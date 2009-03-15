@@ -1,0 +1,67 @@
+Enable MAM
+- Verify speed difference on LED
+
+Start enetcore.h
+
+Start Platform
+- _malloc_region
+
+Start config.h
+
+Add dlmalloc
+
+Add interrupt handling:
+- Disable, Enable (push, pop state)
+- Controller interface
+- Interrupt stack
+
+Add UP spinlock, use in malloc, regions
+
+Add mem.{h,cpp}
+
+Add stack region
+- Use to allocate interrupt stack
+
+Add containers
+
+Add console output
+- Serial driver with deques
+
+Add trace.{h,cpp} that uses serial driver
+
+Add assert
+- Panic should put string on LCD
+- Then try plain serial driver
+- Add LED fault flasher that takes a code (num flashes)
+
+Implement skeleton thread
+- Context switch
+  - Save context A
+  - Load contex B
+  - swtch(Thread*)
+- Interrupt thread
+  - Save context A
+  - Load context I
+  - Handle interrupts
+  - Save context I
+  - Load context A
+  - Return, restoring SPSR
+
+Implement mutex, condvar
+- Turnstiles - equal to # of threads
+- Mutex lock, unlock, trylock
+- Condvar wait
+
+Implement Timer abstraction to interface with hw timers
+- Timer interrupts
+- Implement global clock and an hrtime function
+- Implement Time
+
+Implement scheduler
+- Highest prio thread always runs
+- Turnstiles will priority
+- Condvar timedwait: set timer
+- Interrupt handler: special case Timer interrupts (don't load context I)
+
+Implement Watchdog
+- Use hw watchdog
