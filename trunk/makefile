@@ -7,7 +7,7 @@ AS      = arm-elf-as
 OCP      = arm-elf-objcopy
 OD		= arm-elf-objdump
 
-CFLAGS  = -I. -c -fno-common -O0 -g -fno-exceptions -fno-rtti -DBUSY_WAIT
+CFLAGS  = -I. -fno-common -O0 -g -fno-exceptions -fno-rtti -DBUSY_WAIT
 AFLAGS  = -ahls -mapcs-32 -o crt.o
 LFLAGS  =  -Map main.map -nostartfiles -Tlink.cmd
 CPFLAGS = -O binary
@@ -18,19 +18,19 @@ SRCS=main.cpp hwinit.cpp
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 
-all: main
+all: image
 
 clean:
-	-rm -f crt.lst main.lst crt.o $(OBJS) main.out main.hex main.map main.dmp main.bin
+	-rm -f crt.lst image.lst crt.o $(OBJS) image image.hex image.map image.dmp image.bin
 
-main: crt.o $(OBJS) link.cmd 
+image: crt.o $(OBJS) link.cmd 
 	$(LD) $(LFLAGS) -o $@ crt.o $(OBJS)
-	$(OCP) $(CPFLAGS) main main.bin
-	$(OD) $(ODFLAGS) main > main.dmp
-	$(OCP) $(HEXFLAGS) main main.hex
+	$(OCP) $(CPFLAGS) image image.bin
+	$(OD) $(ODFLAGS) image > image.dmp
+	$(OCP) $(HEXFLAGS) image image.hex
 
 crt.o: crt.s
 	$(AS) $(AFLAGS) crt.s > crt.lst
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $<
+	$(CC) $(CFLAGS) -c $<

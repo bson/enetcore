@@ -116,6 +116,7 @@ void hwinit()
 	// 0000 111 1 1 0 0 0 00 00 00 0 0 1 00 1 0 0 10 0 1 00
 	// 0000 1111 1000 0000 0000 1001 0010 0100
 	PINSEL2 = 0xf800924;
+#endif
 
 	// Map external 32-bit RAM at 0x8100 0000
 	//
@@ -134,6 +135,7 @@ void hwinit()
 	(((MW) << 28) | ((BM) << 27) | ((WP) << 26) | ((WST2) << 11) | (1 << 10) | \
 	 ((WST1) << 5) | (IDCY) | (1 << 25))
 
+#if 0
 	BCFG1 = BCFGVAL(0, 0, 0, 0, 0, 2);
 
 	// Map external 16-bit flash at 0x8000 0000
@@ -149,6 +151,21 @@ void hwinit()
 	//
 	BCFG0 = BCFGVAL(0, 4, 4, 1, 0, 1);
 #endif
+
+	// Fully enable MAM
+	MAMCR = 0;
+	MAMTIM = 3;
+	MAMCR = 2;
+
+	// Turn off WP on external flash
+	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1);
+
+	// For now, map flash to vectors
+	// 1 = flash, 2 = ram, 3 = xram
+	MEMMAP = 1;
+	
+	// Disable watchdog
+	WDMOD = 0;
 }
 
 

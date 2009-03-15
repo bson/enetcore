@@ -1,9 +1,3 @@
-// ***********************************************************************
-//
-//  LPC210X.H:  Header file for Philips LPC2104 / LPC2105 / LPC2106
-//
-// ***********************************************************************
-
 #ifndef __LPC22xx_H
 #define __LPC22xx_H
 
@@ -70,7 +64,9 @@
 /* Memory Accelerator Module (MAM) */
 #define MAMCR          (*((volatile unsigned char *) 0xE01FC000))
 #define MAMTIM         (*((volatile unsigned char *) 0xE01FC004))
-#define MAMMAP         (*((volatile unsigned char *) 0xE01FC040))
+
+// Memory map control
+#define MEMMAP         (*((volatile unsigned char *) 0xE01FC040))
 
 /* Phase Locked Loop (PLL) */
 #define PLLCON         (*((volatile unsigned char *) 0xE01FC080))

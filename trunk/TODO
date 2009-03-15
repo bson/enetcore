@@ -1,5 +1,3 @@
-Enable MAM
-- Verify speed difference on LED
 
 Start enetcore.h
 
@@ -65,3 +63,4 @@ Implement scheduler
 
 Implement Watchdog
 - Use hw watchdog
+- Disable watchdog from openocd while writing flash
