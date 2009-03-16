@@ -1,13 +1,4 @@
 
-Start enetcore.h
-
-Implement Util::VFormat codes
-
-Add assert
-- Panic should put string on LCD
-- Then try plain serial driver
-- Add LED fault flasher that takes a code (num flashes)
-
 Add interrupt handling:
 - Disable, Enable (push, pop state)
 - Interrupt stack
@@ -18,13 +9,10 @@ Implement Timer abstraction to interface with hw timers
 - Implement global clock and an hrtime function
 - Implement Time
 
-Add stack region
-- Use to allocate interrupt stack
+- Use stack region to allocate interrupt stack
 
 Add console output
 - Serial driver with deques
-
-Add trace.{h,cpp} that uses serial driver
 
 Add Platform memory/region/etc debug messages
 
