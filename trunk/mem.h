@@ -82,14 +82,12 @@ uchar* NOALIAS xstrndup(const uchar* s, uint num);
 uchar* xmemtostr(const void* block, uint size);
 
 inline uint xstrlen(const uchar* s) { return ::strlen((const char*)s); }
-#if 0
 inline int xstrncasecmp(const uchar* a, const uchar* b, uint len) {
 	return ::strncasecmp((const char*)a, (const char*)b, len);
 }
 inline int xstrcasecmp(const uchar* a, const uchar* b) {
 	return ::strcasecmp((const char*)a, (const char*)b);
 }
-#endif
 inline int xstrcmp(const uchar* a, const uchar* b) {
 	return ::strcmp((const char*)a, (const char*)b);
 }
@@ -117,11 +115,11 @@ inline in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a)
 inline uchar* xinet_ntop(int af, const void* __restrict src, uchar* __restrict dst, uint len) {
 	return (uchar*)::inet_ntop(af, src, (char*)dst, len);
 }
+#endif
 
 template <typename T> inline void move(T* dest, T* src, uint items) {
 	memmove(dest, src, items * sizeof(T));
 }
 
-#endif
 
 #endif // __MEM_H__

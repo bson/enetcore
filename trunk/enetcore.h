@@ -58,15 +58,13 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 
 #include "arithmetic.h"
 #include "dlmalloc.h"
-#if 0
 #include "vector.h"
 #include "deque.h"
-#endif
 #include "trace.h"
-#if 0
 #include "ovector.h"
 #include "odeque.h"
 #include "set.h"
+#if 0
 #include "time.h"
 #include "pstring.h"
 #endif
