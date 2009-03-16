@@ -1,36 +1,32 @@
 
 Start enetcore.h
 
-Start Platform
-- _malloc_region
+Implement Util::VFormat codes
 
-Start config.h
-
-Add dlmalloc
+Add assert
+- Panic should put string on LCD
+- Then try plain serial driver
+- Add LED fault flasher that takes a code (num flashes)
 
 Add interrupt handling:
 - Disable, Enable (push, pop state)
-- Controller interface
 - Interrupt stack
+- Controller interface
 
-Add UP spinlock, use in malloc, regions
-
-Add mem.{h,cpp}
+Implement Timer abstraction to interface with hw timers
+- Timer interrupts
+- Implement global clock and an hrtime function
+- Implement Time
 
 Add stack region
 - Use to allocate interrupt stack
-
-Add containers
 
 Add console output
 - Serial driver with deques
 
 Add trace.{h,cpp} that uses serial driver
 
-Add assert
-- Panic should put string on LCD
-- Then try plain serial driver
-- Add LED fault flasher that takes a code (num flashes)
+Add Platform memory/region/etc debug messages
 
 Implement skeleton thread
 - Context switch
@@ -49,11 +45,6 @@ Implement mutex, condvar
 - Turnstiles - equal to # of threads
 - Mutex lock, unlock, trylock
 - Condvar wait
-
-Implement Timer abstraction to interface with hw timers
-- Timer interrupts
-- Implement global clock and an hrtime function
-- Implement Time
 
 Implement scheduler
 - Highest prio thread always runs
