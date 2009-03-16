@@ -72,8 +72,8 @@ extern uint8_t _estack;
 
 enum { XRAM_SIZE = 1024*1024 };
 
-#define MALLOC_REGION_START  (&_bss_start)
-#define MALLOC_REGION_SIZE   ((&_data + XRAM_SIZE) - &_bss_start)
+#define MALLOC_REGION_START  (&_bss_end)
+#define MALLOC_REGION_SIZE   ((&_data + XRAM_SIZE) - &_bss_end)
 
 #define STACK_REGION_START (&_stack)
 #define STACK_REGION_SIZE (&_estack - &_stack)
@@ -87,12 +87,5 @@ enum { XRAM_SIZE = 1024*1024 };
 #define XFLASH_REGION_START (&_xflash)
 #define XFLASH_REGION_SIZE (&_exflash - &_xflash)
 
-
-#ifdef USE_LITERALS
-// Test if location is literal in text
-inline bool IsLiteral(const void* p) { return _text_region.IsInRegion(p); }
-#else
-inline bool IsLiteral(const void*)  { return false; }
-#endif
 
 #endif // __HARDWARE_H__

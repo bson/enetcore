@@ -21,7 +21,13 @@ void SerialPort::SetSpeed(uint speed)
 void SerialPort::WriteSync(const uchar* buf, uint len)
 {
 	while (len--) {
-		while (!(_base[UART_LSR] & 16)) continue; // Spin until THRE
+		while (!(_base[UART_LSR] & 0b100000)) continue; // Spin until THRE
 		_base[UART_THR] = *buf++;
 	}
+}
+
+
+void SerialPort::WriteSync(const String& s)
+{
+	WriteSync(s.CStr(), s.Size());
 }

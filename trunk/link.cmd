@@ -165,7 +165,7 @@ SECTIONS
 
 		_dtors_start_ = .;
 /*
-No need to keep dtors if main() never returns 
+No need to keep dtors if main() never returns
 		
 		*(.dtors)
 		*(SORT(.dtors.*))
@@ -199,10 +199,10 @@ No need to keep dtors if main() never returns
 	{
 		_bss_start = .;					/* define a global symbol marking the start of the .bss section */
 		*(.bss)							/* all .bss sections  */
+			. = ALIGN(4);						/* advance location counter to the next 32-bit boundary */
+		_bss_end = . ;						/* define a global symbol marking the end of the .bss section */
 	} >xram								/* put all the above in RAM (it will be cleared in the startup code */
 
-	. = ALIGN(4);						/* advance location counter to the next 32-bit boundary */
-	_bss_end = . ;						/* define a global symbol marking the end of the .bss section */
 
 	.xflash :
 	{
@@ -211,5 +211,4 @@ No need to keep dtors if main() never returns
 		_exflash = .;
 	} >xflash
 }
-	_end = .;							/* define a global symbol marking the end of application RAM */
 	

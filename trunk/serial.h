@@ -18,6 +18,7 @@ public:
 
 	// Send synchronously (= polled) 
 	void WriteSync(const uchar* buf, uint len);
+	void WriteSync(const String& s);
 };
 
 

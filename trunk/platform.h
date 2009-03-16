@@ -74,7 +74,7 @@ namespace Platform {
 		void SetReserve(uint reserve);
 
 		// True if pointer falls in region
-		bool IsInRegion(void* ptr) {
+		bool IsInRegion(const void* ptr) {
 			Spinlock::Scoped L(_lock);
 			return (uint8_t*)ptr >= _start && (uint8_t*)ptr < _end;
 		}
@@ -137,6 +137,14 @@ using Platform::_stack_region;
 using Platform::_data_region;
 using Platform::_text_region;
 using Platform::_xflash_region;
+
+
+#ifdef USE_LITERALS
+// Test if location is literal in text
+inline bool IsLiteral(const void* p) { return _text_region.IsInRegion(p); }
+#else
+inline bool IsLiteral(const void*)  { return false; }
+#endif
 
 
 // If pointer refers to malloc heap, validate

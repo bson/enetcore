@@ -48,6 +48,8 @@ typedef intptr_t ptrdiff_t;
 
 typedef uint32_t time_t;
 
+#define USE_LITERALS
+
 #include "hardware.h"
 #include "config.h"
 #include "mem.h"
