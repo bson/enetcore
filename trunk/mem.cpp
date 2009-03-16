@@ -1,4 +1,4 @@
-#include "enetcore.h"
+#include "enetkit.h"
 
 
 static MemStats memstats = { 0, 0, 0 };
@@ -35,7 +35,6 @@ void *xrealloc(void *old, uint size)
 }
 
 
-#if 0
 void *xmemdup(const void* block, uint size)
 {
 	if (IsLiteral(block)) return const_cast<void*>(block);
@@ -82,7 +81,6 @@ uchar* xmemtostr(const void* block, uint size)
 	_malloc_region.Validate(tmp);
 	return tmp;
 }
-#endif
 
 
 void xxfree(void* ptr)

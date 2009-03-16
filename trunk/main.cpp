@@ -1,6 +1,5 @@
-#include "enetcore.h"
+#include "enetkit.h"
 #include "serial.h"
-#include "platform.h"
 
 
 int	main ()

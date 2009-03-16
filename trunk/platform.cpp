@@ -1,4 +1,4 @@
-#include "enetcore.h"
+#include "enetkit.h"
 #include "platform.h"
 
 
@@ -247,10 +247,13 @@ char* strstr(const char* s1, const char* s2)
 
 extern "C" {
 int __cxa_atexit(void (*func) (void*), void* arg, void* dso_handle);
+int __cxa_pure_virtual();
 }
 
 int __cxa_atexit(void (*func) (void*), void* arg, void* dso_handle)
 {
 }
+
+int __cxa_pure_virtual() { abort(); }
 
 void*   __dso_handle = (void*) &__dso_handle;

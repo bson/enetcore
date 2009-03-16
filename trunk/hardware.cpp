@@ -1,5 +1,4 @@
-#include "enetcore.h"
-#include "hardware.h"
+#include "enetkit.h"
 
 #include "lpc22xx.h"
 

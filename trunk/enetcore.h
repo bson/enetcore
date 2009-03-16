@@ -46,6 +46,8 @@ typedef intptr_t ptrdiff_t;
 #define NOALIAS  __attribute__((malloc)) // Return value is unalised pointer
 #define NOINLINE  __attribute__((noinline))	// Do not inline
 
+typedef uint32_t time_t;
+
 #include "hardware.h"
 #include "config.h"
 #include "mem.h"
@@ -64,10 +66,9 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "ovector.h"
 #include "odeque.h"
 #include "set.h"
-#if 0
+#include "platform.h"
+#include "freelist.h"
 #include "time.h"
 #include "pstring.h"
-#endif
-#include "platform.h"
 
 #endif // __ENETCORE_H__

@@ -123,7 +123,14 @@ namespace Platform {
 	// Get free malloc memory
 	uint GetFreeMem();
 
+	// Get a MAC address
+	inline bool GetMacAddr(uint8_t macaddr[6]) {
+		memcpy(macaddr, "deaddd", 6);
+		return true;
+	}
 }
+
+using Platform::Spinlock;
 
 using Platform::_malloc_region;
 using Platform::_stack_region;
