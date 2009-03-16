@@ -137,6 +137,7 @@ Reset_Handler:
 				b		3b
 4:		
 				/* Enter the C code  */
+				bl		hwinit
                 b       main
 
 .endfunc

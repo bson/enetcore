@@ -8,11 +8,8 @@
 
 int	main ()
 {
-	hwinit();
-
-	_lcd.WriteSync(STR("  \xfe\x01Enetcore v0 DEV"), 19);
-	_console.WriteSync(STR("Enetcore v0 DEV\r\n"), 17);
-	_console.WriteSync(String(STR("This is a test\r\n")));
+	_lcd.WriteSync(STR("\254\1" "Enetcore v0 DEV"), 19);
+	_console.WriteSync(String(STR("Enetcore v0 DEV\r\n")));
 
 	fault(3);
 }
