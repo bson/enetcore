@@ -1,7 +1,7 @@
 #ifndef __TRACE_H__
 #define __TRACE_H__
 
-// #include "util.h"
+#include "util.h"
 
 
 // Console message

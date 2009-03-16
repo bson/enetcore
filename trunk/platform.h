@@ -141,7 +141,7 @@ using Platform::_xflash_region;
 
 #ifdef USE_LITERALS
 // Test if location is literal in text
-inline bool IsLiteral(const void* p) { return _text_region.IsInRegion(p); }
+inline bool IsLiteral(const void* p) { return p && _text_region.IsInRegion(p); }
 #else
 inline bool IsLiteral(const void*)  { return false; }
 #endif

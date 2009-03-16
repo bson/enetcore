@@ -17,8 +17,9 @@ public:
 	void SetSpeed(uint speed);
 
 	// Send synchronously (= polled) 
-	void WriteSync(const uchar* buf, uint len);
 	void WriteSync(const String& s);
+private:
+	void WriteSync(const uchar* buf, uint len);
 };
 
 

@@ -50,6 +50,41 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 }
 
 
+void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits)
+{
+	assert(radix <= 16);
+	assert(digits <= 31);
+
+	if (!(flags & FMT_UNSIGNED) && val < 0) {
+		dest.PushBack((uchar)'-');
+		val = -val;
+	}
+
+	if (!val) {
+		dest.PushBack((uchar)'0');
+		return;
+	}
+
+	uchar buf[32];
+	buf[31] = 0;
+	uchar* pos = buf + 31;
+
+	while (val && pos > buf) {
+		const uint digit = val % radix;
+		assert(digit <= 15);
+		if (digit <= 9)  *--pos = digit + '0';
+		else *--pos = (uchar)(digit - 10 + 'a');
+		val /= radix;
+		if (digits) --digits;
+	}
+
+	while (digits--)
+		*--pos = '0';
+
+	dest.PushBack(pos);
+}
+
+
 const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 {
 	const uint result = dest.Size();
@@ -58,51 +93,35 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 		if (*fmt == '%') {
 			switch (*++fmt) {
 			case '%':  dest.PushBack('%'); break;
-#if 0
 			case 'd':  {
-				// XXX stdio dependency
-				uchar buf[16];
-				::snprintf((char*)buf, sizeof buf, "%d", va_arg(va, int));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, int), 0, 10);
 				break;
 			}
 			case 'D':  {
-				uchar buf[32];
-				::snprintf((char*)buf, sizeof buf, "%lld", va_arg(va, int64_t));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, int64_t), 0, 10);
 				break;
 			}
 			case 'u': {
-				uchar buf[16];
-				::snprintf((char*)buf, sizeof buf, "%u", va_arg(va, uint));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, uint), FMT_UNSIGNED, 10);
 				break;
 			}
 			case 'U': {
-				uchar buf[32];
-				::snprintf((char*)buf, sizeof buf, "%llu", va_arg(va, uint64_t));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, uint64_t), FMT_UNSIGNED, 10);
 				break;
 			}
 			case 'x': {
-				uchar buf[16];
-				::snprintf((char*)buf, sizeof buf, "%x", va_arg(va, uint));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, uint), FMT_UNSIGNED, 16);
 				break;
 			}
 			case 'X': {
-				uchar buf[32];
-				::snprintf((char*)buf, sizeof buf, "%llx", va_arg(va, uint64_t));
-				dest.PushBack(buf);
+				FormatNumber(dest, va_arg(va, uint64_t), FMT_UNSIGNED, 16);
 				break;
 			}
 			case 'p': {
-				uchar buf[32];
-				::snprintf((char*)buf, sizeof buf, "%p", va_arg(va, void*));
-				dest.PushBack(buf);
+				dest.PushBack(STR("0x"));
+				FormatNumber(dest, va_arg(va, uintptr_t), FMT_UNSIGNED, 16, sizeof(uintptr_t)*2);
 				break;
 			}
-#endif
 			case 'c': {
 				dest.PushBack(va_arg(va, int));
 				break;
@@ -128,17 +147,14 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				else dest.PushBack((const uchar*)"(null)");
 				break;
 			}
-#if 0
 			case 'h': {
-				uchar buf[5];
 				uint len = 20;
-				for (const uchar* p = va_arg(va, uchar*); len > 0; --len, ++p) {
-					::snprintf((char*)buf, sizeof buf, "%02x", *p);
-					dest.PushBack(buf);
-				}
+				for (const uchar* p = va_arg(va, uchar*); len > 0; --len, ++p)
+					FormatNumber(dest, *p, FMT_UNSIGNED, 16, 2);
+
 				break;
 			}
-#endif
+
 			// yyyy-MM-dd hh:mm:ss
 			case 'T': {
 				FormatTime(dest, va_arg(va, Time*), true);

@@ -22,7 +22,9 @@ inline void* operator new(size_t size) { return xmalloc(size); }
 inline void operator delete(void *ptr) { xfree(ptr); }
 
 #ifdef ENETCORE
-// Some libc replacements
+//  libc replacements
+
+#if 0
 inline void* memset(void* b, int c, size_t n) {
 	asm volatile("sub %0, %0, #1; 1: strb %2, [%0,#1]!; sub %1, %1, #1; bne 1b"
 				 :  : "r" (b), "r" (n), "r" (c));
@@ -59,6 +61,13 @@ inline size_t strlen(const char* s) {
 				 : "=&r" (len) : "r" (s) : "r2");
 	return len;
 }
+#else
+void* memset(void* b, int c, size_t n);
+void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
+char* strcpy(char* __restrict dest, const char* __restrict src);
+char* strncpy(char* __restrict dest, const char* __restrict src, size_t n);
+size_t strlen(const char* s);
+#endif
 
 inline int toupper(int c) {
 	return c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c;

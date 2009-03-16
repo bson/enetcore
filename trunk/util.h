@@ -19,6 +19,10 @@ namespace Util {
 		return tmp;
 	}
 
+	// Flags for FormatNumber
+	enum { FMT_UNSIGNED = 1 };
+	void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits = 0);
+
 	void Trim(Deque<uchar>& buffer);
 
 	// Find first clear bit in a word

@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "platform.h"
+#include "serial.h"
 
 
 namespace Platform {
@@ -93,7 +94,47 @@ uint GetFreeMem()
 
 // Runtime compat stuff that needs to go in global namespace
 
-void abort() { fault(2); for (;;) ; }
+//void abort() { _lcd.WriteSync(STR("\xfe\xc0""ABORT")); fault(2); for (;;) ; }
+void abort() { panic("ABORT"); }
+
+void* memset(void* b, int c, size_t n)
+{
+	uint8_t* p = (uint8_t*)b;
+	while (n--)  *p++ = c;
+	return b;
+}
+
+
+void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n)
+{
+	uint8_t* p1 = (uint8_t*)s1;
+	const uint8_t* p2 = (const uint8_t*)s2;
+	while (n--)  *p1++ = *p2++;
+	return s1;
+}
+
+
+char* strcpy(char* __restrict dest, const char* __restrict src)
+{
+	for (char *tmp = dest; (*tmp++ = *src++); ) continue;
+	return dest;
+}
+
+
+char* strncpy(char* __restrict dest, const char* __restrict src, size_t n)
+{
+	for (char *tmp = dest; n-- && (*tmp++ = *src++); ) continue;
+	return dest;
+}
+
+
+size_t strlen(const char* s)
+{
+	size_t n = 0;
+	while (*s++) ++n;
+	return n;
+}
+
 
 int strcmp(const char* s1, const char* s2) 
 {

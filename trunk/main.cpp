@@ -1,14 +1,20 @@
 #include "enetkit.h"
 #include "serial.h"
+#include "util.h"
+
 
 int	main ()
 {
 	_malloc_region.SetReserve(4096);
 
 	_lcd.WriteSync(String(STR("\xfe\1Enetcore 0.1 DEV")));
-	_console.WriteSync(String(STR("Enetcore 0.1 DEV\r\n")));
+
+	console("Enetcore 0.1 DEV");
 
 	void* tmp = xmalloc(31);
 
-	fault(3);
+	DMSG("Allocated %d bytes at %p", 31, tmp);
+
+//	fault(3);
+	abort();
 }
