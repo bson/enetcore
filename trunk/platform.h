@@ -10,15 +10,15 @@ namespace Platform {
 	public:
 		Spinlock() { }
 		~Spinlock() { }
-		uint32_t Lock() { return DisableInterrupts(); }
-		void Unlock(uint32_t cpsr) { EnableInterrupts(cpsr); }
-		void AssertLocked() { }
+		uint32_t Lock() const { return DisableInterrupts(); }
+		void Unlock(uint32_t cpsr) const { EnableInterrupts(cpsr); }
+		void AssertLocked() const { }
 
 		class Scoped {
-			Spinlock& _lock;
+			const Spinlock& _lock;
 			uint _cpsr;
 		public:
-			Scoped(Spinlock& lock) : _lock(lock) { _cpsr = _lock.Lock(); }
+			Scoped(const Spinlock& lock) : _lock(lock) { _cpsr = _lock.Lock(); }
 			~Scoped() { _lock.Unlock(_cpsr); }
 		};
 	};

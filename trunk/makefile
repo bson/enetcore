@@ -16,9 +16,9 @@ CPFLAGS = -O binary
 HEXFLAGS = -O ihex
 ODFLAGS	= -x --syms
 
-SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp		\
-	serial.cpp mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp	\
-	sha1.cpp object.cpp time.cpp lookup3.cpp pstring.cpp
+SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp			\
+	serial.cpp mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp		\
+	sha1.cpp object.cpp time.cpp lookup3.cpp pstring.cpp hashtable.cpp
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 DEPS = $(patsubst %.cpp, %.d, $(SRCS))
