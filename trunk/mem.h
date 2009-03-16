@@ -1,0 +1,127 @@
+#ifndef __MEM_H__
+#define __MEM_H__
+
+void NOALIAS *xmalloc(uint size);
+void NOALIAS *xrealloc(void *old, uint size);
+void NOALIAS *xmemdup(const void* block, uint size);
+void xxfree(void* ptr);
+
+inline void xfree(void* ptr) { xxfree(ptr); }
+
+#define STR(X)  ((const uchar*)(X))
+
+struct MemStats {
+	uint num_malloc;
+	uint num_realloc;
+	uint num_free;
+};
+
+const MemStats& xmemstats();
+
+inline void* operator new(size_t size) { return xmalloc(size); }
+inline void operator delete(void *ptr) { xfree(ptr); }
+
+#ifdef ENETCORE
+// Some libc replacements
+inline void* memset(void* b, int c, size_t n) {
+	asm volatile("sub %0, %0, #1; 1: strb %2, [%0,#1]!; sub %1, %1, #1; bne 1b"
+				 :  : "r" (b), "r" (n), "r" (c));
+	return b;
+}
+
+inline void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
+	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
+				 "1: ldrb r2, [%1,#1]!; strb r2, [%0,#1]!; sub %2, %2, #1; bne 1b"
+				 : : "r" (s1), "r" (s2), "r" (n) : "r2");
+	return s1;
+}
+
+
+inline char* strcpy(char* __restrict dest, const char* __restrict src) {
+	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
+				 "1: ldrb r2, [%1,#1]!; strb r2, [%1,#1]!; cmp r2, #0; bne 1b"
+				 : : "r" (dest), "r" (src) : "r2");
+	return dest;
+}
+
+inline char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
+	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
+				 "1: ldrb r2, [%1,#1]!; strb r2, [%1,#1]!; "
+				 "sub %2, %2, #1; cmpne r2, #0; bne 1b"
+				 : : "r" (dest), "r" (src), "r" (n) : "r2");
+	return dest;
+}
+
+inline size_t strlen(const char* s) {
+	size_t len;
+	asm volatile("mov %0, #-1; sub %1, %1, #1;"
+				 "1: add %0, %0, #1; ldrb r2, [%1,#1]!; cmp r2, #0; bne 1b"
+				 : "=&r" (len) : "r" (s) : "r2");
+	return len;
+}
+
+inline int toupper(int c) {
+	return c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c;
+}
+
+
+char* strchr(const char* s, int c);
+char* strrchr(const char* s, int c);
+char* strstr(const char* s1, const char* s2);
+int strncmp(const char* s1, const char* s2, size_t n);
+int strcasecmp(const char* s1, const char* s2);
+int strncasecmp(const char* s1, const char* s2, size_t n);
+int strcmp(const char* s1, const char* s2);
+int memcmp(const void* s1, const void* s2, size_t n);
+void* memmove(void* s1, const void* s2, size_t n);
+#endif
+
+
+uchar* xstrdup(const uchar* s);
+uchar* NOALIAS xstrndup(const uchar* s, uint num);
+uchar* xmemtostr(const void* block, uint size);
+
+inline uint xstrlen(const uchar* s) { return ::strlen((const char*)s); }
+#if 0
+inline int xstrncasecmp(const uchar* a, const uchar* b, uint len) {
+	return ::strncasecmp((const char*)a, (const char*)b, len);
+}
+inline int xstrcasecmp(const uchar* a, const uchar* b) {
+	return ::strcasecmp((const char*)a, (const char*)b);
+}
+#endif
+inline int xstrcmp(const uchar* a, const uchar* b) {
+	return ::strcmp((const char*)a, (const char*)b);
+}
+
+// Note that s is const, but return value is non-const.  Just like strchr().
+inline uchar* xstrchr(const uchar* s, uchar c) { return (uchar*)::strchr((const char*)s, c); }
+inline uchar* xstrrchr(const uchar* s, uchar c) { return (uchar*)::strrchr((const char*)s, c); }
+
+inline uchar* xstrstr(const uchar* s1, const uchar* s2) {
+	return (uchar*)::strstr((const char*)s1, (const char*)s2);
+}
+
+inline uchar* xstrcpy(uchar* dest, const uchar* src) {
+	return (uchar*)::strcpy((char*)dest, (const char*)src);
+}
+inline uchar* xstrncpy(uchar* dest, const uchar* src, uint n) {
+	return (uchar*)::strncpy((char*)dest, (const char*)src, n);
+}
+
+#if 0
+// XXX these don't really belong here
+inline int xatoi(const uchar* s) { return ::atoi((const char*)s); }
+
+inline in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a); }
+inline uchar* xinet_ntop(int af, const void* __restrict src, uchar* __restrict dst, uint len) {
+	return (uchar*)::inet_ntop(af, src, (char*)dst, len);
+}
+
+template <typename T> inline void move(T* dest, T* src, uint items) {
+	memmove(dest, src, items * sizeof(T));
+}
+
+#endif
+
+#endif // __MEM_H__

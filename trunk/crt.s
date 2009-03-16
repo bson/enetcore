@@ -69,7 +69,7 @@ Reset_Handler:
 				/* Setup a stack for each mode - note that this only sets up a usable stack
 				for User mode.   Also each mode is setup with interrupts initially disabled. */
     			  
-    			ldr   r0, =_stack_end
+    			ldr   r0, =_estack
     			msr   CPSR_c, #MODE_UND|I_BIT|F_BIT 	/* Undefined Instruction Mode  */
     			mov   sp, r0
     			sub   r0, r0, #UND_STACK_SIZE
