@@ -29,10 +29,12 @@ void fault0(uint num)
 }
 
 
+volatile uint8_t _busy_flag;
+
 void busy_wait()
 {
 #ifdef BUSY_WAIT
-	while (!_data) continue;
+	while (!_busy_flag) continue;
 #endif
 }
 

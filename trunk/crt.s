@@ -101,7 +101,7 @@ Reset_Handler:
 
 				/* sync up with JTAGkey/gdb */
 				mov		r0, #0
-				ldr		r1, =_data
+				ldr		r1, =_busy_flag
 				strb	r0, [r1]
 				bl		busy_wait
 	
