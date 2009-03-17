@@ -98,15 +98,14 @@ namespace Platform {
 #endif
 		}
 
-#if 0
 		// Print debug message about arena
-		void DebugMsg(const String& name) {
+		void DebugMsg(const class String& name) {
 #ifdef DEBUG
 			DMSG("%S region: %p-%p, %uk (%u bytes held in reserve)",
 				 &name, _start, _end, (uint)(_end-_start)/1024, _reserve);
 #endif
 		}
-#endif
+
 		// Round up address; size is power of two
 		inline uintptr_t RoundUpAddr(uintptr_t addr, uint size) {
 			assert(!(size & (size - 1))); // verify that size is power of two
@@ -120,10 +119,8 @@ namespace Platform {
 	extern Region _malloc_region, _data_region, _stack_region,
 		_text_region, _xflash_region;
 
-#if 0
 	// Print debug output regarding malloc stats
 	void DebugMallocMsg();
-#endif
 
 	// Get free malloc memory
 	uint GetFreeMem();
