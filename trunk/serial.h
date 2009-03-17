@@ -4,6 +4,7 @@
 
 class SerialPort {
 	volatile uint8_t* _base;
+	mutable Spinlock _lock;
 
 public:
 	SerialPort(volatile void* base, uint default_speed = 9600) : 

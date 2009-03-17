@@ -94,7 +94,6 @@ uint GetFreeMem()
 
 // Runtime compat stuff that needs to go in global namespace
 
-//void abort() { _lcd.WriteSync(STR("\xfe\xc0""ABORT")); fault(2); for (;;) ; }
 void abort() { panic("ABORT"); }
 
 #ifndef USE_ASM_MEMOPS

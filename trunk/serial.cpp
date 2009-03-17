@@ -10,6 +10,8 @@ void SerialPort::SetSpeed(uint speed)
 {
 	const uint prescale = PCLK / speed / 16;
 
+	Spinlock::Scoped L(_lock);
+
 	_base[UART_LCR] = 0x83;		// Set 8N1 and access divisor
 	_base[UART_DLL] = prescale & 0xff;
 	_base[UART_DLM] = prescale / 256;
@@ -21,8 +23,15 @@ void SerialPort::SetSpeed(uint speed)
 void SerialPort::WriteSync(const uchar* buf, uint len)
 {
 	while (len--) {
-		while (!(_base[UART_LSR] & 0b100000)) continue; // Spin until THRE
-		_base[UART_THR] = *buf++;
+		// Spin until THRE
+		for (;;) {
+			Spinlock::Scoped L(_lock);
+
+			if (_base[UART_LSR] & 0b100000) {
+				_base[UART_THR] = *buf++;
+				break;
+			}
+		}
 	}
 }
 
