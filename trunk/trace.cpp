@@ -6,11 +6,12 @@
 
 void console(const char* fmt, ...)
 {
-	va_list va;
-	va_start(va, fmt);
 #if 1
 	const Time now = Time::Now();
 	_console.Write(String::Format(STR("%t "), &now));
+
+	va_list va;
+	va_start(va, fmt);
 	_console.Write(String::VFormat((const uchar*)fmt, va));
 	_console.Write(STR("\r\n"));
 	va_end(va);
@@ -35,10 +36,11 @@ void console(const char* fmt, ...)
 void DMSG(const char* fmt, ...)
 {
 #if 1
-	va_list va;
-	va_start(va, fmt);
 	const Time now = Time::Now();
 	_console.Write(String::Format(STR("%t DEBUG "), &now));
+
+	va_list va;
+	va_start(va, fmt);
 	_console.Write(String::VFormat((const uchar*)fmt, va));
 	_console.Write(STR("\r\n"));
 	va_end(va);

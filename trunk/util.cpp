@@ -37,26 +37,27 @@ void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uin
 		val = -val;
 	}
 
-	if (!val) {
-		dest.PushBack((uchar)'0');
-		return;
-	}
+	const uchar pad = flags & PAD_SPACE ? ' ' : '0';
 
 	uchar buf[32];
 	buf[31] = 0;
 	uchar* pos = buf + 31;
 
-	while (val && pos > buf) {
-		const uint digit = val % radix;
-		assert(digit <= 15);
-		if (digit <= 9)  *--pos = digit + '0';
-		else *--pos = (uchar)(digit - 10 + 'a');
-		val /= radix;
-		if (digits) --digits;
+	if (val) {
+		while (val && pos > buf) {
+			const uint digit = val % radix;
+			assert(digit <= 15);
+			if (digit <= 9)  *--pos = digit + '0';
+			else *--pos = (uchar)(digit - 10 + 'a');
+			val /= radix;
+			if (digits) --digits;
+		}
+	} else {
+		*--pos = '0';
+		digits--;
 	}
 
-	while (digits--)
-		*--pos = '0';
+	while (digits--)  *--pos = pad;
 
 	dest.PushBack(pos);
 }
@@ -87,7 +88,7 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 	uint min = posixtime / 60;  posixtime %= 60;
 	uint hr = min / 60; min %= 60;
 
-	FormatNumber(dest, hr, FMT_UNSIGNED, 10, 2);
+	FormatNumber(dest, hr, FMT_UNSIGNED, 10, 1);
 
 	dest.PushBack((uchar)':');
 	FormatNumber(dest, min, FMT_UNSIGNED, 10, 2);
@@ -96,7 +97,7 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 2);
 
 	dest.PushBack((uchar)'.');
-	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 3);
+	FormatNumber(dest, t->GetMsec(), FMT_UNSIGNED, 10, 3);
 #endif
 }
 

@@ -9,7 +9,11 @@ int	main ()
 
 	_lcd.WriteSync(String(STR("\xfe\1Enetcore 0.1 DEV")));
 
+	for (int j = 0; j < 100000; j++ ) continue;
+
 	console("Enetcore 0.1 DEV");
+
+	for (int j = 0; j < 100000; j++ ) continue;
 
 	void* tmp = xmalloc(31);
 

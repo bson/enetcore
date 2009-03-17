@@ -4,7 +4,8 @@
 
 #ifdef ENETCORE
 #define TIME_RESOLUTION 20
-#define TIMEBASE (1 << 20)
+#define TIMEBASE (1 << TIME_RESOLUTION)
+#define HZ 64
 #else
 #define TIMEBASE 1000000
 #endif
@@ -55,7 +56,7 @@ public:
 	}
 #endif
 
-	time_t GetPosixTime() const { return GetSec() / TIMEBASE; }
+	time_t GetPosixTime() const { return GetSec(); }
 	int64_t GetSec() const { return _t / TIMEBASE; }
 	int64_t GetMsec() const { return _t / (TIMEBASE / 1000); }
 	int64_t GetUsec() const { return _t; }

@@ -58,5 +58,5 @@ void Timer::HandleInterrupt()
 // * implements Clock::GetTime
 void Clock::Tick()
 {
-	_time += TIMEBASE;
+	_time += TIMEBASE / HZ;
 }

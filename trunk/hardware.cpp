@@ -3,6 +3,7 @@
 #include "lpc22xx.h"
 
 #include "serial.h"
+#include "timer.h"
 
 
 extern "C" {
@@ -279,8 +280,15 @@ void hwinit()
 	_vic.EnableChannel(6);
 	_uart0.SetInterrupts(true);
 
+	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
+	_vic.EnableChannel(4);
+
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
+
+	// Start clock
+	_clock.SetResolution(TIME_RESOLUTION);
+	_clock.RunTimer(HZ, true);
 }
 
 

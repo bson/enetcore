@@ -7,5 +7,5 @@ const Time Time::InfTim(-1);
 
 Time Time::Now()
 {
-	return _clock.GetTime();
+	return Time::FromUsec(_clock.GetTime());
 }

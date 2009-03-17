@@ -38,10 +38,7 @@ private:
 class Clock: public Timer {
 	uint64_t _time;
 public:
-	Clock() : Timer(TIMER0_BASE), _time(0) {
-		SetResolution(TIME_RESOLUTION);
-		RunTimer(32, true);
-	}
+	Clock() : Timer(TIMER0_BASE), _time(0) { }
 
 	uint64_t GetTime() const {
 		return _time + GetCount();

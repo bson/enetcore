@@ -20,7 +20,8 @@ namespace Util {
 	}
 
 	// Flags for FormatNumber
-	enum { FMT_UNSIGNED = 1 };
+	enum { FMT_UNSIGNED = 1,
+		   PAD_SPACE = 2 };
 	void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits = 0);
 
 	void Trim(Deque<uchar>& buffer);
