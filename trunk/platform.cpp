@@ -94,8 +94,6 @@ uint GetFreeMem()
 
 // Runtime compat stuff that needs to go in global namespace
 
-void abort() { panic("ABORT"); }
-
 #ifndef USE_ASM_MEMOPS
 void* memset(void* b, int c, size_t n)
 {
@@ -296,6 +294,9 @@ void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
 }
 
 #endif
+
+#undef abort
+void abort() { panic("ABORT"); }
 
 
 // ABI stuff

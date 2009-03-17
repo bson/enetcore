@@ -33,6 +33,22 @@ enum { UART0_BASE = 0xe000c000,
 	   UART_DLL = 0,
 	   UART_DLM = 4 };
 
+enum { VIC_BASE = 0xfffff000,
+	   VIC_IRQStatus = 0,
+	   VIC_FIQStatus = 1,
+	   VIC_RawIntr = 2,
+	   VIC_IntSelect = 3,
+	   VIC_IntEnable = 4,
+	   VIC_IntEnClr = 5,
+	   VIC_SoftInt = 6,
+	   VIC_SoftIntClear = 7,
+	   VIC_Protection = 8,
+	   VIC_VectAddr = 12,
+	   VIC_DefVectAddr = 13,
+	   VIC_VectAddr0 = 64,
+	   VIC_VectCntl0 = 128
+};
+
 
 // We only mask IRQ, not FIQ
 
@@ -49,6 +65,9 @@ INLINE_ALWAYS uint DisableInterrupts() {
 INLINE_ALWAYS void EnableInterrupts(uint prev) {
 	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
 }
+
+
+#define __irq   __attribute__((interrupt("IRQ")))
 
 
 void fault0(uint num);

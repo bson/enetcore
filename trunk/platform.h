@@ -1,14 +1,12 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
-extern "C" {
-void abort();
-}
+#define abort() (panic("ABORT"), (void)0)
 
 namespace Platform {
 	class Spinlock {
-		uint32_t _cpsr;
-		uint _count;
+		mutable uint32_t _cpsr;
+		mutable uint _count;
 
 	public:
 		Spinlock() : _count(0) { }
@@ -18,7 +16,7 @@ namespace Platform {
 			assert(_count);
 			if (!--_count) EnableInterrupts(_cpsr);
 		}
-		void AssertLocked() const { }
+		void AssertLocked() const { assert(_count); }
 
 		class Scoped {
 			mutable Spinlock& _lock;
@@ -130,6 +128,34 @@ namespace Platform {
 		memcpy(macaddr, "deaddd", 6);
 		return true;
 	}
+
+
+	typedef void (*IRQHandler)();
+
+	// Vectored interrupt controller
+	class Vic {
+		volatile uint32_t* const _base;
+		mutable Spinlock _lock;
+		uint _num_handlers;
+	public:
+		Vic(uint32_t base) : _base((volatile uint32_t*) base), _num_handlers(0) {
+			// Install default IRQ handler
+			InstallHandler((uint)-1, Unhandled_IRQ);
+		}
+	
+		void InstallHandler(uint channel, IRQHandler handler);
+		void EnableChannel(uint channel);
+		void DisableChannel(uint channel);
+
+		// True if channel has a pending interrupt
+		bool ChannelPending(uint channel);
+
+		// Clear pending interrupt status - call prior to return
+		void ClearPending();
+
+	private:
+		static void Unhandled_IRQ() __irq;
+	};
 }
 
 using Platform::Spinlock;
@@ -139,6 +165,10 @@ using Platform::_stack_region;
 using Platform::_data_region;
 using Platform::_text_region;
 using Platform::_xflash_region;
+
+using Platform::Vic;
+
+extern Vic _vic;
 
 
 #ifdef USE_LITERALS

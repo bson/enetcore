@@ -9,8 +9,8 @@ void console(const char* fmt, ...)
 	va_list va;
 	va_start(va, fmt);
 #if 1
-	_console.WriteSync(String::VFormat((const uchar*)fmt, va));
-	_console.WriteSync(String(STR("\r\n")));
+	_console.Write(String::VFormat((const uchar*)fmt, va));
+	_console.Write(STR("\r\n"));
 	va_end(va);
 #else
 	Vector<uchar> msg(256);
@@ -23,7 +23,7 @@ void console(const char* fmt, ...)
 	Util::AppendVFmt(msg, (const uchar*)fmt, va);
 	msg.PushBack((uchar)'\r');
 	msg.PushBack((uchar)'\n');
-	_console.WriteSync(msg);
+	_console.Write(msg);
 	va_end(va);
 #endif
 }
@@ -35,9 +35,9 @@ void DMSG(const char* fmt, ...)
 #if 1
 	va_list va;
 	va_start(va, fmt);
-	_console.WriteSync(STR("DEBUG "));
-	_console.WriteSync(String::VFormat((const uchar*)fmt, va));
-	_console.WriteSync(String(STR("\r\n")));
+	_console.Write(STR("DEBUG "));
+	_console.Write(String::VFormat((const uchar*)fmt, va));
+	_console.Write(STR("\r\n"));
 	va_end(va);
 #else
 	Vector<uchar> msg(256);
@@ -55,7 +55,7 @@ void DMSG(const char* fmt, ...)
 	msg.PushBack((uchar)'\r');
 	msg.PushBack((uchar)'\n');
 
-	_console.WriteSync(msg);
+	_console.Write(msg);
 #endif
 }
 #endif

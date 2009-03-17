@@ -63,7 +63,9 @@ enum { HTTP_MAX_WAIT_TIMER = 120 };	// Non-idle timeout
 // Failure codes specific to HTTP
 enum { HTTP_CONN_TIMEOUT = 1001 };
 
-enum { THREAD_DEFAULT_STACK = 2048 }; // Default thread stack size
+enum { MAIN_THREAD_STACK = 1400 };
+enum { INTR_THREAD_STACK = 1400 };
+enum { THREAD_DEFAULT_STACK = 1400 }; // Default thread stack size
 
 // IOScheduler settings
 enum { IO_FUDGE = 10 };	  // I/O scheduler timing granularity, in msec

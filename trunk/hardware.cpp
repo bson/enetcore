@@ -2,12 +2,11 @@
 
 #include "lpc22xx.h"
 
+#include "serial.h"
+
 
 extern "C" {
-void IRQ_Routine ()   __attribute__ ((interrupt("IRQ")));
-void FIQ_Routine ()   __attribute__ ((interrupt("FIQ"), naked));
-void SWI_Routine ()   __attribute__ ((interrupt("SWI")));
-void UNDEF_Routine () __attribute__ ((interrupt("UNDEF")));
+void Unexpected_Interrupt() __irq;
 
 void feed();
 void busy_wait () __attribute__ ((naked));
@@ -37,6 +36,73 @@ void busy_wait()
 	while (!_busy_flag) continue;
 #endif
 }
+
+
+Vic _vic(VIC_BASE);
+
+
+void Vic::Unhandled_IRQ()
+{
+	panic("Unhandled IRQ");
+}
+
+
+void Vic::InstallHandler(uint channel, IRQHandler handler)
+{
+	Spinlock::Scoped L(_lock);
+
+	if (channel == (uint)-1) {
+		_base[VIC_DefVectAddr] = (uint32_t)handler;
+		return;
+	}
+
+	assert(channel < 32);
+
+	// There are only 16 slots
+	assert(_num_handlers < 16);
+
+	_base[VIC_IntSelect] &= ~(1 << channel); // Make channel IRQ
+
+	// Assign next available slot
+	_base[VIC_VectCntl0 + _num_handlers] = (1 << 5) + channel;
+	_base[VIC_VectAddr0 + _num_handlers] = (uint32_t)handler; // Vector
+	++_num_handlers;
+}
+
+
+void Vic::EnableChannel(uint channel)
+{
+	assert(channel < 32);
+
+	Spinlock::Scoped L(_lock);
+	_base[VIC_IntEnable] |= 1 << channel;
+}
+
+
+void Vic::DisableChannel(uint channel)
+{
+	assert(channel < 32);
+
+	Spinlock::Scoped L(_lock);
+	_base[VIC_IntEnClr] = 1 << channel;
+}
+
+
+bool Vic::ChannelPending(uint channel)
+{
+	return (_base[VIC_IRQStatus] & (1 << channel)) != 0;
+}
+
+
+void Vic::ClearPending()
+{
+	// Clear pending interrupt by doing a dummy write to VICVectAddr
+	_base[VIC_VectAddr] = _base[VIC_VectAddr];
+}
+
+
+void* _main_thread_stack;
+void* _intr_thread_stack;
 
 
 #define PLOCK 0x400
@@ -179,7 +245,7 @@ void hwinit()
 	// Turn off WP on external flash
 	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1);
 
-	// For now, map flash to vectors
+	// For now, map internal flash to vectors
 	// 1 = flash, 2 = ram, 3 = xram
 	MEMMAP = 1;
 	
@@ -193,8 +259,28 @@ void hwinit()
 	IO1SET =  0x00800000;	 // led off
 	IO1CLR =  0x00800000;	// led on
 
+	// Allocate main thread stack - this is the one we're using now
+	// Since the region allocates low to high we do this by installing a reserve...
+	_stack_region.SetReserve(MAIN_THREAD_STACK);
+	asm volatile("mov %0, sp; add %0, #4" : "=r"(_main_thread_stack));
+
+	// Allocate interrupt thread stack and install it
+	_intr_thread_stack = _stack_region.GetMem(INTR_THREAD_STACK);
+	
+	asm volatile("mrs r2, cpsr; msr cpsr, #0x12|0x80|0x40; mov sp, %0; msr cpsr, r2"
+				 : : "r"(_intr_thread_stack) : "cc", "r2", "memory");
+
+	console("");
+	DMSG("Main thread stack at (approx) %p; interrupt thread stack at %p",
+		 _main_thread_stack, _intr_thread_stack);
+
+	// Install IRQ handlers
+	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
+	_vic.EnableChannel(6);
+	_uart0.SetInterrupts(true);
+
 	// Enable interrupts
-	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12");
+	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
 }
 
 
@@ -205,23 +291,4 @@ void feed()
 }
 
 
-void IRQ_Routine () {
-	while (1) ;	
-	asm volatile ("subs pc, lr, #4");
-}
-
-
-void FIQ_Routine ()
-{
-	while (1) ;
-	asm volatile ("subs pc, lr, #4");
-}
-
-void SWI_Routine ()  {
-	while (1) ;	
-}
-
-
-void UNDEF_Routine () {
-	while (1) ;	
-}
+void Unexpected_Interrupt()  { /* for (;;) ; */ }

@@ -4,6 +4,8 @@
 
 class SerialPort {
 	volatile uint8_t* _base;
+	Deque<uchar> _sendq;		// Tx buffer
+	Deque<uchar> _recvq;		// Tx buffer
 	mutable Spinlock _lock;
 
 public:
@@ -37,12 +39,28 @@ public:
 
 	// Send synchronously (= polled) 
 	void WriteSync(const String& s);
+
+	// Send string
+	void Write(const String& s);
+
+	// Interrupt handler
+	static void Interrupt() __irq;
+
+	// Enable interrupts
+	void SetInterrupts(bool enable);
+
 private:
+	void FillFifo();
 	void WriteSync(const uchar* buf, uint len);
+
+	void HandleInterrupt();
 };
 
 
-extern SerialPort _console;
-extern SerialPort _lcd;
+extern SerialPort _uart0;
+extern SerialPort _uart1;
+
+#define _console _uart0
+#define _lcd _uart1
 
 #endif // __SERIAL_H__

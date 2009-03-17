@@ -2625,12 +2625,6 @@ static void* internal_realloc(mstate m, void* oldmem, size_t bytes) {
     void* extra = 0;
 
     /* Try to either shrink or extend into top. Else malloc-copy-free */
-
-	bool ok1 = ok_address(m, oldp);
-	bool ok2 = ok_cinuse(oldp);
-	bool ok3 = ok_next(oldp, next);
-	bool ok4 = ok_pinuse(next);
-
     if (RTCHECK(ok_address(m, oldp) && ok_cinuse(oldp) &&
                 ok_next(oldp, next) && ok_pinuse(next))) {
       size_t nb = request2size(bytes);

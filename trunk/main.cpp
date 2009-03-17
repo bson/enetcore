@@ -15,6 +15,5 @@ int	main ()
 
 	DMSG("Allocated %d bytes at %p", 31, tmp);
 
-//	fault(3);
 	abort();
 }

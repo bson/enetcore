@@ -35,7 +35,6 @@
 .text
 .arm
 
-.global	Reset_Handler
 .global _startup
 .func   _startup
 
@@ -43,7 +42,7 @@ _startup:
 
 # Exception Vectors
 
-_vectors:       ldr     PC, Reset_Addr         
+_vectors:       ldr     PC, Reset_Addr
                 ldr     PC, Undef_Addr
                 ldr     PC, SWI_Addr
                 ldr     PC, PAbt_Addr
@@ -52,20 +51,17 @@ _vectors:       ldr     PC, Reset_Addr
                 ldr     PC, [PC,#-0xFF0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
                 ldr     PC, FIQ_Addr
 
-Reset_Addr:     .word   Reset_Handler		/* defined in this module below  */
-Undef_Addr:     .word   UNDEF_Routine		/* defined in main.c  */
-SWI_Addr:       .word   SWI_Routine			/* defined in main.c  */
-PAbt_Addr:      .word   UNDEF_Routine		/* defined in main.c  */
-DAbt_Addr:      .word   UNDEF_Routine		/* defined in main.c  */
-IRQ_Addr:       .word   IRQ_Routine			/* defined in main.c  */
-FIQ_Addr:       .word   FIQ_Routine			/* defined in main.c  */
+Reset_Addr:     .word   _init
+Undef_Addr:     .word   Unexpected_Interrupt
+SWI_Addr:       .word   Unexpected_Interrupt
+PAbt_Addr:      .word   Unexpected_Interrupt
+DAbt_Addr:      .word   Unexpected_Interrupt
+IRQ_Addr:       .word   Unexpected_Interrupt
+FIQ_Addr:       .word   Unexpected_Interrupt
                 .word   0					/* rounds the vectors and ISR addresses to 64 bytes total  */
 
 
-# Reset Handler
-
-Reset_Handler:  
-
+_init:
 				/* Setup a stack for each mode - note that this only sets up a usable stack
 				for User mode.   Also each mode is setup with interrupts initially disabled. */
     			  
