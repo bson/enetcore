@@ -97,6 +97,7 @@ uint GetFreeMem()
 //void abort() { _lcd.WriteSync(STR("\xfe\xc0""ABORT")); fault(2); for (;;) ; }
 void abort() { panic("ABORT"); }
 
+#ifndef USE_ASM_MEMOPS
 void* memset(void* b, int c, size_t n)
 {
 	uint8_t* p = (uint8_t*)b;
@@ -134,6 +135,7 @@ size_t strlen(const char* s)
 	while (*s++) ++n;
 	return n;
 }
+#endif // USE_ASM_MEMOPS
 
 
 int strcmp(const char* s1, const char* s2) 

@@ -24,7 +24,9 @@ inline void operator delete(void *ptr) { xfree(ptr); }
 #ifdef ENETCORE
 //  libc replacements
 
-#if 0
+// #define USE_ASM_MEMOPS
+
+#ifdef USE_ASM_MEMOPS
 inline void* memset(void* b, int c, size_t n) {
 	asm volatile("sub %0, %0, #1; 1: strb %2, [%0,#1]!; sub %1, %1, #1; bne 1b"
 				 :  : "r" (b), "r" (n), "r" (c));
