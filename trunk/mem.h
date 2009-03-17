@@ -27,6 +27,15 @@ inline void operator delete(void *ptr) { xfree(ptr); }
 #define USE_ASM_MEMOPS
 
 #ifdef USE_ASM_MEMOPS
+extern "C" {
+// These need C linkage so gcc can use them from initializers
+void* memset(void* b, int c, size_t n);
+void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
+}
+
+#define memset xxmemset
+#define memcpy xxmemcpy
+
 INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
 	asm volatile("1: strb %2, [%0], #1; subs %1, %1, #1; bne 1b"
 				 :  : "r" (b), "r" (n), "r" (c) : "memory", "cc");
@@ -39,7 +48,6 @@ INLINE_ALWAYS void* memcpy(void*  s1, const void* s2, size_t n) {
 				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
 	return s1;
 }
-
 
 INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
 	asm volatile("1: ldrb r2, [%1], #1; strb r2, [%1], #1; cmp r2, #0; bne 1b"

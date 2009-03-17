@@ -38,7 +38,7 @@ on 1 byte), but shoehorning those bytes into integers efficiently is messy.
 
 namespace Lookup3 {
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(ENETCORE)
 #define SELF_TEST 1
 #endif
 

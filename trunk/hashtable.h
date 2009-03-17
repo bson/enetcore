@@ -103,7 +103,7 @@ public:
 	uint GetWorstOccupancy() const { return _worst_occupancy; }
 
 	uint GetOccupancy() {
-		Mutex::Scoped L(_lock);
+		Spinlock::Scoped L(_lock);
 		return GetNumUsed() * 100 / _v.Size();
 	}
 #endif

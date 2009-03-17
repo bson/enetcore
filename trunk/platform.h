@@ -23,7 +23,7 @@ namespace Platform {
 		class Scoped {
 			mutable Spinlock& _lock;
 		public:
-			Scoped(Spinlock& lock) : _lock(lock) { _lock.Lock(); }
+			Scoped(const Spinlock& lock) : _lock((Spinlock&)lock) { _lock.Lock(); }
 			~Scoped() { _lock.Unlock(); }
 		};
 	};

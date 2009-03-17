@@ -114,7 +114,7 @@ void FreelistVoidStar::Free(void* block)
 void FreelistVoidStar::Check(void* ptr)
 {
 #ifdef DEBUG
-		Mutex::Scoped L(_lock);
+		Spinlock::Scoped L(_lock);
 		for (Magazine* m = _head; m; m = m->_next)
 			if ((uint8_t*)ptr >= (uint8_t*)m && (uint8_t*)ptr < (uint8_t*)m + _size)
 				panic("attempt to free() member of freelist");

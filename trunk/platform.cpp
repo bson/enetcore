@@ -285,6 +285,19 @@ char* strstr(const char* s1, const char* s2)
 }
 
 
+// For gcc
+#ifdef USE_ASM_MEMOPS
+#undef memset
+#undef memcpy
+
+void* memset(void* b, int c, size_t n) { return xxmemset(b, c, n); }
+void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
+	return xxmemcpy(s1, s2, n);
+}
+
+#endif
+
+
 // ABI stuff
 
 extern "C" {

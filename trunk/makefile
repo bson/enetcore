@@ -8,8 +8,10 @@ OCP      = arm-elf-objcopy
 OD		= arm-elf-objdump
 
 #  -fno-common
-CFLAGS  = -I. -O0 -g -fno-exceptions -fno-rtti -ffreestanding \
-	-fno-threadsafe-statics -marm -DTRACE  -mcpu=arm7tdmi-s -DBUSY_WAIT
+COPT ?= -O0 -DTRACE -DDEBUG
+
+CFLAGS  = -I. $(COPT) -g -fno-exceptions -fno-rtti -ffreestanding \
+	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT
 AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o crt.o
 LFLAGS  =  -Map main.map -nostartfiles -Tlink.cmd
 LIBS    = /opt/local/lib/gcc/arm-elf/4.3.2/libgcc.a
@@ -24,16 +26,22 @@ SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp			\
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 DEPS = $(patsubst %.cpp, %.d, $(SRCS))
 
-all: image
+all: image.bin image.dmp image.hex
 
 clean:
 	-rm -f crt.lst image.lst crt.o $(OBJS) image image.hex image.map image.dmp image.bin
 
 image: crt.o $(OBJS) link.cmd 
 	$(LD) $(LFLAGS) -o $@ crt.o $(OBJS) $(LIBS)
-	$(OCP) $(CPFLAGS) image image.bin
-	$(OD) $(ODFLAGS) image > image.dmp
-	$(OCP) $(HEXFLAGS) image image.hex
+
+%.bin: %
+	$(OCP) $(CPFLAGS) $< $@
+
+%.dmp: %
+	$(OD) $(ODFLAGS) $< >$@
+
+%.hex: %
+	$(OCP) $(HEXFLAGS) $< $@
 
 crt.o: crt.s
 	$(AS) $(AFLAGS) crt.s > crt.lst
