@@ -82,7 +82,7 @@ enum { XRAM_SIZE = 1024*1024 };
 #define DATA_REGION_SIZE (&_edata - &_data)
 
 #define TEXT_REGION_START  ((uint8_t*)0)
-#define TEXT_REGION_SIZE (&_etext - (uint8_t*)0)
+#define TEXT_REGION_SIZE (&_etext - (uint8_t*)0 + (DATA_REGION_SIZE))
 
 #define XFLASH_REGION_START (&_xflash)
 #define XFLASH_REGION_SIZE (&_exflash - &_xflash)

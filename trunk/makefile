@@ -7,7 +7,8 @@ AS      = arm-elf-as
 OCP      = arm-elf-objcopy
 OD		= arm-elf-objdump
 
-CFLAGS  = -I. -fno-common -O0 -g -fno-exceptions -fno-rtti -DBUSY_WAIT -ffreestanding \
+# -DBUSY_WAIT  -fno-common
+CFLAGS  = -I. -O0 -g -fno-exceptions -fno-rtti -ffreestanding \
 	-fno-threadsafe-statics -marm -DTRACE  -mcpu=arm7tdmi-s
 AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o crt.o
 LFLAGS  =  -Map main.map -nostartfiles -Tlink.cmd
