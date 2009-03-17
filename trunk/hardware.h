@@ -49,6 +49,26 @@ enum { VIC_BASE = 0xfffff000,
 	   VIC_VectCntl0 = 128
 };
 
+enum { TIMER0_BASE = 0xe0004000,
+	   TIMER1_BASE = 0xe0008000,
+	   TIMER_IR = 0,
+	   TIMER_TCR = 1,
+	   TIMER_TC = 2,
+	   TIMER_PR = 3,
+	   TIMER_PC = 4,
+	   TIMER_MCR = 5,
+	   TIMER_MR0 = 6,
+	   TIMER_MR1 = 7,
+	   TIMER_MR2 = 8,
+	   TIMER_MR3 = 9,
+	   TIMER_CCR = 10,
+	   TIMER_CR0 = 11,
+	   TIMER_CR1 = 12,
+	   TIMER_CR2 = 13,
+	   TIMER_CR3 = 14,
+	   TIMER_EMR = 15
+};
+
 
 // We only mask IRQ, not FIQ
 

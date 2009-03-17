@@ -26,29 +26,6 @@ int ParseHexDigit(int c)
 }
 
 
-void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
-{
-	assert(t);
-	const time_t posixtime = t->GetPosixTime();
-	
-	static Spinlock lock;
-	Spinlock::Scoped L(lock);
-
-#ifdef POSIX
-	struct tm* tm = ::localtime(&posixtime);
-	char buf[64];
-	if (with_date)
-		::snprintf(buf, sizeof buf, "%04u-%02u-%02u %02u:%02u:%02u",
-				   tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-				   tm->tm_hour, tm->tm_min, tm->tm_sec);
-	else
-		::snprintf(buf, sizeof buf, "%02u:%02u:%02u.%03u",
-				   tm->tm_hour, tm->tm_min, tm->tm_sec, t->GetMsec() % 1000);
-
-	dest.PushBack((uint8_t*)buf);
-#endif
-}
-
 
 void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits)
 {
@@ -82,6 +59,45 @@ void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uin
 		*--pos = '0';
 
 	dest.PushBack(pos);
+}
+
+
+void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
+{
+	assert(t);
+	
+	time_t posixtime = t->GetPosixTime();
+
+	static Spinlock lock;
+	Spinlock::Scoped L(lock);
+
+#ifdef POSIX
+	struct tm* tm = ::localtime(&posixtime);
+	char buf[64];
+	if (with_date)
+		::snprintf(buf, sizeof buf, "%04u-%02u-%02u %02u:%02u:%02u",
+				   tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+				   tm->tm_hour, tm->tm_min, tm->tm_sec);
+	else
+		::snprintf(buf, sizeof buf, "%02u:%02u:%02u.%03u",
+				   tm->tm_hour, tm->tm_min, tm->tm_sec, t->GetMsec() % 1000);
+
+	dest.PushBack((uint8_t*)buf);
+#else
+	uint min = posixtime / 60;  posixtime %= 60;
+	uint hr = min / 60; min %= 60;
+
+	FormatNumber(dest, hr, FMT_UNSIGNED, 10, 2);
+
+	dest.PushBack((uchar)':');
+	FormatNumber(dest, min, FMT_UNSIGNED, 10, 2);
+
+	dest.PushBack((uchar)':');
+	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 2);
+
+	dest.PushBack((uchar)'.');
+	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 3);
+#endif
 }
 
 

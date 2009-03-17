@@ -62,6 +62,7 @@ enum { NOT_FOUND = (uint)-1 };
 typedef bool (*OrderFunc)(const void* a, const void* b);
 
 #include "arithmetic.h"
+#include "time.h"
 #include "dlmalloc.h"
 #include "vector.h"
 #include "deque.h"
@@ -71,7 +72,6 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "set.h"
 #include "platform.h"
 #include "freelist.h"
-#include "time.h"
 #include "pstring.h"
 
 #endif // __ENETCORE_H__
