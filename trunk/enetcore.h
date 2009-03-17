@@ -45,6 +45,7 @@ typedef intptr_t ptrdiff_t;
 #define DESTRUCTOR  __attribute__((destructor)) // Static destructor, called after exit
 #define NOALIAS  __attribute__((malloc)) // Return value is unalised pointer
 #define NOINLINE  __attribute__((noinline))	// Do not inline
+#define INLINE_ALWAYS inline __attribute__((always_inline))
 
 typedef uint32_t time_t;
 

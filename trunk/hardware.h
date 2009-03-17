@@ -36,7 +36,7 @@ enum { UART0_BASE = 0xe000c000,
 
 // We only mask IRQ, not FIQ
 
-inline uint DisableInterrupts() {
+INLINE_ALWAYS uint DisableInterrupts() {
 	uint prev;
 	asm volatile("mrs r12, cpsr\n"
 				 "mov %0, r12\n"
@@ -46,7 +46,7 @@ inline uint DisableInterrupts() {
 	return prev;
 }
 
-inline void EnableInterrupts(uint prev) {
+INLINE_ALWAYS void EnableInterrupts(uint prev) {
 	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
 }
 

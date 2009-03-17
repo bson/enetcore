@@ -27,40 +27,40 @@ inline void operator delete(void *ptr) { xfree(ptr); }
 // #define USE_ASM_MEMOPS
 
 #ifdef USE_ASM_MEMOPS
-inline void* memset(void* b, int c, size_t n) {
+INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
 	asm volatile("sub %0, %0, #1; 1: strb %2, [%0,#1]!; sub %1, %1, #1; bne 1b"
-				 :  : "r" (b), "r" (n), "r" (c));
+				 :  : "r" (b), "r" (n), "r" (c) : "memory", "cc");
 	return b;
 }
 
-inline void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
+INLINE_ALWAYS void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
 	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
 				 "1: ldrb r2, [%1,#1]!; strb r2, [%0,#1]!; sub %2, %2, #1; bne 1b"
-				 : : "r" (s1), "r" (s2), "r" (n) : "r2");
+				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
 	return s1;
 }
 
 
-inline char* strcpy(char* __restrict dest, const char* __restrict src) {
+INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
 	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
 				 "1: ldrb r2, [%1,#1]!; strb r2, [%1,#1]!; cmp r2, #0; bne 1b"
-				 : : "r" (dest), "r" (src) : "r2");
+				 : : "r" (dest), "r" (src) : "r2", "memory", "cc");
 	return dest;
 }
 
-inline char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
+INLINE_ALWAYS char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
 	asm volatile("sub %0, %0, #1; sub %1, %1, #1;"
 				 "1: ldrb r2, [%1,#1]!; strb r2, [%1,#1]!; "
 				 "sub %2, %2, #1; cmpne r2, #0; bne 1b"
-				 : : "r" (dest), "r" (src), "r" (n) : "r2");
+				 : : "r" (dest), "r" (src), "r" (n) : "r2", "memory", "cc");
 	return dest;
 }
 
-inline size_t strlen(const char* s) {
+INLINE_ALWAYS size_t strlen(const char* s) {
 	size_t len;
 	asm volatile("mov %0, #-1; sub %1, %1, #1;"
 				 "1: add %0, %0, #1; ldrb r2, [%1,#1]!; cmp r2, #0; bne 1b"
-				 : "=&r" (len) : "r" (s) : "r2");
+				 : "=&r" (len) : "r" (s) : "r2", "memory", "cc");
 	return len;
 }
 #else
