@@ -7,19 +7,24 @@ void abort();
 
 namespace Platform {
 	class Spinlock {
+		uint32_t _cpsr;
+		uint _count;
+
 	public:
-		Spinlock() { }
+		Spinlock() : _count(0) { }
 		~Spinlock() { }
-		uint32_t Lock() const { return DisableInterrupts(); }
-		void Unlock(uint32_t cpsr) const { EnableInterrupts(cpsr); }
+		void Lock() { if (_count++) _cpsr = DisableInterrupts(); }
+		void Unlock() {
+			assert(_count);
+			if (!--_count) EnableInterrupts(_cpsr);
+		}
 		void AssertLocked() const { }
 
 		class Scoped {
-			const Spinlock& _lock;
-			uint _cpsr;
+			mutable Spinlock& _lock;
 		public:
-			Scoped(const Spinlock& lock) : _lock(lock) { _cpsr = _lock.Lock(); }
-			~Scoped() { _lock.Unlock(_cpsr); }
+			Scoped(Spinlock& lock) : _lock(lock) { _lock.Lock(); }
+			~Scoped() { _lock.Unlock(); }
 		};
 	};
 

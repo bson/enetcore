@@ -268,13 +268,14 @@ static int win32munmap(void* ptr, size_t size) {
 #define INITIAL_LOCK(l)      pthread_mutex_init(l, NULL)
 #define ACQUIRE_LOCK(l)      pthread_mutex_lock(l)
 #define RELEASE_LOCK(l)      pthread_mutex_unlock(l)
+#define LOCK_INITIALIZER  = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #if HAVE_MORECORE
-static MLOCK_T morecore_mutex = PTHREAD_MUTEX_INITIALIZER;
+static MLOCK_T morecore_mutex LOCK_INITIALIZER;
 #endif /* HAVE_MORECORE */
 
-static MLOCK_T magic_init_mutex = PTHREAD_MUTEX_INITIALIZER;
+static MLOCK_T magic_init_mutex LOCK_INITIALIZER;
 
 #else /* WIN32 */
 /*

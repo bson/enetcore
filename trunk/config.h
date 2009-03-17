@@ -12,7 +12,13 @@ enum { SHUTDOWN_TIMEOUT = 10000 };
 
 
 // dlmalloc config - see dlmalloc.h
-#define USE_LOCKS 0
+#define USE_LOCKS 1
+#define MLOCK_T Spinlock
+#define INITIAL_LOCK(l) ((void)0)
+#define ACQUIRE_LOCK(l) ((l)->Lock(), 0)
+#define RELEASE_LOCK(l) ((l)->Unlock(), 0)
+#define LOCK_INITIALIZER
+
 #define HAVE_MORECORE 1
 #define MORECORE(X)  _malloc_region.GetCore((X), MALLOC_REGION_SIZE)
 #define HAVE_MMAP 0

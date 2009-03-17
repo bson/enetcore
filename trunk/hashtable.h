@@ -65,7 +65,7 @@ private:
 	// Because this depends on usage pattern, the value is a parameter.
 	// It can even be changed using SetEvictionDepth().
 
-	Spinlock _lock;
+	mutable Spinlock _lock;
 
 	Vector<void*> _v;
 	uint _eviction_depth;
