@@ -6,16 +6,16 @@ SerialPort _console((volatile void*)UART0_BASE);
 SerialPort _lcd((volatile void*)UART1_BASE);
 
 
-void SerialPort::SetSpeed(uint speed)
+void SerialPort::SetSpeed(uint speed, uint framing)
 {
 	const uint prescale = PCLK / speed / 16;
 
 	Spinlock::Scoped L(_lock);
 
-	_base[UART_LCR] = 0x83;		// Set 8N1 and access divisor
+	_base[UART_LCR] = 0x80 | framing; // Set framing and access divisor
 	_base[UART_DLL] = prescale & 0xff;
 	_base[UART_DLM] = prescale / 256;
-	_base[UART_LCR] = 3;		// Disable divisor access
+	_base[UART_LCR] = framing;	// Disable divisor access
 	_base[UART_FCR] = 7;	 // Reset, set FIFO Rx trigger to 14 bytes
 }
 
