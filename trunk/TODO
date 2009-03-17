@@ -1,9 +1,3 @@
-Implement Timer abstraction to interface with hw timers
-- Timer interrupts
-- Implement global clock and an hrtime function
-- Implement Time
-- Implement %T/%t formatters
-
 Implement skeleton thread
 - Context switch
   - Save context A
