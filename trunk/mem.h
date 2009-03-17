@@ -24,17 +24,18 @@ inline void operator delete(void *ptr) { xfree(ptr); }
 #ifdef ENETCORE
 //  libc replacements
 
-// #define USE_ASM_MEMOPS
+#define USE_ASM_MEMOPS
 
 #ifdef USE_ASM_MEMOPS
 INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
-	asm volatile("1: strb %2, [%0], #1; sub %1, %1, #1; bne 1b"
+	asm volatile("1: strb %2, [%0], #1; subs %1, %1, #1; bne 1b"
 				 :  : "r" (b), "r" (n), "r" (c) : "memory", "cc");
 	return b;
 }
 
-INLINE_ALWAYS void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
-	asm volatile("1: sub %2, %2, #1; ldrccb r2, [%1], #1; strccb r2, [%0], #1; bne 1b"
+
+INLINE_ALWAYS void* memcpy(void*  s1, const void* s2, size_t n) {
+	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
 				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
 	return s1;
 }
@@ -47,9 +48,9 @@ INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
 }
 
 INLINE_ALWAYS char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
-	asm volatile("1: sub %2, %2, #1;"
-				 "ldrccb r2, [%1], #1; strccb r2, [%1], #1;"
-				 "cmpcc r2, #0; bne 1b"
+	asm volatile("1: subs %2, %2, #1;"
+				 "ldrgeb r2, [%1], #1; strgeb r2, [%1], #1;"
+				 "tstge r2, r2; bne 1b"
 				 : : "r" (dest), "r" (src), "r" (n) : "r2", "memory", "cc");
 	return dest;
 }
@@ -58,7 +59,7 @@ INLINE_ALWAYS size_t strlen(const char* s) {
 	size_t len;
 	asm volatile("mov %0, #0;"
 				 "1: ldrb r2, [%1], #1; cmp r2, #0; addne %0, %0, #1; bne 1b"
-				 : "=&r" (len) : "r" (s) : "r2", "memory", "cc");
+				 : "=&r" (len) : "r" (s) : "r2", "cc");
 	return len;
 }
 #else

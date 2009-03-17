@@ -7,9 +7,9 @@ AS      = arm-elf-as
 OCP      = arm-elf-objcopy
 OD		= arm-elf-objdump
 
-# -DBUSY_WAIT  -fno-common
+#  -fno-common
 CFLAGS  = -I. -O0 -g -fno-exceptions -fno-rtti -ffreestanding \
-	-fno-threadsafe-statics -marm -DTRACE  -mcpu=arm7tdmi-s
+	-fno-threadsafe-statics -marm -DTRACE  -mcpu=arm7tdmi-s -DBUSY_WAIT
 AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o crt.o
 LFLAGS  =  -Map main.map -nostartfiles -Tlink.cmd
 LIBS    = /opt/local/lib/gcc/arm-elf/4.3.2/libgcc.a
