@@ -1,19 +1,7 @@
-Add interrupt handling:
-- Disable, Enable (push, pop state)
-- Interrupt stack
-- Controller interface
-
 Implement Timer abstraction to interface with hw timers
 - Timer interrupts
 - Implement global clock and an hrtime function
 - Implement Time
-
-- Use stack region to allocate interrupt stack
-
-Add console output
-- Serial driver with deques
-
-Add Platform memory/region/etc debug messages
 
 Implement skeleton thread
 - Context switch
