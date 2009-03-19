@@ -11,7 +11,7 @@ namespace Platform {
 	public:
 		Spinlock() : _count(0) { }
 		~Spinlock() { }
-		void Lock() { if (!_count++) _cpsr = DisableInterrupts(); }
+		void Lock() { const uint32_t cpsr = DisableInterrupts(); if (!_count++) _cpsr = cpsr; }
 		void Unlock() {
 			assert(_count);
 			if (!--_count) EnableInterrupts(_cpsr);

@@ -4,6 +4,12 @@
 
 #include "serial.h"
 #include "timer.h"
+#include "thread.h"
+
+
+Thread* _main_thread;
+void* _main_thread_stack;
+void* _intr_thread_stack;
 
 
 extern "C" {
@@ -100,10 +106,6 @@ void Vic::ClearPending()
 	// Clear pending interrupt by doing a dummy write to VICVectAddr
 	_base[VIC_VectAddr] = _base[VIC_VectAddr];
 }
-
-
-void* _main_thread_stack;
-void* _intr_thread_stack;
 
 
 #define PLOCK 0x400
@@ -275,6 +277,8 @@ void hwinit()
 	DMSG("Main thread stack at (approx) %p; interrupt thread stack at %p",
 		 _main_thread_stack, _intr_thread_stack);
 
+	_console.SetSpeed(115200);
+
 	// Install IRQ handlers
 	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
 	_vic.EnableChannel(6);
@@ -285,6 +289,9 @@ void hwinit()
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
+
+	// Initialize threads
+	_main_thread = &Thread::Initialize();
 
 	// Start clock
 	_clock.SetResolution(TIME_RESOLUTION);

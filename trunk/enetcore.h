@@ -46,6 +46,7 @@ typedef intptr_t ptrdiff_t;
 #define NOALIAS  __attribute__((malloc)) // Return value is unalised pointer
 #define NOINLINE  __attribute__((noinline))	// Do not inline
 #define INLINE_ALWAYS inline __attribute__((always_inline))
+#define NAKED __attribute((naked))
 
 typedef uint32_t time_t;
 

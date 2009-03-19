@@ -88,6 +88,8 @@ INLINE_ALWAYS void EnableInterrupts(uint prev) {
 
 
 #define __irq   __attribute__((interrupt("IRQ")))
+#define __fiq   __attribute__((interrupt("FIQ")))
+#define __abt   __attribute__((interrupt("ABT")))
 
 
 void fault0(uint num);
@@ -126,5 +128,7 @@ enum { XRAM_SIZE = 1024*1024 };
 #define XFLASH_REGION_START (&_xflash)
 #define XFLASH_REGION_SIZE (&_exflash - &_xflash)
 
+extern void* _main_thread_stack;
+extern void* _intr_thread_stack;
 
 #endif // __HARDWARE_H__
