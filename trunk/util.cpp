@@ -97,7 +97,7 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 2);
 
 	dest.PushBack((uchar)'.');
-	FormatNumber(dest, t->GetMsec(), FMT_UNSIGNED, 10, 3);
+	FormatNumber(dest, t->GetMsec() % 1000, FMT_UNSIGNED, 10, 3);
 #endif
 }
 

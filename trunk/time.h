@@ -58,13 +58,17 @@ public:
 
 	time_t GetPosixTime() const { return GetSec(); }
 	int64_t GetSec() const { return _t / TIMEBASE; }
-	int64_t GetMsec() const { return _t / (TIMEBASE / 1000); }
-	int64_t GetUsec() const { return _t; }
+#ifdef POSIX
+	int64_t GetMsec() const { return _t / 1000; }
+#else
+	int64_t GetMsec() const { return _t * 1000 / TIMEBASE; }
+#endif
+	int64_t GetUsec() const { return _t * 1000000 / TIMEBASE; }
 
 	static Time Now();
 
-	static const Time FromNsec(int64_t nsec) { return nsec / (TIMEBASE / 1000); }
-	static const Time FromUsec(int64_t usec) { return usec; }
+	static const Time FromNsec(int64_t nsec) { return FromMsec(nsec * 1000); }
+	static const Time FromUsec(int64_t usec) { return usec * TIMEBASE / 1000000; }
 	static const Time FromMsec(int64_t msec) { return msec * (TIMEBASE / 1000); }
 	static const Time FromSec(uint sec) { return (uint64_t)sec * (uint64_t)TIMEBASE; }
 
