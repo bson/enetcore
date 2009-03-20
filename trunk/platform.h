@@ -2,29 +2,11 @@
 #define __PLATFORM_H__
 
 #define abort() (panic("ABORT"), (void)0)
+extern "C" {
+	void Unexpected_Interrupt() __irq;
+}
 
 namespace Platform {
-	class Spinlock {
-		mutable uint32_t _cpsr;
-		mutable uint _count;
-
-	public:
-		Spinlock() : _count(0) { }
-		~Spinlock() { }
-		void Lock() { const uint32_t cpsr = DisableInterrupts(); if (!_count++) _cpsr = cpsr; }
-		void Unlock() {
-			assert(_count);
-			if (!--_count) EnableInterrupts(_cpsr);
-		}
-		void AssertLocked() const { assert(_count); }
-
-		class Scoped {
-			mutable Spinlock& _lock;
-		public:
-			Scoped(const Spinlock& lock) : _lock((Spinlock&)lock) { _lock.Lock(); }
-			~Scoped() { _lock.Unlock(); }
-		};
-	};
 
 	// Memory regions
 	class Region {
@@ -75,6 +57,10 @@ namespace Platform {
 		// Set reserve
 		// The reserve allows us to set aside memory to gracefully terminate
 		void SetReserve(uint reserve);
+
+		// Get start of, end of (first byte following) region
+		INLINE_ALWAYS void* GetStart() const { return _start; }
+		INLINE_ALWAYS void* GetEnd() const { return _end; }
 
 		// True if pointer falls in region
 		bool IsInRegion(const void* ptr) {
@@ -140,7 +126,7 @@ namespace Platform {
 	public:
 		Vic(uint32_t base) : _base((volatile uint32_t*) base), _num_handlers(0) {
 			// Install default IRQ handler
-			InstallHandler((uint)-1, Unhandled_IRQ);
+			InstallHandler((uint)-1, Unexpected_Interrupt);
 		}
 	
 		void InstallHandler(uint channel, IRQHandler handler);
@@ -157,8 +143,6 @@ namespace Platform {
 		static void Unhandled_IRQ() __irq;
 	};
 }
-
-using Platform::Spinlock;
 
 using Platform::_malloc_region;
 using Platform::_stack_region;

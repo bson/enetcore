@@ -19,12 +19,12 @@ public:
 	void RunTimer(uint count, bool recur);
 
 	// Read timer
-	uint GetCount() const { return _base[TIMER_TC]; }
+	uint GetCount() const { Spinlock::Scoped L(_lock); return _base[TIMER_TC]; }
 
 	// Interrupt handler
-	static void Interrupt() __irq;
+	static void Interrupt() __irq /*NAKED*/;
 
-	void HandleInterrupt();
+	void HandleInterrupt(uint mr);
 
 	// Called from interrupt handler to indicate clock tick
 	virtual void Tick() = 0;
@@ -40,9 +40,7 @@ class Clock: public Timer {
 public:
 	Clock() : Timer(TIMER0_BASE), _time(0) { }
 
-	uint64_t GetTime() const {
-		return _time + GetCount();
-	}
+	uint64_t GetTime() const { return _time + GetCount(); }
 
 	void Tick();
 };

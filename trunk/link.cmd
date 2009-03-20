@@ -129,7 +129,7 @@ MEMORY
 	ram   				: ORIGIN = 0x40000200, LENGTH = 15840
 
 	/* variables used by Philips ISP bootloader	*/
-	ram_isp_high(A)		: ORIGIN = 0x40001EE0, LENGTH = 32
+	ram_isp_high(A)		: ORIGIN = 0x40001ee0, LENGTH = 32
 
 	/* external RAM */
 	xram				: ORIGIN = 0x81000000, LENGTH = 1M
@@ -142,7 +142,7 @@ MEMORY
 
 /* define a global symbol _stack_end  */
 
-_estack = 0x40001EDC;
+_estack = 0x40003edc;
 
 
 /* now define the output sections  */

@@ -1,7 +1,6 @@
 #ifndef __TIME_H__
 #define __TIME_H__
 
-
 #ifdef ENETCORE
 #define TIME_RESOLUTION 20
 #define TIMEBASE (1 << TIME_RESOLUTION)
@@ -30,8 +29,8 @@ public:
 	Time(const Time& arg) : _t(arg._t) {  }
 	Time& operator=(const Time& arg) { return assign(arg); }
 
-	Time operator+(const Time& rhs) const { return FromUsec(_t + rhs._t); }
-	Time operator-(const Time& rhs) const { return FromUsec(_t - rhs._t); }
+	Time operator+(const Time& rhs) const { return _t + rhs._t; }
+	Time operator-(const Time& rhs) const { return _t - rhs._t; }
 	uint operator/(const Time& rhs) const { return _t / rhs._t; }
 	Time& operator+=(const Time& rhs) { _t += rhs._t; return *this; }
 	Time& operator-=(const Time& rhs) { _t -= rhs._t; return *this; }
@@ -65,7 +64,7 @@ public:
 #endif
 	int64_t GetUsec() const { return _t * 1000000 / TIMEBASE; }
 
-	static Time Now();
+	static Time Now() { return _clock.GetTime(); }
 
 	static const Time FromNsec(int64_t nsec) { return FromMsec(nsec * 1000); }
 	static const Time FromUsec(int64_t usec) { return usec * TIMEBASE / 1000000; }
@@ -78,6 +77,10 @@ public:
 	static const Time InfTim;
 };
 
+
+inline void udelay(uint usec) {
+	for (Time x = Time::Now() + Time::FromUsec(usec); Time::Now() < x; ) ;
+}
 
 #endif // __TIME_H__
 

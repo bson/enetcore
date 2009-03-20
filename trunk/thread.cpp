@@ -31,7 +31,7 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool)
 		_lock.Lock();
 		_curthread = this;
 		_curpcb = &_pcb;
-		SetStack(_stack);
+		SetStack((uint8_t*)_estack - 4 );
 		_lock.Unlock();
 		func(arg);
 		_exit = true;
@@ -85,12 +85,4 @@ bool Thread::SaveState() volatile
 		: : : "memory", "r0", "r1", "cc");
 
 	return false;				// Bah.
-}
-
-
-void Thread::SaveState(uint32_t lr, uint32_t spsr) volatile
-{
-	SaveState();
-	_curpcb->_regs[15] = lr;
-	_curpcb->_regs[16] = spsr;
 }

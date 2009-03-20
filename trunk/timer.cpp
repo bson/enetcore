@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "timer.h"
+#include "thread.h"
 
 
 Clock _clock;
@@ -34,23 +35,27 @@ void Timer::RunTimer(uint count, bool recur)
 // * static __irq
 void Timer::Interrupt()
 {
+//	SaveStateExc(4);
+
 	if (_vic.ChannelPending(4))
-		_clock.HandleInterrupt();
+		_clock.HandleInterrupt(0); // Timer0 uses MR0
 #if 0
 	if (_vic.ChannelPending(5))
-		_timer1.HandleInterrupt();
+		_timer1.HandleInterrupt(1); // Timer1 used MR1
 #endif
 
 	_vic.ClearPending();
+
+//	Thread::LoadStateExc();
 }
 
 
-void Timer::HandleInterrupt()
+void Timer::HandleInterrupt(uint mr)
 {
 	Spinlock::Scoped L(_lock);
-	if (_base[TIMER_IR] & 1) {
+	if (_base[TIMER_IR] & (1 << mr)) {
 		Tick();
-		_base[TIMER_IR] = 1;
+		_base[TIMER_IR] = (1 << mr);
 	}
 }
 

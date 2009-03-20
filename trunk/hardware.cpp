@@ -14,9 +14,13 @@ void* _intr_thread_stack;
 
 extern "C" {
 void Unexpected_Interrupt() __irq;
+void Data_Abort_Exception() __abort;
+void Program_Abort_Exception() __abort;
+void Undef_Exception() __undef;
+void SWI_Trap() __swi;
 
 void feed();
-void busy_wait () __attribute__ ((naked));
+void busy_wait () NAKED;
 
 }
 
@@ -42,16 +46,11 @@ void busy_wait()
 #ifdef BUSY_WAIT
 	while (!_busy_flag) continue;
 #endif
+	asm volatile ("mov pc, lr");
 }
 
 
 Vic _vic(VIC_BASE);
-
-
-void Vic::Unhandled_IRQ()
-{
-	panic("Unhandled IRQ");
-}
 
 
 void Vic::InstallHandler(uint channel, IRQHandler handler)
@@ -100,11 +99,10 @@ bool Vic::ChannelPending(uint channel)
 	return (_base[VIC_IRQStatus] & (1 << channel)) != 0;
 }
 
-
 void Vic::ClearPending()
 {
 	// Clear pending interrupt by doing a dummy write to VICVectAddr
-	_base[VIC_VectAddr] = _base[VIC_VectAddr];
+	_base[VIC_VectAddr] = 0;
 }
 
 
@@ -262,30 +260,29 @@ void hwinit()
 	IO1SET =  0x00800000;	 // led off
 	IO1CLR =  0x00800000;	// led on
 
+	// Clear malloc space
+	memset(_malloc_region.GetStart(), 0, _malloc_region.GetSize());
+
 	// Allocate main thread stack - this is the one we're using now
 	// Since the region allocates low to high we do this by installing a reserve...
 	_stack_region.SetReserve(MAIN_THREAD_STACK);
-	asm volatile("mov %0, sp; add %0, #4" : "=r"(_main_thread_stack));
+	_main_thread_stack = (uint8_t*)_stack_region.GetEnd() - MAIN_THREAD_STACK;
+	// This is picked up by Thread::Initialize to wrap the current thread as the main thread
 
 	// Allocate interrupt thread stack and install it
 	_intr_thread_stack = _stack_region.GetMem(INTR_THREAD_STACK);
-	
 	asm volatile("mrs r2, cpsr; msr cpsr, #0x12|0x80|0x40; mov sp, %0; msr cpsr, r2"
-				 : : "r"(_intr_thread_stack) : "cc", "r2", "memory");
-
-	console("");
-	DMSG("Main thread stack at (approx) %p; interrupt thread stack at %p",
-		 _main_thread_stack, _intr_thread_stack);
-
-	_console.SetSpeed(115200);
+				 : : "r"((uint8_t*)_intr_thread_stack + INTR_THREAD_STACK - 4) : "cc", "r2", "memory");
 
 	// Install IRQ handlers
+	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
+	_vic.EnableChannel(4);
+
 	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
 	_vic.EnableChannel(6);
 	_uart0.SetInterrupts(true);
 
-	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
-	_vic.EnableChannel(4);
+	_uart0.SetSpeed(115200);
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
@@ -296,6 +293,16 @@ void hwinit()
 	// Start clock
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimer(HZ, true);
+
+	udelay(1000);
+
+	void *sp;
+	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
+	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
+		 _main_thread_stack, sp, _intr_thread_stack);
+
+
+	udelay(10000);
 }
 
 
@@ -306,4 +313,27 @@ void feed()
 }
 
 
-void Unexpected_Interrupt()  { /* for (;;) ; */ }
+void Unexpected_Interrupt()  {
+	console("Unhandled interrupt");
+	_vic.ClearPending();
+}
+
+void Data_Abort_Exception()
+{
+	for (;;) ;
+}
+
+void Program_Abort_Exception()
+{
+	for (;;) ;
+}
+
+void Undef_Exception()
+{
+	for (;;) ;
+}
+
+void SWI_Trap()
+{
+	for (;;) ;
+}

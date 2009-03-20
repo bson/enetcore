@@ -1,7 +1,47 @@
 #ifndef __HARDWARE_H__
 #define __HARDWARE_H__
 
-#include "LPC22xx.h"
+#include "assert.h"
+
+#include "lpc22xx.h"
+
+INLINE_ALWAYS uint DisableInterrupts() {
+	uint prev;
+	asm volatile("mrs r12, cpsr\n"
+				 "mov %0, r12\n"
+				 "orr r12, #0x80|0x40\n"
+				 "msr cpsr, r12"
+				 : "=r" (prev) : : "r12", "cc", "memory");
+	return prev;
+}
+
+INLINE_ALWAYS void EnableInterrupts(uint prev) {
+	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
+}
+
+
+class Spinlock {
+	mutable uint32_t _cpsr;
+	mutable uint _count;
+
+public:
+	Spinlock() : _count(0) { }
+	~Spinlock() { }
+	void Lock() { const uint32_t cpsr = DisableInterrupts(); if (!_count++) _cpsr = cpsr; }
+	void Unlock() {
+		assert(_count);
+		if (!--_count) EnableInterrupts(_cpsr);
+	}
+	void AssertLocked() const { assert(_count); }
+
+	class Scoped {
+		mutable Spinlock& _lock;
+	public:
+		Scoped(const Spinlock& lock) : _lock((Spinlock&)lock) { _lock.Lock(); }
+		~Scoped() { _lock.Unlock(); }
+	};
+};
+
 
 #define BIG_ENDIAN 0
 #define LITTLE_ENDIAN 1
@@ -70,26 +110,13 @@ enum { TIMER0_BASE = 0xe0004000,
 };
 
 
-// We only mask IRQ, not FIQ
-
-INLINE_ALWAYS uint DisableInterrupts() {
-	uint prev;
-	asm volatile("mrs r12, cpsr\n"
-				 "mov %0, r12\n"
-				 "orr r12, #0x80|0x40\n"
-				 "msr cpsr, r12"
-				 : "=r" (prev) : : "r12", "cc", "memory");
-	return prev;
-}
-
-INLINE_ALWAYS void EnableInterrupts(uint prev) {
-	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
-}
-
-
 #define __irq   __attribute__((interrupt("IRQ")))
 #define __fiq   __attribute__((interrupt("FIQ")))
-#define __abt   __attribute__((interrupt("ABT")))
+#define __abort   __attribute__((interrupt("ABT")))
+#define __undef   __attribute__((interrupt("UNDEF")))
+#define __swi   __attribute__((interrupt("SWI")))
+
+#include "timer.h"
 
 
 void fault0(uint num);
@@ -130,5 +157,6 @@ enum { XRAM_SIZE = 1024*1024 };
 
 extern void* _main_thread_stack;
 extern void* _intr_thread_stack;
+
 
 #endif // __HARDWARE_H__

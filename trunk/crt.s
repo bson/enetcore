@@ -1,13 +1,4 @@
 
-/* Stack Sizes */
-.set  UND_STACK_SIZE, 0x00000004		/* stack for "undefined instruction" interrupts is 4 bytes  */
-.set  ABT_STACK_SIZE, 0x00000004		/* stack for "abort" interrupts is 4 bytes                  */
-.set  FIQ_STACK_SIZE, 0x00000004		/* stack for "FIQ" interrupts  is 4 bytes         			*/
-.set  IRQ_STACK_SIZE, 0X00000004		/* stack for "IRQ" normal interrupts is 4 bytes    			*/
-.set  SVC_STACK_SIZE, 0x00000004		/* stack for "SVC" supervisor mode is 4 bytes  				*/
-
-
-
 /* Standard definitions of Mode bits and Interrupt (I & F) flags in PSRs (program status registers) */
 .set  MODE_USR, 0x10            		/* Normal User Mode 										*/
 .set  MODE_FIQ, 0x11            		/* FIQ Processing Fast Interrupts Mode 						*/
@@ -20,18 +11,6 @@
 .set  I_BIT, 0x80               		/* when I bit is set, IRQ is disabled (program status registers) */
 .set  F_BIT, 0x40               		/* when F bit is set, FIQ is disabled (program status registers) */
 
-.set BCFG0, 0xffe00000
-
-.set PINSEL2, 0xe002c014
-	
-/* Enable external bus, CS0, CS1 */
-.set PINSEL2VAL, 0xf800924
-
-/* BCFG0 command to map external flash onto CS0 (0x80000000) */
-.set BCFG0VAL, 0x16002480
-
-/* BCFG1: map external 10ns RAM onto CS1 (0x81000000) */
-.set BCFG1VAL, 0x22000400
 .text
 .arm
 
@@ -48,47 +27,47 @@ _vectors:       ldr     PC, Reset_Addr
                 ldr     PC, PAbt_Addr
                 ldr     PC, DAbt_Addr
                 nop							/* Reserved Vector (holds Philips ISP checksum) */
-                ldr     PC, [PC,#-0xFF0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
+                ldr     pc, [pc,#-0xFF0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
                 ldr     PC, FIQ_Addr
 
 Reset_Addr:     .word   _init
-Undef_Addr:     .word   Unexpected_Interrupt
-SWI_Addr:       .word   Unexpected_Interrupt
-PAbt_Addr:      .word   Unexpected_Interrupt
-DAbt_Addr:      .word   Unexpected_Interrupt
+Undef_Addr:     .word   Undef_Exception
+SWI_Addr:       .word   SWI_Trap
+PAbt_Addr:      .word   Program_Abort_Exception
+DAbt_Addr:      .word   Data_Abort_Exception
 IRQ_Addr:       .word   Unexpected_Interrupt
 FIQ_Addr:       .word   Unexpected_Interrupt
                 .word   0					/* rounds the vectors and ISR addresses to 64 bytes total  */
 
 
 _init:
-				/* Setup a stack for each mode - note that this only sets up a usable stack
-				for User mode.   Also each mode is setup with interrupts initially disabled. */
-    			  
     			ldr   r0, =_estack
-    			msr   CPSR_c, #MODE_UND|I_BIT|F_BIT 	/* Undefined Instruction Mode  */
+    			msr   CPSR_c, #MODE_UND|I_BIT|F_BIT
     			mov   sp, r0
-    			sub   r0, r0, #UND_STACK_SIZE
-    			msr   CPSR_c, #MODE_ABT|I_BIT|F_BIT 	/* Abort Mode */
+    			msr   CPSR_c, #MODE_ABT|I_BIT|F_BIT
     			mov   sp, r0
-    			sub   r0, r0, #ABT_STACK_SIZE
-    			msr   CPSR_c, #MODE_FIQ|I_BIT|F_BIT 	/* FIQ Mode */
+    			msr   CPSR_c, #MODE_FIQ|I_BIT|F_BIT
     			mov   sp, r0	
-   				sub   r0, r0, #FIQ_STACK_SIZE
-    			msr   CPSR_c, #MODE_IRQ|I_BIT|F_BIT 	/* IRQ Mode */
+    			msr   CPSR_c, #MODE_IRQ|I_BIT|F_BIT
     			mov   sp, r0
-    			sub   r0, r0, #IRQ_STACK_SIZE
-    			msr   CPSR_c, #MODE_SVC|I_BIT|F_BIT 	/* Supervisor Mode */
+    			msr   CPSR_c, #MODE_SVC|I_BIT|F_BIT
     			mov   sp, r0
-    			sub   r0, r0, #SVC_STACK_SIZE
-    			msr   CPSR_c, #MODE_SYS|I_BIT|F_BIT 	/* User Mode */
+    			sub   r0, r0, #8
+    			msr   CPSR_c, #MODE_SYS|I_BIT|F_BIT
     			mov   sp, r0
 
 				/* set up external memory */
-				ldr		r0, =PINSEL2VAL
+				.set PINSEL2, 0xe002c014
+				.set PINSEL2VAL, 0xf800924  /* Enable external bus, CS0, CS1 */
+
 				ldr		r2, =PINSEL2
+				ldr		r0, =PINSEL2VAL
 				str		r0, [r2]
 
+				.set BCFG0, 0xffe00000
+				.set BCFG0VAL, 0x16002480  /* BCFG0: map external flash onto CS0 (0x80000000) */
+				.set BCFG1VAL, 0x22000400 /* BCFG1: map external 10ns RAM onto CS1 (0x81000000) */
+	
 				ldr		r2, =BCFG0
 				ldr		r0, =BCFG0VAL
 				str		r0, [r2], #4
@@ -96,8 +75,8 @@ _init:
 				str		r0, [r2]
 
 				/* sync up with JTAGkey/gdb */
-				mov		r0, #0
 				ldr		r1, =_busy_flag
+				mov		r0, #0
 				strb	r0, [r1]
 				bl		busy_wait
 	
