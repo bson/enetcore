@@ -21,24 +21,25 @@ _startup:
 
 # Exception Vectors
 
-_vectors:       ldr     PC, Reset_Addr
-                ldr     PC, Undef_Addr
-                ldr     PC, SWI_Addr
-                ldr     PC, PAbt_Addr
-                ldr     PC, DAbt_Addr
+_vectors:       b		_init
+                ldr     pc, Undef_Addr
+                ldr     pc, SWI_Addr
+                ldr     pc, PAbt_Addr
+                ldr     pc, DAbt_Addr
                 nop							/* Reserved Vector (holds Philips ISP checksum) */
-                ldr     pc, [pc,#-0xFF0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
-                ldr     PC, FIQ_Addr
+                ldr     pc, [pc,#-0xff0]	/* see page 71 of "Insiders Guide to the Philips ARM7-Based Microcontrollers" by Trevor Martin  */
+                ldr     pc, FIQ_Addr
 
-Reset_Addr:     .word   _init
 Undef_Addr:     .word   Undef_Exception
 SWI_Addr:       .word   SWI_Trap
 PAbt_Addr:      .word   Program_Abort_Exception
 DAbt_Addr:      .word   Data_Abort_Exception
 IRQ_Addr:       .word   Unexpected_Interrupt
 FIQ_Addr:       .word   Unexpected_Interrupt
-                .word   0					/* rounds the vectors and ISR addresses to 64 bytes total  */
-
+                .word   0
+				.word	0
+.text
+.arm
 
 _init:
     			ldr   r0, =_estack
@@ -56,6 +57,13 @@ _init:
     			msr   CPSR_c, #MODE_SYS|I_BIT|F_BIT
     			mov   sp, r0
 
+				/* map vector to internal flash (may be changed later) */
+				.set MEMMAP, 0xe01fc040
+	
+/*				ldr		r2, =MEMMAP
+				mov		r0, #1
+				str		r1, [r2]
+*/
 				/* set up external memory */
 				.set PINSEL2, 0xe002c014
 				.set PINSEL2VAL, 0xf800924  /* Enable external bus, CS0, CS1 */

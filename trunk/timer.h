@@ -22,7 +22,7 @@ public:
 	uint GetCount() const { Spinlock::Scoped L(_lock); return _base[TIMER_TC]; }
 
 	// Interrupt handler
-	static void Interrupt() __irq /*NAKED*/;
+	static void Interrupt() __irq NAKED;
 
 	void HandleInterrupt(uint mr);
 

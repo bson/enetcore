@@ -118,38 +118,37 @@ private:
 #endif
 	}
 
-protected:
-	friend class Timer;
-
+public:
 	// Save state on exception that may cause a thread switch (e.g. TIMER)
 	// This needs to be a macro - an unoptimized inline function will try
 	// to touch the frame for store the OFFSET parameter.
-#define SaveStateExc(OFFSET)								\
+#define SaveStateExc()								\
 	{	asm volatile(										\
-			"str r1, [sp,#-4];"								\
+			"str r1, [sp,#-4]!;"								\
 			"ldr r1, =__curpcb;"							\
 			"ldr r1, [r1];"									\
 			"str r0, [r1], #4;"								\
-			"ldr r0, [sp, #-4];"							\
+			"ldr r0, [sp];"							\
 			"str r0, [r1], #4;"								\
-			"stm r1, {r2-r14}^;"							\
-			"sub lr, lr, #" #OFFSET ";"						\
+			"stm r1, {r2-r14}^; nop;"							\
 			"str lr, [r1, #13*4]!;"  /* Save pre-exception PC as PC */ \
 			"mrs r0, spsr;"									\
 			"str r0, [r1, #4];" /* Save SPSR as CPSR */			\
 			: : : "memory"); }
 
 
-	// Load state - return from exception (non-user/system mode)
-	static void INLINE_ALWAYS LoadStateExc() {
-		asm volatile (
-			"ldr r0, =__curpcb;"
-			"ldr r0, [r0];"
-			"ldr r1, [r0, #16*4];" // R1 = saved PSR
-			"msr spsr, r1;"		   // SPSR = saved PSR
-			"ldm r0, {r0-r15}^;"   // Load saved R0-R14,PC, CPSR=SPSR
-			: : : "memory");
-	}
+	// Load state - return from exception
+#define LoadStateReturnExc(OFFSET) 									\
+		{ asm volatile(													\
+			"add sp, sp, #4; "											\
+			"ldr r0, =__curpcb;"										\
+			"ldr r0, [r0];"												\
+			"ldr r1, [r0, #16*4];" /* R1 = saved PSR */					\
+			"msr spsr, r1;"		   /* SPSR = saved PSR */				\
+			"ldr lr, [r0,#15*4];"  /* LR_irq = saved PC */				\
+			"ldm r0, {r0-r14}^; nop;"   /* Load saved user R0-R14 */	\
+			"subs pc, lr, #" #OFFSET		  /* Return */				\
+			: : : "memory"); }
 
 };
 

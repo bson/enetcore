@@ -246,9 +246,12 @@ void hwinit()
 	// Turn off WP on external flash
 	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1);
 
-	// For now, map internal flash to vectors
+#if 0
+	// 1 is the defaiult from crt.s
+
 	// 1 = flash, 2 = ram, 3 = xram
 	MEMMAP = 1;
+#endif
 	
 	// Disable watchdog
 	WDMOD = 0;

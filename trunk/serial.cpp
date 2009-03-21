@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "serial.h"
+#include "thread.h"
 
 
 SerialPort _uart0((volatile void*)UART0_BASE, 115200);
@@ -67,6 +68,8 @@ void SerialPort::FillFifo()
 // * static __irq
 void SerialPort::Interrupt()
 {
+	SaveStateExc();
+
 	if (_vic.ChannelPending(6))
 		_uart0.HandleInterrupt();
 
@@ -74,6 +77,8 @@ void SerialPort::Interrupt()
 		_uart1.HandleInterrupt();
 
 	_vic.ClearPending();
+
+	LoadStateReturnExc(4);
 }
 
 

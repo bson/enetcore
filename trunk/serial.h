@@ -44,7 +44,7 @@ public:
 	void Write(const String& s);
 
 	// Interrupt handler
-	static void Interrupt() __irq;
+	static void Interrupt() __irq NAKED;
 
 	// Enable interrupts
 	void SetInterrupts(bool enable);
