@@ -73,22 +73,41 @@ public:
 
  	// Yield to other thread
 	void Yield(Thread* other) {
-		if (SaveState()) {
+		_lock.Lock();
+		if (Suspend()) {
 			_curpcb = &other->_pcb;
-			(_curthread = other)->LoadState();
+			(_curthread = other)->Resume();
 		}
+		assert(IntEnabled());
+		assert(InSystemMode());
 	}
 
 private:
-	// Save state of self - this function will return after save, then
-	// again after LoadState().  The first time, it returns true, the
-	// second time (after LoadState()) false.
-	bool NAKED SaveState() volatile;
-
-	// Explicit return (from SaveState, which will return 0)
-	void INLINE_ALWAYS LoadState() volatile {
-		DisableInterrupts();
-		_pcb._regs[0] = 0;		// Return 0 in R0
+	// Save/resume state of self - this function will return after save, then
+	// again after Resume().  The first time (immediately), it returns true, the
+	// second time (after Resume()) false.  _lock must be held on entry and will
+	// be held on the first return, but not on the second.  No other spin lock
+	// must be held.
+	//
+	// Canonical use of Suspend-Resume:
+	//
+	//    _lock.Lock();
+	//    // ... prepare ...
+	//    if (Suspend()) {
+	//       // ... do work and figure out which thread to run next
+	//       other_thread->Resume();
+	//       // not reached
+	//    }
+	//
+	//    // _lock is no longer held here.  The thread is fully pre-emptible after
+	//    // this thread has been resumed. If _lock is needed, it must be acquired.
+	//
+	// This function is not MP safe as implemented.
+	
+	bool NAKED Suspend() volatile;
+	void INLINE_ALWAYS Resume() volatile {
+		_lock.Abandon();
+		_pcb._regs[0] = 0;		// Return 0 in R0: return value from Suspend() after Resume()
 		asm volatile (
 			"mov  r0, %0;"		   // &_pcb
 			"ldr r1, [r0, #16*4];" // R1 = saved PSR
@@ -97,11 +116,6 @@ private:
 			: : "r"(&_pcb) : "memory", "cc");
 	}
 
-
-	// Clone into other thread
-	// Returns true in cloner, false in clonee
-	// Currently all that's done is SaveState(), but in the future will plumb itself into the scheduler
-	bool Clone() { return SaveState(); }
 
 	// Change thread's stack
 	static void INLINE_ALWAYS SetStack(void* new_stack) {
@@ -114,7 +128,8 @@ private:
 	// This is mainly for diagnostic purposes
 	void TakeSnapshot()  {
 #ifdef DEBUG
-		if (SaveState()) LoadState();
+		_lock.Lock();
+		if (Suspend()) Resume();
 #endif
 	}
 

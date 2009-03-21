@@ -20,6 +20,22 @@ INLINE_ALWAYS void EnableInterrupts(uint prev) {
 }
 
 
+// Test if interrupts are enabled
+inline bool IntEnabled() {
+	uint32_t cpsr;
+	asm volatile("mrs %0, cpsr" : "=r"(cpsr) : : );
+	return !(cpsr & 0x80);
+}
+
+
+// Test if in user more
+inline bool InSystemMode() {
+	uint32_t cpsr;
+	asm volatile("mrs %0, cpsr" : "=r"(cpsr) : : );
+	return (cpsr & 0x1f) == 0x1f;
+}
+
+
 class Spinlock {
 	mutable uint32_t _cpsr;
 	mutable uint _count;
@@ -33,6 +49,10 @@ public:
 		if (!--_count) EnableInterrupts(_cpsr);
 	}
 	void AssertLocked() const { assert(_count); }
+
+	// Abandon lock - must be held.  This resets the lock, which must be held once
+	// by the caller.
+	void Abandon() { assert(_count == 1);  _count = 0; }
 
 	class Scoped {
 		mutable Spinlock& _lock;

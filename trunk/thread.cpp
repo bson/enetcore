@@ -26,9 +26,7 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool)
 
 	Thread* prev = _curthread;
 
-	_lock.Unlock();
-	if (SaveState()) {
-		_lock.Lock();
+	if (Suspend()) {
 		_curthread = this;
 		_curpcb = &_pcb;
 		SetStack((uint8_t*)_estack - 4 );
@@ -39,6 +37,10 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool)
 		// Won't return here, because join() will have reaped thread
 		panic("coop thread exit");
 	}
+
+	assert(IntEnabled());
+	assert(InSystemMode());
+
 	_lock.Lock();
 	_curthread = prev;
 	_curpcb = &prev->_pcb;
@@ -66,7 +68,7 @@ Thread& Thread::Initialize()
 }
 
 
-bool Thread::SaveState() volatile
+bool Thread::Suspend() volatile
 {
 	asm volatile (
 		"str r0, [sp,#-4];"
@@ -78,6 +80,7 @@ bool Thread::SaveState() volatile
 		"ldr r0, [sp, #-4];"
 		"str r0, [r1, #-4];"
 		"mrs r0, cpsr;"
+		"bic r0, #0x80|0x40;"    // Resume with interrupts enabled
 		"str r0, [r1, #16*4-4];"
 		"mov r0, #1;"		// Return value
 		"str lr, [r1, #15*4-4];"// Save LR as PC so LoadState returns to our caller
