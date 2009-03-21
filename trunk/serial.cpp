@@ -68,7 +68,7 @@ void SerialPort::FillFifo()
 // * static __irq
 void SerialPort::Interrupt()
 {
-	SaveStateExc();
+	SaveStateExc(4);
 
 	if (_vic.ChannelPending(6))
 		_uart0.HandleInterrupt();
@@ -78,7 +78,7 @@ void SerialPort::Interrupt()
 
 	_vic.ClearPending();
 
-	LoadStateReturnExc(4);
+	LoadStateReturnExc();
 }
 
 

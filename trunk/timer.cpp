@@ -35,7 +35,7 @@ void Timer::RunTimer(uint count, bool recur)
 // * static __irq
 void Timer::Interrupt()
 {
-	SaveStateExc();
+	SaveStateExc(4);
 
 	if (_vic.ChannelPending(4))
 		_clock.HandleInterrupt(0); // Timer0 uses MR0
@@ -46,7 +46,7 @@ void Timer::Interrupt()
 
 	_vic.ClearPending();
 
-	LoadStateReturnExc(4);		// Load _curthread and return
+	LoadStateReturnExc();		// Load _curthread and return
 }
 
 
