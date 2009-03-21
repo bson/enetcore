@@ -130,10 +130,13 @@ public:
 			"str r0, [r1], #4;"								\
 			"ldr r0, [sp];"							\
 			"str r0, [r1], #4;"								\
-			"stm r1, {r2-r14}^; "							\
+			"stm r1, {r2-r14}^;"							\
 			"str lr, [r1, #13*4]!;"  /* Save pre-exception PC as PC */ \
-			"mrs r0, spsr;"									\
-			"str r0, [r1, #4];" /* Save SPSR as CPSR */			\
+			"mrs r0, spsr;"											\
+			"str r0, [r1, #4];" /* Save SPSR as CPSR */				\
+			"mrs r0, cpsr;"											\
+			"bic r0, #0x40;" /* Rerenable FIQ */					\
+			"msr cpsr, r0;"											\
 			: : : "memory"); }
 
 

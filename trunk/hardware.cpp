@@ -273,9 +273,17 @@ void hwinit()
 	// This is picked up by Thread::Initialize to wrap the current thread as the main thread
 
 	// Allocate interrupt thread stack and install it
+	// Allocate and install FIQ stack
 	_intr_thread_stack = _stack_region.GetMem(INTR_THREAD_STACK);
-	asm volatile("mrs r2, cpsr; msr cpsr, #0x12|0x80|0x40; mov sp, %0; msr cpsr, r2"
-				 : : "r"((uint8_t*)_intr_thread_stack + INTR_THREAD_STACK - 4) : "cc", "r2", "memory");
+
+	uint8_t* fiq_stack = (uint8_t*)_stack_region.GetMem(16);
+
+	asm volatile("mrs r2, cpsr; "
+				 "msr cpsr, #0x12|0x80|0x40; mov sp, %0;"
+				 "msr cpsr, #0x11|0x80|0x40; mov sp, %1;"
+				 "msr cpsr, r2"
+				 : : "r"((uint8_t*)_intr_thread_stack + INTR_THREAD_STACK),
+				   "r"(fiq_stack + 16) : "cc", "r2", "memory");
 
 	// Install IRQ handlers
 	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
