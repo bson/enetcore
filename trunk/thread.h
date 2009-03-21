@@ -130,7 +130,7 @@ public:
 			"str r0, [r1], #4;"								\
 			"ldr r0, [sp];"							\
 			"str r0, [r1], #4;"								\
-			"stm r1, {r2-r14}^; nop;"							\
+			"stm r1, {r2-r14}^; "							\
 			"str lr, [r1, #13*4]!;"  /* Save pre-exception PC as PC */ \
 			"mrs r0, spsr;"									\
 			"str r0, [r1, #4];" /* Save SPSR as CPSR */			\
@@ -146,7 +146,7 @@ public:
 			"ldr r1, [r0, #16*4];" /* R1 = saved PSR */					\
 			"msr spsr, r1;"		   /* SPSR = saved PSR */				\
 			"ldr lr, [r0,#15*4];"  /* LR_irq = saved PC */				\
-			"ldm r0, {r0-r14}^; nop;"   /* Load saved user R0-R14 */	\
+			"ldm r0, {r0-r14}^; "   /* Load saved user R0-R14 */	\
 			"subs pc, lr, #" #OFFSET		  /* Return */				\
 			: : : "memory"); }
 
