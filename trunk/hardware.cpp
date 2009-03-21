@@ -260,7 +260,7 @@ void hwinit()
 	IO1CLR =  0x00800000;	// led on
 
 	// Clear malloc space
-	memset(_malloc_region.GetStart(), 0, _malloc_region.GetSize());
+//	memset(_malloc_region.GetStart(), 0, _malloc_region.GetSize());
 
 	// Allocate main thread stack - this is the one we're using now
 	// Since the region allocates low to high we do this by installing a reserve...
