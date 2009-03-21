@@ -9,7 +9,7 @@ INLINE_ALWAYS uint DisableInterrupts() {
 	uint prev;
 	asm volatile("mrs r12, cpsr\n"
 				 "mov %0, r12\n"
-				 "orr r12, #0x80|0x40\n"
+				 "orr r12, #0x80\n"
 				 "msr cpsr, r12"
 				 : "=r" (prev) : : "r12", "cc", "memory");
 	return prev;

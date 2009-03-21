@@ -57,13 +57,6 @@ _init:
     			msr   CPSR_c, #MODE_SYS|I_BIT|F_BIT
     			mov   sp, r0
 
-				/* map vector to internal flash (may be changed later) */
-				.set MEMMAP, 0xe01fc040
-	
-/*				ldr		r2, =MEMMAP
-				mov		r0, #1
-				str		r1, [r2]
-*/
 				/* set up external memory */
 				.set PINSEL2, 0xe002c014
 				.set PINSEL2VAL, 0xf800924  /* Enable external bus, CS0, CS1 */
