@@ -86,21 +86,23 @@ private:
 	// Save/resume state of self - this function will return after save, then
 	// again after Resume().  The first time (immediately), it returns true, the
 	// second time (after Resume()) false.  _lock must be held on entry and will
-	// be held on the first return, but not on the second.  No other spin lock
-	// must be held.
+	// be held across (unbroken) on the first return, but will not be held on the
+	// second.  No other spin lock must be held while suspending a thread.
+	//
+	// _lock must be held on Resume();
 	//
 	// Canonical use of Suspend-Resume:
 	//
 	//    _lock.Lock();
 	//    // ... prepare ...
 	//    if (Suspend()) {
-	//       // ... do work and figure out which thread to run next
+	//       // ... do work and figure out which thread to run next  ...
 	//       other_thread->Resume();
 	//       // not reached
 	//    }
 	//
 	//    // _lock is no longer held here.  The thread is fully pre-emptible after
-	//    // this thread has been resumed. If _lock is needed, it must be acquired.
+	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
 	// This function is not MP safe as implemented.
 	
@@ -117,10 +119,9 @@ private:
 	}
 
 
-	// Change thread's stack
+	// Change currently running thread's stack
 	static void INLINE_ALWAYS SetStack(void* new_stack) {
 		_lock.AssertLocked();
-		_curpcb->_regs[13] = (uint32_t)new_stack;
 		asm volatile ("mov sp, %0" : : "r"(new_stack) : "memory");
 	}
 
@@ -134,9 +135,11 @@ private:
 	}
 
 public:
-	// Save state on exception that may cause a thread switch (e.g. TIMER)
-	// This needs to be a macro - an unoptimized inline function will try
-	// to touch the frame for store the OFFSET parameter.
+	// Save state on exception that may cause a thread switch.
+	// The exception handler must be declared NAKED so it has no implicit
+	// prologue-epilogue.
+	// OFFSET is how much LR deviates from the return location:
+	// 4 for IRQ/FIQ, 8 for Abort/Undef.
 #define SaveStateExc(OFFSET)									\
 	{	asm volatile(											\
 			"str r1, [sp,#-4]!;"								\
