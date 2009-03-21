@@ -1,17 +1,5 @@
-Fix Time msec calculations
-
-Implement skeleton thread
-- Context switch
-  - Save context A
-  - Load contex B
-  - swtch(Thread*)
-- Interrupt thread
-  - Save context A
-  - Load context I
-  - Handle interrupts
-  - Save context I
-  - Load context A
-  - Return, restoring SPSR
+Add Thread list
+- Wait channel
 
 Implement mutex, condvar
 - Turnstiles - equal to # of threads
