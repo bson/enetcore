@@ -301,15 +301,10 @@ void hwinit()
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimer(HZ, true);
 
-	udelay(1000);
-
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
 	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
 		 _main_thread_stack, sp, _intr_thread_stack);
-
-
-	udelay(10000);
 }
 
 
