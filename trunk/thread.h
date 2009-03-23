@@ -17,7 +17,9 @@ private:
 
 	volatile bool _ready:1;		// Initialized
 	volatile bool _cancel:1;	// Cancel
-	volatile bool _exit:1;		// Has exited
+
+	Start _func;				// Start function
+	void* _arg;					// Arg to start function
 
 	// Thread TLS area
 	TLS _tls;
@@ -29,17 +31,32 @@ private:
 	volatile Pcb _pcb;
 	static volatile struct Pcb* _curpcb asm("__curpcb"); // PCB of currently running thread
 
+	// Run queue - because of the small number of threads we keep only a single table
+	static Vector<Thread*> _runq;
+
+	// Thread execution state
+	enum State {
+		STATE_RUN = 0,			// Running
+		STATE_RESUME,			// Resuming
+		STATE_WAIT,				// Waiting on _waitob
+		STATE_TWAIT,			// In timed wait until _waitob or _waittmr
+		STATE_SLEEP,			// In indefinite sleep
+		STATE_STOP				// Stopped (waiting for join)
+	};
+
+	State _state;
+	uint8_t _prio;		 		// Thread priority - lowest is 0, highest 255
+	const void* _waitob;		// Object thread is blocked on, if any
+	Time _waittime;				// Absolute wake time when in STATE_TWAIT
+
 #ifdef DEBUG
 	void* _stack;				// Beginning of stack memory block (low address)
 	void* _estack;				// End of stack (high address - first address past the stack)
 #endif
 
 public:
-	Thread(void* stack = 0, uint stack_size = 0) :
-		_ready(false), _cancel(false), _exit(false),
-		_stack(stack), _estack((uint8_t*)_stack + stack_size)
-	{ }
-	~Thread() { }
+	Thread(void* stack = NULL, uint stack_size = 0);
+	~Thread();
 
 	// Same as Thread t; t.Create(func, arg); t.WaitForReady();
 	Thread(Start func, void* arg, uint stack_size = THREAD_DEFAULT_STACK,
@@ -53,7 +70,7 @@ public:
 	void Cancel() { _cancel = true; }
 	static INLINE_ALWAYS bool IsCanceled()  { return Self()._cancel; }
 
-	void Join() { /* while (!_exit)  _waitq.Wait();*/ }
+	void Join();
 
 	void Create(Start func, void *arg, uint stack_size = THREAD_DEFAULT_STACK,
 				bool detached = false);
@@ -71,16 +88,18 @@ public:
 #endif
 	}
 
- 	// Yield to other thread
-	void Yield(Thread* other) {
-		_lock.Lock();
-		if (Suspend()) {
-			_curpcb = &other->_pcb;
-			(_curthread = other)->Resume();
-		}
-		assert(IntEnabled());
-		assert(InSystemMode());
-	}
+ 	// Explicitly yield to specific thread
+	void Yield(Thread* other);
+
+	// Wake all threads, if any, waiting for an object.
+	void WakeAll(const void* ob);
+
+	// Wake highest priority thread, if any, waiting for an object
+	void WakeSingle(const void* ob);
+
+	// Wait for an object.
+	void WaitFor(const void* ob);
+	void WaitFor(const void* ob, Time until); // until = absolute time
 
 private:
 	// Save/resume state of self - this function will return after save, then
@@ -104,10 +123,9 @@ private:
 	//    // _lock is no longer held here.  The thread is fully pre-emptible after
 	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
-	// This function is not MP safe as implemented.
-	
 	bool NAKED Suspend() volatile;
 	void INLINE_ALWAYS Resume() volatile {
+		_state = STATE_RESUME;	// Keep other CPUs from racing to resume
 		_lock.Abandon();
 		_pcb._regs[0] = 0;		// Return 0 in R0: return value from Suspend() after Resume()
 		asm volatile (
@@ -131,6 +149,9 @@ private:
 #ifdef DEBUG
 		_lock.Lock();
 		if (Suspend()) Resume();
+		_lock.Lock();
+		_state = STATE_RUN;
+		_lock.Unlock();
 #endif
 	}
 
@@ -172,6 +193,15 @@ public:
 			"movs pc, lr"			/* Return */						\
 			: : : "memory"); }
 
+	// Pick best thread on RunQ and resume it.
+	// Call with _lock held, returns without.
+	void Switch();
+
+	// Pick next thread for running and timer
+	// Returns NULL if no runnable thread
+	// Sets wake to next thread that needs timer wake
+	// Can be called from exception handler
+	Thread* Pick(Thread*& wake);
 };
 
 extern Thread* _main_thread;

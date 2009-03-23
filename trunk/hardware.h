@@ -20,6 +20,12 @@ INLINE_ALWAYS void EnableInterrupts(uint prev) {
 }
 
 
+// Wait for interrupt - enter idle mode
+INLINE_ALWAYS void  WaitForInterrupt() {
+	PCON = 1;
+}
+
+
 // Test if interrupts are enabled
 inline bool IntEnabled() {
 	uint32_t cpsr;

@@ -12,6 +12,13 @@ Implement scheduler
 - Condvar timedwait: set timer
 - Interrupt handler: special case Timer interrupts (don't load context I)
 
+- Sleep() function
+
+Thread features
+- Detached threads
+- Priority willing
+
 Implement Watchdog
 - Use hw watchdog
 - Disable watchdog from openocd while writing flash
+
