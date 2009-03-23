@@ -101,6 +101,10 @@ public:
 	void WaitFor(const void* ob);
 	void WaitFor(const void* ob, Time until); // until = absolute time
 
+	// Sleep
+	void Delay(uint usec);
+	void Sleep(Time until);
+
 private:
 	// Save/resume state of self - this function will return after save, then
 	// again after Resume().  The first time (immediately), it returns true, the

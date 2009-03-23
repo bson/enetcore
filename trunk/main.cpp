@@ -2,7 +2,12 @@
 #include "serial.h"
 #include "util.h"
 #include "thread.h"
+#include "mutex.h"
 
+
+Mutex mtx;
+CondVar cv;
+int runner;
 
 Thread* test_thread;
 
@@ -10,9 +15,17 @@ void* ttfunc(void* tmp)
 {
 	DMSG("ttfunc: %p", tmp);
 	for (;;) {
+		Mutex::Scoped L(mtx);
+		while (!runner)
+			cv.Wait(mtx);
+
 		DMSG("ttfunc");
 		udelay(500000);
-		Thread::Self().Yield(_main_thread);
+		// Thread::Self().Delay(500000);
+		runner = !runner;
+		cv.Signal();
+
+//		Thread::Self().Yield(_main_thread);
 	}
 }
 
@@ -27,14 +40,20 @@ int	main ()
 
 	test_thread = new Thread(ttfunc, (void*)0xdeadbeef);
 
+	runner = 0;
+
 	for (;;) {
-		if (_vic.ChannelPending(6)) {
-			console("Unwedging!");
-			_vic.ClearPending();
-		}
+		Mutex::Scoped L(mtx);
+		while (runner)
+			cv.Wait(mtx);
+
 		DMSG( "main");
 		udelay(500000);
-		Thread::Self().Yield(test_thread);
+		// Thread::Self().Delay(500000);
+		runner = !runner;
+		cv.Signal();
+
+//		Thread::Self().Yield(test_thread);
 	}
 
 	abort();

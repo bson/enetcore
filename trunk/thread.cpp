@@ -284,3 +284,18 @@ void Thread::WaitFor(const void* ob, Time until)
 
 	if (Suspend()) Switch();
 }
+
+
+void Thread::Sleep(Time until)
+{
+	while (Time::Now() < until) {
+		_lock.Lock();
+		_state = STATE_TWAIT;
+		_waitob = NULL;
+		_waittime = until;
+		if (Suspend()) Switch();
+	}
+}
+
+
+void Thread::Delay(uint usec) { Sleep(Time::Now() + Time::FromUsec(usec)); }
