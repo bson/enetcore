@@ -228,9 +228,9 @@ void Thread::WakeAll(const void* ob)
 		}
 	}
 
-	if (waiter && Suspend())
-		Switch();
-	else
+	if (waiter) {
+		if (Suspend()) Switch();
+	} else
 		_lock.Unlock();
 }
 
@@ -252,8 +252,9 @@ void Thread::WakeSingle(const void* ob)
 		}
 	}
 	
-	if (top) {
-		top->_state = STATE_RUN;
+	if (top) top->_state = STATE_RUN;
+
+	if (top && top->_prio > _prio) {
 		if (Suspend()) Switch();
 	} else
 		_lock.Unlock();
