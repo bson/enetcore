@@ -13,6 +13,9 @@ Vector<Thread*> Thread::_runq(64);
 
 SysTimer _systimer;
 
+Time Thread::_qend;
+uint Thread::_rr;
+
 
 Thread::Thread(void* stack, uint stack_size) :
 	_ready(false), _cancel(false),
@@ -89,6 +92,8 @@ Thread& Thread::Initialize()
 	_curthread = new Thread();
 	_curpcb = &_curthread->_pcb;
 	_curthread->_state = STATE_RUN;
+	_rr = 0;
+	_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
 	_lock.Unlock();
 	_curthread->TakeSnapshot();
 
@@ -158,18 +163,19 @@ void Thread::Yield(Thread* other)
 }
 
 
-Thread* Thread::Pick(Thread*& wake)
+Thread* Thread::Rotate()
 {
-	wake = NULL;
-
-	Thread* top = NULL;
-
+	Thread* wake = NULL;		// Next thread on timed wait
+	Thread* top = NULL;			// Thread with highest priority
+	uint numrun = 0;			// Number of running threads with prio equal to current's
+	
 	for (uint i = 0; i < _runq.Size(); ++i) {
 		Thread* t = _runq[i];
 
 		switch (t->_state) {
 		case STATE_RUN:
 			if (!top || t->_prio > top->_prio) top = t;
+			if (t->_prio == _curthread->_prio) ++numrun;
 			break;
 		case STATE_TWAIT:
 			if (!wake || t->_waittime < wake->_waittime) wake = t;
@@ -177,7 +183,37 @@ Thread* Thread::Pick(Thread*& wake)
 		}
 	}
 
-	return top;
+	Thread* next = top;
+
+	// If there's nothing running with higher prio and there are multiple threads
+	// running with current prio, round-robin.
+	if (!next && numrun > 1 && Time::Now() >= _qend) {
+		// Find next in round-robin cycle
+		if (_rr >= _runq.Size() - 1) _rr = 0; else ++_rr;
+
+		for (uint i = _rr; i < _runq.Size(); ++i)
+			if (_runq[i]->_prio == _curthread->_prio && _runq[i]->_state == STATE_RUN) {
+				next = _runq[i];
+				break;
+			}
+
+		if (!next)
+			for (uint i = 0; i < _rr; ++i)
+				if (_runq[i]->_prio == _curthread->_prio && _runq[i]->_state == STATE_RUN) {
+					next = _runq[i];
+					break;
+				}
+	}
+
+	// If we switched, and current is running, reset end-of-quantum
+	if (next && next != _curthread && next->_state == STATE_RUN)
+		_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
+
+	// Update timer
+	if (wake)  SetTimer(min(_qend > Time::Now() ? _qend : Time::FromSec(1) + Time::Now(),
+							wake->_waittime));
+
+	return next;
 }
 
 
@@ -186,13 +222,9 @@ void Thread::Switch()
 	_lock.AssertLocked();
 
 	do {
-		Thread* wake;
-		Thread* top = Pick(wake);
+		Thread* top = Rotate();
 
-		// Just push it off to a second instead of totally stopping if nothing is in timed wait.
-		SetTimer(wake ? wake->_waittime : Time::FromSec(1));
-
-		// If best thread is already running we're done here
+		// If best thread is already current we're done here
 		if (top == _curthread) {
 			_lock.Unlock();
 			return;
@@ -265,17 +297,10 @@ void Thread::TimerInterrupt()
 {
 	Spinlock::Scoped L(_lock);
 
-	for (uint i = 0; i < _runq.Size(); ++i) {
-		Thread* t = _runq[i];
-		
-		if (t->_state == STATE_TWAIT) {
-			t->_state = STATE_RUN;
-			// If we woke up a thread of higher prio than currently running, switch
-			if (t->_prio > _curthread->_prio)  {
-				_curthread = t;
-				_curpcb = &t->_pcb;
-			}
-		}
+	Thread* t = Rotate();
+	if (t) {
+		_curthread = t;
+		_curpcb = &t->_pcb;
 	}
 }
 

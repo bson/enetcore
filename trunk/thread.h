@@ -13,8 +13,6 @@ private:
 	static Spinlock _lock;		// Global thread lock
 	static Thread* _curthread;	// Currently running thread
 
-//	mutable WaitQ _waitq;		// Signals Thread state change
-
 	volatile bool _ready:1;		// Initialized
 	volatile bool _cancel:1;	// Cancel
 
@@ -211,11 +209,11 @@ public:
 	// Call with _lock held, returns without.
 	void Switch();
 
-	// Pick next thread for running and timer
-	// Returns NULL if no runnable thread
-	// Sets wake to next thread that needs timer wake
-	// Can be called from exception handler
-	Thread* Pick(Thread*& wake);
+	// Update timer and pick the next thread to execute.
+	// Move round-robin if appropriate.
+	// Returns thread, but doesn't update _curthread/_curpcb.
+	// Returns NULL if there's nothing runnable.
+	static Thread* Rotate();
 
 	// Set timer
 	static Time _curtimer;				// Current timer setting
