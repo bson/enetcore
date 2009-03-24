@@ -11,7 +11,7 @@ OD		= arm-elf-objdump
 COPT ?= -O0 -DTRACE -DDEBUG
 
 CFLAGS  = -I. $(COPT) -g -fno-exceptions -fno-rtti -ffreestanding \
-	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT
+	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT -ffunction-sections
 AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o crt.o
 LFLAGS  =  -Map main.map -nostartfiles -Tlink.cmd
 LIBS    = /opt/local/lib/gcc/arm-elf/4.3.2/libgcc.a

@@ -1,13 +1,17 @@
 #include "enetkit.h"
 #include "thread.h"
 #include "platform.h"
+#include "timer.h"
 
 
 Spinlock Thread::_lock;
 Thread* Thread::_curthread;
 volatile Thread::Pcb* Thread::_curpcb;
+Time Thread::_curtimer;
 
 Vector<Thread*> Thread::_runq(64);
+
+SysTimer _systimer;
 
 
 Thread::Thread(void* stack, uint stack_size) :
@@ -185,12 +189,8 @@ void Thread::Switch()
 		Thread* wake;
 		Thread* top = Pick(wake);
 
-		if (wake) {
-			// XXX update timer
-			// maybe track previous time value and only change timer if time changed
-		} else {
-			// XXX stop timer if it's running
-		}
+		// Just push it off to a second instead of totally stopping if nothing is in timed wait.
+		SetTimer(wake ? wake->_waittime : Time::FromSec(1));
 
 		// If best thread is already running we're done here
 		if (top == _curthread) {
@@ -261,6 +261,25 @@ void Thread::WakeSingle(const void* ob)
 }
 
 
+void Thread::TimerInterrupt()
+{
+	Spinlock::Scoped L(_lock);
+
+	for (uint i = 0; i < _runq.Size(); ++i) {
+		Thread* t = _runq[i];
+		
+		if (t->_state == STATE_TWAIT) {
+			t->_state = STATE_RUN;
+			// If we woke up a thread of higher prio than currently running, switch
+			if (t->_prio > _curthread->_prio)  {
+				_curthread = t;
+				_curpcb = &t->_pcb;
+			}
+		}
+	}
+}
+
+
 void Thread::WaitFor(const void* ob)
 {
 	_lock.Lock();
@@ -299,3 +318,21 @@ void Thread::Sleep(Time until)
 
 
 void Thread::Delay(uint usec) { Sleep(Time::Now() + Time::FromUsec(usec)); }
+
+
+void Thread::SetTimer(Time deadline)
+{
+	Spinlock::Scoped L(_lock);
+
+	if (deadline != _curtimer) {
+		_curtimer = deadline;
+		_systimer.RunTimer(deadline.GetUsec(), false);
+	}
+}
+
+
+// * virtual
+void SysTimer::Tick()
+{
+	Thread::TimerInterrupt();
+}

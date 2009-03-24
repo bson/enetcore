@@ -105,6 +105,9 @@ public:
 	void Delay(uint usec);
 	void Sleep(Time until);
 
+	// Timer interrupt entry
+	static void TimerInterrupt();
+
 private:
 	// Save/resume state of self - this function will return after save, then
 	// again after Resume().  The first time (immediately), it returns true, the
@@ -206,6 +209,10 @@ public:
 	// Sets wake to next thread that needs timer wake
 	// Can be called from exception handler
 	Thread* Pick(Thread*& wake);
+
+	// Set timer
+	static Time _curtimer;				// Current timer setting
+	static void SetTimer(Time deadline);
 };
 
 extern Thread* _main_thread;

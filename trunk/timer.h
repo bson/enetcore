@@ -46,6 +46,15 @@ public:
 };
 
 
+// System timer
+class SysTimer: public Timer {
+public:
+	SysTimer() : Timer(TIMER1_BASE) { }
+	void Tick();
+	void SetTimer(uint usec) { RunTimer(usec, false); }
+};
+
 extern Clock _clock;
+extern SysTimer _systimer;
 
 #endif // __TIMER_H__
