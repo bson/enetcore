@@ -165,6 +165,8 @@ void Thread::Yield(Thread* other)
 
 Thread* Thread::Rotate()
 {
+	const Time now = Time::Now();
+
 	Thread* wake = NULL;		// Next thread on timed wait
 	Thread* top = NULL;			// Thread with highest priority
 	uint numrun = 0;			// Number of running threads with prio equal to current's
@@ -183,11 +185,15 @@ Thread* Thread::Rotate()
 		}
 	}
 
-	Thread* next = top;
+	Thread* next = NULL;
 
-	// If there's nothing running with higher prio and there are multiple threads
-	// running with current prio, round-robin.
-	if (!next && numrun > 1 && Time::Now() >= _qend) {
+	// If there's a thread with a prio higher than current, switch to it
+	if (top && top->_prio > _curthread->_prio) {
+		next = top;
+	} else if (numrun > 1 && now >= _qend) {
+		// If there's nothing running with higher prio and there are multiple threads
+		// running with current prio, round-robin.
+
 		// Find next in round-robin cycle
 		if (_rr >= _runq.Size() - 1) _rr = 0; else ++_rr;
 
@@ -205,13 +211,12 @@ Thread* Thread::Rotate()
 				}
 	}
 
-	// If we switched, and current is running, reset end-of-quantum
-	if (next && next != _curthread && next->_state == STATE_RUN)
-		_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
+	// Reset end-of-quantum
+	// XXX we should only do this if the runq is in such a state that we will need to RR
+	_qend = now + Time::FromUsec(RRQUANTUM);
 
 	// Update timer
-	if (wake)  SetTimer(min(_qend > Time::Now() ? _qend : Time::FromSec(1) + Time::Now(),
-							wake->_waittime));
+	if (wake)  SetTimer(min(_qend, wake->_waittime));
 
 	return next;
 }
@@ -297,6 +302,14 @@ void Thread::TimerInterrupt()
 {
 	Spinlock::Scoped L(_lock);
 
+	// Wake waiting threads
+	const Time now = Time::Now();
+	for (uint i = 0; i < _runq.Size(); +i) {
+		Thread* t = _runq[i];
+		if (t->_state == STATE_TWAIT && t->_waittime <= now) t->_state = STATE_RUN;
+	}
+
+	// Perform runq rotation
 	Thread* t = Rotate();
 	if (t) {
 		_curthread = t;
