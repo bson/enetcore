@@ -101,7 +101,7 @@ Thread& Thread::Initialize()
 }
 
 
-bool Thread::Suspend() volatile
+bool Thread::Suspend()
 {
 	_lock.AssertLocked();
 	asm volatile (

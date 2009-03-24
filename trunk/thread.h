@@ -34,6 +34,11 @@ private:
 	// Run queue - because of the small number of threads we keep only a single table
 	static Vector<Thread*> _runq;
 
+	static uint _rr;			// Round robin index
+	static Time _qend;			// End of current quantum
+
+	enum { RRQUANTUM = 20*1024 };		// Round robin quantum, in usec
+
 	// Thread execution state
 	enum State {
 		STATE_RUN = 0,			// Running
@@ -130,9 +135,11 @@ private:
 	//    // _lock is no longer held here.  The thread is fully pre-emptible after
 	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
-	bool NAKED Suspend() volatile;
-	void INLINE_ALWAYS Resume() volatile {
+	bool NAKED Suspend();
+	void INLINE_ALWAYS Resume() {
 		_state = STATE_RESUME;	// Keep other CPUs from racing to resume
+		_curthread = this;
+		_curpcb = &_pcb;
 		_lock.Abandon();
 		_pcb._regs[0] = 0;		// Return 0 in R0: return value from Suspend() after Resume()
 		asm volatile (
