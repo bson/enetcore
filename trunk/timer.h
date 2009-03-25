@@ -16,7 +16,8 @@ public:
 	void SetResolution(uint8_t r);
 
 	// Start timer - will interrupt
-	void RunTimer(uint count, bool recur);
+	void RunTimer(uint count);	// Run once up to count
+	void RunTimerFreq(uint freq); // Run repeatedly, trigger at freq Hz
 
 	// Read timer
 	uint GetCount() const { Spinlock::Scoped L(_lock); return _base[TIMER_TC]; }
@@ -51,7 +52,7 @@ class SysTimer: public Timer {
 public:
 	SysTimer() : Timer(TIMER1_BASE) { }
 	void Tick();
-	void SetTimer(uint usec) { RunTimer(usec, false); }
+	void SetTimer(uint usec) { RunTimer(usec); }
 };
 
 extern Clock _clock;

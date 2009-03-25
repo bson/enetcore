@@ -44,8 +44,6 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 		_estack = (uint8_t*)_stack + stack_size;
 	}
 
-	Thread* prev = _curthread;
-
 	if (Suspend()) {
 		_curthread = this;
 		_curpcb = &_pcb;
@@ -66,11 +64,6 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 
 	assert(IntEnabled());
 	assert(InSystemMode());
-
-	_lock.Lock();
-	_curthread = prev;
-	_curpcb = &prev->_pcb;
-	_lock.Unlock();
 }
 
 
@@ -94,8 +87,8 @@ Thread& Thread::Initialize()
 	_curthread->_state = STATE_RUN;
 	_rr = 0;
 	_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
-//	_systimer.SetResolution(TIME_RESOLUTION);
-//	SetTimer(_qend);
+	_systimer.SetResolution(TIME_RESOLUTION);
+	SetTimer(_qend);
 	_lock.Unlock();
 	_curthread->TakeSnapshot();
 
@@ -164,87 +157,105 @@ void Thread::Yield(Thread* other)
 }
 
 
-Thread* Thread::Rotate()
+// * static
+void Thread::Rotate()
 {
 	const Time now = Time::Now();
 
-	Thread* wake = NULL;		// Next thread on timed wait
-	Thread* top = NULL;			// Thread with highest priority
+	// Make a pass through runq, collecting the parameters we'll need
+
+	Thread* wake = NULL;		// Next thread due on timed wait
+	Thread* top = _curthread;	// Thread with highest priority
 	uint numrun = 0;			// Number of running threads with prio equal to current's
+	Thread* firstrun = NULL;	// First other thread with prio equal to current
+	Thread* nextrun = NULL;		// Next other thread with prio equal to current
+	bool seencur = false;		// Set to true when we've encountered current thread
 	
 	for (uint i = 0; i < _runq.Size(); ++i) {
 		Thread* t = _runq[i];
 
+		if (t == _curthread) seencur = true;
+
 		switch (t->_state) {
-		case STATE_RUN:
-			if (!top || t->_prio > top->_prio) top = t;
-			if (t->_prio == _curthread->_prio) ++numrun;
-			break;
 		case STATE_TWAIT:
-			if (!wake || t->_waittime < wake->_waittime) wake = t;
+			if (t->_waittime > now) {
+				if (!wake || t->_waittime < wake->_waittime) wake = t;
+				break;
+			}
+			t->_state = STATE_RUN;
+
+			// fallthru
+		case STATE_RUN:
+			if (t->_prio > top->_prio) {
+				top = t;
+			} else if (t->_prio == _curthread->_prio) {
+				if (t != _curthread) {
+					if (seencur) {
+						if (!nextrun) nextrun = t;
+					} else {
+						if (!firstrun) firstrun = t;
+					}
+				}
+				++numrun;
+			}
 			break;
 		}
 	}
 
 	Thread* next = _curthread;
+	Time next_timer = wake ? wake->_waittime : now + Time::FromSec(10); // 10sec is a gratuitous upper bound
 
 	// If there's a thread with a prio higher than current, switch to it
-	if (top && top->_prio > _curthread->_prio) {
+	if (top->_prio > _curthread->_prio) {
 		next = top;
 	} else if (_curthread->_state != STATE_RUN || (numrun > 1 && now >= _qend)) {
 		// If there's nothing running with higher prio and there are multiple threads
-		// running with current prio, round-robin.
+		// running with current prio, round-robin when the quantum is over.
 
-		// Find next in round-robin cycle
-		if (_rr >= _runq.Size() - 1) _rr = 0; else ++_rr;
+		assert(nextrun || firstrun);
+		next = nextrun ? nextrun : firstrun;
+		assert(next != _curthread);
 
-		next = NULL;
-		for (uint i = _rr; i < _runq.Size(); ++i)
-			if (_runq[i]->_prio == _curthread->_prio && _runq[i]->_state == STATE_RUN) {
-				next = _runq[i];
-				break;
-			}
-
-		if (!next)
-			for (uint i = 0; i < _rr; ++i)
-				if (_runq[i]->_prio == _curthread->_prio && _runq[i]->_state == STATE_RUN) {
-					next = _runq[i];
-					break;
-				}
+		_qend = now + Time::FromUsec(RRQUANTUM);
 	}
 
-	// Reset end-of-quantum
-	// XXX we should only do this if the runq is in such a state that we will need to RR
-	_qend = now + Time::FromUsec(RRQUANTUM);
+	if (_qend > now)
+		SetTimer(min(next_timer, _qend));
+	else
+		SetTimer(next_timer);
 
-	// Update timer
-	if (wake)  SetTimer(min(_qend, wake->_waittime));
-
-	return next;
+	if (next) {
+		_curthread = next;
+		_curpcb = &next->_pcb;
+	}
 }
 
+
+#ifndef USE_IDLE
+volatile uint _intr_counter;
+#endif
 
 void Thread::Switch()
 {
 	_lock.AssertLocked();
 
-	do {
-		Thread* top = Rotate();
+	for (;;) {
+		Rotate();
 
-		// If best thread is already current we're done here
-		if (top == _curthread) {
-			_lock.Unlock();
-			return;
-		}
+		if (_curthread->_state == STATE_RUN)
+			_curthread->Resume();
 
-		if (top) top->Resume();
-
-		// Do nothing until interrupt.  We'll return when runnable.
+		// Nothing runnable - idle
 		_lock.Unlock();
+#ifdef USE_IDLE
+		// This is incompatible with JTAG since it stops the CPU
 		WaitForInterrupt();
+#else
+		const uint counter = _intr_counter;
+		while (counter == _intr_counter) continue;
+#endif
 		_lock.Lock();
-	} while (_state != STATE_RUN);
-	_lock.Unlock();
+	}
 }
 
 
@@ -302,21 +313,10 @@ void Thread::WakeSingle(const void* ob)
 
 void Thread::TimerInterrupt()
 {
-	Spinlock::Scoped L(_lock);
-
-	// Wake waiting threads
-	const Time now = Time::Now();
-	for (uint i = 0; i < _runq.Size(); +i) {
-		Thread* t = _runq[i];
-		if (t->_state == STATE_TWAIT && t->_waittime <= now) t->_state = STATE_RUN;
-	}
-
-	// Perform runq rotation
-	Thread* t = Rotate();
-	if (t) {
-		_curthread = t;
-		_curpcb = &t->_pcb;
-	}
+	Rotate();
+#ifndef USE_IDLE
+	++_intr_counter;
+#endif
 }
 
 
@@ -366,7 +366,7 @@ void Thread::SetTimer(Time deadline)
 
 	if (deadline != _curtimer) {
 		_curtimer = deadline;
-		_systimer.RunTimer(deadline.GetUsec(), false);
+		_systimer.RunTimer((deadline - Time::Now()).GetUsec());
 	}
 }
 

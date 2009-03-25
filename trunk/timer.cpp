@@ -12,10 +12,10 @@ void Timer::SetResolution(uint8_t r)
 }
 
 
-void Timer::RunTimer(uint count, bool recur)
+void Timer::RunTimerFreq(uint freq)
 {
 	const uint prescale = PCLK / (1 << _resolution);
-	const uint match = (1 << _resolution) / count;
+	const uint match = (1 << _resolution) / freq;
 
 	Spinlock::Scoped L(_lock);
 	_base[TIMER_TCR] = 0b10;
@@ -23,9 +23,26 @@ void Timer::RunTimer(uint count, bool recur)
 	_base[TIMER_PR] = prescale - 1;
 	_base[TIMER_MR0] = match;
 
-	// If recurring, clear and reload TC on match
-	// If one-shot, stop timer on match
-	_base[TIMER_MCR] = recur ? 0b000000000011 : 0b000000000101;
+	// Clear and reload TC on match
+	_base[TIMER_MCR] = 0b000000000011;
+	
+	_base[TIMER_TCR] = 0b01;
+}
+
+
+
+void Timer::RunTimer(uint count)
+{
+	const uint prescale = PCLK / (1 << _resolution);
+
+	Spinlock::Scoped L(_lock);
+	_base[TIMER_TCR] = 0b10;
+
+	_base[TIMER_PR] = prescale - 1;
+	_base[TIMER_MR0] = count;
+
+	// Stop timer on match
+	_base[TIMER_MCR] = 0b000000000101;
 	
 	_base[TIMER_TCR] = 0b01;
 }
@@ -39,10 +56,9 @@ void Timer::Interrupt()
 
 	if (_vic.ChannelPending(4))
 		_clock.HandleInterrupt(0); // Timer0 uses MR0
-#if 0
+
 	if (_vic.ChannelPending(5))
-		_timer1.HandleInterrupt(1); // Timer1 used MR1
-#endif
+		_systimer.HandleInterrupt(1); // Timer1 uses MR1
 
 	_vic.ClearPending();
 

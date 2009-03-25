@@ -1,3 +1,6 @@
+Exeption handler - traceback all threads, print thread state
+- Write tool to symbolize console crash output
+
 Thread features
 - Detached threads
 - Priority willing

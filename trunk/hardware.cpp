@@ -281,6 +281,9 @@ void hwinit()
 	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
 	_vic.EnableChannel(4);
 
+	_vic.InstallHandler(5, SysTimer::Interrupt); // Channel 5 is TIMER1/SysTimer
+	_vic.EnableChannel(5);
+
 	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
 	_vic.EnableChannel(6);
 	_uart0.SetInterrupts(true);
@@ -295,7 +298,7 @@ void hwinit()
 	_main_thread = &Thread::Initialize();
 
 	_clock.SetResolution(TIME_RESOLUTION);
-	_clock.RunTimer(HZ, true);
+	_clock.RunTimerFreq(HZ);
 
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");

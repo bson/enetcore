@@ -205,19 +205,20 @@ public:
 			"movs pc, lr"			/* Return */						\
 			: : : "memory"); }
 
-	// Pick best thread on RunQ and resume it.
-	// Call with _lock held, returns without.
-	void Switch();
+	// Perform thread rotation.  This function does all except actually
+	// resume the updated _curthread.  The reason for this is that the
+	// resume mechanism differs depending on context (exception vs system).
+	// Switch() wraps this function for use from system mode.
+	// TimerInterrupt() calls it directly from exception mode.
+	static void Rotate();
 
-	// Update timer and pick the next thread to execute.
-	// Move round-robin if appropriate.
-	// Returns thread, but doesn't update _curthread/_curpcb.
-	// Returns NULL if there's nothing runnable.
-	static Thread* Rotate();
+	// Perform thread rotation - from system context.
+	// Called with _lock held, returns without.
+	void Switch();
 
 	// Set timer
 	static Time _curtimer;				// Current timer setting
-	static void SetTimer(Time deadline);
+	static void SetTimer(Time deadline); // Absolute time
 };
 
 extern Thread* _main_thread;
