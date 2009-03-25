@@ -94,6 +94,8 @@ Thread& Thread::Initialize()
 	_curthread->_state = STATE_RUN;
 	_rr = 0;
 	_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
+//	_systimer.SetResolution(TIME_RESOLUTION);
+//	SetTimer(_qend);
 	_lock.Unlock();
 	_curthread->TakeSnapshot();
 
@@ -108,7 +110,6 @@ Thread& Thread::Initialize()
 
 bool Thread::Suspend()
 {
-	_lock.AssertLocked();
 	asm volatile (
 		"str r0, [sp,#-4];"
 		"ldr r0, =__curpcb;"
@@ -124,7 +125,7 @@ bool Thread::Suspend()
 		"mov r0, #1;"		// Return value
 		"str lr, [r1, #15*4-4];"// Save LR as PC so LoadState returns to our caller
 		"mov pc, lr"			// Return
-		: : : "memory", "r0", "r1", "cc");
+		: : : "memory");
 
 	return false;				// Bah.
 }

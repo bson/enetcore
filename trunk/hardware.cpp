@@ -163,10 +163,6 @@ void hwinit()
 	PLLCON=0x3;
 	feed();
   
-	// Enabling MAM and setting number of clocks used for Flash memory fetch (4 cclks in this case)
-	MAMCR=0x2;
-	MAMTIM=0x4;
-  
 	// Setting peripheral Clock (pclk) to System Clock (cclk)
 	VPBDIV=0x1;
 
@@ -294,10 +290,10 @@ void hwinit()
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
 
+	// Start clock
 	// Initialize threads
 	_main_thread = &Thread::Initialize();
 
-	// Start clock
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimer(HZ, true);
 
