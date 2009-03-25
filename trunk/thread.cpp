@@ -186,18 +186,19 @@ Thread* Thread::Rotate()
 		}
 	}
 
-	Thread* next = NULL;
+	Thread* next = _curthread;
 
 	// If there's a thread with a prio higher than current, switch to it
 	if (top && top->_prio > _curthread->_prio) {
 		next = top;
-	} else if (numrun > 1 && now >= _qend) {
+	} else if (_curthread->_state != STATE_RUN || (numrun > 1 && now >= _qend)) {
 		// If there's nothing running with higher prio and there are multiple threads
 		// running with current prio, round-robin.
 
 		// Find next in round-robin cycle
 		if (_rr >= _runq.Size() - 1) _rr = 0; else ++_rr;
 
+		next = NULL;
 		for (uint i = _rr; i < _runq.Size(); ++i)
 			if (_runq[i]->_prio == _curthread->_prio && _runq[i]->_state == STATE_RUN) {
 				next = _runq[i];

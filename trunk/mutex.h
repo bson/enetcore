@@ -37,7 +37,7 @@ public:
 		assert(_tid == &Thread::Self());
 	}
 
-	bool Try() const {
+	bool TryLock() const {
 		Spinlock::Scoped L(_lock);
 		if (_count) return false;
 		
@@ -60,9 +60,9 @@ public:
 	}
 
 	void Unlock() const { 
-		assert(_tid == &Thread::Self());
-		assert(_count);
-		if (--_count) _tid = 0;
+		AssertLocked();
+
+		if (!--_count) _tid = 0;
 		Thread::Self().WakeSingle(this);
 	}
 
