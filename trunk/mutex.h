@@ -117,5 +117,28 @@ private:
 };
 
 
+// Like the Win32 EventObject
+class EventObject {
+public:
+	enum Mode { SELF_RESET, MANUAL_RESET };
+private:
+	mutable Spinlock _lock;
+	uint8_t _state;
+	uint8_t _mode;
+public:
+	EventObject(uint8_t state = 0, Mode mode = SELF_RESET) :
+		_state(state), _mode(mode)
+	{
+	}
+
+	~EventObject() { }
+
+	void Set(uint8_t new_state = 1);
+	void Reset() { Set(0); }
+	void Wait();
+	bool Wait(Time delay);
+	uint8_t GetState() const;
+};
+
 #endif	// __MUTEX_H__
 
