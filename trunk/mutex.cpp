@@ -56,7 +56,7 @@ void EventObject::Wait()
 		Thread::Self().WaitFor(this);
 		_lock.Lock();
 	}
-	if (_mode == SELF_RESET) _state = false;
+	if (_mode == SELF_RESET) _state = 0;
 }
 
 
@@ -71,8 +71,8 @@ bool EventObject::Wait(Time delay)
 		Thread::Self().WaitFor(this, deadline);
 		_lock.Lock();
 	}
-	const bool retval = _state;
-	if (_mode == SELF_RESET) _state = false;
+	const bool retval = _state != 0;
+	if (_mode == SELF_RESET) _state = 0;
 	return retval;
 }
 
