@@ -12,7 +12,7 @@ void Timer::SetResolution(uint8_t r)
 }
 
 
-void Timer::RunTimerFreq(uint freq)
+void Timer::RunTimerFreq(uint freq, uint mr)
 {
 	const uint prescale = PCLK / (1 << _resolution);
 	const uint match = (1 << _resolution) / freq;
@@ -21,17 +21,17 @@ void Timer::RunTimerFreq(uint freq)
 	_base[TIMER_TCR] = 0b10;
 
 	_base[TIMER_PR] = prescale - 1;
-	_base[TIMER_MR0] = match;
+	_base[TIMER_MR0+mr] = match;
 
 	// Clear and reload TC on match
-	_base[TIMER_MCR] = 0b000000000011;
+	_base[TIMER_MCR] = 0b011 << (mr * 3);
 	
 	_base[TIMER_TCR] = 0b01;
 }
 
 
 
-void Timer::RunTimer(uint count)
+void Timer::RunTimer(uint count, uint mr)
 {
 	const uint prescale = PCLK / (1 << _resolution);
 
@@ -39,10 +39,10 @@ void Timer::RunTimer(uint count)
 	_base[TIMER_TCR] = 0b10;
 
 	_base[TIMER_PR] = prescale - 1;
-	_base[TIMER_MR0] = count;
+	_base[TIMER_MR0+mr] = count;
 
 	// Stop timer on match
-	_base[TIMER_MCR] = 0b000000000101;
+	_base[TIMER_MCR] = 0b101 << (mr * 3);
 	
 	_base[TIMER_TCR] = 0b01;
 }

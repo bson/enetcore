@@ -133,19 +133,17 @@ private:
 	//    // _lock is no longer held here.  The thread is fully pre-emptible after
 	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
-	bool NAKED Suspend();
-	void INLINE_ALWAYS Resume() {
-		_state = STATE_RESUME;	// Keep other CPUs from racing to resume
-		_curthread = this;
-		_curpcb = &_pcb;
+	static bool NAKED Suspend();
+	static void Resume() {
+		_curthread->_state = STATE_RESUME;	// Keep other CPUs from racing to resume
+		_curpcb = &_curthread->_pcb;
 		_lock.Abandon();
-		_pcb._regs[0] = 0;		// Return 0 in R0: return value from Suspend() after Resume()
 		asm volatile (
 			"mov  r0, %0;"		   // &_pcb
 			"ldr r1, [r0, #16*4];" // R1 = saved PSR
 			"msr cpsr, r1;"		   // CPSR = saved PSR
 			"ldm r0, {r0-r15};"	   // Load saved R0-R14,PC, CPSR=SPSR
-			: : "r"(&_pcb) : "memory", "cc");
+			: : "r"(_curpcb) : "memory", "cc");
 	}
 
 

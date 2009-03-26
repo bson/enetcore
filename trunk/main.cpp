@@ -20,8 +20,8 @@ void* ttfunc(void* tmp)
 			cv.Wait(mtx);
 
 		DMSG("ttfunc");
-//		udelay(500000);
-		Thread::Self().Delay(500000);
+		udelay(500000);
+//		Thread::Self().Delay(500000);
 		runner = !runner;
 		cv.Signal();
 

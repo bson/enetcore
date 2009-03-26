@@ -51,7 +51,7 @@ public:
 	~Spinlock() { }
 	void Lock() { const uint32_t cpsr = DisableInterrupts(); if (!_count++) _cpsr = cpsr; }
 	void Unlock() {
-		assert(_count);
+		assert((int)_count > 0);
 		if (!--_count) EnableInterrupts(_cpsr);
 	}
 	void AssertLocked() const { assert(_count); }

@@ -47,11 +47,16 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 	if (Suspend()) {
 		_curthread = this;
 		_curpcb = &_pcb;
-		SetStack((uint8_t*)_estack - 4 );
+		SetStack((uint8_t*)_estack - 4);
 		_state = STATE_RUN;
 		_func = func;			// Move these off the stack
 		_arg = arg;
 		if (Suspend()) Switch(); // Switch to highest-priority thread (may not be this one!)
+
+		_lock.Lock();
+		_state = STATE_RUN;
+		_lock.Unlock();
+
 		_func(_arg);
 
 		// Never proceed past this - if we should become runnable, stop again
@@ -59,11 +64,19 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 			_state = STATE_STOP;
 			WakeAll(this);		// Wake all threads waiting for us
 			if (Suspend()) Switch();
+			_lock.Lock();
+			_state = STATE_STOP;
+			_lock.Unlock();
+
 		}
 	}
 
 	assert(IntEnabled());
 	assert(InSystemMode());
+
+	_lock.Lock();
+	_state = STATE_RUN;
+	_lock.Unlock();
 }
 
 
@@ -104,19 +117,17 @@ Thread& Thread::Initialize()
 bool Thread::Suspend()
 {
 	asm volatile (
-		"str r0, [sp,#-4];"
 		"ldr r0, =__curpcb;"
 		"ldr r0, [r0];"
 		"add r0, r0, #4;"
 		"stm r0, {r1-r14};"
-		"mov r1, r0;"
-		"ldr r0, [sp, #-4];"
-		"str r0, [r1, #-4];"
-		"mrs r0, cpsr;"
-		"bic r0, #0x80|0x40;"    // Resume with interrupts enabled
-		"str r0, [r1, #16*4-4];"
-		"mov r0, #1;"		// Return value
-		"str lr, [r1, #15*4-4];"// Save LR as PC so LoadState returns to our caller
+		"mov r1, #0;"			// Return value after Resume
+		"str r1, [r0, #-4];"
+		"mrs r1, cpsr;"
+		"bic r1, r1, #0x80|0x40;"    // Resume with interrupts enabled
+		"str r1, [r0, #16*4-4];"
+		"str lr, [r0, #15*4-4];"// Save LR as PC so LoadState returns to our caller
+		"mov r0, #1;"			// Return value now
 		"mov pc, lr"			// Return
 		: : : "memory");
 
@@ -145,9 +156,10 @@ void Thread::Yield(Thread* other)
 	}
 
 	if (Suspend()) {
-		_curpcb = &other->_pcb;
 		other->_state = STATE_RUN;
-		(_curthread = other)->Resume();
+		_curpcb = &other->_pcb;
+		_curthread = other;
+		Resume();
 	}
 	assert(IntEnabled());
 	assert(InSystemMode());
@@ -160,6 +172,8 @@ void Thread::Yield(Thread* other)
 // * static
 void Thread::Rotate()
 {
+	_lock.AssertLocked();
+
 	const Time now = Time::Now();
 
 	// Make a pass through runq, collecting the parameters we'll need
@@ -208,11 +222,11 @@ void Thread::Rotate()
 	// If there's a thread with a prio higher than current, switch to it
 	if (top->_prio > _curthread->_prio) {
 		next = top;
-	} else if (_curthread->_state != STATE_RUN || (numrun > 1 && now >= _qend)) {
+	} else if ((_curthread->_state != STATE_RUN && _curthread->_state != STATE_RESUME)
+			   || (numrun > 1 && now >= _qend)) {
 		// If there's nothing running with higher prio and there are multiple threads
 		// running with current prio, round-robin when the quantum is over.
 
-		assert(nextrun || firstrun);
 		next = nextrun ? nextrun : firstrun;
 		assert(next != _curthread);
 
@@ -243,7 +257,7 @@ void Thread::Switch()
 		Rotate();
 
 		if (_curthread->_state == STATE_RUN)
-			_curthread->Resume();
+			Resume();
 
 		// Nothing runnable - idle
 		_lock.Unlock();
@@ -280,6 +294,9 @@ void Thread::WakeAll(const void* ob)
 
 	if (waiter) {
 		if (Suspend()) Switch();
+		_lock.Lock();
+		_state = STATE_RUN;
+		_lock.Unlock();
 	} else
 		_lock.Unlock();
 }
@@ -306,6 +323,9 @@ void Thread::WakeSingle(const void* ob)
 
 	if (top && top->_prio > _prio) {
 		if (Suspend()) Switch();
+		_lock.Lock();
+		_state = STATE_RUN;
+		_lock.Unlock();
 	} else
 		_lock.Unlock();
 }
@@ -313,6 +333,8 @@ void Thread::WakeSingle(const void* ob)
 
 void Thread::TimerInterrupt()
 {
+	Spinlock::Scoped L(_lock);
+
 	Rotate();
 #ifndef USE_IDLE
 	++_intr_counter;
@@ -325,7 +347,11 @@ void Thread::WaitFor(const void* ob)
 	_lock.Lock();
 	_state = STATE_WAIT;
 	_waitob = ob;
-	if (Suspend()) Switch();
+	if (Suspend())
+		Switch();
+	_lock.Lock();
+	_state = STATE_RUN;
+	_lock.Unlock();
 }
 
 
@@ -342,6 +368,9 @@ void Thread::WaitFor(const void* ob, Time until)
 	_waittime = until;
 
 	if (Suspend()) Switch();
+	_lock.Lock();
+	_state = STATE_RUN;
+	_lock.Unlock();
 }
 
 
@@ -353,6 +382,9 @@ void Thread::Sleep(Time until)
 		_waitob = NULL;
 		_waittime = until;
 		if (Suspend()) Switch();
+		_lock.Lock();
+		_state = STATE_RUN;
+		_lock.Unlock();
 	}
 }
 
@@ -366,7 +398,9 @@ void Thread::SetTimer(Time deadline)
 
 	if (deadline != _curtimer) {
 		_curtimer = deadline;
-		_systimer.RunTimer((deadline - Time::Now()).GetUsec());
+		uint usec = (deadline - Time::Now()).GetUsec();
+		if (usec < 20) usec = 20;
+		_systimer.SetTimer(min(usec, (uint)1024*1024*4));
 	}
 }
 

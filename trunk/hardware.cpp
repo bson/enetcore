@@ -298,7 +298,7 @@ void hwinit()
 	_main_thread = &Thread::Initialize();
 
 	_clock.SetResolution(TIME_RESOLUTION);
-	_clock.RunTimerFreq(HZ);
+	_clock.RunTimerFreq(HZ, 0);
 
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
