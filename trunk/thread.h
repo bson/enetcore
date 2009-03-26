@@ -24,6 +24,7 @@ private:
 
 	struct Pcb {
 		uint32_t _regs[17];		// R0-R15, CPSR
+		uint32_t _flags;		// Flag word: bit = 0 do not save current thread on exception
 	};
 
 	volatile Pcb _pcb;
@@ -216,7 +217,7 @@ public:
 
 	// Set timer
 	static Time _curtimer;				// Current timer setting
-	static void SetTimer(Time deadline); // Absolute time
+	static void SetTimer(uint usec);	// usec from now
 };
 
 extern Thread* _main_thread;

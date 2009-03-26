@@ -101,7 +101,7 @@ Thread& Thread::Initialize()
 	_rr = 0;
 	_qend = Time::Now() + Time::FromUsec(RRQUANTUM);
 	_systimer.SetResolution(TIME_RESOLUTION);
-	SetTimer(_qend);
+	SetTimer(RRQUANTUM);
 	_lock.Unlock();
 	_curthread->TakeSnapshot();
 
@@ -179,7 +179,7 @@ void Thread::Rotate()
 	// Make a pass through runq, collecting the parameters we'll need
 
 	Thread* wake = NULL;		// Next thread due on timed wait
-	Thread* top = _curthread;	// Thread with highest priority
+	Thread* top = NULL;			// Thread with highest priority
 	uint numrun = 0;			// Number of running threads with prio equal to current's
 	Thread* firstrun = NULL;	// First other thread with prio equal to current
 	Thread* nextrun = NULL;		// Next other thread with prio equal to current
@@ -200,7 +200,7 @@ void Thread::Rotate()
 
 			// fallthru
 		case STATE_RUN:
-			if (t->_prio > top->_prio) {
+			if (!top || t->_prio > top->_prio) {
 				top = t;
 			} else if (t->_prio == _curthread->_prio) {
 				if (t != _curthread) {
@@ -222,21 +222,25 @@ void Thread::Rotate()
 	// If there's a thread with a prio higher than current, switch to it
 	if (top->_prio > _curthread->_prio) {
 		next = top;
-	} else if ((_curthread->_state != STATE_RUN && _curthread->_state != STATE_RESUME)
-			   || (numrun > 1 && now >= _qend)) {
+	} else if (numrun > 1 && now >= _qend) {
 		// If there's nothing running with higher prio and there are multiple threads
 		// running with current prio, round-robin when the quantum is over.
 
+		assert(nextrun || firstrun);
 		next = nextrun ? nextrun : firstrun;
 		assert(next != _curthread);
 
 		_qend = now + Time::FromUsec(RRQUANTUM);
+	} else if (_curthread->_state != STATE_RUN && _curthread->_state != STATE_RESUME) {
+		// Current thread is blocked, so just pick first runnable, if any
+		if (top)
+			next = top;
 	}
 
 	if (_qend > now)
-		SetTimer(min(next_timer, _qend));
+		SetTimer((min(next_timer, _qend) - now).GetUsec());
 	else
-		SetTimer(next_timer);
+		SetTimer((next_timer - now).GetUsec());
 
 	if (next) {
 		_curthread = next;
@@ -245,31 +249,26 @@ void Thread::Rotate()
 }
 
 
-#ifndef USE_IDLE
-volatile uint _intr_counter;
-#endif
-
+// * static
 void Thread::Switch()
 {
 	_lock.AssertLocked();
 
-	for (;;) {
-		Rotate();
+	Rotate();
 
-		if (_curthread->_state == STATE_RUN)
-			Resume();
+	if (_curthread->_state == STATE_RUN)
+		Resume();
 
-		// Nothing runnable - idle
+	// Nothing runnable - idle
+	while (_curthread->_state != STATE_RESUME && _curthread->_state != STATE_RUN) {
 		_lock.Unlock();
 #ifdef USE_IDLE
 		// This is incompatible with JTAG since it stops the CPU
 		WaitForInterrupt();
-#else
-		const uint counter = _intr_counter;
-		while (counter == _intr_counter) continue;
 #endif
 		_lock.Lock();
 	}
+	_lock.Unlock();
 }
 
 
@@ -336,9 +335,6 @@ void Thread::TimerInterrupt()
 	Spinlock::Scoped L(_lock);
 
 	Rotate();
-#ifndef USE_IDLE
-	++_intr_counter;
-#endif
 }
 
 
@@ -392,16 +388,13 @@ void Thread::Sleep(Time until)
 void Thread::Delay(uint usec) { Sleep(Time::Now() + Time::FromUsec(usec)); }
 
 
-void Thread::SetTimer(Time deadline)
+void Thread::SetTimer(uint usec)
 {
 	Spinlock::Scoped L(_lock);
 
-	if (deadline != _curtimer) {
-		_curtimer = deadline;
-		uint usec = (deadline - Time::Now()).GetUsec();
-		if (usec < 20) usec = 20;
-		_systimer.SetTimer(min(usec, (uint)1024*1024*4));
-	}
+	if (usec < 20) usec = 20;
+	_systimer.SetTimer(min(usec, (uint)1024*1024*4));
+//	}
 }
 
 
