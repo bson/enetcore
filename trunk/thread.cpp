@@ -75,7 +75,7 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 	assert(InSystemMode());
 
 	_lock.Lock();
-	_state = STATE_RUN;
+	_curthread->_state = STATE_RUN;
 	_lock.Unlock();
 }
 
@@ -202,7 +202,8 @@ void Thread::Rotate()
 		case STATE_RUN:
 			if (!top || t->_prio > top->_prio) {
 				top = t;
-			} else if (t->_prio == _curthread->_prio) {
+			}
+			if (t->_prio == _curthread->_prio) {
 				if (t != _curthread) {
 					if (seencur) {
 						if (!nextrun) nextrun = t;
@@ -268,6 +269,7 @@ void Thread::Switch()
 #endif
 		_lock.Lock();
 	}
+	_curthread->_state = STATE_RUN;
 	_lock.Unlock();
 }
 
@@ -343,8 +345,7 @@ void Thread::WaitFor(const void* ob)
 	_lock.Lock();
 	_state = STATE_WAIT;
 	_waitob = ob;
-	if (Suspend())
-		Switch();
+	if (Suspend()) Switch();
 	_lock.Lock();
 	_state = STATE_RUN;
 	_lock.Unlock();

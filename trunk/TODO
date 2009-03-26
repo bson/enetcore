@@ -11,5 +11,7 @@ Implement SD card block driver
 
 Implement FAT32
 
+Run clock off Timer1
+
 Implement Watchdog
 - Use hw watchdog

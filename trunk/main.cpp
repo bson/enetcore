@@ -23,9 +23,11 @@ void* ttfunc(void* tmp)
 //			cv.Wait(mtx);
 
 		DMSG("ttfunc");
-		mtx.Lock();
-		cv.Wait(mtx, Time::FromMsec(500));
-		mtx.Unlock();
+		for (uint i = 0; i < 3000000; ++i) ;
+
+//		mtx.Lock();
+//		cv.Wait(mtx, Time::FromMsec(500));
+//		mtx.Unlock();
 
 //		udelay(500000);
 //		Thread::Self().Delay(500000);
@@ -59,9 +61,11 @@ int	main ()
 //		ev2.Wait();
 
 		DMSG( "main");
-		mtx.Lock();
-		cv.Wait(mtx, Time::FromMsec(500));
-		mtx.Unlock();
+
+		for (uint i = 0; i < 3000000; ++i) ;
+//		mtx.Lock();
+//		cv.Wait(mtx, Time::FromMsec(500));
+//		mtx.Unlock();
 
 //		udelay(500000);
 //		Thread::Self().Delay(500000);
