@@ -43,6 +43,7 @@ public:
 	void AutoCompact() { if (_v.Size() > 32 && _head > _v.Size() / 2)  Compact(); }
 
 	void Reserve(uint new_size) { AutoCompact(); _v.Reserve(new_size + _head); }
+	uint GetReserve() const { return _v.GetReserve(); }
 	uint Grow(uint num) { return _v.Grow(num) - _head; }
 		
 	uint Size() const { return _v.Size() - _head; }

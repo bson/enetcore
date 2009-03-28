@@ -294,12 +294,15 @@ void Thread::WakeAll(const void* ob)
 	}
 
 	if (waiter) {
-		if (Suspend()) Switch();
-		_lock.Lock();
-		_state = STATE_RUN;
-		_lock.Unlock();
-	} else
-		_lock.Unlock();
+		if (InSystemMode()) {
+			if (Suspend()) Switch();
+			_lock.Lock();
+			_curthread->_state = STATE_RUN;
+		} else {
+			Rotate();
+		}
+	}
+	_lock.Unlock();
 }
 
 
@@ -320,15 +323,21 @@ void Thread::WakeSingle(const void* ob)
 		}
 	}
 	
-	if (top) top->_state = STATE_RUN;
+	if (top) {
+		top->_state = STATE_RUN;
 
-	if (top && top->_prio > _prio) {
-		if (Suspend()) Switch();
-		_lock.Lock();
-		_state = STATE_RUN;
-		_lock.Unlock();
-	} else
-		_lock.Unlock();
+		if (top->_prio > _curthread->_prio ||
+			(_curthread->_state != STATE_RUN && _curthread->_state != STATE_RESUME)) {
+			if (InSystemMode()) {
+				if (Suspend()) Switch();
+				_lock.Lock();
+				_curthread->_state = STATE_RUN;
+			} else {
+				Rotate();
+			}
+		}
+	}
+	_lock.Unlock();
 }
 
 
@@ -354,10 +363,7 @@ void Thread::WaitFor(const void* ob)
 
 void Thread::WaitFor(const void* ob, Time until)
 {
-	if (until <= Time::Now()) {
-		WaitFor(ob);
-		return;
-	}
+	if (until <= Time::Now()) return;
 
 	_lock.Lock();
 	_state = STATE_TWAIT;

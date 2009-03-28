@@ -96,10 +96,10 @@ public:
 	void Yield(Thread* other);
 
 	// Wake all threads, if any, waiting for an object.
-	void WakeAll(const void* ob);
+	static void WakeAll(const void* ob);
 
 	// Wake highest priority thread, if any, waiting for an object
-	void WakeSingle(const void* ob);
+	static void WakeSingle(const void* ob);
 
 	// Wait for an object.
 	void WaitFor(const void* ob);
@@ -213,7 +213,7 @@ public:
 
 	// Perform thread rotation - from system context.
 	// Called with _lock held, returns without.
-	void Switch();
+	static void Switch();
 
 	// Set timer
 	static Time _curtimer;				// Current timer setting

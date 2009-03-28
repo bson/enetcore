@@ -5,6 +5,7 @@
 #include "serial.h"
 #include "timer.h"
 #include "thread.h"
+#include "spi.h"
 
 
 Thread* _main_thread;
@@ -248,15 +249,22 @@ void hwinit()
 	// Disable watchdog
 	WDMOD = 0;
 
-	// Enable UARTs as output, along with pin P1.23 (LED)
-	PINSEL0 = 0x50005;
+	// Enable UARTs as output, SPI0 on pins
+	PINSEL0 = 0x55505;
 	IO1DIR |= 0x00800000;	 // Make P1.23 an output, everything else stays input
 
 	IO1SET =  0x00800000;	 // led off
 	IO1CLR =  0x00800000;	// led on
 
-	// Clear malloc space
-//	memset(_malloc_region.GetStart(), 0, _malloc_region.GetSize());
+	IO0DIR |= 0x80;				   // GPIO 0.7 is output (soft SSEL)
+	IO0DIR |= 0x40 | 0x10;		   // GPIO 0.4 (SCK), 0.6 (MOSI) are out
+	IO0DIR &= ~0x20;			   // GPIO 0.5 (MISO) is in
+	IO0DIR |= 1 << 10;			   // GPIO 0.10 is output (CARD_CS)
+
+	// Enable SPI1
+	PINSEL1 = 0b10101000;
+	IO1DIR |= 0b1101 << 17;		// SCK1, MOSI1, SSEL1 are out
+	IO1DIR &= 0b0010 << 17;		// MISO1 is in
 
 	// Allocate main thread stack - this is the one we're using now
 	// Since the region allocates low to high we do this by installing a reserve...
@@ -289,6 +297,9 @@ void hwinit()
 	_uart0.SetInterrupts(true);
 
 	_uart0.SetSpeed(115200);
+
+	_vic.InstallHandler(10, SPI::Interrupt);
+	_vic.EnableChannel(10);
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
