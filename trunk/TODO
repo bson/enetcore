@@ -1,8 +1,29 @@
+Deque
+- Add flag to disable auto compact
+- Add buffer functions: SetHead() and SetTail()
+
+
+Ethernet
+- Map and configure CS8900A
+- Pick up interrupt on link status, track in driver, log
+- Packet tx list, packet rx ring
+- Interrupt tx/rx
+- Service wait point
+- Provide network thread
+- Implement basic IP: ARP, route table
+- Downcalls for sending
+- Upcalls for receiving (network thread context)
+
+Add ICMP
+
+Add UDP
+
+Consider making network thread high priority.
+
 Exeption handler - traceback all threads, print thread state
 - Write tool to symbolize console crash output
 
 Thread features
-- Detached threads
 - Priority willing
 
 Implement SPI driver
@@ -15,3 +36,62 @@ Run clock off Timer1
 
 Implement Watchdog
 - Use hw watchdog
+
+
+---
+
+CS8900 notes:
+
+I/O mode:
+- Eight 16-bit addresses
+- Default at power up
+
+Powerup configuration:
+- Set IObase in PacketPage+0x20 (default 0x300)
+- 0x3000 in IObase+0xa as signature after reset; write nonzero value
+  (4.10 page 75)
+- Wait for init/calibration done (R16.INITD)
+- I/O space mode
+- Memory base addr
+- Ethernet phys addr
+- Frame types to receive
+- Enable 16 tx collisions
+- INTR0 on packet receive
+  - Set PacketPage+022h to 0x0000
+- Leave DMA disabled
+- Select media interface (auto-select)
+- See 3.3 page 18, 3.4 page 20
+- Control regs: 4.4 page 46
+
+Packet transmission:
+- Phase 1:
+  - Transmit Command: includes info on threshold at which to start transmit
+    (5, 381, 1021, or all)
+  - Transmit Length: indicates buffer space required
+  - When buffer space is available, begin copy frame into CS8900
+  - Host supplies Dest Addr, Src Addr, Length, LLC (data)
+- Phase 2:
+  - CS8900 provides preamble, start-of-frame, adds CRC32, any padding
+  - Puts onto media
+- See 5.7 page 98.
+
+Packet reception:
+- Phase 1:
+  - Packet is clocked in and decoded, preamble/s-o-f are stripped
+  - Address is passed through programmable addr filter
+  - Notifies processor
+- Phase 2:
+  - Transfer frame into host memory
+- See 5.2 page 78 through 5.6 page 95.
+
+Promiscuous mode:
+- Adjust address filter
+
+Explicit device reset:
+- Set reset bit (SelfCTL.6)
+
+Interrupts:
+- On TxEvent (reg8), RxEvent
+- Enable interrupts in TxCFG, RxCFG
+- Lose packets on transmitter errors (don't bother keeping around)
+  Higher layers implement retransmit policy
