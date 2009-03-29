@@ -1,8 +1,3 @@
-Deque
-- Add flag to disable auto compact
-- Add buffer functions: SetHead() and SetTail()
-- typedef Deque<uint8_t> IOBuffer
-
 Ethernet
 - Map and configure CS8900A
 - Pick up interrupt on link status, track in driver, log

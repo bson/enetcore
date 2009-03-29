@@ -75,4 +75,6 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "freelist.h"
 #include "pstring.h"
 
+typedef Deque<uint8_t> IOBuffer;
+
 #endif // __ENETCORE_H__
