@@ -9,14 +9,15 @@
 template <typename T> class Deque {
 	Vector<T> _v;
 	uint _head;					// Start of "ring"
+	bool _autocompact;
 
 	typedef Deque<T> Self;
 
 public:
-	Deque() { _head = 0; }
-	Deque(uint reserve) : _v(reserve) { _head = 0; }
-	Deque(const Self& arg) : _v(arg._v) { _head = arg._head; }
-	Deque(const Vector<T>& arg) : _v(arg) { _head = 0; }
+	Deque() { _head = 0; _autocompact = true; }
+	Deque(uint reserve) : _v(reserve) { _head = 0; _autocompact = true; }
+	Deque(const Self& arg) : _v(arg._v) { _head = arg._head; _autocompact = true; }
+	Deque(const Vector<T>& arg) : _v(arg) { _head = 0; _autocompact = true; }
 
 	virtual ~Deque() { };
 
@@ -40,7 +41,12 @@ public:
 		return _v.Grab(used, start, alloc);
 	}
 
-	void AutoCompact() { if (_v.Size() > 32 && _head > _v.Size() / 2)  Compact(); }
+	void AutoCompact() {
+		if (!_autocompact) return;
+		if (_v.Size() > 32 && _head > _v.Size() / 2)  Compact();
+	}
+
+	void SetAutoCompact(bool arg) { _autocompact = arg; }
 
 	void Reserve(uint new_size) { AutoCompact(); _v.Reserve(new_size + _head); }
 	uint GetReserve() const { return _v.GetReserve(); }
@@ -51,6 +57,9 @@ public:
 	bool Empty() const { return _head == _v.Size(); }
 
 	void SetSize(uint arg) { _v.SetSize(_head + arg); }
+
+	void SetHead(uint arg) { _head = arg; }
+	void SetTail(uint arg) { _v.SetSize(arg); }
 
 	T& Front() { assert(_v.Size() > _head); return _v[_head]; }
 	const T& Front() const { assert(_v.Size() > _head); return _v[_head]; }
