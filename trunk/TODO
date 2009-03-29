@@ -1,18 +1,32 @@
 Deque
 - Add flag to disable auto compact
 - Add buffer functions: SetHead() and SetTail()
-
+- typedef Deque<uint8_t> IOBuffer
 
 Ethernet
 - Map and configure CS8900A
 - Pick up interrupt on link status, track in driver, log
 - Packet tx list, packet rx ring
 - Interrupt tx/rx
-- Service wait point
-- Provide network thread
+- Service wait point - global state variable
+- Provide network thread: wait; manage buffer freelist (restock if needed)
 - Implement basic IP: ARP, route table
 - Downcalls for sending
 - Upcalls for receiving (network thread context)
+
+Global buffer pool
+- FreeList<IOBuffer*>
+- Alloc() may return NULL if nothing available
+- Prealloc(uint num) - fixed preallocated size
+
+Ethernet methods:
+- Initialize()
+- bool GetLinkStatus() const
+- SendBuffer(Buffer*) - adds buffer to xmit list, releases when done
+- Buffer* GetBuffer() - return next receive buffer, or NULL if none
+- Prealloc(Buffer&) - move tail to accomodate frame header
+  (skip first two bytes to align IP header!!!)
+
 
 Add ICMP
 
