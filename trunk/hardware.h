@@ -115,6 +115,10 @@ enum { VIC_BASE = 0xfffff000,
 	   VIC_VectCntl0 = 128
 };
 
+enum { CS8900A_BASE = 0x60000000
+};
+
+
 enum { TIMER0_BASE = 0xe0004000,
 	   TIMER1_BASE = 0xe0008000,
 	   TIMER_IR = 0,
