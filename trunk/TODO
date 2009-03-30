@@ -10,9 +10,7 @@ Ethernet
 - Upcalls for receiving (network thread context)
 
 Global buffer pool
-- FreeList<IOBuffer*>
-- Alloc() may return NULL if nothing available
-- Prealloc(uint num) - fixed preallocated size
+- Vector used as stack
 
 Ethernet methods:
 - Initialize()
