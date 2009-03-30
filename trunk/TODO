@@ -9,9 +9,6 @@ Ethernet
 - Downcalls for sending
 - Upcalls for receiving (network thread context)
 
-Global buffer pool
-- Vector used as stack
-
 Ethernet methods:
 - Initialize()
 - bool GetLinkStatus() const
