@@ -1,5 +1,10 @@
 Ethernet
 - Map and configure CS8900A
+  - CS2  (0x60000000?)
+  - 7 wait states?
+  - Pinsel EINT2 active high
+  - Attach EINT2 to Ethernet::Interrupt()
+
 - Pick up interrupt on link status, track in driver, log
 - Packet tx list, packet rx ring
 - Interrupt tx/rx
@@ -9,18 +14,14 @@ Ethernet
 - Downcalls for sending
 - Upcalls for receiving (network thread context)
 
-Ethernet methods:
-- Initialize()
-- bool GetLinkStatus() const
-- SendBuffer(Buffer*) - adds buffer to xmit list, releases when done
-- Buffer* GetBuffer() - return next receive buffer, or NULL if none
-- Prealloc(Buffer&) - move tail to accomodate frame header
-  (skip first two bytes to align IP header!!!)
-
 
 Add ICMP
 
 Add UDP
+
+Optimize memset, memcpy
+- If operands are 32 bit aligned, use 32-bit ops
+
 
 Consider making network thread high priority.
 
@@ -40,6 +41,15 @@ Run clock off Timer1
 
 Implement Watchdog
 - Use hw watchdog
+
+
+---
+DHCP:
+
+RFC2131
+
+
+
 
 
 ---
