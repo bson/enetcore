@@ -1,6 +1,7 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
+
 #define abort() (panic("ABORT"), (void)0)
 extern "C" {
 	void Unexpected_Interrupt() __irq;
@@ -154,6 +155,22 @@ using Platform::Vic;
 
 extern Vic _vic;
 
+
+// Various compatibility functions
+int atoi(const char* s);		// in platform.cpp
+INLINE_ALWAYS int xatoi(const uchar* s) { return ::atoi((const char*)s); }
+
+in_addr_t inet_addr(const char* a);
+INLINE_ALWAYS in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a); }
+
+long strtol(const char* __restrict str, char **__restrict endptr, int base);
+int64_t strtoll(const char* __restrict str, char **__restrict endptr, int base);
+
+#if 0
+inline uchar* xinet_ntop(int af, const void* __restrict src, uchar* __restrict dst, uint len) {
+	return (uchar*)::inet_ntop(af, src, (char*)dst, len);
+}
+#endif
 
 #ifdef USE_LITERALS
 // Test if location is literal in text

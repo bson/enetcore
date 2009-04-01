@@ -1,6 +1,7 @@
 #ifndef __DHCP_H__
 #define __DHCP_H__
 
+#include "mutex.h"
 #include "time.h"
 #include "netaddr.h"
 #include "ethernet.h"
@@ -17,6 +18,7 @@ struct Dhcp {
 
 #define INITIAL_XID 'enet'		// Start value for our XIDs
 
+	Mutex _lock;
 	Ethernet& _netif;			// Interface to configure
 	uint32_t _xid_serial;
 	Time _start;				// Time since we started DHCP process
@@ -61,7 +63,11 @@ struct Dhcp {
 		uint16_t flags;
 
 		uint32_t ciaddr;
-		uint32_t yiaddr;			// Returned addr in DHCPOFFER
+
+		// This is filled in by client, to use as the dest addr by server
+		// We ALWAYS put 0.0.0.0 here.
+		uint32_t yiaddr;
+
 		uint32_t siaddr;
 		uint32_t giaddr;
 		uint8_t chaddr[16];

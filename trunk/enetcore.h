@@ -37,6 +37,8 @@ typedef native_int_t intptr_t;
 typedef native_uint_t uintptr_t;
 typedef intptr_t ptrdiff_t;
 
+typedef uint32_t in_addr_t;
+
 #define WEAK  __attribute__((weak))			// Weak symbol - can be redefined
 #define NORETURN  __attribute__((noreturn)) // Function never returns
 #define PURE __attribute__((pure)) // Indicates function has no meaningful side effects

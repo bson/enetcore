@@ -125,15 +125,6 @@ INLINE_ALWAYS uchar* xstrncpy(uchar* dest, const uchar* src, uint n) {
 	return (uchar*)::strncpy((char*)dest, (const char*)src, n);
 }
 
-#if 0
-// XXX these don't really belong here
-inline int xatoi(const uchar* s) { return ::atoi((const char*)s); }
-
-inline in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a); }
-inline uchar* xinet_ntop(int af, const void* __restrict src, uchar* __restrict dst, uint len) {
-	return (uchar*)::inet_ntop(af, src, (char*)dst, len);
-}
-#endif
 
 template <typename T> inline void move(T* dest, T* src, uint items) {
 	memmove(dest, src, items * sizeof(T));

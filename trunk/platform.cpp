@@ -295,6 +295,97 @@ void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
 
 #endif
 
+bool isspace(char c) { return c && c <= ' '; }
+
+template <typename T> T strto(const char* __restrict s, char **__restrict endptr, int base)
+{
+	assert(s);
+	assert(base <= 10 || base == 16);
+
+	// Ignore leading whitespace (includes control chars but not NUL)
+	while (isspace(*s)) ++s;
+
+	// - or +, but not both
+	const bool neg = (*s == '-');
+	if (*s == '+') ++s;
+	if (neg) ++s;
+
+	// Base 0 or 16 has an optional 0x prefix
+	if ((!base || base == 16) && (s[0] == '0' && toupper(s[1]) == 'X')) {
+		s += 2;
+		base = 16;
+	}
+
+	// Without a prefix, base 0 defaults to 10
+	if (!base) base = 10;
+
+	// For base 2 and 16, we shift.  We could shift for other power of 2
+	// bases as well, but they're so rare there's no point adding code for it.
+	const int8_t shiftbase = (base == 2 ? 1 : base == 16 ? 4 : 0);
+
+	const char maxdigit = base >= 10 ? '9' : base - 1;
+
+	T result = 0;
+	for (;;) {
+		const char c = toupper(*s);
+
+		if (c >= '0' && c <= maxdigit || (base == 16 && c >= 'A' && c <= 'F')) {
+			if (shiftbase)
+				result <<= shiftbase;
+			else
+				result *= base;
+
+			if (c >= 'A' && c <= 'F')
+				result += (c - 'A') + 10;
+			else 
+				result += c - '0';
+
+			++s;
+		} else {
+			if (endptr) *endptr = (char*)s;
+			return neg ? -result : result;
+		}
+	}
+}
+
+
+long strtol(const char* __restrict str, char **__restrict endptr, int base)
+{
+#ifdef LP64
+	// On a 64-bit platform 32/64 bit are the same speed, so no need for both
+	return strto<int64_t>(str, endptr, base);
+#else
+	// On a 32-bit platform a 32-bit numeric parse is orders of magnitude faster,
+	// so in a nod to performance we use a separate 32-bit version.
+	return strto<long>(str, endptr, base);
+#endif
+}
+
+
+int64_t strtoll(const char* __restrict str, char **__restrict endptr, int base)
+{
+	return strto<int64_t>(str, endptr, base);
+}
+
+
+int atoi(const char* s) { return strtol(s, NULL, 10); }
+
+
+in_addr_t inet_addr(const char* a)
+{
+	in_addr_t ip;
+	uint8_t* ptr = (uint8_t*)&ip;
+
+	while (a) {
+		char* end;
+		const int octet = strtol(a, &end, 10);
+		if (end == a) return 0;
+		*ptr++ = octet;
+		a = end;
+	}
+}
+
+
 #undef abort
 void abort() { panic("ABORT"); }
 
