@@ -2,6 +2,7 @@
 #define __DHCP_H__
 
 #include "mutex.h"
+#include "network.h"
 #include "time.h"
 #include "netaddr.h"
 #include "ethernet.h"
@@ -10,48 +11,81 @@
 struct Dhcp {
 
 	enum State {
-		STATE_RENEW,		   // Should start acquiring a lease
+		STATE_RESET,		   // Initial state
 		STATE_DISCOVER,		   // Waiting for response to DHCPDISCOVER
 		STATE_REQUEST, // Received DHCPOFFER, sent back DHCPREQUEST, waiting for ACK
 		STATE_CONFIGURED // Got DHCPACK, now configured, on timer to renew
 	};
 
-#define INITIAL_XID 'enet'		// Start value for our XIDs
+
+	enum { XID = 0x74656e65 };	// 'enet'
 
 	Mutex _lock;
 	Ethernet& _netif;			// Interface to configure
-	uint32_t _xid_serial;
 	Time _start;				// Time since we started DHCP process
 	Time _renew;				// If _leased: time when lease expires
 	State _state;
 	bool _leased;				// Currently have an address (in _curaddr)
-	NetAddr _lease;				// Currently leased addr
-	NetAddr _gw;				// Default gateway
-	NetAddr _netmask;			// Netmask
-	NetAddr _dns;				// DNS server
+	in_addr_t _lease;			// Currently leased addr
+	in_addr_t _gw;				// Default gateway
+	in_addr_t _netmask;			// Netmask
+	in_addr_t _dns;				// DNS server
 	String _domain;				// DNS domain
+	Time _rexmit;				// Next time we retransmit
 	uint8_t _backoff;			// Rexmit timer (4, 8, 16, 64 sec backoff)
+	in_addr_t _server;			// In STATE_OFFER, STATE_CONFIGURED, holds server id
+	uint32_t _offer_xid;		// XID in server's offer
+	Time _first_request;		// Time we sent first DHCPREQUEST - lease start time
+
+	// Ports
+	enum {
+		CLIENT_PORT = 68,
+		SERVER_PORT = 67
+	};
+
+	// DHCP type codes
+	// Typical sequence:
+	// C->bcast DHCPDISCOVER
+	// S->C DHCPOFFER
+	// C->bcast DHCPREQUEST (echoing server name)
+	// S->C DHCPACK with config
+	enum Type {
+		DHCPINVALID = 0,		// Guard token
+		DHCPDISCOVER = 1,
+		DHCPOFFER = 2,
+		DHCPREQUEST = 3,
+		DHCPACK = 4,
+		DHCPNAK = 5,
+		DHCPDECLINE = 6,
+		DHCPRELEASE = 7,
+//		DHCPINFORM = 8  ??? Not listed in RFC1533
+	};
+
+	// Option tags - see RFC1533
+	// This is a partial list
+	enum {
+		TAG_PAD = 0,			// 1 byte padding
+		TAG_SUBNET = 1, 		// 4 byte subnet
+		TAG_GW = 3,				// List of N gateways, 4 bytes each
+		TAG_NS = 6,				// List of N name servers, 4 bytes each
+		TAG_NAME = 12,			// Host name, N characters
+		TAG_DOMAIN = 15,		// Domain name, N characters
+		TAG_IP_TTL = 23,		// Default IP TTL
+		TAG_ARP_TO = 35,		// ARP cache timeout
+		TAG_NTP = 42,			// List of NTP servers
+		TAG_VEXT = 43,			// Vendor extension block
+		TAG_DHCP_REQ_IP = 50,	// DHCP Requested IP Address
+		TAG_DHCP_LEASE = 51,	// DHCP Lease Time
+		TAG_DHCP_MSGTYPE = 53,	// DHCP Message Type
+		TAG_DHCP_SERVER = 54,	// DHCP Server identified (IP addr of server)
+		TAG_DHCP_PARAM_REQ = 55, // DHCP Requested parameters
+		TAG_END = 255,			// 1 byte end
+	};
+
+	// BOOTP ops
+	enum { BOOTREQUEST = 1, BOOTREPLY = 2 }; // ops
 
 	struct Packet {
-		enum { BOOTREQUEST = 1, BOOTREPLY = 2 }; // ops
-
-		// DHCP type codes
-		// Typical sequence:
-		// C->bcast DHCPDISCOVER
-		// S->C DHCPOFFER
-		// C->bcast DHCPREQUEST (includes sname of selected sever)
-		// S->C DHCPACK with config
-		enum {
-			DHCPDISCOVER,
-			DHCPOFFER,
-			DHCPREQUEST,
-			DHCPACK,
-			DHCPNAK,
-			DHCPDECLINE,
-			DHCPRELEASE,
-			DHCPINFORM
-		};
-
 		uint8_t op;
 		uint8_t htype;				// 1 = ethernet
 		uint8_t hlen;				// 6 for ethernet
@@ -77,22 +111,25 @@ struct Dhcp {
 		uint8_t options[312];
 
 
-		Packet(uint type) :
+		Packet(Dhcp& dhcp) :
 			// Default to ethernet boot request
 			op(BOOTREQUEST), htype(1), hlen(6), hops(0),
-			xid(++_xid_serial), secs((Time::Now() - _start).GetSecs()),
+			xid(XID), secs((Time::Now() - dhcp._start).GetSec()),
 			flags(0), yiaddr(0), giaddr(0)
 		{
-			ciaddr = _leased ? _curaddr.GetAddr4() : 0;
+			ciaddr = 0;
 			yiaddr = 0;
-			memcpy(chaddr, Ethernet::GetMacAddr(), 6);
-			sname[0] = 0;
-			file[0] = 0;
+
+			memset(chaddr, 0, sizeof chaddr);
+			memcpy(chaddr, dhcp._netif.GetMacAddr(), 6);
+			memset(sname, 0, sizeof sname);
+			memset(file, 0, sizeof file);
+
 			options[0] = 99;		// DHCP magic cookie
 			options[1] = 130;
 			options[2] = 83;
 			options[3] = 99;
-			options[4] = type;
+			options[4] = TAG_END;
 		}
 	};
 
@@ -113,6 +150,28 @@ struct Dhcp {
 
 	// Service - returns next service time
 	Time Service();
+
+	// Signals link was recovered
+	void LinkRecovered();
+
+private:
+	// Allocate packet buffer
+	IOBuffer* AllocPacket();
+
+	// Send discover message
+	void SendDiscover();
+
+	// Send request message
+	void SendRequest();
+
+	// Update retransmit timer
+	void BackOff();
+
+	// Extract config from DHCPACK
+	void Extract(const uint8_t* options, uint len);
+
+	// Get message type and server id from DHCP tag mess
+	Type GetMsgType(IOBuffer* buf, in_addr_t& server);
 };
 
 

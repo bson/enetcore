@@ -52,6 +52,10 @@ void FreeBuffer(IOBuffer* buf)
 // * static
 uint16_t Ethernet::_macaddr[3] = { 0x0177, 0x4455, 0x3132 };
 
+// Broadcast address
+uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
+
+
 Ethernet::Ethernet(uint32_t base)
 {
 	_base = (volatile uint16_t*)base;
@@ -326,4 +330,15 @@ void Ethernet::DiscardTx()
 	const uint16_t tmp = _pp[ETH_PP_BusST];
 
 	_tx_state = TX_IDLE;
+}
+
+
+void Ethernet::FillForBcast(IOBuffer* buf, uint dgramlen)
+{
+	const uint frame_len = dgramlen + 6 * 2 + 4;
+	buf->SetHead(2);
+	buf->SetTail(frame_len + 2);
+	memcpy(buf + 0, GetBcastAddr(), GetAddrLen());
+	memcpy(buf + GetAddrLen(), GetMacAddr(), GetAddrLen());
+	*(uint16_t*)(buf + GetAddrLen() * 2) = Htons(frame_len);
 }

@@ -30,6 +30,7 @@ class Ethernet {
 
 	uint16_t _pid;				// Product ID
 	static uint16_t _macaddr[3]; // Our Mac address
+	static uint16_t _bcastaddr[3]; // Broadcast address
 
 	bool _link_status:1;		// Link status indicator
 	bool _10bt:1;				// 10BT transceiver, otherwise AUI (yeah, right :))
@@ -75,6 +76,18 @@ public:
 
 	// Get our configured mac address
 	const uint8_t* GetMacAddr() const { return (const uint8_t*)_macaddr; }
+
+	// Get broadcast address
+	static const uint8_t* GetBcastAddr() { return (const uint8_t*)_bcastaddr; }
+
+	// Address length
+	static const uint GetAddrLen() { return 6; }
+
+	// Buffer pad
+	static const uint GetBufPad() { return 2; }
+
+	// Fill in a buffer for broadcast
+	void FillForBcast(IOBuffer* buf, uint dgramlen);
 
 private:
 	// Begin Tx for head of sendq - issue command
