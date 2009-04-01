@@ -34,6 +34,17 @@ class Ethernet {
 	bool _link_status:1;		// Link status indicator
 	bool _10bt:1;				// 10BT transceiver, otherwise AUI (yeah, right :))
 
+	struct PacketPage {
+		volatile uint16_t* _base;
+
+		volatile uint16_t& operator[](int addr) volatile {
+			_base[ETH_PP] = addr;
+			return _base[ETH_PPDATA0];
+		}
+	};
+
+	volatile PacketPage _pp;
+
 public:
 	Ethernet(uint32_t base);
 
@@ -83,12 +94,6 @@ private:
 
 	// Flush on-chip Tx buffer
 	void DiscardTx();
-
-	// Read packetpage reg
-	uint16_t GetPacketPage(uint addr);
-
-	// Set packetpage reg
-	void SetPacketPage(uint addr, uint16_t val);
 };
 
 

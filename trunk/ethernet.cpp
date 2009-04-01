@@ -55,20 +55,7 @@ uint16_t Ethernet::_macaddr[3] = { 0x0177, 0x4455, 0x3132 };
 Ethernet::Ethernet(uint32_t base)
 {
 	_base = (volatile uint16_t*)base;
-}
-
-
-uint16_t Ethernet::GetPacketPage(uint addr)
-{
-	_base[ETH_PP] = addr;
-	return _base[ETH_PPDATA0];
-}
-
-
-void Ethernet::SetPacketPage(uint addr, uint16_t val)
-{
-	_base[ETH_PP] = addr;
-	_base[ETH_PPDATA0] = val;
+	_pp._base = _base;
 }
 
 
@@ -76,36 +63,39 @@ void Ethernet::Initialize()
 {
 	Spinlock::Scoped L(_lock);
 
+	_sendq.Reserve(16);
+	_recvq.Reserve(16);
+
 	// Wait for initialization to finish
-	while (!(GetPacketPage(ETH_PP_SelfST) & 80)) continue;
+	while (!(_pp[ETH_PP_SelfST] & 80)) continue;
 
 	// RxCFG: RxOKiE
-	SetPacketPage(ETH_PP_RxCFG, 0x100);
+	_pp[ETH_PP_RxCFG] = 0x100;
 
 	// RxCTL: RxOKA | IndividualA | BroadcastA
-	SetPacketPage(ETH_PP_RxCTL, 0x100|0x400|0x800);
+	_pp[ETH_PP_RxCTL] = 0x100|0x400|0x800;
 
 	// TxCFG: TxOKiE
-	SetPacketPage(ETH_PP_TxCFG, 0x100);
+	_pp[ETH_PP_TxCFG] = 0x100;
 
 	// BufCFG: Rdy4TxiE
-	SetPacketPage(ETH_PP_BufCFG, 0x100);
+	_pp[ETH_PP_BufCFG] = 0x100;
 
-	_pid = GetPacketPage(ETH_PP_PID) | (GetPacketPage(ETH_PP_PID+2) << 16);
+	_pid = _pp[ETH_PP_PID] | (_pp[ETH_PP_PID+2] << 16);
 
 	// INTR: INTR0
-	SetPacketPage(ETH_PP_INTR, 0);
+	_pp[ETH_PP_INTR] = 0;
 
 	// BusCLT: EnableRQ (master interrupt enable)
-	SetPacketPage(ETH_PP_BusCTL, 0x8000);
+	_pp[ETH_PP_BusCTL] = 0x8000;
 
 	// Hash filter
-	SetPacketPage(ETH_PP_LAF, 0);
+	_pp[ETH_PP_LAF] = 0;
 
 	// IA
-	SetPacketPage(ETH_PP_IA + 0, _macaddr[0]);
-	SetPacketPage(ETH_PP_IA + 2, _macaddr[1]);
-	SetPacketPage(ETH_PP_IA + 4, _macaddr[2]);
+	_pp[ETH_PP_IA + 0] = _macaddr[0];
+	_pp[ETH_PP_IA + 2] = _macaddr[1];
+	_pp[ETH_PP_IA + 4] = _macaddr[2];
 
 	_tx_state = TX_IDLE;
 	_link_status = false;
@@ -113,7 +103,7 @@ void Ethernet::Initialize()
 
 	// Last of all enable Tx, Rx
 	// LineCTL: SerTxON, SerRxON, 10BT
-	SetPacketPage(ETH_PP_LineCTL, 0x40|0x80);
+	_pp[ETH_PP_LineCTL] = 0x40|0x80;
 }
 
 
@@ -158,7 +148,7 @@ void Ethernet::HandleInterrupt()
 	Spinlock::Scoped L(_lock);
 
 	// Update link status
-	uint16_t linkst = GetPacketPage(ETH_PP_LineST);
+	uint16_t linkst = _pp[ETH_PP_LineST];
 	const bool newst = (linkst & 0x80) != 0;
 	const bool new10bt = (linkst & 0x200) != 0;
 	if (newst != _link_status || new10bt != _10bt) {
@@ -168,11 +158,11 @@ void Ethernet::HandleInterrupt()
 	}
 
 	for (;;) {
-		uint16_t ev = _base[ETH_ISQ];
+		const uint16_t ev = _base[ETH_ISQ];
 		if (!ev) return;
 
 		// Switch on regnum
-		switch (ev & 31) {
+		switch (ev & 0x1f) {
 		case ETH_R_RxEvent:
 			ReceiveFrame(ev);
 			break;
@@ -189,7 +179,7 @@ void Ethernet::HandleInterrupt()
 
 		case ETH_R_BufEvent:
 			if (ev & 0x200) {
-				// Underrun - send next frame (this one is gone already)
+				// Underrun - send next frame (this one is lost already)
 				_tx_state = TX_IDLE;
 				do {
 					BeginTx();
@@ -213,10 +203,15 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 {
 	_lock.AssertLocked();
 
-	if (rxev & 0x100) {
-		// RxOK
-		IOBuffer* buf = BufferPool::Alloc();
-		if (!buf) return;		// No buffer available: drop packet
+	if (rxev & 0x100) {			// RxOK
+
+		IOBuffer* buf;
+		if (!_recvq.Headroom() || !(buf = BufferPool::Alloc())) {
+			// No buffer available, or recvq full: drop packet
+			// XXX maybe count this
+			_pp[ETH_PP_RxCFG] = 0x40; // Skip_1
+			return;
+		}
 
 		const uint16_t rxstatus = _base[ETH_XD0];
 		const uint16_t len = _base[ETH_XD0];
@@ -229,11 +224,15 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 		
 		if (len & 1) buf[len-1] = (uint8_t&)_base[ETH_XD0];
 
-		_lock.Lock();
-		_recvq.PushBack(buf);
-		_lock.Unlock();
-
-		_net_event.Set();		// Wake network thread
+		// Ignore runt frames.  This is rare enough not to be worth
+		// optimizing.  We don't ever see partial frames or frames
+		// with a bad CRC, so this is really quite exceptional.
+		if (len >= 64) {
+			_recvq.PushBack(buf);
+			_net_event.Set();		// Signal EventObject
+		} else {
+			BufferPool::FreeBuffer(buf);
+		}
 	}
 }
 
@@ -242,10 +241,9 @@ void Ethernet::BeginTx()
 {
 	_lock.AssertLocked();
 
-	uint16_t len;
-
 	if (_tx_state != TX_IDLE) return;
 
+	uint16_t len;
 	do {
 		if (_sendq.Empty()) return;
 
@@ -255,22 +253,30 @@ void Ethernet::BeginTx()
 
 		if (len < 60-14 || len > 1514) {
 			_sendq.PopFront();
+			BufferPool::FreeBuffer(buf);
 			len = 0;
 		}
 	} while (!len);
 
 	// Start after entire frame is in buffer
 	// TxCMD: TxStart = 0b11 (full frame)
+
+	// XXX The optimial TxStart depends on: CCLK, RAM wait states, and
+	// CS8900 wait states.  Should calculate the optimal Tx high water
+	// mark in Init(), which should receive these params as input.
 	_base[ETH_TxCMD] = 0b11000000;
 	_base[ETH_TxLength] = len;
 
 	_tx_state = TX_CMD;
 
 	// Try copying right away
-	const uint16_t busst = GetPacketPage(ETH_PP_BusST);
+	const uint16_t busst = _pp[ETH_PP_BusST];
 	if (busst & 0x80) {
-		// TxBidErr
-		if (!_sendq.Empty())  _sendq.PopFront();
+		// TxBidErr - something wrong with the TxCMD/TxLength
+		if (!_sendq.Empty())  {
+			BufferPool::FreeBuffer(_sendq.Front());
+			_sendq.PopFront();
+		}
 		_tx_state = TX_IDLE;
 		return;
 	}
@@ -305,16 +311,19 @@ void Ethernet::CopyTx()
 	if (buf->Size() & 1)
 		(uint8_t&)_base[ETH_XD0] = buf->Back();
 
-	// Return buffer to pool
+	// Return buffer to pool.  If transmission fails after we get here
+	// the packet is lost.
 	BufferPool::FreeBuffer(buf);
 }
 
 
 void Ethernet::DiscardTx()
 {
-	_base[ETH_TxCMD] = 0b111000000;
+	_lock.AssertLocked();
+
+	_base[ETH_TxCMD] = 0b111000000; // Force Tx reset
 	_base[ETH_TxLength] = 0;
-	GetPacketPage(ETH_PP_BusST);
+	const uint16_t tmp = _pp[ETH_PP_BusST];
 
 	_tx_state = TX_IDLE;
 }
