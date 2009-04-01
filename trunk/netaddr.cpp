@@ -1,6 +1,6 @@
 #include "enetkit.h"
 #include "netaddr.h"
-#include "vector.h"
+
 
 const NetAddr NetAddr::addr_any;
 
@@ -22,12 +22,12 @@ NetAddr::NetAddr(const sockaddr_storage& sa)
 
 
 // * static
-const NetAddr NetAddr::Parse(String s, bool& ok)
+const NetAddr NetAddr::Parse(const String& s, bool& ok)
 {
 	ok = false;
 
 	Vector<String*> parts(3);
-	s.Split(parts, ":");
+	s.Split(parts, STR(":"));
 	
 	const uchar* portstr = STR("0");
 	NetAddr a(addr_any);
@@ -35,12 +35,12 @@ const NetAddr NetAddr::Parse(String s, bool& ok)
 	if (parts.Size() == 1 || parts.Size() == 2) {
 		if (parts.Size() == 2) portstr = parts[1]->CStr();
 	
-		a = NetAddr(::xinet_addr(parts[0]->CStr()), ::xatoi(portstr));
+		a = NetAddr(xinet_addr(parts[0]->CStr()), xatoi(portstr));
 
 		ok = (a._port != (uint16_t)-1 && a._ip != (uint32_t)-1);
 	}
 
-	parts.DeleteEntries();
+	parts.DeleteObjects();
 
 	return a;
 }
@@ -54,15 +54,17 @@ String NetAddr::Printable(bool with_port) const
 	if (sa.ss_len < sizeof (sockaddr_in)) return STR("");
 #elif defined(__linux__)
 	if (sa.ss_family != AF_INET && sa.ss_family != AF_INET6)  return STR("");
+#elif defined(__CYGWIN__)
+	if (sa.ss_family != AF_INET)  return STR("");
 #endif
 
 	sockaddr_in& sin = (sockaddr_in&)sa;
 
-	char buf[64];
-	char* s = (char*)::inet_ntop(sin.sin_family, &sin.sin_addr, buf, sizeof buf);
+	uchar buf[64];
+	uchar* s = xinet_ntop(sin.sin_family, &sin.sin_addr, buf, sizeof buf);
 	if (with_port) {
-		const uint len = strlen(s);
-		::snprintf(s + len, sizeof buf - len, ":%u", Ntohs(sin.sin_port));
+		const uint len = xstrlen(s);
+		::snprintf((char*)s + len, sizeof buf - len, ":%u", Ntohs(sin.sin_port));
 	}
 	return buf;
 #elif defined(ENETCORE)
@@ -95,4 +97,42 @@ bool NetAddr::OrderWithPort(const void* a, const void* b)
 	const NetAddr& a2 = **(const NetAddr**)b;
 
 	return (a1._ip > a2._ip) || (a1._ip == a2._ip && a1._port > a2._port);
+}
+
+
+static InterfaceInfo* GetInterface(const NetAddr& addr)
+{
+	const Vector<InterfaceInfo*>& iflist = GetNetworkInterfaces();
+
+	NetAddr tmp(addr); tmp.SetPort(0);
+
+	for (uint i = 0; i < iflist.Size(); ++i) {
+		assert(iflist[i]);
+		if ((iflist[i]->_addr & iflist[i]->_mask) == (tmp & iflist[i]->_mask))
+			return iflist[i];
+	}
+
+	return NULL;
+}
+
+
+bool NetAddr::IsLocal() const
+{
+	InterfaceInfo* netinfo = GetInterface(*this);
+	const NetAddr tmp(_ip, 0);
+	return netinfo && netinfo->_addr == tmp;
+}
+
+
+bool NetAddr::IsLAN() const
+{
+	InterfaceInfo* netinfo = GetInterface(*this);
+	return netinfo && !netinfo->_loopback;
+}
+
+
+bool NetAddr::IsLoopback() const
+{
+	InterfaceInfo* netinfo = GetInterface(*this);
+	return netinfo && netinfo->_loopback;
 }

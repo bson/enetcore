@@ -2,7 +2,7 @@
 #define __PSTRING_H__
 
 #include "lookup3.h"
-#include "freelist.h"
+
 
 // Dumb 0 terminated C string
 // POD safe

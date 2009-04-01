@@ -76,6 +76,8 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "platform.h"
 #include "freelist.h"
 #include "pstring.h"
+#include "netaddr.h"
+#include "network.h"
 
 typedef Deque<uint8_t> IOBuffer;
 
