@@ -5,6 +5,24 @@
 Ip _ip;
 
 
+uint16_t ipcksum(const uint16_t* block, uint len)
+{
+	const bool unaligned = len & 1;
+
+	len /= 2;
+
+	uint32_t sum = 0;
+	while (len) sum += Ntohs(*block++);
+
+	if (unaligned)  sum += *(const uint8_t*)block << 8;
+
+	while (sum > 0xffff)
+		sum = (sum & 0xffff) + (sum >> 16);
+
+	return sum;
+}
+
+
 void Ip::AddInterface(Ethernet& nic, in_addr_t addr, in_addr_t mask) 
 {
 	Mutex::Scoped L(_lock);
@@ -92,7 +110,7 @@ void Ip::ReleasePendingARP()
 			Route* rt = _routes[n];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->macvalid) {
-					memcpy(*packet + 2, rt->macaddr, 6);
+					FillFrame(packet, rt);
 					rt->netif.Send(packet);
 					remove_packet = true;
 				}
@@ -115,16 +133,27 @@ void Ip::ReleasePendingARP()
 }
 
 
+void Ip::FillFrame(IOBuffer* buf, Route* rt)
+{
+	memcpy(*buf + 2, rt->macaddr, 6);
+	memcpy(*buf + 2 + 6, rt->netif.GetMacAddr(), 6);
+	const uint16_t et = Htons(ETHERTYPE_IP);
+	memcpy(*buf + 2 + 6, &et, 2);
+}
+
+
 bool Ip::Send(IOBuffer* buf)
 {
 	Mutex::Scoped L(_lock);
-	const in_addr_t dest = GetIph(buf).dest;
+	Iph& iph = GetIph(buf);
+	const in_addr_t dest = iph.dest;
+	iph.SetCsum();
 
 	for (uint i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
 		if (rt->dest == dest & rt->netmask) {
 			if (rt->macvalid) {
-				memcpy(*buf + 2, rt->macaddr, 6);
+				FillFrame(buf, rt);
 				if (rt->type == Route::TYPE_IF) {
 					if (rt->dest == dest) {
 						rt->netif.Send(buf); // Loopback: ethernet driver will return it

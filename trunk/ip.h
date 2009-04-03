@@ -41,6 +41,10 @@ struct Arph {
 };
 
 
+// Checksum
+uint16_t ipcksum(const uint16_t* block, uint len);
+
+
 // IP header
 struct Iph {
 	enum Flags {
@@ -76,6 +80,12 @@ struct Iph {
 	// Get transport header
 	template <typename T> T& GetTransport() {
 		return *(T*)((uint8_t*)this + GetHLen());
+	}
+
+	// Set checksum
+	void SetCsum() {
+		sum = 0;
+		sum = Htons(~ipcksum((const uint16_t*)this, GetHLen()));
 	}
 };
 
@@ -273,6 +283,12 @@ public:
 	// Receive for ETHERTYPE_ARP
 	void ArpReceive(IOBuffer* packet);
 
+	// Return header ID
+	static uint16_t GetId() {
+		static uint16_t id = 0;
+		return Htons(++id);
+	}
+	
 private:
 	// Derive a host route derived from another entry (TYPE_IF)
 	Route* AddHostRoute(in_addr_t host, Route* base);
@@ -293,6 +309,9 @@ private:
 	// Get source/dest mac address from frame
 	uint8_t* GetMacSource(IOBuffer* buf) { return *buf + 2 + 6; }
 	uint8_t* GetMacDest(IOBuffer* buf) { return *buf + 2; }
+
+	// Fill in datagram with frame header
+	void FillFrame(IOBuffer* packet, Route* rt);
 };
 
 extern Ip _ip;

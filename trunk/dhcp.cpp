@@ -143,7 +143,7 @@ IOBuffer* Dhcp::AllocPacket()
 	const NetAddr src(INADDR_ANY, CLIENT_PORT);
 	const NetAddr dst(~0, SERVER_PORT);
 
-	Udp::FillHeader(buf, src, dst);
+	FillHeader(buf, src, dst);
 
 	// Fill in DHCP packet with defaults
 	Packet* pkt = (Packet*)(buf + sizeof (Iph) + sizeof (Udph));
@@ -349,4 +349,32 @@ Dhcp::Type Dhcp::GetMsgType(IOBuffer* buf, in_addr_t& server)
 	}
 done:
 	return type;
+}
+
+
+void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
+{
+	buf->SetHead(0);
+	memcpy(*buf + 2, _netif.GetBcastAddr(), 6);
+	memcpy(*buf + 2 + 6, _netif.GetMacAddr(), 6);
+	const uint16_t et = Htons(ETHERTYPE_IP);
+	memcpy(*buf + 2 + 6 + 6, &et, 2);
+
+	Iph& iph = Ip::GetIph(buf);
+	iph.SetHLen(sizeof (Iph));
+	iph.tos = 0;
+	iph.len = 576;
+	iph.id = Ip::GetId();
+	iph.off = 0;
+	iph.ttl = 255;
+	iph.proto = IPPROTO_UDP;
+	iph.source = src.GetAddr4();
+	iph.dest = dst.GetAddr4();
+	iph.SetCsum();
+
+	Udph& udph = iph.GetTransport<Udph>();
+	udph.sport = Htons(src.GetPort());
+	udph.dport = Htons(dst.GetPort());
+	udph.len = Htons(*buf + buf->Size() - (uint8_t*)&udph);
+	udph.SetCsum();
 }

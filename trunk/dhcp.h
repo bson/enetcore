@@ -172,6 +172,9 @@ private:
 
 	// Get message type and server id from DHCP tag mess
 	Type GetMsgType(IOBuffer* buf, in_addr_t& server);
+
+	// Fill in DHCP packet from scratch - UDP, IP, MAC
+	void FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst);
 };
 
 
