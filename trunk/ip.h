@@ -213,6 +213,7 @@ enum { HOSTRT_EXPIRE = 120 };
 
 class Ip {
 
+public:
 	// Interface/Route/ARP table entry.  
 	// Currently Ethernet centric
 	struct Route {
@@ -229,22 +230,39 @@ class Ip {
 		Time expire;			// For TYPE_ARP, entry expiration
 		uint8_t type;			// Type of entry
 		uint8_t macaddr[6];
-		bool macvalid;			// Mac addr is valid
+		bool macvalid:1;		// Mac addr is valid
+		bool invalid:1;			// Route has been removed from table
+
+		uint8_t refcount;
+		Spinlock lock;			// Protects refcount
+
+		Route* ifroute;			// Points back to TYPE_IF Route for netif.
 
 		Route(Ethernet& n, Type t, in_addr_t addr, in_addr_t mask = 0xffffffff) :
 			netif(n)
 		{
+			refcount = 1;
 			dest = addr & mask;
 			netmask = mask;
 			nexthop = addr;
 			type = t;
 			memset(macaddr, 0, sizeof macaddr);
 			macvalid = false;
+			invalid = false;
 			ResetExpire();
+			ifroute = NULL;
 		}
 
 		void ResetExpire() { expire = Time::Now() + Time::FromSec(HOSTRT_EXPIRE); }
+
+		void Retain() { Spinlock::Scoped L(lock); assert(refcount); ++refcount; }
+		void Release() {
+			lock.Lock(); assert(refcount); --refcount; 
+			if (!refcount) { lock.Unlock(); delete this; }
+			else lock.Unlock();
+		}
 	};
+private:
 
 	Mutex _lock;
 
@@ -273,9 +291,17 @@ public:
 	// Set destination Mac address
 	static void SetMacDest(IOBuffer* buf, uint8_t macaddr[6]);
 
-	// Send packet
-	// Returns true if sent, false if pending ARP
-	bool Send(IOBuffer* buf);
+	// Send packet.  If the Route is known, pass it in.  Returns the
+	// Route used.  If caller wants to keep the Route, then the
+	// refcount should be incremented.  If Route isn't known, pass in
+	// NULL.  May return NULL if packet wasn't sendable (no route), in
+	// which case the packet is also returned to pool.  May return a
+	// route different from the one passed in, if so the route's
+	// refcount has been decremented.
+	//
+	// The purpose of this scheme is to keep TCP and connected UDP
+	// sockets from having to do a route lookup for every packet sent.
+	Route* Send(IOBuffer* buf, Route* rt);
 
 	// Receive for ETHERTYPE_IP
 	void Receive(IOBuffer* packet);

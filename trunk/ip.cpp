@@ -135,19 +135,46 @@ void Ip::ReleasePendingARP()
 
 void Ip::FillFrame(IOBuffer* buf, Route* rt)
 {
+	buf->SetHead(0);
 	memcpy(*buf + 2, rt->macaddr, 6);
 	memcpy(*buf + 2 + 6, rt->netif.GetMacAddr(), 6);
 	const uint16_t et = Htons(ETHERTYPE_IP);
 	memcpy(*buf + 2 + 6, &et, 2);
+
+	// Fill in source addr
+	Iph& iph = GetIph(buf);
+	if (iph.source == INADDR_ANY) {
+		const Route* ifroute = rt->type == Route::TYPE_IF ? rt : rt->ifroute;
+		assert(ifroute);
+		assert(ifroute->type == Route::TYPE_IF);
+		iph.source = ifroute->nexthop;
+	}
+	// Length and checksum
+	iph.len = Htons(*buf + buf->Size() - (uint8_t*)&iph);
+	iph.SetCsum();
 }
 
 
-bool Ip::Send(IOBuffer* buf)
+Ip::Route* Ip::Send(IOBuffer* buf, Ip::Route* prevrt)
 {
 	Mutex::Scoped L(_lock);
+
+	if (prevrt) {
+		if (prevrt->invalid)
+			prevrt->Release();
+		else if (prevrt->macvalid) {
+			FillFrame(buf, prevrt);
+			prevrt->netif.Send(buf);
+			return prevrt;
+		} else {
+			// ARP has expired
+			_pending_arp.PushBack(buf);
+			return prevrt;
+		}
+	}
+
 	Iph& iph = GetIph(buf);
 	const in_addr_t dest = iph.dest;
-	iph.SetCsum();
 
 	for (uint i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
@@ -157,28 +184,28 @@ bool Ip::Send(IOBuffer* buf)
 				if (rt->type == Route::TYPE_IF) {
 					if (rt->dest == dest) {
 						rt->netif.Send(buf); // Loopback: ethernet driver will return it
-						return true;
+						return rt;
 					} else {
 						Route* hostrt = AddHostRoute(dest, rt);
 						_pending_arp.PushBack(buf);
 						RequestARP(hostrt);
-						return false;
+						return hostrt;
 					}
 				} else {
 					rt->netif.Send(buf);
-					return true;
+					return rt;
 				}
 			} else {
 				_pending_arp.PushBack(buf);
 				RequestARP(rt);
-				return false;
+				return rt;
 			}
 		}
 	}
 
-	BufferPool::FreeBuffer(buf);
-	// XXX set socket error
-	return true;
+	// No route
+	BufferPool::FreeBuffer(buf); // XXX could a transport ever not want this?
+	return NULL;
 }
 
 
