@@ -89,10 +89,13 @@ public:
 	static void DetectedStep(uint usec) { _stepped._t += usec; }
 #endif
 
+#ifndef POSIX
 	void ToCalendar(struct tm& tm) const;
+#endif
 
 	static const Time InfTim;
 private:
+#ifndef POSIX
 	enum { SECS_PER_DAY = 24*60*60 };
 
 	static bool IsLeapYear(uint year) {
@@ -100,6 +103,7 @@ private:
 	}
 	static uint DaysInYear(uint year) { return IsLeapYear(year) ? 366 : 365; }
 	static uint GetMonthSize(uint year, uint month);
+#endif
 };
 
 
