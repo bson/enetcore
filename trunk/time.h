@@ -92,6 +92,14 @@ public:
 	void ToCalendar(struct tm& tm) const;
 
 	static const Time InfTim;
+private:
+	enum { SECS_PER_DAY = 24*60*60 };
+
+	static bool IsLeapYear(uint year) {
+		return !(year & 3) && ((year % 100) || !(year % 400));
+	}
+	static uint DaysInYear(uint year) { return IsLeapYear(year) ? 366 : 365; }
+	static uint GetMonthSize(uint year, uint month);
 };
 
 

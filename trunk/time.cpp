@@ -5,16 +5,9 @@
 Time Time::_stepped = Time::FromUsec(0);
 const Time Time::InfTim(-1);
 
-enum { SECS_PER_DAY = 24*60*60 };
-
-
-static inline bool IsLeapYear(uint year) {
-	return !(year & 3) && ((year % 100) || !(year % 400));
-}
-
-static inline uint DaysInYear(uint year) { return IsLeapYear(year) ? 366 : 365; }
-
-static inline uint GetMonthSize(uint year, uint month) {
+// * static
+uint Time::GetMonthSize(uint year, uint month) 
+{
 	static const int month_size[24] = {
 		31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
 		31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
