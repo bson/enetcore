@@ -317,7 +317,7 @@ public:
 	//      if (r)  r->Retain();
 	//      _cached_route = r;
 	//    }
-	//    if (!r)  { ...no route... }
+	//    if (!r)  { ...EHOSTUNREACH... }
 	//
 	//   // ... teardown ..
 	//   if (_cached_route)  _cached_route->Release();
