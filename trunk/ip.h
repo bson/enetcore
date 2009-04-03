@@ -301,6 +301,35 @@ public:
 	//
 	// The purpose of this scheme is to keep TCP and connected UDP
 	// sockets from having to do a route lookup for every packet sent.
+	// A transport that doesn't wish to cache Route lookups can pass in
+	// NULL and ignore the result, or treat it as a boolean to indicate
+	// whether the packet was routable or not.
+	//
+	// The canonical pattern for route caching is:
+	//    Route* _cached_route;
+	//
+	//    // ... initialize ...
+	//    _cached_route = NULL;
+	//
+	//    // ... send packet ...
+	//    Route* r = Ip::Send(packet, _cached_route);
+	//    if (r != _cached_route) {
+	//      if (r)  r->Retain();
+	//      _cached_route = r;
+	//    }
+	//    if (!r)  { ...no route... }
+	//
+	//   // ... teardown ..
+	//   if (_cached_route)  _cached_route->Release();
+	//
+	// The route returned should only differ from the previous route
+	// in exceptional cases (e.g. DHCP config param values changed,
+	// because host was physically reconnected to a different network,
+	// or a route/interface was manually reconfigured).
+	//
+	// XXX Doesn't currently take into account the source address when
+	// selecting an interface.  It's always treated as if it were
+	// INADDR_ANY.
 	Route* Send(IOBuffer* buf, Route* rt);
 
 	// Receive for ETHERTYPE_IP

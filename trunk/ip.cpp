@@ -39,8 +39,10 @@ void Ip::RemoveInterface(Ethernet& nic)
 	Mutex::Scoped L(_lock);
 
 	for (uint i = 0; i < _routes.Size(); ) {
-		if (&(_routes[i]->netif) == &nic) {
-			delete _routes[i];
+		Route* rt = _routes[i];
+		if (&rt->netif == &nic) {
+			rt->invalid = true;
+			rt->Release();
 			_routes.Erase(i);
 		} else {
 			++i;
@@ -168,7 +170,7 @@ void Ip::FillFrame(IOBuffer* buf, Route* rt)
 
 	// Fill in source addr
 	Iph& iph = GetIph(buf);
-	if (iph.source == INADDR_ANY) {
+	if (true /* iph.source == INADDR_ANY */) {
 		const Route* ifroute = rt->type == Route::TYPE_IF ? rt : rt->ifroute;
 		assert(ifroute);
 		assert(ifroute->type == Route::TYPE_IF);
