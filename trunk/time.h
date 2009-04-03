@@ -9,6 +9,18 @@
 #define TIMEBASE 1000000
 #endif
 
+#ifndef POSIX
+struct tm {
+	uint tm_sec;     // seconds (0 - 60)
+	uint tm_min;     // minutes (0 - 59)
+	uint tm_hour;    // hours (0 - 23)
+	uint tm_mday;    // day of month (1 - 31)
+	uint tm_mon;     // month of year (0 - 11)
+	uint tm_year;    // year - 1900
+	uint tm_wday;    // day of week (Sunday = 0)
+	uint tm_yday;    // day of year (0 - 365)
+};
+#endif
 
 class Time {
 	uint64_t _t;			// Time in usec
@@ -62,6 +74,7 @@ public:
 #else
 	int64_t GetMsec() const { return _t * 1000 / TIMEBASE; }
 #endif
+	// This only retains 34.10 precision if TIMEBASE != 1000000
 	int64_t GetUsec() const { return _t * 1000000 / TIMEBASE; }
 
 	static Time Now() { return _clock.GetTime(); }
@@ -71,8 +84,12 @@ public:
 	static const Time FromMsec(int64_t msec) { return msec * (TIMEBASE / 1000); }
 	static const Time FromSec(uint sec) { return (uint64_t)sec * (uint64_t)TIMEBASE; }
 
+#ifdef POSIX
 	// Detected backwards time step
 	static void DetectedStep(uint usec) { _stepped._t += usec; }
+#endif
+
+	void ToCalendar(struct tm& tm) const;
 
 	static const Time InfTim;
 };

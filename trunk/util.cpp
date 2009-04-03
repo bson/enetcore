@@ -3,6 +3,7 @@
 //#include "netaddr.h"
 #include "sha1.h"
 #include "object.h"
+#include "mutex.h"
 
 
 namespace Util {
@@ -67,38 +68,30 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 {
 	assert(t);
 	
-	time_t posixtime = t->GetPosixTime();
-
-	static Spinlock lock;
-	Spinlock::Scoped L(lock);
-
 #ifdef POSIX
+	static Mutex lock;
+	Mutex::Scoped L(lock);
+
+	const time_t posixtime = t->GetPosixTime();
 	struct tm* tm = ::localtime(&posixtime);
+#else
+	struct tm tm0;
+	t->ToCalendar(tm0);
+	const tm* const tm = &tm0;
+
+	static Mutex lock;
+	Mutex::Scoped L(lock);
+#endif
 	char buf[64];
 	if (with_date)
-		::snprintf(buf, sizeof buf, "%04u-%02u-%02u %02u:%02u:%02u",
-				   tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-				   tm->tm_hour, tm->tm_min, tm->tm_sec);
+		AppendFmt(dest, STR("%04u-%02u-%02u %02u:%02u:%02u"),
+				  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+				  tm->tm_hour, tm->tm_min, tm->tm_sec);
 	else
-		::snprintf(buf, sizeof buf, "%02u:%02u:%02u.%03u",
+		AppendFmt(dest, STR("%02u:%02u:%02u.%03u"),
 				   tm->tm_hour, tm->tm_min, tm->tm_sec, t->GetMsec() % 1000);
 
 	dest.PushBack((uint8_t*)buf);
-#else
-	uint min = posixtime / 60;  posixtime %= 60;
-	uint hr = min / 60; min %= 60;
-
-	FormatNumber(dest, hr, FMT_UNSIGNED, 10, 1);
-
-	dest.PushBack((uchar)':');
-	FormatNumber(dest, min, FMT_UNSIGNED, 10, 2);
-
-	dest.PushBack((uchar)':');
-	FormatNumber(dest, posixtime, FMT_UNSIGNED, 10, 2);
-
-	dest.PushBack((uchar)'.');
-	FormatNumber(dest, t->GetMsec() % 1000, FMT_UNSIGNED, 10, 3);
-#endif
 }
 
 
@@ -151,13 +144,11 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				dest.PushBack(va_arg(va, const String*)->CStr());
 				break;
 			}
-#if 0
 			case 'a':
 			case 'A': {
 				dest.PushBack(va_arg(va, const NetAddr*)->Printable(*fmt == 'A').CStr());
 				break;
 			}
-#endif
 			case 'o': {
 				Object* o = va_arg(va, Object*);
 				if (o) o->AsJson(dest);
