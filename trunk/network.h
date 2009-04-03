@@ -1,6 +1,12 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+enum EtherType {
+	ETHERTYPE_IP = 0x800,
+	ETHERTYPE_ARP = 0x806
+};
+
+
 struct InterfaceInfo {
 	String _name;			// e.g. "en0"
 	NetAddr _addr;			// Configured address (port == 0)

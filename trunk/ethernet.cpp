@@ -127,6 +127,13 @@ void Ethernet::Send(IOBuffer* buf)
 {
 	Spinlock::Scoped L(_lock);
 
+	if (!memcmp(buf + 2, _macaddr, 6)) {
+		// Loopback - just put add it to the receive queue
+		_recvq.PushBack(buf);
+		_net_event.Set();
+		return;
+	}
+
 	_sendq.PushBack(buf);
 
 	while (_tx_state == TX_IDLE && !_sendq.Empty())

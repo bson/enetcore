@@ -11,6 +11,14 @@ namespace BufferPool {
 }
 
 
+// Ethernet frame
+struct EthFrame {
+	uint8_t pad[2];				// Used ot align IP header to 32 bytes
+	uint8_t dest[6];
+	uint8_t source[6];
+	uint16_t et;				// Ethertype
+};
+
 class Ethernet {
 	volatile uint16_t* _base;
 

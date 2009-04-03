@@ -1,5 +1,7 @@
 #include "enetkit.h"
 #include "dhcp.h"
+#include "ip.h"
+#include "udp.h"
 #include "ethernet.h"
 
 
@@ -301,7 +303,7 @@ done:
 
 Dhcp::Type Dhcp::GetMsgType(IOBuffer* buf, in_addr_t& server)
 {
-	const Packet* pkt = *buf + sizeof (Iph) + sizeof (Udph);
+	const Packet* pkt = (Packet*)(*buf + sizeof (Iph) + sizeof (Udph));
 	const uint8_t* options = pkt->options;
 	const uint len = *buf + buf->Size() - options;
 
