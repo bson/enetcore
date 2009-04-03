@@ -74,7 +74,7 @@ public:
 #else
 	int64_t GetMsec() const { return _t * 1000 / TIMEBASE; }
 #endif
-	// This only retains 34.10 precision if TIMEBASE != 1000000
+	// This only retains 34.20 precision if TIMEBASE != 1000000
 	int64_t GetUsec() const { return _t * 1000000 / TIMEBASE; }
 
 	static Time Now() { return _clock.GetTime(); }
