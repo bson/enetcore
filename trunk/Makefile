@@ -1,0 +1,62 @@
+PATH:=/opt/local/bin:$(PATH)
+
+CC      = arm-elf-g++-4.3.2
+LD      = arm-elf-ld -v
+AR      = arm-elf-ar
+AS      = arm-elf-as
+OCP      = arm-elf-objcopy
+OD		= arm-elf-objdump
+
+ODIR=build
+#  -fno-common
+COPT ?= -O0 -DTRACE -DDEBUG
+
+CFLAGS  = -I. $(COPT) -g -fno-exceptions -fno-rtti -ffreestanding \
+	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT -ffunction-sections
+AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o $(ODIR)/crt.o
+LFLAGS  =  -Map $(ODIR)/image.map -nostartfiles -Tlink.cmd
+LIBS    = /opt/local/lib/gcc/arm-elf/4.3.2/libgcc.a
+CPFLAGS = -O binary
+HEXFLAGS = -O ihex
+ODFLAGS	= -x --syms
+
+SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp			\
+	serial.cpp mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp		\
+	sha1.cpp object.cpp time.cpp lookup3.cpp pstring.cpp hashtable.cpp	\
+	timer.cpp thread.cpp mutex.cpp spi.cpp sdcard.cpp ethernet.cpp		\
+	netaddr.cpp network.cpp dhcp.cpp ip.cpp udp.cpp
+
+TOUCH_ODIR=$(ODIR)/.touch
+
+OBJS=$(patsubst %.cpp,$(ODIR)/%.o,$(SRCS))
+DEPS = $(patsubst %.cpp, $(ODIR)/%.d, $(SRCS))
+
+all: $(ODIR)/image.bin $(ODIR)/image.dmp $(ODIR)/image.hex
+
+clean:
+	-rm -rf $(ODIR)
+
+$(ODIR)/image: $(ODIR)/crt.o $(OBJS) link.cmd 
+	$(LD) $(LFLAGS) -o $@ $(ODIR)/crt.o $(OBJS) $(LIBS)
+
+$(ODIR)/%.bin: $(ODIR)/%
+	$(OCP) $(CPFLAGS) $< $@
+
+$(ODIR)/%.dmp: $(ODIR)/%
+	$(OD) $(ODFLAGS) $< >$@
+
+$(ODIR)/%.hex: $(ODIR)/%
+	$(OCP) $(HEXFLAGS) $< $@
+
+$(ODIR)/crt.o: crt.s $(TOUCH_ODIR)
+	$(AS) $(AFLAGS) crt.s > $(ODIR)/crt.lst
+
+$(ODIR)/%.o: %.cpp $(TOUCH_ODIR)
+	$(CC) $(CFLAGS) -MD -o $@ -c $<
+
+
+$(TOUCH_ODIR):
+	mkdir -p $(ODIR)
+	touch $(TOUCH_ODIR)
+
+-include $(DEPS)
