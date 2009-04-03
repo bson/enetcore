@@ -236,7 +236,7 @@ public:
 		uint8_t refcount;
 		Spinlock lock;			// Protects refcount
 
-		Route* ifroute;			// Points back to TYPE_IF Route for netif.
+		Route* ifroute;			// Points back to TYPE_IF Route for netif
 
 		Route(Ethernet& n, Type t, in_addr_t addr, in_addr_t mask = 0xffffffff) :
 			netif(n)
@@ -316,6 +316,9 @@ public:
 	}
 	
 private:
+	// Find the Route entry for a network interface
+	Route* FindIfRoute(Ethernet& netif);
+
 	// Derive a host route derived from another entry (TYPE_IF)
 	Route* AddHostRoute(in_addr_t host, Route* base);
 

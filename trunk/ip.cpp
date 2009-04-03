@@ -28,7 +28,9 @@ void Ip::AddInterface(Ethernet& nic, in_addr_t addr, in_addr_t mask)
 	Mutex::Scoped L(_lock);
 
 	RemoveInterface(nic);
-	_routes.PushFront(new Route(nic, Route::TYPE_IF, addr, mask));
+	Route* rt = new Route(nic, Route::TYPE_IF, addr, mask);
+	rt->ifroute = rt;
+	_routes.PushFront(rt);
 }
 
 
@@ -50,9 +52,26 @@ void Ip::RemoveInterface(Ethernet& nic)
 }
 
 
+Ip::Route* Ip::FindIfRoute(Ethernet& netif)
+{
+	_lock.AssertLocked();
+
+	for (uint i = 0; i < _routes.Size(); ++i) {
+		Route* rt = _routes[i];
+		if (rt->type != Route::TYPE_IF) break;
+		if (&rt->netif == &netif)  return rt;
+	}
+
+	return NULL;
+}
+
+
 void Ip::AddDefaultRoute(Ethernet& nic, in_addr_t router)
 {
 	Mutex::Scoped L(_lock);
+
+	Route* netif = FindIfRoute(nic);
+	if (!netif) return;
 
 	// Insert immediately following last TYPE_IF
 	uint pos;
@@ -60,6 +79,7 @@ void Ip::AddDefaultRoute(Ethernet& nic, in_addr_t router)
 		if (_routes[pos]->type == Route::TYPE_IF) {
 			Route* rt = new Route(nic, Route::TYPE_RT, 0, 0);
 			rt->nexthop = router;
+			rt->ifroute = netif;
 			_routes.Insert(pos + 1) = rt;
 			break;
 		}
@@ -71,11 +91,15 @@ void Ip::AddNetRoute(Ethernet& nic, in_addr_t network, in_addr_t netmask, in_add
 {
 	Mutex::Scoped L(_lock);
 
+	Route* netif = FindIfRoute(nic);
+	if (!netif) return;
+
 	// Insert immediately following last TYPE_RT
 	for (uint pos = _routes.Size() - 1; pos >= 0; --pos) {
 		if (_routes[pos]->type == Route::TYPE_RT) {
 			Route* rt = new Route(nic, Route::TYPE_RT, network, netmask);
 			rt->nexthop = router;
+			rt->ifroute = netif;
 			_routes.Insert(pos + 1) = rt;
 			break;
 		}
@@ -91,6 +115,7 @@ Ip::Route* Ip::AddHostRoute(in_addr_t host, Route* rt)
 	Route *hostrt = new Route(rt->netif, Route::TYPE_HOSTRT, host);
 	hostrt->nexthop = host;
 	hostrt->macvalid = false;
+	hostrt->ifroute = rt;
 	_routes.PushBack(hostrt);
 
 	return hostrt;
