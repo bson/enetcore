@@ -53,10 +53,8 @@ private:
 	const void* _waitob;		// Object thread is blocked on, if any
 	Time _waittime;				// Absolute wake time when in STATE_TWAIT
 
-#ifdef DEBUG
 	void* _stack;				// Beginning of stack memory block (low address)
 	void* _estack;				// End of stack (high address - first address past the stack)
-#endif
 
 public:
 	Thread(void* stack = NULL, uint stack_size = 0);
@@ -111,6 +109,10 @@ public:
 
 	// Timer interrupt entry
 	static void TimerInterrupt();
+
+	// Thread exception handler.  _curpcb should contain thread state
+	enum ExType { DATA_ABORT = 0, PROGRAM_ABORT, UNDEF, SWI };
+	static void Exception(ExType ex) NAKED NORETURN;
 
 private:
 	// Save/resume state of self - this function will return after save, then

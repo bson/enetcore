@@ -405,6 +405,24 @@ void Thread::SetTimer(uint usec)
 }
 
 
+// * static
+void Thread::Exception(Thread::ExType ex)
+{
+	switch (ex) {
+	case DATA_ABORT:
+		panic("Data abort");
+	case PROGRAM_ABORT:
+		panic("Program abort");
+	case UNDEF:
+		panic("Undef instruction");
+	case SWI:
+		panic("SWI exception");
+	default:
+		abort();
+	}
+}
+
+
 // * virtual
 void SysTimer::Tick()
 {

@@ -14,11 +14,11 @@ void* _intr_thread_stack;
 
 
 extern "C" {
-void Unexpected_Interrupt() __irq;
-void Data_Abort_Exception() __abort;
-void Program_Abort_Exception() __abort;
-void Undef_Exception() __undef;
-void SWI_Trap() __swi;
+void Unexpected_Interrupt() __irq NAKED;
+void Data_Abort_Exception() __abort NAKED;
+void Program_Abort_Exception() __abort NAKED;
+void Undef_Exception() __undef NAKED;
+void SWI_Trap() __swi NAKED;
 
 void feed();
 void busy_wait () NAKED;
@@ -332,20 +332,24 @@ void Unexpected_Interrupt()  {
 
 void Data_Abort_Exception()
 {
-	for (;;) ;
+	SaveStateExc(8);			// Set LR to point to aborted instruction
+	Thread::Exception(Thread::DATA_ABORT);
 }
 
 void Program_Abort_Exception()
 {
-	for (;;) ;
+	SaveStateExc(8);			// Set LR to point to aborted instruction
+	Thread::Exception(Thread::PROGRAM_ABORT);
 }
 
 void Undef_Exception()
 {
-	for (;;) ;
+	SaveStateExc(4);			// Set LR to point to aborted instruction
+	Thread::Exception(Thread::UNDEF);
 }
 
 void SWI_Trap()
 {
-	for (;;) ;
+	SaveStateExc(4);			// Set LR to point to SWI instruction
+	Thread::Exception(Thread::SWI);
 }

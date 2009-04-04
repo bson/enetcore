@@ -6,14 +6,8 @@ Ethernet
   - Attach EINT2 to Ethernet::Interrupt()
 
 - Pick up interrupt on link status, track in driver, log
-- Packet tx list, packet rx ring
-- Interrupt tx/rx
-- Service wait point - global state variable
 - Provide network thread: wait; manage buffer freelist (restock if needed)
-- Implement basic IP: ARP, route table
-- Downcalls for sending
-- Upcalls for receiving (network thread context)
-
+- Consider making network thread high priority.
 
 Add ICMP
 
@@ -22,10 +16,7 @@ Add UDP
 Optimize memset, memcpy
 - If operands are 32 bit aligned, use 32-bit ops
 
-
-Consider making network thread high priority.
-
-Exeption handler - traceback all threads, print thread state
+Improve exeption handler - traceback all threads, print thread state
 - Write tool to symbolize console crash output
 
 Thread features
@@ -42,15 +33,14 @@ Run clock off Timer1
 Implement Watchdog
 - Use hw watchdog
 
-
----
-DHCP:
-
-RFC2131
-
-
-
-
+Image sizes:
+ -Os         				 84k
+ -Os -DTRACE 				 85k
+ -Os -DTRACE -DDEBUG		 95k
+ -O0 -DTRACE -DDEBUG		189k
+ -O1 -DTRACE -DDEBUG		135k
+ -O2 -DTRACE -DDEBUG		130k
+ -O3 -DTRACE -DDEBUG		139k
 
 ---
 
