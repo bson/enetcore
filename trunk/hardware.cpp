@@ -344,7 +344,7 @@ void Program_Abort_Exception()
 
 void Undef_Exception()
 {
-	SaveStateExc(4);			// Set LR to point to aborted instruction
+	SaveStateExc(4);			// Set LR to point to undefined instruction
 	Thread::Exception(Thread::UNDEF);
 }
 
