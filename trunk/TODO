@@ -1,5 +1,3 @@
-Ethernet: Check that byte order of Mac addr is correct
-
 Add ICMP
 
 Add UDP
