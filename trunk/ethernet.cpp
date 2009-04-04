@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "ethernet.h"
+#include "util.h"
 
 
 Ethernet _eth0(CS8900A_BASE);
@@ -95,6 +96,9 @@ void Ethernet::Initialize()
 	_pp[ETH_PP_LAF] = 0;
 
 	// IA
+	const uint32_t ma = Util::Random<uint32_t>();
+	memcpy(_macaddr+1, &ma, 4);
+
 	_pp[ETH_PP_IA + 0] = _macaddr[0];
 	_pp[ETH_PP_IA + 2] = _macaddr[1];
 	_pp[ETH_PP_IA + 4] = _macaddr[2];
@@ -150,8 +154,8 @@ void Ethernet::Interrupt()
 {
 	SaveStateExc(4);
 
-	// XXX check EINT2 channel (active HIGH for CS8900)
-	_eth0.HandleInterrupt();
+	if (_vic.ChannelPending(16))
+		_eth0.HandleInterrupt();
 
 	_vic.ClearPending();
 	LoadStateReturnExc();

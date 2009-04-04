@@ -3,6 +3,7 @@
 #include "ip.h"
 #include "udp.h"
 #include "ethernet.h"
+#include "util.h"
 
 
 Dhcp _dhcp0(_eth0);
@@ -10,6 +11,7 @@ Dhcp _dhcp0(_eth0);
 
 Dhcp::Dhcp(Ethernet& netif) : _netif(netif)
 {
+	_xid = Util::Random<uint32_t>();
 }
 
 
@@ -41,7 +43,7 @@ bool Dhcp::Receive(IOBuffer* buf)
 
 	Mutex::Scoped L(_lock);
 	
-	if (pkt->xid == XID) {
+	if (pkt->xid == _xid) {
 		switch (_state) {
 		case STATE_DISCOVER:
 			if (msg != DHCPOFFER)
@@ -161,6 +163,7 @@ IOBuffer* Dhcp::AllocPacket()
 
 //	pkt->flags |= 1;			// Tell server to broadcast reply
 	pkt->secs = (Time::Now() - _start).GetSec();
+	pkt->xid = _xid;			// Default XID
 
 	return buf;
 }
@@ -374,7 +377,7 @@ void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
 	iph.SetHLen(sizeof (Iph));
 	iph.tos = 0;
 	iph.len = 576;
-	iph.id = Ip::GetId();
+	iph.id = _ip.GetId();
 	iph.off = 0;
 	iph.ttl = 255;
 	iph.proto = IPPROTO_UDP;

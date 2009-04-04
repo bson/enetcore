@@ -18,12 +18,11 @@ struct Dhcp {
 	};
 
 
-	enum { XID = 0x74656e65 };	// 'enet'
-
 	Mutex _lock;
 	Ethernet& _netif;			// Interface to configure
 	Time _start;				// Time since we started DHCP process
 	Time _renew;				// If _leased: time when lease expires
+	uint32_t _xid;				// XID we use
 	State _state;
 	bool _leased;				// Currently have an address (in _curaddr)
 	in_addr_t _lease;			// Currently leased addr
@@ -114,7 +113,7 @@ struct Dhcp {
 		Packet(Dhcp& dhcp) :
 			// Default to ethernet boot request
 			op(BOOTREQUEST), htype(1), hlen(6), hops(0),
-			xid(XID), secs((Time::Now() - dhcp._start).GetSec()),
+			xid(0), secs((Time::Now() - dhcp._start).GetSec()),
 			flags(0), yiaddr(0), giaddr(0)
 		{
 			ciaddr = 0;

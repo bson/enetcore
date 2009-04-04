@@ -45,6 +45,7 @@ void* NetThread(void*)
 	Thread::Self().ReadyToWork();
 
 	_eth0.Initialize();
+	_ip.Initialize();
 	_dhcp0.Reset();
 
 	Time dhcp_next = _dhcp0.GetServiceTime();

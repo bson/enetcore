@@ -231,4 +231,8 @@
 #define BCFG2 (*((volatile unsigned long*) 0xFFE00008))
 #define BCFG3 (*((volatile unsigned long*) 0xFFE0000C))
 
+// ADC
+#define ADCR (*((volatile unsigned long*) 0xe0034000))
+#define ADDR (*((volatile unsigned long*) 0xe0034004))
+
 #endif  // __LPC22xx_H

@@ -98,6 +98,8 @@ public:
 	// Fill in a buffer for broadcast
 	void FillForBcast(IOBuffer* buf, uint dgramlen);
 
+	// Interrupt handler
+	static void Interrupt() __irq NAKED;
 private:
 	// Begin Tx for head of sendq - issue command
 	void BeginTx();
@@ -106,8 +108,7 @@ private:
 	// Call when we know there is on-chip buffer space.
 	void CopyTx();
 
-	// Interrupt handler
-	static void Interrupt() __irq NAKED;
+	// Instance interrupt handler
 	void HandleInterrupt();
 
 	// Receive frame

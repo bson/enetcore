@@ -7,6 +7,8 @@
 #include "thread.h"
 #include "spi.h"
 #include "network.h"
+#include "ethernet.h"
+#include "util.h"
 
 
 Thread* _main_thread;
@@ -250,8 +252,12 @@ void hwinit()
 	// Disable watchdog
 	WDMOD = 0;
 
+	// CS8900A: on CS2, 7 wait states, 16 bit
+	BCFG2 = BCFGVAL(4, 7, 7, 0, 0, 1);
+
 	// Enable UARTs as output, SPI0 on pins
-	PINSEL0 = 0x55505;
+	// P0.15 = EINT2
+	PINSEL0 = 0x40055505;
 	IO1DIR |= 0x00800000;	 // Make P1.23 an output, everything else stays input
 
 	IO1SET =  0x00800000;	 // led off
@@ -262,10 +268,24 @@ void hwinit()
 	IO0DIR &= ~0x20;			   // GPIO 0.5 (MISO) is in
 	IO0DIR |= 1 << 10;			   // GPIO 0.10 is output (CARD_CS)
 
-	// Enable SPI1
-	PINSEL1 = 0b10101000;
+	// Enable SPI1, AIN0
+	PINSEL1 = 0b00000000001000000000000010101000;
 	IO1DIR |= 0b1101 << 17;		// SCK1, MOSI1, SSEL1 are out
 	IO1DIR &= 0b0010 << 17;		// MISO1 is in
+
+	// Enable reading from AIN0
+	uint8_t buf[32];
+	ADCR = 0b10000000000000000000001 | (((PCLK / 4500000) - 1) << 8);
+	for (uint8_t* p = (uint8_t*)buf; p < (uint8_t*)buf + sizeof buf; ) {
+		uint32_t ad;
+		do {
+			ad = ADDR;
+		} while (!(ad & (1 << 31)));
+		*p++ = (ad & 0xffff) >> 6;
+	}
+	ADCR = 0;
+
+	Util::RandomSeed(buf, sizeof buf);
 
 	// Allocate main thread stack - this is the one we're using now
 	// Since the region allocates low to high we do this by installing a reserve...
@@ -296,11 +316,13 @@ void hwinit()
 	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
 	_vic.EnableChannel(6);
 	_uart0.SetInterrupts(true);
-
 	_uart0.SetSpeed(115200);
 
 	_vic.InstallHandler(10, SPI::Interrupt);
 	_vic.EnableChannel(10);
+
+	_vic.InstallHandler(16, Ethernet::Interrupt);
+	_vic.EnableChannel(16);
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
@@ -316,6 +338,8 @@ void hwinit()
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
 	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
 		 _main_thread_stack, sp, _intr_thread_stack);
+
+	DMSG("Random uint: 0x%0x", Util::Random<uint>());
 
 	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }

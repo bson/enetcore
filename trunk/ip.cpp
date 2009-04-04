@@ -23,6 +23,13 @@ uint16_t ipcksum(const uint16_t* block, uint len)
 }
 
 
+void Ip::Initialize()
+{
+	_id = Util::Random<uint16_t>();
+}
+
+
+
 void Ip::AddInterface(Ethernet& nic, in_addr_t addr, in_addr_t mask) 
 {
 	Mutex::Scoped L(_lock);
@@ -176,9 +183,21 @@ void Ip::FillFrame(IOBuffer* buf, Route* rt)
 		assert(ifroute->type == Route::TYPE_IF);
 		iph.source = ifroute->nexthop;
 	}
-	// Length and checksum
-	iph.len = Htons(*buf + buf->Size() - (uint8_t*)&iph);
-	iph.SetCsum();
+
+	// id = 0 means header is not yet filled in
+	// Source, dest need to be filled in
+	if (!iph.id)  {
+		iph.id = ++_id;
+
+		iph.SetHLen(sizeof (Iph));
+		iph.tos = 0;
+		iph.off = 0;
+		iph.ttl = 255;
+
+		// Length and checksum
+		iph.len = Htons(*buf + buf->Size() - (uint8_t*)&iph);
+		iph.SetCsum();
+	}
 }
 
 
@@ -194,7 +213,7 @@ Ip::Route* Ip::Send(IOBuffer* buf, Ip::Route* prevrt)
 			prevrt->netif.Send(buf);
 			return prevrt;
 		} else {
-			// ARP has expired
+			// No ARP info yet
 			_pending_arp.PushBack(buf);
 			return prevrt;
 		}

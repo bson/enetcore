@@ -267,7 +267,10 @@ private:
 	Vector<Route*> _routes;
 	Vector<IOBuffer*> _pending_arp;
 
+	uint16_t _id;				// ID counter
+
 public:
+	void Initialize();
 	
 	// Remove interface and all entries that refer to it
 	void RemoveInterface(Ethernet& nic);
@@ -335,13 +338,10 @@ public:
 
 	// Receive for ETHERTYPE_ARP
 	void ArpReceive(IOBuffer* packet);
-
-	// Return header ID
-	static uint16_t GetId() {
-		static uint16_t id = 0;
-		return Htons(++id);
-	}
 	
+	// Return header ID
+	uint16_t GetId() { return ++_id; }
+
 private:
 	// Find the Route entry for a network interface
 	Route* FindIfRoute(Ethernet& netif);

@@ -190,10 +190,14 @@ public:
 			"str lr, [r1, #13*4]!;"  /* Save pre-exception PC as PC */ \
 			"mrs r0, spsr;"											\
 			"str r0, [r1, #4];" /* Save SPSR as CPSR */				\
-			"mrs r0, cpsr;"											\
-			"bic r0, #0x40;" /* Rerenable FIQ */					\
-			"msr cpsr, r0;"											\
 			: : : "memory"); }
+
+#if 0
+// XXX IRQs and exceptions don't disable FIQ
+			"mrs r0, cpsr;"											\
+			"bic r0, #0x40;" /* Enable FIQ */					\
+			"msr cpsr, r0;"											\ //
+#endif
 
 
 	// Load state - return from exception

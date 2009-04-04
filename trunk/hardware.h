@@ -115,7 +115,7 @@ enum { VIC_BASE = 0xfffff000,
 	   VIC_VectCntl0 = 128
 };
 
-enum { CS8900A_BASE = 0x60000000,
+enum { CS8900A_BASE = 0x82000000,
 	   ETH_XD0 = 0,
 	   ETH_XD1 = 1,
 	   ETH_TxCMD = 2,
