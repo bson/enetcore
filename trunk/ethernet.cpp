@@ -49,7 +49,7 @@ void FreeBuffer(IOBuffer* buf)
 // LSB must be 0 (1 implies multicast/logical address)
 // This number is chosen to be easy to type
 // * static
-uint16_t Ethernet::_macaddr[3] = { 0x0177, 0x4455, 0x3132 };
+uint16_t Ethernet::_macaddr[3] = { 0x0177, 0, 0 };
 
 // Broadcast address
 uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
@@ -99,9 +99,9 @@ void Ethernet::Initialize()
 	const uint32_t ma = Util::Random<uint32_t>();
 	memcpy(_macaddr+1, &ma, 4);
 
-	_pp[ETH_PP_IA + 0] = _macaddr[0];
-	_pp[ETH_PP_IA + 2] = _macaddr[1];
-	_pp[ETH_PP_IA + 4] = _macaddr[2];
+	_pp[ETH_PP_IA + 0] = Htons(_macaddr[0]);
+	_pp[ETH_PP_IA + 2] = Htons(_macaddr[1]);
+	_pp[ETH_PP_IA + 4] = Htons(_macaddr[2]);
 
 	_tx_state = TX_IDLE;
 	_link_status = false;

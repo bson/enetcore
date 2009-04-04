@@ -1,17 +1,4 @@
-Ethernet
-- Map and configure CS8900A
-  - CS2 
-  - 7 wait states?
-  - EINT2 = P0.15
-  - Pinsel EINT2 active high
-  - Attach EINT2 to Ethernet::Interrupt()
-
 Ethernet: Check that byte order of Mac addr is correct
-
-Enable ADC
-Generate random seed by reading 32 bytes from ADC at highest speed,
-then hashing it to a 32-bit integer.
-Use AIN0 = P0.27 (EXT-17)
 
 Add ICMP
 
