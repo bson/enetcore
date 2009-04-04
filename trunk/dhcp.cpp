@@ -26,10 +26,10 @@ void Dhcp::Reset()
 bool Dhcp::Receive(IOBuffer* buf)
 {
 	buf->SetHead(0);
-	if (buf->Size() < sizeof (Iph) + sizeof (Udph) + 32+64+128+8)
+	Iph& iph = Ip::GetIph(buf);
+	if (buf->Size() < 16 + iph.GetHLen() + sizeof (Udph) + 28+16+64+128+5)
 		return false;
 
-	Iph& iph = Ip::GetIph(buf);
 	Udph& udp = *(Udph*)iph.GetTransport();
 
 	if (Ntohs(udp.sport) != SERVER_PORT && Ntohs(udp.dport) != CLIENT_PORT)
