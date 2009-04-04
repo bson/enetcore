@@ -1,6 +1,15 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#include "thread.h"
+#include "mutex.h"
+
+extern EventObject _net_event;	// Wait object for network thread
+extern Thread* _net_thread;
+
+void* NetThread(void*);
+
+
 enum EtherType {
 	ETHERTYPE_IP = 0x800,
 	ETHERTYPE_ARP = 0x806

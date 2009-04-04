@@ -67,6 +67,9 @@ enum { MAIN_THREAD_STACK = 1400 };
 enum { INTR_THREAD_STACK = 1400 };
 enum { THREAD_DEFAULT_STACK = 1400 }; // Default thread stack size
 
+enum { NET_THREAD_STACK = 1400 };	  // Network thread stack size
+enum { NET_THREAD_PRIORITY = 200 };	  // Network thread priority
+
 // IOScheduler settings
 enum { IO_FUDGE = 10 };	  // I/O scheduler timing granularity, in msec
 enum { IO_STACK_SIZE = 2048 };	// Stack size for I/O threads

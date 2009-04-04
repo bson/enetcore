@@ -90,6 +90,9 @@ public:
 #endif
 	}
 
+	// Change thread priority
+	void SetPriority(uint8_t new_prio);
+
  	// Explicitly yield to specific thread
 	void Yield(Thread* other);
 

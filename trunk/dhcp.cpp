@@ -5,6 +5,9 @@
 #include "ethernet.h"
 
 
+Dhcp _dhcp0(_eth0);
+
+
 Dhcp::Dhcp(Ethernet& netif) : _netif(netif)
 {
 }

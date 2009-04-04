@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "thread.h"
 #include "spi.h"
+#include "network.h"
 
 
 Thread* _main_thread;
@@ -315,6 +316,8 @@ void hwinit()
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
 	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
 		 _main_thread_stack, sp, _intr_thread_stack);
+
+	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }
 
 

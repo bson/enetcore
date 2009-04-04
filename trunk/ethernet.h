@@ -61,7 +61,8 @@ public:
 	void Send(IOBuffer* buf);
 
 	// Return next buffer, or NULL if nothing ready.
-	IOBuffer* Recv();
+	// Sets et to ethertype (in host byte order)
+	IOBuffer* Receive(uint16_t& et);
 
 	// Return Link status
 	bool GetLinkStatus() const { return _link_status; }
@@ -117,8 +118,6 @@ private:
 	void DiscardTx();
 };
 
-
 extern Ethernet _eth0;
-extern EventObject _net_event;	// Wait object for network thread
 
 #endif // __ETHERNET_H__

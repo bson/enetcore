@@ -178,4 +178,6 @@ private:
 };
 
 
+extern Dhcp _dhcp0;
+
 #endif // __DHCP_H__

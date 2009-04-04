@@ -2,8 +2,6 @@
 #include "ethernet.h"
 
 
-EventObject _net_event;
-
 Ethernet _eth0(CS8900A_BASE);
 
 
@@ -111,7 +109,7 @@ void Ethernet::Initialize()
 }
 
 
-IOBuffer* Ethernet::Recv()
+IOBuffer* Ethernet::Receive(uint16_t& et)
 {
 	Spinlock::Scoped L(_lock);
 	if (_recvq.Empty()) return NULL;
@@ -119,6 +117,12 @@ IOBuffer* Ethernet::Recv()
 	IOBuffer* buf = _recvq.Front();
 	_recvq.PopFront();
 	_recvq.Compact();
+
+	buf->SetHead(0);
+	uint16_t tmp;
+	memcpy(&tmp, *buf + 2 + 6 + 6, 2);
+	et = Ntohs(tmp);
+
 	return buf;
 }
 

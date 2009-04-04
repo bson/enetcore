@@ -114,6 +114,17 @@ Thread& Thread::Initialize()
 }
 
 
+void Thread::SetPriority(uint8_t new_prio)
+{
+	_lock.Lock();
+	_prio = new_prio;
+	if (Suspend()) Switch();
+	_lock.Lock();
+	_state = STATE_RUN;
+	_lock.Unlock();
+}
+
+
 bool Thread::Suspend()
 {
 	asm volatile (
