@@ -150,7 +150,6 @@ bool Thread::Suspend()
 void Thread::Join()
 {
 	for (;;) {
-		_lock.Lock();
 		WaitFor(this);
 		if (_state == STATE_STOP) break;
 	}
