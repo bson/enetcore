@@ -5,8 +5,6 @@ Ethernet
   - Pinsel EINT2 active high
   - Attach EINT2 to Ethernet::Interrupt()
 
-- Pick up interrupt on link status, track in driver, log
-
 Add ICMP
 
 Add UDP
