@@ -76,8 +76,8 @@ public:
 
 	void Create(Start func, void *arg, uint stack_size = THREAD_DEFAULT_STACK,
 				bool detached = false);
-	static void ReadyToWork() { Self()._ready = true; /* Self()._waitq.WakeAll(); */ }
-	void WaitForReady() volatile const { /* while(!_read)  _waitq.Wait(); */ }
+	static void ReadyToWork() { Self()._ready = true;  WakeAll(&Self()); }
+	void WaitForReady()  { while(!_ready) WaitFor(this); }
 
 	static TLS& GetTLS() { return Self()._tls; }
 

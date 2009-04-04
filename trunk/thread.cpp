@@ -32,6 +32,7 @@ Thread::Thread(Start func, void* arg, uint stack_size, bool detached)
 	new (this) Thread(NULL, stack_size);
 
 	Create(func, arg, stack_size, detached);
+//	WaitForReady();
 }
 
 
