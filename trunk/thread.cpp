@@ -149,10 +149,9 @@ bool Thread::Suspend()
 
 void Thread::Join()
 {
-	for (;;) {
+	do {
 		WaitFor(this);
-		if (_state == STATE_STOP) break;
-	}
+	} while (_state != STATE_STOP);
 }
 
 
