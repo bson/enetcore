@@ -6,8 +6,6 @@ Ethernet
   - Attach EINT2 to Ethernet::Interrupt()
 
 - Pick up interrupt on link status, track in driver, log
-- Provide network thread: wait; manage buffer freelist (restock if needed)
-- Consider making network thread high priority.
 
 Add ICMP
 

@@ -48,11 +48,21 @@ void* NetThread(void*)
 	_dhcp0.Reset();
 
 	Time dhcp_next = _dhcp0.GetServiceTime();
+	bool link = !_eth0.GetLinkStatus();
 
 	for (;;) {
+		const bool newlink = _eth0.GetLinkStatus();
+		if (newlink != link) {
+			link = newlink;
+			DMSG("eth0: link status: %s", link ? "up" : "down");
+		}
+
 		const Time now = Time::Now();
-		if (now < dhcp_next)
-			_net_event.Wait(dhcp_next - now);
+		Time next = dhcp_next;
+		if (!link) next = min(next, Time::FromSec(1));
+
+		if (now < next)
+			_net_event.Wait(next - now);
 
 		IOBuffer* packet;
 
