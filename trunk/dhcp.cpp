@@ -25,10 +25,17 @@ void Dhcp::Reset()
 
 bool Dhcp::Receive(IOBuffer* buf)
 {
-	if (buf->Size() < sizeof (Iph) + sizeof (Udph) + 245)
+	buf->SetHead(0);
+	if (buf->Size() < sizeof (Iph) + sizeof (Udph) + 32+64+128+8)
 		return false;
 
-	Packet* pkt = (Packet*)(buf + 14 + sizeof(Iph) + sizeof (Udph));
+	Iph& iph = Ip::GetIph(buf);
+	Udph& udp = *(Udph*)iph.GetTransport();
+
+	if (Ntohs(udp.sport) != SERVER_PORT && Ntohs(udp.dport) != CLIENT_PORT)
+		return false;
+
+	Packet* pkt = (Packet*)udp.GetPayload();
 	in_addr_t server;
 	Type msg = GetMsgType(buf, server);
 
@@ -375,7 +382,7 @@ void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
 	iph.dest = dst.GetAddr4();
 	iph.SetCsum();
 
-	Udph& udph = iph.GetTransport<Udph>();
+	Udph& udph = *(Udph*)iph.GetTransport();
 	udph.sport = Htons(src.GetPort());
 	udph.dport = Htons(dst.GetPort());
 	udph.len = Htons(*buf + buf->Size() - (uint8_t*)&udph);

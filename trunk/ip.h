@@ -78,9 +78,7 @@ struct Iph {
 	uint GetFlags() const { return off & 7; }
 
 	// Get transport header
-	template <typename T> T& GetTransport() {
-		return *(T*)((uint8_t*)this + GetHLen());
-	}
+	uint8_t* GetTransport() { return (uint8_t*)this + GetHLen(); }
 
 	// Set checksum
 	void SetCsum() {

@@ -15,6 +15,8 @@ struct Udph {
 		sum = 0;
 		sum = Htons(~ipcksum((const uint16_t*)this, sizeof (Udph) + Ntohs(len)));
 	}
+
+	uint8_t* GetPayload() { return (uint8_t*)this + sizeof (Udph); }
 };
 
 
