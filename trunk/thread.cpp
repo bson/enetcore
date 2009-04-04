@@ -19,7 +19,7 @@ uint Thread::_rr;
 
 Thread::Thread(void* stack, uint stack_size) :
 	_ready(false), _cancel(false),
-	_state(STATE_SLEEP), _prio(128), _waitob(NULL), _waittime(0),
+	_state(STATE_SLEEP), _prio(THREAD_DEFAULT_PRIORITY), _waitob(NULL), _waittime(0),
 	_stack(stack), _estack((uint8_t*)_stack + stack_size)
 { 
 	Spinlock::Scoped L(_lock);

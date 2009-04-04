@@ -65,10 +65,12 @@ enum { HTTP_CONN_TIMEOUT = 1001 };
 
 enum { MAIN_THREAD_STACK = 1400 };
 enum { INTR_THREAD_STACK = 1400 };
-enum { THREAD_DEFAULT_STACK = 1400 }; // Default thread stack size
 
 enum { NET_THREAD_STACK = 1400 };	  // Network thread stack size
 enum { NET_THREAD_PRIORITY = 200 };	  // Network thread priority
+
+enum { THREAD_DEFAULT_STACK = 1400 }; // Default thread stack size
+enum { THREAD_DEFAULT_PRIORITY = 128 }; // Default thread priority
 
 // IOScheduler settings
 enum { IO_FUDGE = 10 };	  // I/O scheduler timing granularity, in msec
