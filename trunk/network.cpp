@@ -41,7 +41,7 @@ bool GetMacAddr(uint8_t macaddr[6]) { return GetIfMacAddr(STR("eth0"), macaddr);
 
 void* NetThread(void*)
 {
-	Thread::Self().SetPriority(200);
+	Thread::Self().SetPriority(NETWORK_THREAD_PRIORITY);
 	Thread::Self().ReadyToWork();
 
 	_eth0.Initialize();
