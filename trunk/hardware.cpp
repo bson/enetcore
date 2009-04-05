@@ -273,20 +273,19 @@ void hwinit()
 	IO1DIR |= 0b1101 << 17;		// SCK1, MOSI1, SSEL1 are out
 	IO1DIR &= 0b0010 << 17;		// MISO1 is in
 
-	// Enable reading from AIN0
-	ADCR = ((PCLK / 4500000) + 1) << 8;
-
-	// Grab 32 bytes
-	ADCR |= 0x01000000;
+	// Grab 32 bytes from AIN0
 	uint8_t buf[32];
 	for (uint8_t* p = (uint8_t*)buf; p < (uint8_t*)buf + sizeof buf; ) {
+		// Does the first of these two actually have to be inside the loop?
+		ADCR = 0x00200000 | (((PCLK / 4500000) + 1) << 8);
+		ADCR |= 0x01000000;		// Go
 		uint32_t ad;
 		do {
 			ad = ADDR;
 		} while (!(ad & 0x80000000));
 		*p++ = (ad & 0xffff) >> 6;
 	}
-	ADCR = 0;
+	ADCR = 0;					// Power down ADC
 
 	Util::RandomSeed(buf, sizeof buf);
 
