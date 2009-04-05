@@ -269,9 +269,9 @@ void hwinit()
 	IO0DIR |= 1 << 10;			   // GPIO 0.10 is output (CARD_CS)
 
 	// Disable CPU wake by external interrupt
-	EXTWAKE = 0;
-	EXTMODE = 4;				// Make EINT2 edge triggered
-	EXTPOLAR = 0;				// EINT0-EINT3 active low/falling edge
+	EXTWAKE = 4;			   // EINT2 wakes from power-down
+	EXTMODE = 4;			   // Make EINT2 edge triggered
+	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
 
 	// Enable SPI1, AIN0
 	PINSEL1 = 0b00000000001000000000000010101000;
