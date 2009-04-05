@@ -81,10 +81,6 @@
 #define PCON           (*((volatile unsigned char *) 0xE01FC0C0))
 #define PCONP          (*((volatile unsigned long *) 0xE01FC0C4))
 
-/* External Interrupts */
-#define EXTINT         (*((volatile unsigned char *) 0xE01FC140))
-#define EXTWAKE        (*((volatile unsigned char *) 0xE01FC144))
-
 /* Timer 0 */
 #define TIMER0_IR      (*((volatile unsigned long *) 0xE0004000))
 #define TIMER0_TCR     (*((volatile unsigned long *) 0xE0004004))
@@ -234,5 +230,11 @@
 // ADC
 #define ADCR (*((volatile unsigned long*) 0xe0034000))
 #define ADDR (*((volatile unsigned long*) 0xe0034004))
+
+// External interrupts
+#define EXTINT (*((volatile unsigned char*) 0xE01FC140))
+#define EXTWAKE (*((volatile unsigned char*) 0xE01FC144))
+#define EXTMODE (*((volatile unsigned char*) 0xE01FC148))
+#define EXTPOLAR (*((volatile unsigned char*) 0xE01FC14C))
 
 #endif  // __LPC22xx_H

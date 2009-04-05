@@ -157,6 +157,8 @@ void Ethernet::Interrupt()
 	if (_vic.ChannelPending(16))
 		_eth0.HandleInterrupt();
 
+	EXTINT = 4;					// Clear EINT2 flag
+
 	_vic.ClearPending();
 	LoadStateReturnExc();
 }
