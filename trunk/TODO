@@ -1,21 +1,20 @@
 Add ICMP
 
-Add UDP
-
-Optimize memset, memcpy
-- If operands are 32 bit aligned, use 32-bit ops
+Add UDP sockets
 
 Fix SPI driver
 - Run using FIQ
 - Operations needed:
   1. Send byte sequence
   2. Send 0xff and read, returning result
-  3. Repeat 2 at a given usec interval, and a number of times
+  3. Repeat 2 at a given usec interval, and a number of times until non 0xff
   4. Repeat 3 2-4 times and return result in an uint32_t
   5. Repeat 2 to fill a buffer
 - Parameterize polarity and phase
 
 Implement SD card block driver
+
+Implement CRC7
 
 Implement FAT32
 
@@ -26,11 +25,25 @@ Improve exeption handler - traceback all threads, print thread state
 
 Thread features
 - Priority willing
+- Thread structure should be in internal mem (maybe at the top of the
+  thread's stack) - for single-cycle access
+
+Containers should have a _resize flag to enable/disable auto resizing.
+
+Optimize memset, memcpy
+- If operands are 32 bit aligned, use 32-bit ops
 
 Implement Watchdog
 - Use hw watchdog
 
-Image sizes:
+Assign an internal flash sector for non-volatile params, like the
+ethernet Mac address.  See if we can set aside a small internet
+flash sector in link.cmd.
+
+---
+
+Code footprint (as of #105):
+
  -Os         				 84k
  -Os -DTRACE 				 85k
  -Os -DTRACE -DDEBUG		 95k
