@@ -331,7 +331,7 @@ public:
 	// XXX Doesn't currently take into account the source address when
 	// selecting an interface.  It's always treated as if it were
 	// INADDR_ANY.
-	Route* Send(IOBuffer* buf, Route* rt);
+	Route* Send(IOBuffer* buf, in_addr_t dest, Route* rt);
 
 	// Receive for ETHERTYPE_IP
 	void Receive(IOBuffer* packet);

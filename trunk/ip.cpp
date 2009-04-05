@@ -201,8 +201,11 @@ void Ip::FillFrame(IOBuffer* buf, Route* rt)
 }
 
 
-Ip::Route* Ip::Send(IOBuffer* buf, Ip::Route* prevrt)
+Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt)
 {
+	Iph& iph = GetIph(buf);
+	iph.dest = dest;
+
 	Mutex::Scoped L(_lock);
 
 	if (prevrt) {
@@ -218,9 +221,6 @@ Ip::Route* Ip::Send(IOBuffer* buf, Ip::Route* prevrt)
 			return prevrt;
 		}
 	}
-
-	Iph& iph = GetIph(buf);
-	const in_addr_t dest = iph.dest;
 
 	for (uint i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
