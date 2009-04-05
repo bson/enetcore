@@ -144,7 +144,7 @@ void Ip::ReleasePendingARP()
 			Route* rt = _routes[n];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->macvalid) {
-					FillFrame(packet, rt);
+					FillHeader(packet, rt, false);
 					rt->netif.Send(packet);
 					remove_packet = true;
 				}
@@ -167,7 +167,7 @@ void Ip::ReleasePendingARP()
 }
 
 
-void Ip::FillFrame(IOBuffer* buf, Route* rt)
+void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
 {
 	buf->SetHead(0);
 	memcpy(*buf + 2, rt->macaddr, 6);
@@ -191,7 +191,7 @@ void Ip::FillFrame(IOBuffer* buf, Route* rt)
 
 		iph.SetHLen(sizeof (Iph));
 		iph.tos = 0;
-		iph.off = 0;
+		iph.off = df ? Iph::IPFLAG_DF : 0;
 		iph.ttl = 255;
 
 		// Length and checksum
@@ -201,7 +201,7 @@ void Ip::FillFrame(IOBuffer* buf, Route* rt)
 }
 
 
-Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt)
+Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 {
 	Iph& iph = GetIph(buf);
 	iph.dest = dest;
@@ -212,7 +212,7 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt)
 		if (prevrt->invalid)
 			prevrt->Release();
 		else if (prevrt->macvalid) {
-			FillFrame(buf, prevrt);
+			FillHeader(buf, prevrt, df);
 			prevrt->netif.Send(buf);
 			return prevrt;
 		} else {
@@ -226,7 +226,7 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt)
 		Route* rt = _routes[i];
 		if (rt->dest == dest & rt->netmask) {
 			if (rt->macvalid) {
-				FillFrame(buf, rt);
+				FillHeader(buf, rt, df);
 				if (rt->type == Route::TYPE_IF) {
 					if (rt->dest == dest) {
 						rt->netif.Send(buf); // Loopback: ethernet driver will return it

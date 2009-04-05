@@ -331,7 +331,9 @@ public:
 	// XXX Doesn't currently take into account the source address when
 	// selecting an interface.  It's always treated as if it were
 	// INADDR_ANY.
-	Route* Send(IOBuffer* buf, in_addr_t dest, Route* rt);
+	//
+	// df indicates whether the don't-fragment flag should be set (for PMTU)
+	Route* Send(IOBuffer* buf, in_addr_t dest, Route* rt = NULL, bool df = false);
 
 	// Receive for ETHERTYPE_IP
 	void Receive(IOBuffer* packet);
@@ -367,7 +369,7 @@ private:
 	uint8_t* GetMacDest(IOBuffer* buf) { return *buf + 2; }
 
 	// Fill in datagram with frame header
-	void FillFrame(IOBuffer* packet, Route* rt);
+	void FillHeader(IOBuffer* packet, Route* rt, bool df);
 };
 
 extern Ip _ip;
