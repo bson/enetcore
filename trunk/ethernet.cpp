@@ -69,6 +69,9 @@ void Ethernet::Initialize()
 	_sendq.Reserve(16);
 	_recvq.Reserve(16);
 
+	// Read IOBASE - should be 0x300
+	const uint iobase = _pp[ETH_PP_IOBASE];
+
 	// Wait for initialization to finish
 	while (!(_pp[ETH_PP_SelfST] & 80)) continue;
 

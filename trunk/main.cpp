@@ -14,5 +14,8 @@ int	main ()
 
 	_sd.Init();
 
+	static char buf[512];
+	_sd.ReadSector(1, buf);
+
 	abort();
 }

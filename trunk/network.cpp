@@ -44,7 +44,9 @@ void* NetThread(void*)
 	Thread::Self().SetPriority(NET_THREAD_PRIORITY);
 	Thread::Self().ReadyToWork();
 
-	_eth0.Initialize();
+// Moved to hwinit - needs to be done before EINT2 is enabled
+//	_eth0.Initialize();
+
 	_ip.Initialize();
 	_dhcp0.Reset();
 

@@ -217,12 +217,12 @@ void hwinit()
 	// WST1 = 1, WST2 = 1
 	// IDCY = 0 (no switch overhead)
 	//
-#define BCFGVAL(IDCY, WST1, WST2, WP, BM, MW) \
-	(((MW) << 28) | ((BM) << 27) | ((WP) << 26) | ((WST2) << 11) | (1 << 10) | \
+#define BCFGVAL(IDCY, WST1, WST2, WP, BM, MW, RBLE)							\
+	(((MW) << 28) | ((BM) << 27) | ((WP) << 26) | ((WST2) << 11) | ((RBLE) << 10) | \
 	 ((WST1) << 5) | (IDCY) | (1 << 25))
 
 #if 0
-	BCFG1 = BCFGVAL(0, 0, 0, 0, 0, 2);
+	BCFG1 = BCFGVAL(0, 0, 0, 0, 0, 2, 1);
 
 	// Map external 16-bit flash at 0x8000 0000
 	//
@@ -235,7 +235,7 @@ void hwinit()
 	// Write protect
 	// Non-burst ROM
 	//
-	BCFG0 = BCFGVAL(0, 4, 4, 1, 0, 1);
+	BCFG0 = BCFGVAL(0, 4, 4, 1, 0, 1, 1);
 #endif
 
 	// Fully enable MAM
@@ -244,7 +244,7 @@ void hwinit()
 	MAMCR = 2;
 
 	// Turn off WP on external flash
-	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1);
+//	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1, 1);
 
 	// 1 = flash, 2 = ram, 3 = xram
 	MEMMAP = 1;
@@ -253,11 +253,15 @@ void hwinit()
 	WDMOD = 0;
 
 	// CS8900A: on CS2, 7 wait states, 16 bit
-	BCFG2 = BCFGVAL(4, 7, 7, 0, 0, 1);
+//	BCFG2 = BCFGVAL(4, 7, 7, 0, 0, 1, 0);
+	BCFG2 = BCFGVAL(15, 31, 31, 0, 0, 1, 1);
 
 	// Enable UARTs as output, SPI0 on pins
-	// P0.15 = EINT2
-	PINSEL0 = 0x40055505;
+	PINSEL0 = 0b00000000000001010101010100000101;
+
+	// Enable CS2 on P3.25
+	PINSEL2 = (PINSEL2 & ~(0b11 << 14)) | (0b01 << 14);
+
 	IO1DIR |= 0x00800000;	 // Make P1.23 an output, everything else stays input
 
 	IO1SET =  0x00800000;	 // led off
@@ -268,16 +272,10 @@ void hwinit()
 	IO0DIR &= ~0x20;			   // GPIO 0.5 (MISO) is in
 	IO0DIR |= 1 << 10;			   // GPIO 0.10 is output (CARD_CS)
 
-	// Disable CPU wake by external interrupt
-	EXTWAKE = 4;			   // EINT2 wakes from power-down
-	EXTMODE = 4;			   // Make EINT2 edge triggered
-	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
-	EXTINT = 4;				   // Clear any stray EINT2 flag
-
 	// Enable SPI1, AIN0
 	PINSEL1 = 0b00000000001000000000000010101000;
 	IO1DIR |= 0b1101 << 17;		// SCK1, MOSI1, SSEL1 are out
-	IO1DIR &= 0b0010 << 17;		// MISO1 is in
+	IO1DIR &= ~(0b0010 << 17);		// MISO1 is in
 
 	// Grab 32 bytes from AIN0
 	uint8_t buf[32];
@@ -347,7 +345,23 @@ void hwinit()
 	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
 		 _main_thread_stack, sp, _intr_thread_stack);
 
-	DMSG("Random uint: 0x%0x", Util::Random<uint>());
+	DMSG("Random uint: 0x%x", Util::Random<uint>());
+
+	_eth0.Initialize();
+
+	// Set up external interrupt pins - do this last since we may get
+
+	// P0.15 = EINT2
+	PINSEL0 = (PINSEL0 & ~(0b11 << 30)) | (0b10 << 30);
+
+	// an interrupt immediately.
+	EXTWAKE = 0;
+	EXTMODE = 0;
+
+//	EXTWAKE = 4;			   // EINT2 wakes from power-down
+	EXTMODE = 4;			   // Make EINT2 edge triggered
+	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
+	EXTINT = 4;				   // Clear any stray EINT2 flag
 
 	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }
