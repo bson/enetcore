@@ -252,9 +252,8 @@ void hwinit()
 	// Disable watchdog
 	WDMOD = 0;
 
-	// CS8900A: on CS2, 7 wait states, 16 bit
-//	BCFG2 = BCFGVAL(4, 7, 7, 0, 0, 1, 0);
-	BCFG2 = BCFGVAL(15, 31, 31, 0, 0, 1, 1);
+	// CS8900A: on CS2, 7 wait states, 16 bit with BSEL
+	BCFG2 = BCFGVAL(0, 7, 7, 0, 0, 1, 1);
 
 	// Enable UARTs as output, SPI0 on pins
 	PINSEL0 = 0b00000000000001010101010100000101;
