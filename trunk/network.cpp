@@ -41,8 +41,8 @@ bool GetMacAddr(uint8_t macaddr[6]) { return GetIfMacAddr(STR("eth0"), macaddr);
 
 void* NetThread(void*)
 {
-	Thread::Self().SetPriority(NET_THREAD_PRIORITY);
-	Thread::Self().ReadyToWork();
+	Self().SetPriority(NET_THREAD_PRIORITY);
+	Self().ReadyToWork();
 
 // Moved to hwinit - needs to be done before EINT2 is enabled
 //	_eth0.Initialize();

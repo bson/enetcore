@@ -11,7 +11,7 @@ void CondVar::Wait(Mutex& m)
 	const uint count = exch<uint>(m._count, 1);
 	m.Unlock();
 
-	Thread::Self().WaitFor(this);
+	Self().WaitFor(this);
 
 	m.Lock();
 	m._count = count;
@@ -26,7 +26,7 @@ void CondVar::Wait(Mutex& m, const Time& delay)
 	const uint count = exch<uint>(m._count, 1);
 	m.Unlock();
 
-	Thread::Self().WaitFor(this, Time::Now() + delay);
+	Self().WaitFor(this, Time::Now() + delay);
 
 	m.Lock();
 	m._count = count;
@@ -40,9 +40,9 @@ void EventObject::Set(uint8_t new_state)
 	_lock.Unlock();
 	if (new_state && new_state != prev_state) {
 		if (_mode == SELF_RESET)
-			Thread::Self().WakeSingle(this);
+			Self().WakeSingle(this);
 		else
-			Thread::Self().WakeAll(this);
+			Self().WakeAll(this);
 	}
 }
 
@@ -53,7 +53,7 @@ void EventObject::Wait()
 
 	while (!_state) {
 		_lock.Unlock();
-		Thread::Self().WaitFor(this);
+		Self().WaitFor(this);
 		_lock.Lock();
 	}
 	if (_mode == SELF_RESET) _state = 0;
@@ -68,7 +68,7 @@ bool EventObject::Wait(Time delay)
 
 	while (!_state && Time::Now() < deadline) {
 		_lock.Unlock();
-		Thread::Self().WaitFor(this, deadline);
+		Self().WaitFor(this, deadline);
 		_lock.Lock();
 	}
 	const bool retval = _state != 0;

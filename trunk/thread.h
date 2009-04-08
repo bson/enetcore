@@ -229,6 +229,8 @@ public:
 	static void SetTimer(uint usec);	// usec from now
 };
 
+INLINE_ALWAYS Thread& Self() { return Thread::Self(); }
+
 extern Thread* _main_thread;
 
 #endif // __THREAD_H__

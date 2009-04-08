@@ -111,7 +111,7 @@ void SPI::SetReadCount(uint hiwat)
 	_read_count = hiwat;
 	if (_readbuf.Size() >= hiwat)  {
 		_lock.Unlock();
-		Thread::Self().WakeAll(&_readbuf);
+		Self().WakeAll(&_readbuf);
 	} else
 		_lock.Unlock();
 }
@@ -123,7 +123,7 @@ void SPI::SetWriteMark(uint lowat)
 	_write_lowat = lowat;
 	if (_writebuf.Size() <= lowat)  {
 		_lock.Unlock();
-		Thread::Self().WakeAll(&_writebuf);
+		Self().WakeAll(&_writebuf);
 	} else
 		_lock.Unlock();
 }
@@ -134,7 +134,7 @@ bool SPI::WaitRead(Time deadline)
 	Spinlock::Scoped L(_lock);
 	while (_readbuf.Size() < _read_count && Time::Now() < deadline)  {
 		_lock.Unlock();
-		Thread::Self().WaitFor(&_readbuf, deadline);
+		Self().WaitFor(&_readbuf, deadline);
 		_lock.Lock();
 	}
 	return _readbuf.Size() >= _read_count;
@@ -146,7 +146,7 @@ bool SPI::WaitWrite(Time deadline)
 	Spinlock::Scoped L(_lock);
 	while (_writebuf.Size() > _write_lowat && Time::Now() < deadline)  {
 		_lock.Unlock();
-		Thread::Self().WaitFor(&_writebuf, deadline);
+		Self().WaitFor(&_writebuf, deadline);
 		_lock.Lock();
 	}
 	return _writebuf.Size() <= _write_lowat;

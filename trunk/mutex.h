@@ -34,28 +34,28 @@ public:
 
 	void AssertLocked() const {
 		assert(_count);
-		assert(_tid == &Thread::Self());
+		assert(_tid == &Self());
 	}
 
 	bool TryLock() const {
 		Spinlock::Scoped L(_lock);
 		if (_count) return false;
 		
-		_tid = &Thread::Self();
+		_tid = &Self();
 		++_count;
 		return true;
 	}
 
 	void Lock() const {
 		Spinlock::Scoped L(_lock);
-		while (_count && _tid != &Thread::Self()) {
+		while (_count && _tid != &Self()) {
 			_lock.Unlock();
-			Thread::Self().WaitFor(this);
+			Self().WaitFor(this);
 			_lock.Lock();
 		}
 
-		assert((!_tid && !_count) || (_count && _tid == &Thread::Self()));
-		_tid = &Thread::Self();
+		assert((!_tid && !_count) || (_count && _tid == &Self()));
+		_tid = &Self();
 		++_count;
 	}
 
@@ -63,7 +63,7 @@ public:
 		AssertLocked();
 
 		if (!--_count) _tid = 0;
-		Thread::Self().WakeSingle(this);
+		Self().WakeSingle(this);
 	}
 
 	typedef ScopedLock<Mutex> Scoped;
@@ -108,8 +108,8 @@ public:
 
 	void Wait(Mutex& m, const Time& delay);
 	void Wait(Mutex& m);
-	void Signal() { Thread::Self().WakeSingle(this); }
-	void Broadcast() { Thread::Self().WakeAll(this); }
+	void Signal() { Self().WakeSingle(this); }
+	void Broadcast() { Self().WakeAll(this); }
 private:
 	// These make no sense
 	CondVar(const CondVar&);
