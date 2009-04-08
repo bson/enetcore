@@ -13,6 +13,8 @@ int	main ()
 
 	console("Enetcore 0.1 DEV");
 
+	for (;;) ;
+
 	_sd.Init();
 
 	static char buf[512];

@@ -96,6 +96,7 @@ Time Dhcp::GetServiceTime()
 	Mutex::Scoped L(_lock);
 
 	switch (_state) {
+	case STATE_RESET:
 	case STATE_DISCOVER:
 	case STATE_REQUEST:
 		return _rexmit;
@@ -109,6 +110,8 @@ Time Dhcp::GetServiceTime()
 
 Time Dhcp::Service()
 {
+	Mutex::Scoped L(_lock);
+
 	switch (_state) {
 	case STATE_CONFIGURED:
 		if (Time::Now() < _renew)
@@ -130,6 +133,10 @@ Time Dhcp::Service()
 		_state = STATE_DISCOVER;
 		// fallthrough
 
+	case STATE_RESET:
+		if (_state == STATE_RESET && Time::Now() < _rexmit)
+			break;
+
 	case STATE_DISCOVER:
 	case_STATE_DISCOVER:
 		if (_backoff == 128)  _backoff = 1;
@@ -150,6 +157,8 @@ void Dhcp::LinkRecovered()
 IOBuffer* Dhcp::AllocPacket()
 {
 	IOBuffer* buf = BufferPool::Alloc();
+	if (!buf) return NULL;
+
 	_netif.FillForBcast(buf, sizeof (Iph) + sizeof (Udph) + sizeof (Packet));
 
 	const NetAddr src(INADDR_ANY, CLIENT_PORT);
@@ -173,12 +182,18 @@ void Dhcp::SendDiscover()
 {
 	_lock.AssertLocked();
 
+	IOBuffer* buf = AllocPacket();
+	if (!buf) {
+		DMSG("DHCP: SendDiscover: no buffers");
+		_rexmit = Time::Now() + Time::FromSec(1);
+		return;
+	}
+		
 	if (_state == STATE_RESET)
 		_start = Time::Now();
 
 	_state = STATE_DISCOVER;
 
-	IOBuffer* buf = AllocPacket();
 	Packet* pkt = (Packet*)(*buf + sizeof(Iph) + sizeof (Udph));
 	pkt->op = BOOTREQUEST;
 
@@ -206,6 +221,12 @@ void Dhcp::SendRequest()
 	_lock.AssertLocked();
 
 	IOBuffer* buf = AllocPacket();
+	if (!buf) {
+		DMSG("DHCP: SendRequest: no buffers");
+		_rexmit = Time::Now() + Time::FromSec(1);
+		return;
+	}
+
 	Packet* pkt = (Packet*)(buf + sizeof(Iph) + sizeof (Udph));
 	pkt->op = BOOTREQUEST;
 	pkt->xid = _offer_xid;

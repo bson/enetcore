@@ -54,6 +54,8 @@ void* NetThread(void*)
 	bool link = !_eth0.GetLinkStatus();
 
 	for (;;) {
+		DMSG("NetThread: wake");
+
 		const bool newlink = _eth0.GetLinkStatus();
 		if (newlink != link) {
 			link = newlink;
@@ -62,7 +64,7 @@ void* NetThread(void*)
 
 		const Time now = Time::Now();
 		Time next = dhcp_next;
-		if (!link) next = min(next, Time::FromSec(1));
+		if (!link) next = min(next, now + Time::FromSec(1));
 
 		if (now < next)
 			_net_event.Wait(next - now);
