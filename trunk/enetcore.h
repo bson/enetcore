@@ -50,6 +50,9 @@ typedef uint32_t in_addr_t;
 #define INLINE_ALWAYS inline __attribute__((always_inline))
 #define NAKED __attribute((naked))
 
+#define NOVTABLE
+#define PACKED __attributed__((packed))
+
 typedef uint32_t time_t;
 
 #define USE_LITERALS

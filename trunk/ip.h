@@ -46,7 +46,7 @@ uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
 
 
 // IP header
-struct Iph {
+struct NOVTABLE Iph {
 	enum Flags {
 		IPFLAG_DF = 0x4000,		// Don't fragment - used for PMTU
 		IPFLAG_MF = 0x2000		// More fragments
