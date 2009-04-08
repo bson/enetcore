@@ -409,6 +409,6 @@ void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
 	Udph& udph = *(Udph*)iph.GetTransport();
 	udph.sport = Htons(src.GetPort());
 	udph.dport = Htons(dst.GetPort());
-	udph.len = Htons(*buf + buf->Size() - (uint8_t*)&udph);
+	udph.len = Htons((uint8_t*)&udph - (*buf + 0) + buf->Size());
 	udph.SetCsum();
 }
