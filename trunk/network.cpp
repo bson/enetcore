@@ -44,6 +44,8 @@ void* NetThread(void*)
 	Self().SetPriority(NET_THREAD_PRIORITY);
 	Self().ReadyToWork();
 
+	BufferPool::Initialize(10);
+
 // Moved to hwinit - needs to be done before EINT2 is enabled
 //	_eth0.Initialize();
 
