@@ -42,7 +42,7 @@ struct Arph {
 
 
 // Checksum
-uint16_t ipcksum(const uint16_t* block, uint len);
+uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
 
 
 // IP header
@@ -84,6 +84,7 @@ struct Iph {
 	void SetCsum() {
 		sum = 0;
 		sum = Htons(~ipcksum((const uint16_t*)this, GetHLen()));
+		if (!sum) --sum;
 	}
 };
 

@@ -6,6 +6,8 @@
 #include "time.h"
 #include "netaddr.h"
 #include "ethernet.h"
+#include "ip.h"
+#include "udp.h"
 
 
 struct Dhcp {
@@ -84,7 +86,12 @@ struct Dhcp {
 	// BOOTP ops
 	enum { BOOTREQUEST = 1, BOOTREPLY = 2 }; // ops
 
+	// Complete DHCP packet, sans frame header
+
 	struct Packet {
+		Iph iph;
+		Udph udph;
+
 		uint8_t op;
 		uint8_t htype;				// 1 = ethernet
 		uint8_t hlen;				// 6 for ethernet
@@ -123,12 +130,6 @@ struct Dhcp {
 			memcpy(chaddr, dhcp._netif.GetMacAddr(), 6);
 			memset(sname, 0, sizeof sname);
 			memset(file, 0, sizeof file);
-
-			options[0] = 99;		// DHCP magic cookie
-			options[1] = 130;
-			options[2] = 83;
-			options[3] = 99;
-			options[4] = TAG_END;
 		}
 	};
 
@@ -155,7 +156,9 @@ struct Dhcp {
 
 private:
 	// Allocate packet buffer
-	IOBuffer* AllocPacket(uint size);
+	// Sets buffer head to start of Packet (Iph)
+	// Returns NULL if no buffer is available
+	IOBuffer* AllocPacket();
 
 	// Send discover message
 	void SendDiscover();
@@ -173,7 +176,10 @@ private:
 	Type GetMsgType(IOBuffer* buf, in_addr_t& server);
 
 	// Fill in DHCP packet from scratch - UDP, IP, MAC
-	void FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst);
+	// From 0.0.0.0:68 to 255.255.255.255:67
+	// Buffer head should be at start of Packet
+	// Will return with head at start of buffer
+	void FillHeader(IOBuffer* buf);
 };
 
 

@@ -30,6 +30,8 @@ IOBuffer* Alloc()
 
 	IOBuffer* buf = _pool.Back();
 	_pool.PopBack();
+	buf->SetHead(0);
+	buf->SetTail(buf->GetReserve());
 	return buf;
 }
 
@@ -392,12 +394,10 @@ void Ethernet::DiscardTx()
 }
 
 
-void Ethernet::FillForBcast(IOBuffer* buf, uint dgramlen)
+void Ethernet::FillForBcast(IOBuffer* buf, uint16_t et)
 {
-	const uint frame_len = dgramlen + 6 * 2 + 4;
-	buf->SetHead(2);
-	buf->SetTail(frame_len + 2);
-	memcpy(buf + 0, GetBcastAddr(), GetAddrLen());
-	memcpy(buf + GetAddrLen(), GetMacAddr(), GetAddrLen());
-	*(uint16_t*)(buf + GetAddrLen() * 2) = Htons(frame_len);
+	memcpy(*buf + 2, GetBcastAddr(), GetAddrLen());
+	memcpy(*buf + GetAddrLen(), GetMacAddr(), GetAddrLen());
+	et = Htons(et);
+	memcpy(*buf + 2 + 6 + 6, &et, 2);
 }

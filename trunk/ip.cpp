@@ -5,13 +5,12 @@
 Ip _ip;
 
 
-uint16_t ipcksum(const uint16_t* block, uint len)
+uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)
 {
 	const bool unaligned = len & 1;
 
 	len /= 2;
 
-	uint32_t sum = 0;
 	while (len--) sum += Ntohs(*block++);
 
 	if (unaligned)  sum += *(const uint8_t*)block << 8;

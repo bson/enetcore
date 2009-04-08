@@ -154,20 +154,16 @@ void Dhcp::LinkRecovered()
 }
 
 
-IOBuffer* Dhcp::AllocPacket(uint size)
+IOBuffer* Dhcp::AllocPacket()
 {
 	IOBuffer* buf = BufferPool::Alloc();
 	if (!buf) return NULL;
 
-	const NetAddr src(INADDR_ANY, CLIENT_PORT);
-	const NetAddr dst(~0, SERVER_PORT);
+	buf->SetHead(_netif.GetPrealloc());
+	buf->SetSize(sizeof (Packet));
 
-	buf->SetHead(0);
-	buf->SetTail(size);
-	FillHeader(buf, src, dst);
-
-	// Fill in DHCP packet with defaults
-	Packet* pkt = (Packet*)(*buf + sizeof (Iph) + sizeof (Udph));
+	// Initialize packet with defaults
+	Packet* pkt = (Packet*)(*buf + 0);
 	new (pkt) Packet(*this);
 
 //	pkt->flags |= 1;			// Tell server to broadcast reply
@@ -182,18 +178,7 @@ void Dhcp::SendDiscover()
 {
 	_lock.AssertLocked();
 
-	// Add Parameter Request List option
-	static const uint8_t request[] = {
-		TAG_VEXT, 10,
- 		  TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
-		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
-		  TAG_END,
-		TAG_END
-	};
-
-	Packet* pkt;
-	IOBuffer* buf = AllocPacket(16 + sizeof (Iph) + sizeof (Udph) + sizeof (Packet) - sizeof (pkt->options) +
-								sizeof (request) + 4);
+	IOBuffer* buf = AllocPacket();
 	if (!buf) {
 		DMSG("DHCP: SendDiscover: no buffers");
 		_rexmit = Time::Now() + Time::FromSec(1);
@@ -205,12 +190,24 @@ void Dhcp::SendDiscover()
 
 	_state = STATE_DISCOVER;
 
-	pkt = (Packet*)(*buf + 16 + sizeof(Iph) + sizeof (Udph));
+	Packet* pkt = (Packet*)(*buf + 0);
 	pkt->op = BOOTREQUEST;
 
-	memcpy(pkt->options + 4, request, sizeof request);
+	static const uint8_t request[] = {
+		9, 130, 83, 99,			// DHCP magic
+		TAG_VEXT, 10,
+ 		  TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
+		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
+		  TAG_END,
+		TAG_END
+	};
 
-	// Hand over packet to ethernet
+	memcpy(pkt->options, request, sizeof request);
+	buf->SetSize(offsetof(Packet, options) + sizeof request);
+
+	FillHeader(buf);
+
+	// Hand over packet to MAC
 	DMSG("DHCP: broadcasting DHCPDISCOVER");
 	_netif.Send(buf);
 
@@ -223,6 +220,7 @@ void Dhcp::SendRequest()
 	_lock.AssertLocked();
 
 	static const uint8_t request[] = {
+		9, 130, 83, 99,			// DHCP magic
 		TAG_VEXT, 16,
  		  TAG_DHCP_MSGTYPE, 1, DHCPREQUEST,
 		  TAG_DHCP_SERVER, 4, 0, 0, 0, 0,
@@ -231,27 +229,29 @@ void Dhcp::SendRequest()
 		TAG_END
 	};
 
-	Packet* pkt;
-	IOBuffer* buf = AllocPacket(16 + sizeof (Iph) + sizeof (Udph) + sizeof (Packet) - sizeof (pkt->options) +
-								sizeof (request) + 4);
+	IOBuffer* buf = AllocPacket();
 	if (!buf) {
 		DMSG("DHCP: SendRequest: no buffers");
 		_rexmit = Time::Now() + Time::FromSec(1);
 		return;
 	}
 
-	pkt = (Packet*)(*buf + 16 + sizeof(Iph) + sizeof (Udph));
+	_state = STATE_REQUEST;
+
+	Packet* pkt = (Packet*)(*buf + 0);
 	pkt->op = BOOTREQUEST;
 	pkt->xid = _offer_xid;
 
-	memcpy(pkt->options + 4, request, sizeof request);
+	memcpy(pkt->options, request, sizeof request);
 	memcpy(pkt->options + 11, &_server, 4);
+	buf->SetSize(offsetof(Packet, options) + sizeof request);
+
+	FillHeader(buf);
 
 	// Hand over packet to ethernet
 	DMSG("DHCP: broadcasting DHCPREQUEST");
 	_netif.Send(buf);
 
-	_state = STATE_REQUEST;
 	BackOff();					// Update rexmit timer
 }
 
@@ -390,29 +390,27 @@ done:
 }
 
 
-void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
+void Dhcp::FillHeader(IOBuffer* buf)
 {
-	buf->SetHead(0);
-	memcpy(*buf + 2, _netif.GetBcastAddr(), 6);
-	memcpy(*buf + 2 + 6, _netif.GetMacAddr(), 6);
-	const uint16_t et = Htons(ETHERTYPE_IP);
-	memcpy(*buf + 2 + 6 + 6, &et, 2);
-
-	Iph& iph = Ip::GetIph(buf);
+	Packet* pkt = (Packet*)(*buf + 0);
+	Iph& iph = pkt->iph;
 	iph.SetHLen(sizeof (Iph));
 	iph.tos = 0;
-	iph.len = Htons(buf->Size() - 16);
+	iph.len = Htons(buf->Size());
 	iph.id = _ip.GetId();
 	iph.off = 0;
 	iph.ttl = 255;
 	iph.proto = IPPROTO_UDP;
-	iph.source = src.GetAddr4();
-	iph.dest = dst.GetAddr4();
+	iph.source = INADDR_ANY;
+	iph.dest = ~0;
 	iph.SetCsum();
 
-	Udph& udph = *(Udph*)iph.GetTransport();
-	udph.sport = Htons(src.GetPort());
-	udph.dport = Htons(dst.GetPort());
-	udph.len = Htons((uint8_t*)&udph - (*buf + 0) + buf->Size());
-	udph.SetCsum();
+	Udph& udph = pkt->udph;
+	udph.sport = Htons(CLIENT_PORT);
+	udph.dport = Htons(SERVER_PORT);
+	udph.len = Htons(buf->Size() - sizeof (Iph));
+	udph.SetCsum(iph);
+
+	buf->SetHead(0);
+	_netif.FillForBcast(buf, ETHERTYPE_IP);
 }

@@ -96,7 +96,7 @@ public:
 	static const uint GetBufPad() { return 2; }
 
 	// Fill in a buffer for broadcast
-	void FillForBcast(IOBuffer* buf, uint dgramlen);
+	void FillForBcast(IOBuffer* buf, uint16_t et);
 
 	// Interrupt handler
 	static void Interrupt() __irq NAKED;

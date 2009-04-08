@@ -12,7 +12,8 @@ ODIR=build
 COPT ?= -O0 -DTRACE -DDEBUG
 
 CFLAGS  = -I. $(COPT) -g -fno-exceptions -fno-rtti -ffreestanding \
-	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT -ffunction-sections
+	-fno-threadsafe-statics -marm  -mcpu=arm7tdmi-s -DBUSY_WAIT -ffunction-sections \
+	-Wno-invalid-offsetof
 AFLAGS  = -mcpu=arm7tdmi-s -ahls -mapcs-32 -o $(ODIR)/crt.o
 LFLAGS  =  -Map $(ODIR)/image.map -nostartfiles -Tlink.cmd
 LIBS    = /opt/local/lib/gcc/arm-elf/4.3.2/libgcc.a
