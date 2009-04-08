@@ -207,6 +207,40 @@ enum { TIMER0_BASE = 0xe0004000,
 #define __undef   __attribute__((interrupt("UNDEF")))
 #define __swi   __attribute__((interrupt("SWI")))
 
+
+typedef void (*IRQHandler)();
+
+extern "C" {
+	void Unexpected_Interrupt() __irq NAKED;
+}
+
+// Vectored interrupt controller
+class Vic {
+	volatile uint32_t* const _base;
+	mutable Spinlock _lock;
+	uint _num_handlers;
+public:
+	Vic(uint32_t base) : _base((volatile uint32_t*) base), _num_handlers(0) {
+		// Install default IRQ handler
+		InstallHandler((uint)-1, Unexpected_Interrupt);
+	}
+	
+	void InstallHandler(uint channel, IRQHandler handler);
+	void EnableChannel(uint channel);
+	void DisableChannel(uint channel);
+
+	// True if channel has a pending interrupt
+	bool ChannelPending(uint channel);
+
+	// Clear pending interrupt status - call prior to return
+	void ClearPending();
+
+private:
+	static void Unhandled_IRQ() __irq;
+};
+
+extern Vic _vic;
+
 #include "timer.h"
 
 

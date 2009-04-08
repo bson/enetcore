@@ -37,11 +37,11 @@ public:
 
 	void SetSpeed(uint speed, uint framing = FRAMING_8N1);
 
-	// Send synchronously (= polled) 
-	void WriteSync(const String& s);
-
 	// Send string
 	void Write(const String& s);
+
+	// Drain write buffer synchronously (= polled)
+	void SyncDrain();
 
 	// Interrupt handler
 	static void Interrupt() __irq NAKED;
@@ -51,8 +51,6 @@ public:
 
 private:
 	void FillFifo();
-	void WriteSync(const uchar* buf, uint len);
-
 	void HandleInterrupt();
 };
 

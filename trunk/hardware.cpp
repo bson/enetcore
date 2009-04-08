@@ -85,7 +85,7 @@ void Vic::EnableChannel(uint channel)
 	assert(channel < 32);
 
 	Spinlock::Scoped L(_lock);
-	_base[VIC_IntEnable] |= 1 << channel;
+	_base[VIC_IntEnable] = 1 << channel;
 }
 
 
@@ -114,44 +114,6 @@ void Vic::ClearPending()
 
 void hwinit()
 {
-	
- 
-	// 				Setting the Phased Lock Loop (PLL)
-	//               ----------------------------------
-	//
-	// Olimex LPC-P2106 has a 14.7456 mhz crystal
-	//
-	// We'd like the LPC2106 to run at 53.2368 mhz (has to be an even multiple of crystal)
-	// 
-	// According to the Philips LPC2106 manual:   M = cclk / Fosc	where:	M    = PLL multiplier (bits 0-4 of PLLCFG)
-	//																		cclk = 53236800 hz
-	//																		Fosc = 14745600 hz
-	//
-	// Solving:	M = 53236800 / 14745600 = 3.6103515625
-	//			M = 4 (round up)
-	//
-	//			Note: M - 1 must be entered into bits 0-4 of PLLCFG (assign 3 to these bits)
-	//
-	//
-	// The Current Controlled Oscilator (CCO) must operate in the range 156 mhz to 320 mhz
-	//
-	// According to the Philips LPC2106 manual:	Fcco = cclk * 2 * P    where:	Fcco = CCO frequency 
-	//																			cclk = 53236800 hz
-	//																			P = PLL divisor (bits 5-6 of PLLCFG)
-	//
-	// Solving:	Fcco = 53236800 * 2 * P
-	//			P = 2  (trial value)
-	//			Fcco = 53236800 * 2 * 2
-	//			Fcc0 = 212947200 hz    (good choice for P since it's within the 156 mhz to 320 mhz range
-	//
-	// From Table 19 (page 48) of Philips LPC2106 manual    P = 2, PLLCFG bits 5-6 = 1  (assign 1 to these bits)
-	//
-	// Finally:      PLLCFG = 0  01  00011  =  0x23
-	//
-	// Final note: to load PLLCFG register, we must use the 0xAA followed 0x55 write sequence to the PLLFEED register
-	//             this is done in the short function feed() below
-	//
-   
 	// Setting Multiplier and Divider values
   	PLLCFG=0x23;
   	feed();
@@ -161,7 +123,7 @@ void hwinit()
 	feed();
   
 	// Wait for the PLL to lock to set frequency
-	while(!(PLLSTAT & PLOCK)) ;
+	while (!(PLLSTAT & PLOCK)) continue;
   
 	// Connect the PLL as the clock source
 	PLLCON=0x3;
@@ -175,10 +137,6 @@ void hwinit()
 	// Enable use of external banks 0, 1
 	// P3.26: /CS1
 	// P3.27: /WE
-
-	// These are controlled through bits 4-5; the standard philips
-	// boot ROM initializes these from two jumpers.  We could do the same...
-	//
 	// P2.0-7: D0-D7
 	// P1.0: /CS0
 	// P1.1: /OE
@@ -242,9 +200,6 @@ void hwinit()
 	MAMCR = 0;
 	MAMTIM = 3;
 	MAMCR = 2;
-
-	// Turn off WP on external flash
-//	BCFG0 = BCFGVAL(0, 4, 4, 0, 0, 1, 1);
 
 	// 1 = flash, 2 = ram, 3 = xram
 	MEMMAP = 1;
@@ -330,7 +285,6 @@ void hwinit()
 	_vic.EnableChannel(10);
 
 	_vic.InstallHandler(16, Ethernet::Interrupt);
-	_vic.EnableChannel(16);
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
@@ -351,19 +305,17 @@ void hwinit()
 
 	_eth0.Initialize();
 
-	// Set up external interrupt pins - do this last since we may get
+	// Set up external interrupt pins - do this last so vectors are ready
 
 	// P0.15 = EINT2
+#if 0
 	PINSEL0 = (PINSEL0 & ~(0b11 << 30)) | (0b10 << 30);
-
-	// an interrupt immediately.
-	EXTWAKE = 0;
-	EXTMODE = 0;
-
-//	EXTWAKE = 4;			   // EINT2 wakes from power-down
+	EXTWAKE = 4;			   // EINT2 wakes from power-down
 	EXTMODE = 4;			   // Make EINT2 edge triggered
 	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
 	EXTINT = 4;				   // Clear any stray EINT2 flag
+	_vic.EnableChannel(16);
+#endif
 
 	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }

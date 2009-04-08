@@ -116,6 +116,10 @@ void Ethernet::Initialize()
 	// Last of all enable Tx, Rx
 	// LineCTL: SerTxON, SerRxON, 10BT
 	_pp[ETH_PP_LineCTL] = 0x40|0x80;
+
+	const uint16_t linkst = _pp[ETH_PP_LineST];
+	_link_status = (linkst & 0x80) != 0;
+	_10bt = (linkst & 0x200) != 0;
 }
 
 
@@ -160,10 +164,12 @@ void Ethernet::Interrupt()
 {
 	SaveStateExc(4);
 
-	if (_vic.ChannelPending(16))
+	if (_vic.ChannelPending(16)) {
 		_eth0.HandleInterrupt();
-
-	EXTINT = 4;					// Clear EINT2 flag
+		_vic.DisableChannel(16);
+		EXTINT = 4;					// Clear EINT2 flag
+		_vic.EnableChannel(16);
+	}
 
 	_vic.ClearPending();
 	LoadStateReturnExc();

@@ -21,28 +21,6 @@ void SerialPort::SetSpeed(uint speed, uint framing)
 }
 
 
-void SerialPort::WriteSync(const uchar* buf, uint len)
-{
-	while (len--) {
-		// Spin until THRE
-		for (;;) {
-			Spinlock::Scoped L(_lock);
-
-			if (_base[UART_LSR] & 0b100000) {
-				_base[UART_THR] = *buf++;
-				break;
-			}
-		}
-	}
-}
-
-
-void SerialPort::WriteSync(const String& s)
-{
-	WriteSync(s.CStr(), s.Size());
-}
-
-
 void SerialPort::Write(const String& s)
 {
 	Spinlock::Scoped L(_lock);
@@ -61,6 +39,18 @@ void SerialPort::FillFifo()
 		uchar c = _sendq.Front();
 		_sendq.PopFront();
 		_base[UART_THR] = c;
+	}
+}
+
+
+void SerialPort::SyncDrain()
+{
+	while (!_sendq.Empty()) {
+		while (_base[UART_LSR] & 0b100000) {
+			uchar c = _sendq.Front();
+			_sendq.PopFront();
+			_base[UART_THR] = c;
+		}
 	}
 }
 

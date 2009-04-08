@@ -38,7 +38,7 @@ void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uin
 		val = -val;
 	}
 
-	const uchar pad = flags & PAD_SPACE ? ' ' : '0';
+	const uchar pad = flags & FMT_SPACEPAD ? ' ' : '0';
 
 	uchar buf[32];
 	buf[31] = 0;
@@ -82,7 +82,6 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 	static Mutex lock;
 	Mutex::Scoped L(lock);
 #endif
-	char buf[64];
 	if (with_date)
 		AppendFmt(dest, STR("%04u-%02u-%02u %02u:%02u:%02u"),
 				  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
@@ -90,8 +89,6 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 	else
 		AppendFmt(dest, STR("%02u:%02u:%02u.%03u"),
 				   tm->tm_hour, tm->tm_min, tm->tm_sec, t->GetMsec() % 1000);
-
-	dest.PushBack((uint8_t*)buf);
 }
 
 
@@ -101,35 +98,51 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 
 	while (*fmt) {
 		if (*fmt == '%') {
+			int flags = 0;
+			int param = 0;
+			if (fmt[1] == '-') {
+				flags |= FMT_LEFT | FMT_SPACEPAD;
+				++fmt;
+			} else if (fmt[1] == '0') {
+				flags |= FMT_ZEROPAD;
+				++fmt;
+			}
+
+			while (fmt[1] >= '0' && fmt[1] <= '9') {
+				param *= 10;
+				param += fmt[1] - '0';
+				++fmt;
+			}
+
 			switch (*++fmt) {
 			case '%':  dest.PushBack('%'); break;
 			case 'd':  {
-				FormatNumber(dest, va_arg(va, int), 0, 10);
+				FormatNumber(dest, va_arg(va, int), flags, 10, param);
 				break;
 			}
 			case 'D':  {
-				FormatNumber(dest, va_arg(va, int64_t), 0, 10);
+				FormatNumber(dest, va_arg(va, int64_t), flags, 10, param);
 				break;
 			}
 			case 'u': {
-				FormatNumber(dest, va_arg(va, uint), FMT_UNSIGNED, 10);
+				FormatNumber(dest, va_arg(va, uint), flags | FMT_UNSIGNED, 10, param);
 				break;
 			}
 			case 'U': {
-				FormatNumber(dest, va_arg(va, uint64_t), FMT_UNSIGNED, 10);
+				FormatNumber(dest, va_arg(va, uint64_t), flags | FMT_UNSIGNED, 10, param);
 				break;
 			}
 			case 'x': {
-				FormatNumber(dest, va_arg(va, uint), FMT_UNSIGNED, 16);
+				FormatNumber(dest, va_arg(va, uint), flags | FMT_UNSIGNED, 16, param);
 				break;
 			}
 			case 'X': {
-				FormatNumber(dest, va_arg(va, uint64_t), FMT_UNSIGNED, 16);
+				FormatNumber(dest, va_arg(va, uint64_t), flags | FMT_UNSIGNED, 16, param);
 				break;
 			}
 			case 'p': {
 				dest.PushBack(STR("0x"));
-				FormatNumber(dest, va_arg(va, uintptr_t), FMT_UNSIGNED, 16, sizeof(uintptr_t)*2);
+				FormatNumber(dest, va_arg(va, uintptr_t), flags | FMT_UNSIGNED, 16, sizeof(uintptr_t)*2);
 				break;
 			}
 			case 'c': {

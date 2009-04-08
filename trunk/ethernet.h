@@ -36,7 +36,7 @@ class Ethernet {
 
 	TxState _tx_state;
 
-	uint16_t _pid;				// Product ID
+	uint32_t _pid;				// Product ID
 	static uint16_t _macaddr[3]; // Our Mac address
 	static uint16_t _bcastaddr[3]; // Broadcast address
 

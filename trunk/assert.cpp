@@ -9,7 +9,9 @@ void NORETURN AssertFailed(const char* expr, const char* file, int linenum)
 	console("Assert:   %s", expr);
 
 	const String lcdmsg = String::Format(STR("\xfe\001@%s:%u\xfe\xc0%s"), file, linenum, expr);
-	_lcd.WriteSync(lcdmsg);
+	_lcd.Write(lcdmsg);
+	_lcd.SyncDrain();
+	_console.SyncDrain();
 
 #ifdef DEBUG
 	WaitForDebugger();
@@ -27,7 +29,9 @@ void NORETURN PanicStop(const uchar* msg, const char* file, int linenum)
 	console("Panic:    %s", msg ? msg : STR("No panic string"));
 
 	const String lcdmsg = String::Format(STR("\xfe\001Panic: %s\xfe\xc0" "%s:%u"), msg, file, linenum);
-	_lcd.WriteSync(lcdmsg);
+	_lcd.Write(lcdmsg);
+	_lcd.SyncDrain();
+	_console.SyncDrain();
 
 	WaitForDebugger();
 }
@@ -37,7 +41,9 @@ void NORETURN PanicStop(const uchar* msg)
 	console("Panic: %s", msg ? msg : STR(""));
 
 	const String lcdmsg = String::Format(STR("\xfe\001Panic: %s"), msg);
-	_lcd.WriteSync(lcdmsg);
+	_lcd.Write(lcdmsg);
+	_lcd.SyncDrain();
+	_console.SyncDrain();
 
 	fault(4);
 	for (;;) ;
