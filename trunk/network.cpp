@@ -54,12 +54,13 @@ void* NetThread(void*)
 	bool link = !_eth0.GetLinkStatus();
 
 	for (;;) {
-		DMSG("NetThread: wake");
+//		DMSG("NetThread: wake");
 
 		const bool newlink = _eth0.GetLinkStatus();
 		if (newlink != link) {
 			link = newlink;
 			DMSG("eth0: link status: %s", link ? "up" : "down");
+			// if (link)  _dhcp0.Reset();
 		}
 
 		const Time now = Time::Now();

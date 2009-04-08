@@ -100,6 +100,14 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 		if (*fmt == '%') {
 			int flags = 0;
 			int param = 0;
+			if (fmt[1] == ':') {
+				flags |= FMT_COLON;
+				++fmt;
+			}
+			if (fmt[1] == '.') {
+				flags |= FMT_DOT;
+				++fmt;
+			}
 			if (fmt[1] == '-') {
 				flags |= FMT_LEFT | FMT_SPACEPAD;
 				++fmt;
@@ -169,9 +177,12 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				break;
 			}
 			case 'h': {
-				uint len = 20;
-				for (const uchar* p = va_arg(va, uchar*); len > 0; --len, ++p)
+				uint len = param ? param : 20;
+				for (const uchar* p = va_arg(va, uchar*); len > 0; --len, ++p) {
 					FormatNumber(dest, *p, FMT_UNSIGNED, 16, 2);
+					if ((flags & FMT_COLON) && len > 1)
+						dest.PushBack((uchar)':');
+				}
 
 				break;
 			}

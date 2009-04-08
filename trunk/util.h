@@ -24,7 +24,9 @@ namespace Util {
 		FMT_UNSIGNED = 1,
 		FMT_ZEROPAD = 2,
 		FMT_LEFT = 4,
-		FMT_SPACEPAD = 8
+		FMT_SPACEPAD = 8,
+		FMT_COLON = 16,			// %:u
+		FMT_DOT = 32			// %.u
 	};
 	void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits = 0);
 
