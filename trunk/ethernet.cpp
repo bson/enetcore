@@ -109,7 +109,7 @@ void Ethernet::Initialize()
 	_pp[ETH_PP_LAF] = 0;
 
 	// IA
-	const uint32_t ma = Util::Random<uint32_t>();
+	const uint32_t ma = Util::Random<uint32_t>() & ~1;
 	memcpy(_macaddr+1, &ma, 4);
 
 	_pp[ETH_PP_IA + 0] = _macaddr[0];

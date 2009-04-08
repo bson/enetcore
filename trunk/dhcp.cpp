@@ -159,15 +159,15 @@ IOBuffer* Dhcp::AllocPacket()
 	IOBuffer* buf = BufferPool::Alloc();
 	if (!buf) return NULL;
 
-	_netif.FillForBcast(buf, sizeof (Iph) + sizeof (Udph) + sizeof (Packet));
-
 	const NetAddr src(INADDR_ANY, CLIENT_PORT);
 	const NetAddr dst(~0, SERVER_PORT);
 
+	buf->SetHead(0);
+	buf->SetTail(1600);
 	FillHeader(buf, src, dst);
 
 	// Fill in DHCP packet with defaults
-	Packet* pkt = (Packet*)(buf + sizeof (Iph) + sizeof (Udph));
+	Packet* pkt = (Packet*)(*buf + sizeof (Iph) + sizeof (Udph));
 	new (pkt) Packet(*this);
 
 //	pkt->flags |= 1;			// Tell server to broadcast reply
