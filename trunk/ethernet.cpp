@@ -166,6 +166,7 @@ void Ethernet::Send(IOBuffer* buf)
 
 	// Throw away frame if we don't have a link
 	if (!_link_status) {
+		DMSG("Ethernet: xmit: no link - dropping frame");
 		BufferPool::FreeBuffer(buf);
 		DiscardSendQ();
 		return;
