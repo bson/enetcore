@@ -115,24 +115,7 @@ struct Dhcp {
 		uint8_t file[128];
 
 		uint8_t options[312];
-
-
-		Packet(Dhcp& dhcp) :
-			// Default to ethernet boot request
-			op(BOOTREQUEST), htype(1), hlen(6), hops(0),
-			xid(0), secs((Time::Now() - dhcp._start).GetSec()),
-			flags(0), yiaddr(0), giaddr(0)
-		{
-			ciaddr = 0;
-			yiaddr = 0;
-
-			memset(chaddr, 0, sizeof chaddr);
-			memcpy(chaddr, dhcp._netif.GetMacAddr(), 6);
-			memset(sname, 0, sizeof sname);
-			memset(file, 0, sizeof file);
-		}
 	};
-
 
 	Dhcp(Ethernet& netif);
 

@@ -28,16 +28,20 @@ void Dhcp::Reset()
 bool Dhcp::Receive(IOBuffer* buf)
 {
 	buf->SetHead(0);
-	Iph& iph = Ip::GetIph(buf);
-	if (buf->Size() < 16 + iph.GetHLen() + sizeof (Udph) + 28+16+64+128+5)
+	if (buf->Size() < _netif.GetPrealloc() + sizeof (Packet) - offsetof(Packet, options) + 5)
 		return false;
 
-	Udph& udp = *(Udph*)iph.GetTransport();
+	buf->SetHead(_netif.GetPrealloc());
+	Packet* pkt = (Packet*)(*buf + 0);
+	Iph& iph = pkt->iph;
+	Udph& udp = pkt->udph;
 
-	if (Ntohs(udp.sport) != SERVER_PORT && Ntohs(udp.dport) != CLIENT_PORT)
+	if (iph.proto != IPPROTO_UDP || Ntohs(udp.sport) != SERVER_PORT ||
+		Ntohs(udp.dport) != CLIENT_PORT || pkt->op != BOOTREPLY) {
+		BufferPool::FreeBuffer(buf);
 		return false;
+	}
 
-	Packet* pkt = (Packet*)udp.GetPayload();
 	in_addr_t server;
 	Type msg = GetMsgType(buf, server);
 
@@ -164,11 +168,16 @@ IOBuffer* Dhcp::AllocPacket()
 
 	// Initialize packet with defaults
 	Packet* pkt = (Packet*)(*buf + 0);
-	new (pkt) Packet(*this);
 
-//	pkt->flags |= 1;			// Tell server to broadcast reply
-	pkt->secs = (Time::Now() - _start).GetSec();
+	memset(&pkt->op, 0, offsetof(Packet, options));
+
+	pkt->op = BOOTREQUEST;
+	pkt->htype = _netif.GetBootpType();
+	pkt->hlen = _netif.GetAddrLen();
 	pkt->xid = _xid;			// Default XID
+	pkt->secs = (Time::Now() - _start).GetSec();
+//	pkt->flags = 1;			// Tell server to broadcast reply
+	memcpy(pkt->chaddr, _netif.GetMacAddr(), _netif.GetAddrLen());
 
 	return buf;
 }
@@ -190,9 +199,6 @@ void Dhcp::SendDiscover()
 
 	_state = STATE_DISCOVER;
 
-	Packet* pkt = (Packet*)(*buf + 0);
-	pkt->op = BOOTREQUEST;
-
 	static const uint8_t request[] = {
 		9, 130, 83, 99,			// DHCP magic
 		TAG_VEXT, 10,
@@ -202,6 +208,7 @@ void Dhcp::SendDiscover()
 		TAG_END
 	};
 
+	Packet* pkt = (Packet*)(*buf + 0);
 	memcpy(pkt->options, request, sizeof request);
 	buf->SetSize(offsetof(Packet, options) + sizeof request);
 
@@ -239,9 +246,8 @@ void Dhcp::SendRequest()
 	_state = STATE_REQUEST;
 
 	Packet* pkt = (Packet*)(*buf + 0);
-	pkt->op = BOOTREQUEST;
 	pkt->xid = _offer_xid;
-
+	
 	memcpy(pkt->options, request, sizeof request);
 	memcpy(pkt->options + 11, &_server, 4);
 	buf->SetSize(offsetof(Packet, options) + sizeof request);
@@ -341,9 +347,9 @@ done:
 
 Dhcp::Type Dhcp::GetMsgType(IOBuffer* buf, in_addr_t& server)
 {
-	const Packet* pkt = (Packet*)(*buf + sizeof (Iph) + sizeof (Udph));
+	const Packet* pkt = (Packet*)(*buf + 0);
 	const uint8_t* options = pkt->options;
-	const uint len = *buf + buf->Size() - options;
+	const uint len = buf->Size() - offsetof(Packet, options);
 
 	Type type = DHCPINVALID;
 	server = INADDR_ANY;

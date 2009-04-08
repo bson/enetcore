@@ -95,6 +95,9 @@ public:
 	// Buffer pad
 	static const uint GetBufPad() { return 2; }
 
+	// BOOTP htype
+	static const uint8_t GetBootpType() { return 1; }
+
 	// Fill in a buffer for broadcast
 	void FillForBcast(IOBuffer* buf, uint16_t et);
 
