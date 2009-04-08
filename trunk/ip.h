@@ -286,7 +286,7 @@ public:
 	static Iph& GetIph(IOBuffer* buf) {
 		buf->SetHead(0);
 		assert(buf->Size() >= 16 + sizeof (Iph));
-		return *(Iph*)(buf + 16);
+		return *(Iph*)(*buf + 16);
 	}
 
 	// Set destination Mac address
@@ -355,7 +355,7 @@ private:
 	Arph& GetArph(IOBuffer* buf) {
 		buf->SetHead(0);
 		assert(buf->Size() >= 16 + sizeof (Arph));
-		return *(Arph*)(buf + 16);
+		return *(Arph*)(*buf + 16);
 	}
 
 	// Resolve MAC addr for Route entry

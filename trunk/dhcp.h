@@ -155,7 +155,7 @@ struct Dhcp {
 
 private:
 	// Allocate packet buffer
-	IOBuffer* AllocPacket();
+	IOBuffer* AllocPacket(uint size);
 
 	// Send discover message
 	void SendDiscover();

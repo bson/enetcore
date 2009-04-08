@@ -154,7 +154,7 @@ void Dhcp::LinkRecovered()
 }
 
 
-IOBuffer* Dhcp::AllocPacket()
+IOBuffer* Dhcp::AllocPacket(uint size)
 {
 	IOBuffer* buf = BufferPool::Alloc();
 	if (!buf) return NULL;
@@ -163,7 +163,7 @@ IOBuffer* Dhcp::AllocPacket()
 	const NetAddr dst(~0, SERVER_PORT);
 
 	buf->SetHead(0);
-	buf->SetTail(1600);
+	buf->SetTail(size);
 	FillHeader(buf, src, dst);
 
 	// Fill in DHCP packet with defaults
@@ -182,7 +182,18 @@ void Dhcp::SendDiscover()
 {
 	_lock.AssertLocked();
 
-	IOBuffer* buf = AllocPacket();
+	// Add Parameter Request List option
+	static const uint8_t request[] = {
+		TAG_VEXT, 10,
+ 		  TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
+		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
+		  TAG_END,
+		TAG_END
+	};
+
+	Packet* pkt;
+	IOBuffer* buf = AllocPacket(16 + sizeof (Iph) + sizeof (Udph) + sizeof (Packet) - sizeof (pkt->options) +
+								sizeof (request) + 4);
 	if (!buf) {
 		DMSG("DHCP: SendDiscover: no buffers");
 		_rexmit = Time::Now() + Time::FromSec(1);
@@ -194,17 +205,8 @@ void Dhcp::SendDiscover()
 
 	_state = STATE_DISCOVER;
 
-	Packet* pkt = (Packet*)(*buf + sizeof(Iph) + sizeof (Udph));
+	pkt = (Packet*)(*buf + 16 + sizeof(Iph) + sizeof (Udph));
 	pkt->op = BOOTREQUEST;
-
-	// Add Parameter Request List option
-	static const uint8_t request[] = {
-		TAG_VEXT, 10,
- 		  TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
-		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
-		  TAG_END,
-		TAG_END
-	};
 
 	memcpy(pkt->options + 4, request, sizeof request);
 
@@ -220,17 +222,6 @@ void Dhcp::SendRequest()
 {
 	_lock.AssertLocked();
 
-	IOBuffer* buf = AllocPacket();
-	if (!buf) {
-		DMSG("DHCP: SendRequest: no buffers");
-		_rexmit = Time::Now() + Time::FromSec(1);
-		return;
-	}
-
-	Packet* pkt = (Packet*)(buf + sizeof(Iph) + sizeof (Udph));
-	pkt->op = BOOTREQUEST;
-	pkt->xid = _offer_xid;
-
 	static const uint8_t request[] = {
 		TAG_VEXT, 16,
  		  TAG_DHCP_MSGTYPE, 1, DHCPREQUEST,
@@ -239,6 +230,19 @@ void Dhcp::SendRequest()
 		  TAG_END,
 		TAG_END
 	};
+
+	Packet* pkt;
+	IOBuffer* buf = AllocPacket(16 + sizeof (Iph) + sizeof (Udph) + sizeof (Packet) - sizeof (pkt->options) +
+								sizeof (request) + 4);
+	if (!buf) {
+		DMSG("DHCP: SendRequest: no buffers");
+		_rexmit = Time::Now() + Time::FromSec(1);
+		return;
+	}
+
+	pkt = (Packet*)(*buf + 16 + sizeof(Iph) + sizeof (Udph));
+	pkt->op = BOOTREQUEST;
+	pkt->xid = _offer_xid;
 
 	memcpy(pkt->options + 4, request, sizeof request);
 	memcpy(pkt->options + 11, &_server, 4);
@@ -397,7 +401,7 @@ void Dhcp::FillHeader(IOBuffer* buf, const NetAddr& src, const NetAddr& dst)
 	Iph& iph = Ip::GetIph(buf);
 	iph.SetHLen(sizeof (Iph));
 	iph.tos = 0;
-	iph.len = 576;
+	iph.len = Htons(buf->Size() - 16);
 	iph.id = _ip.GetId();
 	iph.off = 0;
 	iph.ttl = 255;
