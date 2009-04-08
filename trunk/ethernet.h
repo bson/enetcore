@@ -117,6 +117,9 @@ private:
 
 	// Flush on-chip Tx buffer
 	void DiscardTx();
+
+	// Throw away send queue
+	void DiscardSendQ();
 };
 
 extern Ethernet _eth0;

@@ -150,9 +150,26 @@ IOBuffer* Ethernet::Receive(uint16_t& et)
 }
 
 
+void Ethernet::DiscardSendQ()
+{
+	_lock.AssertLocked();
+	while (!_sendq.Empty()) {
+		BufferPool::FreeBuffer(_sendq.Back());
+		_sendq.PopBack();
+	}
+}
+
+
 void Ethernet::Send(IOBuffer* buf)
 {
 	Spinlock::Scoped L(_lock);
+
+	// Throw away frame if we don't have a link
+	if (!_link_status) {
+		BufferPool::FreeBuffer(buf);
+		DiscardSendQ();
+		return;
+	}
 
 	if (!memcmp(buf + 2, _macaddr, 6)) {
 		// Loopback - just put add it to the receive queue
@@ -198,6 +215,9 @@ void Ethernet::HandleInterrupt()
 		_10bt = new10bt;
 		_net_event.Set();
 	}
+
+	if (!_link_status)
+		DiscardSendQ();
 
 	for (;;) {
 		const uint16_t ev = _base[ETH_ISQ];
@@ -332,7 +352,7 @@ void Ethernet::CopyTx()
 {
 	_lock.AssertLocked();
 
-	if (!_tx_state != TX_CMD) return;
+	if (_tx_state != TX_CMD) return;
 
 	if (_sendq.Empty()) {
 		// Err... what happened to our packet?!

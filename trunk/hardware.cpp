@@ -308,14 +308,18 @@ void hwinit()
 	// Set up external interrupt pins - do this last so vectors are ready
 
 	// P0.15 = EINT2
-#if 0
 	PINSEL0 = (PINSEL0 & ~(0b11 << 30)) | (0b10 << 30);
 	EXTWAKE = 4;			   // EINT2 wakes from power-down
-	EXTMODE = 4;			   // Make EINT2 edge triggered
+	VPBDIV=0;				   // Workaround for EXTINT.1, EXTINT.2 errata
 	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
+	VPBDIV=1;				   // CPU bug workaround
+	VPBDIV=0;				   // CPU bug workaround
+	EXTMODE = 4;			   // Make EINT2 edge triggered
+	VPBDIV=1;				   // CPU bug workaround
+	VPBDIV=1;				   // CPU bug workaround
 	EXTINT = 4;				   // Clear any stray EINT2 flag
+	_vic.ClearPending();
 	_vic.EnableChannel(16);
-#endif
 
 	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }
