@@ -314,7 +314,8 @@ void hwinit()
 	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
 	VPBDIV=1;				   // CPU bug workaround
 	VPBDIV=0;				   // CPU bug workaround
-	EXTMODE = 4;			   // Make EINT2 edge triggered
+//	EXTMODE = 4;			   // Make EINT2 edge triggered
+	EXTMODE = 0;			   // Make EINT2 edge triggered
 	VPBDIV=1;				   // CPU bug workaround
 	VPBDIV=1;				   // CPU bug workaround
 	EXTINT = 4;				   // Clear any stray EINT2 flag

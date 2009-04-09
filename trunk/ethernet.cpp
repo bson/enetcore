@@ -139,6 +139,9 @@ void Ethernet::Initialize()
 	_link_status = (linkst & 0x80) != 0;
 	_10bt = (linkst & 0x200) != 0;
 
+	// Flush ISQ
+	while (_base[ETH_ISQ] & 0x1f) continue;
+
 	// BusCLT: EnableRQ (master interrupt enable)
 	// Don't use IOCHRDY pin
 	_pp[ETH_PP_BusCTL] = 0x8000 | 0x1000;
@@ -249,7 +252,7 @@ void Ethernet::HandleInterrupt()
 				_tx_state = TX_IDLE;
 				do {
 					BeginTx();
-				} while (_tx_state == TX_IDLE);
+				} while (!_sendq.Empty() && _tx_state == TX_IDLE);
 			}
 			break;
 
@@ -298,7 +301,7 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 		for (uint i = 0; i < len/2; ++i)
 			*p++ = _base[ETH_XD0];
 		
-		if (len & 1) buf[len-1] = (uint8_t&)_base[ETH_XD0];
+		if (len & 1) (*buf)[len-1] = (uint8_t&)_base[ETH_XD0];
 
 		// Ignore runt frames.  This is rare enough not to be worth
 		// optimizing.  We don't ever see partial frames or frames
