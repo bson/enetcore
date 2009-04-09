@@ -93,11 +93,11 @@ void Ethernet::Initialize()
 	// RxCTL: RxOKA | IndividualA | BroadcastA
 	_pp[ETH_PP_RxCTL] = 0x100|0x400|0x800;
 
-	// TxCFG: TxOKiE
-	_pp[ETH_PP_TxCFG] = 0x100;
+	// TxCFG: TxOKiE and all failure conditions
+	_pp[ETH_PP_TxCFG] = 0x100 | 0x40 | 0x80 | 0x200 | 0x400 | 0x800 | 0x8000;
 
-	// BufCFG: Rdy4TxiE
-	_pp[ETH_PP_BufCFG] = 0x100;
+	// BufCFG: Rdy4TxiE, Tx underrun
+	_pp[ETH_PP_BufCFG] = 0x100 | 0x200;
 
 	_pid = _pp[ETH_PP_PID] | (_pp[ETH_PP_PID+2] << 16);
 
@@ -105,7 +105,8 @@ void Ethernet::Initialize()
 	_pp[ETH_PP_INTR] = 0;
 
 	// BusCLT: EnableRQ (master interrupt enable)
-	_pp[ETH_PP_BusCTL] = 0x8000;
+	// Don't use IOCHRDY pin
+	_pp[ETH_PP_BusCTL] = 0x8000 | 0x1000;
 
 	// Hash filter
 	_pp[ETH_PP_LAF] = 0;
@@ -126,7 +127,7 @@ void Ethernet::Initialize()
 
 	// Last of all enable Tx, Rx
 	// LineCTL: SerTxON, SerRxON, 10BT
-	_pp[ETH_PP_LineCTL] = 0x40|0x80;
+	_pp[ETH_PP_LineCTL] |= 0x40|0x80;
 
 	const uint16_t linkst = _pp[ETH_PP_LineST];
 	_link_status = (linkst & 0x80) != 0;
