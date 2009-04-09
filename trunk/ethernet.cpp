@@ -99,26 +99,31 @@ void Ethernet::Initialize()
 
 	// Install Mac address
 	// Use 0-0-12 for testing purposes... it's currently unassigned.
-	_macaddr[0] = 0;
-	_macaddr[1] = 0;
-	_macaddr[2] = 0x12;
-	_macaddr[3] = Util::Random<uint8_t>();
-	_macaddr[4] = Util::Random<uint8_t>();
-	_macaddr[5] = Util::Random<uint8_t>();
-
+	// But check if device already appears to have a valid address; if so
+	// use it.  These keeps us from generating a new mac address each time
+	// we reset - and chew through the available DHCP range in no time flat.
 	uint8_t buf[6];
 	uint16_t* mm = (uint16_t*)buf;
 	*mm++ = _pp[ETH_PP_IA + 0];
 	*mm++ = _pp[ETH_PP_IA + 2];
 	*mm++ = _pp[ETH_PP_IA + 4];
 
-	DMSG("Ethernet: prior MAC address: %:06h", buf);
+	if (buf[0] || buf[1] || buf[2] != 0x12) {
+		_macaddr[0] = 0;
+		_macaddr[1] = 0;
+		_macaddr[2] = 0x12;
+		_macaddr[3] = Util::Random<uint8_t>();
+		_macaddr[4] = Util::Random<uint8_t>();
+		_macaddr[5] = Util::Random<uint8_t>();
 
-	const uint16_t* m = (const uint16_t*)_macaddr;
+		const uint16_t* m = (const uint16_t*)_macaddr;
 
-	_pp[ETH_PP_IA + 0] = *m++;
-	_pp[ETH_PP_IA + 2] = *m++;
-	_pp[ETH_PP_IA + 4] = *m++;
+		_pp[ETH_PP_IA + 0] = *m++;
+		_pp[ETH_PP_IA + 2] = *m++;
+		_pp[ETH_PP_IA + 4] = *m++;
+	} else {
+		memcpy(_macaddr, buf, 6);
+	}
 
 	console("Ethernet: MAC address %:06h", (const uint8_t*)_macaddr);
 
