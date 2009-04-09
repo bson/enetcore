@@ -55,7 +55,7 @@ void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uin
 		}
 	} else {
 		*--pos = '0';
-		digits--;
+		if (digits) --digits;
 	}
 
 	while (digits--)  *--pos = pad;

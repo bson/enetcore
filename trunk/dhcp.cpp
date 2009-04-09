@@ -8,6 +8,7 @@
 
 Dhcp _dhcp0(_eth0);
 
+static const uint8_t dhcp_magic[] = { 0x63, 0x82, 0x53, 0x63 };
 
 Dhcp::Dhcp(Ethernet& netif) : _netif(netif)
 {
@@ -43,7 +44,7 @@ bool Dhcp::Receive(IOBuffer* buf)
 	}
 
 	in_addr_t server;
-	Type msg = GetMsgType(buf, server);
+	const Type msg = GetMsgType(buf, server);
 
 	Mutex::Scoped L(_lock);
 	
@@ -53,7 +54,7 @@ bool Dhcp::Receive(IOBuffer* buf)
 			if (msg != DHCPOFFER)
 				break;
 
-			DMSG("DHCP: Received DHCPOFFER");
+//			DMSG("DHCP: Received DHCPOFFER");
 
 			_server = server;
 			_lease = pkt->yiaddr;
@@ -65,22 +66,29 @@ bool Dhcp::Receive(IOBuffer* buf)
 			break;
 
 		case STATE_REQUEST:
-			if (msg != DHCPACK)
+			if (msg != DHCPACK) {
+				if (msg == DHCPNACK) {
+					DMSG("DHCP: Received DHCPNACK, resetting");
+					Reset();
+				}
 				break;
+			}
+
+//			DMSG("DHCP: Received DHCPACK");
 
 			_lease = pkt->yiaddr;
 
 			// Extract config info
-			buf->SetHead(pkt->options - (*buf + 0));
-			Extract(pkt->options, buf->Size());
+			buf->SetHead(_netif.GetPrealloc());
+			Extract(pkt->options, buf->Size() - offsetof(Packet, options));
 
 			_state = STATE_CONFIGURED;
 			_backoff = 0;
 
-			const NetAddr addr(_lease);
-			const NetAddr mask(_netmask);
-			const NetAddr gw(_gw);
-			const NetAddr dns(_dns);
+			const NetAddr addr(_lease, 0);
+			const NetAddr mask(_netmask, 0);
+			const NetAddr gw(_gw, 0);
+			const NetAddr dns(_dns, 0);
 			const uint expire = (_renew - Time::Now()).GetSec();
 			console("DHCP: addr %a/%a  gw %a", &addr, &mask, &gw);
 			console("DHCP: name server %a, domain \"%S\"", &dns, &_domain);
@@ -176,7 +184,7 @@ IOBuffer* Dhcp::AllocPacket()
 	pkt->hlen = _netif.GetAddrLen();
 	pkt->xid = _xid;			// Default XID
 	pkt->secs = (Time::Now() - _start).GetSec();
-	pkt->flags = Htons(1);		// Tell server to broadcast reply
+//	pkt->flags = Htons(1);		// Tell server to broadcast reply
 	memcpy(pkt->chaddr, _netif.GetMacAddr(), _netif.GetAddrLen());
 
 	return buf;
@@ -214,7 +222,7 @@ void Dhcp::SendDiscover()
 	FillHeader(buf);
 
 	// Hand over packet to MAC
-	DMSG("DHCP: broadcasting DHCPDISCOVER");
+//	DMSG("DHCP: broadcasting DHCPDISCOVER");
 	_netif.Send(buf);
 
 	BackOff();					// Update rexmit timer
@@ -229,6 +237,7 @@ void Dhcp::SendRequest()
 		0x63, 0x82, 0x53, 0x63,
 		TAG_DHCP_MSGTYPE, 1, DHCPREQUEST,
 		TAG_DHCP_SERVER, 4, 0, 0, 0, 0,
+		TAG_DHCP_REQ_IP, 4, 0, 0, 0, 0,
 		TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
 		TAG_DHCP_MAX_SIZE, 2, 0x05, 0xdc,
 		TAG_END
@@ -248,12 +257,14 @@ void Dhcp::SendRequest()
 	
 	memcpy(pkt->options, request, sizeof request);
 	memcpy(pkt->options + 9, &_server, 4);
+	memcpy(pkt->options + 15, &_lease, 4);
+
 	buf->SetSize(offsetof(Packet, options) + sizeof request);
 
 	FillHeader(buf);
 
 	// Hand over packet to ethernet
-	DMSG("DHCP: broadcasting DHCPREQUEST");
+//	DMSG("DHCP: broadcasting DHCPREQUEST");
 	_netif.Send(buf);
 
 	BackOff();					// Update rexmit timer
@@ -273,69 +284,49 @@ void Dhcp::BackOff()
 
 void Dhcp::Extract(const uint8_t* options, uint len)
 {
+	if (len < 5 || memcmp(options, dhcp_magic, 4))
+		return;
+
 	_netmask = INADDR_ANY;
 	_gw = INADDR_ANY;
 	_dns = INADDR_ANY;
 	_domain = STR("");
 
-	for (const uint8_t* p = options; p < options + len; ) {
-		switch (*p++) {
-		case TAG_PAD: break;
+	for (const uint8_t* p = options + 4; p < options + len; ) {
+		const Tag tag = (Tag)*p++;
+		if (tag == TAG_PAD) continue;
+
+		const uint len = *p++;
+
+		switch (tag) {
 		case TAG_SUBNET:
-			// RFC1497 says this is a fixed-length field
-			// RFC1533 says it has a length prologue that's always 4
-			// If we see a '4' here we assume it's RFC1533 compliant
-			if (*p == 4) ++p;
 			memcpy(&_netmask, p, 4);
-			p += 4;
 			break;
 		case TAG_GW: {
-			const uint numgw = *p++;
+			const uint numgw = len / 4;
 			memcpy(&_gw, p, 4);
-			p += numgw;
 			break;
 		}
 		case TAG_NS: {
-			const uint numns = *p++;
+			const uint numns = len / 4;
 			memcpy(&_dns, p, 4);
-			p += numns;
 			break;
 		}
 		case TAG_DOMAIN: {
-			const uint len = *p++;
 			_domain = String(p, len);
-			p += len;
 			break;
 		}
 		case TAG_END:
 			p = options + len;
 			break;
-		case TAG_VEXT: {
-			const uint len = *p++;
-			for (const uint8_t* v = p; v < p + len; ++v) {
-				switch (*v++) {
-				case TAG_PAD: break;
-				case TAG_END: v = p + len; break;
-				case TAG_DHCP_LEASE: {
-					uint32_t secs;
-					memcpy(&secs, ++v, 4);
-					v += 4;
-					_renew = _first_request + Time::FromSec(secs);
-					break;
-				}
-				default:
-					v += *v + 1;
-					break;
-				}
-			}
-			p += len;
+		case TAG_DHCP_LEASE: {
+			uint32_t secs;
+			memcpy(&secs, p, 4);
+			_renew = _first_request + Time::FromSec(Ntohl(secs));
 			break;
 		}
-		default:
-			// Some tag we don't care about
-			p += *p + 1;
-			break;
 		}
+		p += len;
 	}
 done:
 	if (_netmask == INADDR_ANY)
@@ -349,47 +340,38 @@ Dhcp::Type Dhcp::GetMsgType(IOBuffer* buf, in_addr_t& server)
 	const uint8_t* options = pkt->options;
 	const uint len = buf->Size() - offsetof(Packet, options);
 
-	Type type = DHCPINVALID;
 	server = INADDR_ANY;
+	Type type = DHCPINVALID;
+
+	if (len < 5 || memcmp(options, dhcp_magic, 4))
+		return type;
+
 	bool got_server = false;
 	bool got_type = false;
 
-	for (const uint8_t* p = options; p < options + len; ++p) {
-		switch (*p++) {
-		case TAG_PAD: break;
-		case TAG_END: goto done;
-		case TAG_SUBNET:
-			if (*p == 4) ++p;
-			p += 4;
+	for (const uint8_t* p = options + 4; p < options + len; ) {
+		const Tag tag = (Tag)*p++;
+		if (tag == TAG_PAD) continue;
+
+		const uint len = *p++;
+
+		switch (tag) {
+		case TAG_DHCP_SERVER:
+			memcpy(&server, p, 4);
+			got_server = true;
 			break;
-		case TAG_VEXT: {
-			const uint vlen = *p++;
-			for (const uint8_t* v = p; v < p + vlen; ++v) {
-				switch (*v++) {
-				case TAG_DHCP_SERVER:
-					memcpy(&server, ++v, 4);
-					v += 4;
-					got_server = true;
-					break;
-				case TAG_DHCP_MSGTYPE:
-					type = (Type)*v++;
-					got_server = true;
-					break;
-				case TAG_END:
-					v = p + vlen;
-					break;
-				}
-				if (got_server && got_type) return type;
-			}
-			p += vlen;
+		case TAG_DHCP_MSGTYPE:
+			type = (Type)*p;
+			got_type = true;
+			break;
+		case TAG_END:
+			p = options + len;
 			break;
 		}
-		default:
-			p += *p + 1;
-			break;
-		}
+		if (got_server && got_type) break;
+
+		p += len;
 	}
-done:
 	return type;
 }
 

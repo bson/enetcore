@@ -311,11 +311,10 @@ void hwinit()
 	PINSEL0 = (PINSEL0 & ~(0b11 << 30)) | (0b10 << 30);
 	EXTWAKE = 4;			   // EINT2 wakes from power-down
 	VPBDIV=0;				   // Workaround for EXTINT.1, EXTINT.2 errata
-	EXTPOLAR = 4;			   // Make EINT2 active high (rising edge)
+	EXTPOLAR = 4;			   // Make EINT2 active high
 	VPBDIV=1;				   // CPU bug workaround
 	VPBDIV=0;				   // CPU bug workaround
-//	EXTMODE = 4;			   // Make EINT2 edge triggered
-	EXTMODE = 0;			   // Make EINT2 edge triggered
+	EXTMODE = 0;			   // Make EINT2 level triggered
 	VPBDIV=1;				   // CPU bug workaround
 	VPBDIV=1;				   // CPU bug workaround
 	EXTINT = 4;				   // Clear any stray EINT2 flag

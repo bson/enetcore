@@ -55,16 +55,16 @@ struct Dhcp {
 		DHCPDISCOVER = 1,
 		DHCPOFFER = 2,
 		DHCPREQUEST = 3,
-		DHCPACK = 4,
-		DHCPNAK = 5,
-		DHCPDECLINE = 6,
+		DHCPDECLINE = 4,
+		DHCPACK = 5,
+		DHCPNACK = 6,
 		DHCPRELEASE = 7,
-//		DHCPINFORM = 8  ??? Not listed in RFC1533
+		DHCPINFORM = 8
 	};
 
 	// Option tags - see RFC1533
 	// This is a partial list
-	enum {
+	enum Tag {
 		TAG_PAD = 0,			// 1 byte padding
 		TAG_SUBNET = 1, 		// 4 byte subnet
 		TAG_GW = 3,				// List of N gateways, 4 bytes each

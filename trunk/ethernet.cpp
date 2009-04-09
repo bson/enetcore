@@ -294,10 +294,10 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 
 		const uint16_t rxstatus = _base[ETH_XD0];
 		const uint16_t len = _base[ETH_XD0];
-		buf->SetHead(0);
-		buf->SetTail(len);
+		buf->SetHead(2);
+		buf->SetSize(len);
 
-		uint16_t* p = (uint16_t*)(buf + 2);
+		uint16_t* p = (uint16_t*)(*buf+0);
 		for (uint i = 0; i < len/2; ++i)
 			*p++ = _base[ETH_XD0];
 		
@@ -307,6 +307,7 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 		// optimizing.  We don't ever see partial frames or frames
 		// with a bad CRC, so this is really quite exceptional.
 		if (len >= 64) {
+			buf->SetHead(0);
 			_recvq.PushBack(buf);
 			_net_event.Set();		// Signal EventObject
 		} else {
