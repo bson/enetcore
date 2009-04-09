@@ -104,6 +104,19 @@ public:
 	// Interrupt handler
 	static void Interrupt() __irq NAKED;
 private:
+	// CS8900A TxCMD codes
+	// XXX The optimial TxStart depends on: CCLK, RAM wait states, and
+	// CS8900 wait states.  We should calculate the optimal Tx high water
+	// mark in Init(), which should pick a high-water mark.
+	// When debugging, TX_STARTALL is a good idea.
+	enum {
+		TX_START4 = 0,			// Start after 4 bytes
+		TX_START64 = 0x40,		// 64
+		TX_START128 = 0x80,		// 128
+		TX_STARTALL = 0xc0,		// After entire frame
+		TX_START = TX_STARTALL
+	};
+
 	// Begin Tx for head of sendq - issue command
 	void BeginTx();
 

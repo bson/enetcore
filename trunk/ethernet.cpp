@@ -324,13 +324,7 @@ void Ethernet::BeginTx()
 		}
 	} while (!len);
 
-	// Start after entire frame is in buffer
-	// TxCMD: TxStart = 0b11 (full frame)
-
-	// XXX The optimial TxStart depends on: CCLK, RAM wait states, and
-	// CS8900 wait states.  Should calculate the optimal Tx high water
-	// mark in Init(), which should receive these params as input.
-	_base[ETH_TxCMD] = 0b11000000;
+	_base[ETH_TxCMD] = TX_START;
 	_base[ETH_TxLength] = len;
 
 	_tx_state = TX_CMD;
