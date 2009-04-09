@@ -11,8 +11,6 @@ int	main ()
 	_lcd.Write(String(STR("\xfe\1Enetcore 0.1 DEV")));
 	_lcd.SyncDrain();
 
-	console("Enetcore 0.1 DEV");
-
 	for (;;) ;
 
 	_sd.Init();

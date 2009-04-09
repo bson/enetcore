@@ -280,6 +280,7 @@ void hwinit()
 	_vic.EnableChannel(6);
 	_uart0.SetInterrupts(true);
 	_uart0.SetSpeed(115200);
+	_uart0.Write(STR("\r\n\n"));
 
 	_vic.InstallHandler(10, SPI::Interrupt);
 	_vic.EnableChannel(10);
@@ -295,6 +296,8 @@ void hwinit()
 
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ, 0);
+
+	console("Enetcore 0.1 DEV");
 
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");

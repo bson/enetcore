@@ -18,7 +18,13 @@ Implement CRC7
 
 Implement FAT32
 
+EventObject should keep count of waiters and don't call
+WakeAll/WakeSingle on a zero count.
+
 Run system clock fully off Timer1
+- Don't stop or reset TC, just interrupt on match
+- In handler, add TC to system clock and reload with new value
+- Increase default timer to 8 seconds
 
 Improve exeption handler - traceback all threads, print thread state
 - Write tool to symbolize console crash output
@@ -27,6 +33,7 @@ Thread features
 - Priority willing
 - Thread structure should be in internal mem (maybe at the top of the
   thread's stack) - for single-cycle access
+- Track max stack usage
 
 Containers should have a _resize flag to enable/disable auto resizing.
 
