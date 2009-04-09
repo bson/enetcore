@@ -13,18 +13,18 @@ struct NOVTABLE Udph {
 
 	// UDP pseudo header
 	struct UPH {
-		in_addr_t saddr;
-		in_addr_t daddr;
-		uint8_t zero;
-		uint8_t proto;
-		uint16_t len;
+		in_addr_t phsaddr;
+		in_addr_t phdaddr;
+		uint8_t phzero;
+		uint8_t phproto;
+		uint16_t phlen;
 	};
 
 	uint16_t CSum(const Iph& iph) const {
-		UPH ph = { iph.source, iph.dest, 0, iph.proto, len };
+		const UPH ph = { iph.source, iph.dest, 0, iph.proto, len };
 
 		uint16_t csum = ipcksum((const uint16_t*)&ph, sizeof ph);
-		csum = ipcksum((const uint16_t*)(uint8_t*)this + sizeof (Udph),
+		csum = ipcksum((const uint16_t*)((uint8_t*)this + sizeof (Udph)),
 					   Ntohs(len) - sizeof (Udph), csum);
 		csum = Htons(~csum);
 		if (!csum) --csum;

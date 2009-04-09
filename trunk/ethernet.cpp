@@ -17,8 +17,11 @@ void Initialize(uint num)
 	Spinlock::Scoped L(_lock);
 
 	_pool.Reserve(num);
-	for (uint i = 0; i < num; ++i)
-		_pool.PushBack(new IOBuffer(1600));
+	for (uint i = 0; i < num; ++i) {
+		IOBuffer* buf = new IOBuffer(1600);
+		buf->SetAutoCompact(false);
+		_pool.PushBack(buf);
+	}
 }
 
 
@@ -46,19 +49,6 @@ void FreeBuffer(IOBuffer* buf)
 
 } // namespace BufferPool
 
-
-// Note, 0100-01FF are set aside as experimental
-// LSB must be 0 (1 implies multicast/logical address)
-// This number is chosen to be easy to type
-// * static
-uint16_t Ethernet::_macaddr[3] = {
-#if BYTE_ORDER == LITTLE_ENDIAN
-	0x7701,
-#else
-	0x0177,
-#endif
-	0, 0
-};
 
 // Broadcast address
 uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
@@ -104,20 +94,31 @@ void Ethernet::Initialize()
 	// INTR: INTR0
 	_pp[ETH_PP_INTR] = 0;
 
-	// BusCLT: EnableRQ (master interrupt enable)
-	// Don't use IOCHRDY pin
-	_pp[ETH_PP_BusCTL] = 0x8000 | 0x1000;
-
 	// Hash filter
 	_pp[ETH_PP_LAF] = 0;
 
-	// IA
-	const uint32_t ma = Util::Random<uint32_t>() & ~1;
-	memcpy(_macaddr+1, &ma, 4);
+	// Install Mac address
+	// Use 0-0-12 for testing purposes... it's currently unassigned.
+	_macaddr[0] = 0;
+	_macaddr[1] = 0;
+	_macaddr[2] = 0x12;
+	_macaddr[3] = Util::Random<uint8_t>();
+	_macaddr[4] = Util::Random<uint8_t>();
+	_macaddr[5] = Util::Random<uint8_t>();
 
-	_pp[ETH_PP_IA + 0] = _macaddr[0];
-	_pp[ETH_PP_IA + 2] = _macaddr[1];
-	_pp[ETH_PP_IA + 4] = _macaddr[2];
+	uint8_t buf[6];
+	uint16_t* mm = (uint16_t*)buf;
+	*mm++ = _pp[ETH_PP_IA + 0];
+	*mm++ = _pp[ETH_PP_IA + 2];
+	*mm++ = _pp[ETH_PP_IA + 4];
+
+	DMSG("Ethernet: prior MAC address: %:06h", buf);
+
+	const uint16_t* m = (const uint16_t*)_macaddr;
+
+	_pp[ETH_PP_IA + 0] = *m++;
+	_pp[ETH_PP_IA + 2] = *m++;
+	_pp[ETH_PP_IA + 4] = *m++;
 
 	console("Ethernet: MAC address %:06h", (const uint8_t*)_macaddr);
 
@@ -132,6 +133,10 @@ void Ethernet::Initialize()
 	const uint16_t linkst = _pp[ETH_PP_LineST];
 	_link_status = (linkst & 0x80) != 0;
 	_10bt = (linkst & 0x200) != 0;
+
+	// BusCLT: EnableRQ (master interrupt enable)
+	// Don't use IOCHRDY pin
+	_pp[ETH_PP_BusCTL] = 0x8000 | 0x1000;
 }
 
 
@@ -363,7 +368,7 @@ void Ethernet::CopyTx()
 
 	// First 2 bytes are alignment padding
 	buf->SetHead(2);
-	const uint16_t* p = (const uint16_t*)(buf + 0);
+	const uint16_t* p = (const uint16_t*)(*buf + 0);
 
 	for (uint i = 0; i < buf->Size() / 2; ++i)
 		_base[ETH_XD0] = *p++;
@@ -391,8 +396,9 @@ void Ethernet::DiscardTx()
 
 void Ethernet::FillForBcast(IOBuffer* buf, uint16_t et)
 {
-	memcpy(*buf + 2, GetBcastAddr(), GetAddrLen());
-	memcpy(*buf + GetAddrLen(), GetMacAddr(), GetAddrLen());
+	const uint hlen = GetAddrLen();
+	memcpy(*buf + 2, GetBcastAddr(), hlen);
+	memcpy(*buf + 2 + hlen, GetMacAddr(), hlen);
 	et = Htons(et);
-	memcpy(*buf + 2 + 6 + 6, &et, 2);
+	memcpy(*buf + 2 + hlen + hlen, &et, 2);
 }

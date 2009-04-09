@@ -169,14 +169,14 @@ IOBuffer* Dhcp::AllocPacket()
 	// Initialize packet with defaults
 	Packet* pkt = (Packet*)(*buf + 0);
 
-	memset(&pkt->op, 0, offsetof(Packet, options));
+	memset(pkt, 0, offsetof(Packet, options));
 
 	pkt->op = BOOTREQUEST;
 	pkt->htype = _netif.GetBootpType();
 	pkt->hlen = _netif.GetAddrLen();
 	pkt->xid = _xid;			// Default XID
 	pkt->secs = (Time::Now() - _start).GetSec();
-//	pkt->flags = 1;			// Tell server to broadcast reply
+	pkt->flags = Htons(1);		// Tell server to broadcast reply
 	memcpy(pkt->chaddr, _netif.GetMacAddr(), _netif.GetAddrLen());
 
 	return buf;
@@ -200,11 +200,10 @@ void Dhcp::SendDiscover()
 	_state = STATE_DISCOVER;
 
 	static const uint8_t request[] = {
-		9, 130, 83, 99,			// DHCP magic
-		TAG_VEXT, 10,
- 		  TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
-		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
-		  TAG_END,
+		0x63, 0x82, 0x53, 0x63,
+		TAG_DHCP_MSGTYPE, 1, DHCPDISCOVER,
+		TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
+		TAG_DHCP_MAX_SIZE, 2, 0x05, 0xdc,
 		TAG_END
 	};
 
@@ -227,12 +226,11 @@ void Dhcp::SendRequest()
 	_lock.AssertLocked();
 
 	static const uint8_t request[] = {
-		9, 130, 83, 99,			// DHCP magic
-		TAG_VEXT, 16,
- 		  TAG_DHCP_MSGTYPE, 1, DHCPREQUEST,
-		  TAG_DHCP_SERVER, 4, 0, 0, 0, 0,
-		  TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
-		  TAG_END,
+		0x63, 0x82, 0x53, 0x63,
+		TAG_DHCP_MSGTYPE, 1, DHCPREQUEST,
+		TAG_DHCP_SERVER, 4, 0, 0, 0, 0,
+		TAG_DHCP_PARAM_REQ, 4, TAG_SUBNET, TAG_GW, TAG_NS, TAG_DOMAIN,
+		TAG_DHCP_MAX_SIZE, 2, 0x05, 0xdc,
 		TAG_END
 	};
 
@@ -249,7 +247,7 @@ void Dhcp::SendRequest()
 	pkt->xid = _offer_xid;
 	
 	memcpy(pkt->options, request, sizeof request);
-	memcpy(pkt->options + 11, &_server, 4);
+	memcpy(pkt->options + 9, &_server, 4);
 	buf->SetSize(offsetof(Packet, options) + sizeof request);
 
 	FillHeader(buf);
@@ -398,6 +396,9 @@ done:
 
 void Dhcp::FillHeader(IOBuffer* buf)
 {
+	// Clearing out the headers makes it easier to diagnose uninitialized fields
+//	memset(*buf + 0 - _netif.GetPrealloc(), 0x55, offsetof(Packet, op) + _netif.GetPrealloc());
+
 	Packet* pkt = (Packet*)(*buf + 0);
 	Iph& iph = pkt->iph;
 	iph.SetHLen(sizeof (Iph));
@@ -416,6 +417,8 @@ void Dhcp::FillHeader(IOBuffer* buf)
 	udph.dport = Htons(SERVER_PORT);
 	udph.len = Htons(buf->Size() - sizeof (Iph));
 	udph.SetCsum(iph);
+
+	udph.sum = 0;
 
 	buf->SetHead(0);
 	_netif.FillForBcast(buf, ETHERTYPE_IP);

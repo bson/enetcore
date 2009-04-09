@@ -80,6 +80,7 @@ struct Dhcp {
 		TAG_DHCP_MSGTYPE = 53,	// DHCP Message Type
 		TAG_DHCP_SERVER = 54,	// DHCP Server identified (IP addr of server)
 		TAG_DHCP_PARAM_REQ = 55, // DHCP Requested parameters
+		TAG_DHCP_MAX_SIZE = 57,	 // Max DHCP packet size for reply
 		TAG_END = 255,			// 1 byte end
 	};
 
