@@ -5,6 +5,7 @@
 #include "netaddr.h"
 #include "ipconn.h"
 #include "socket.h"
+#include "hashmap.h"
 
 
 struct NOVTABLE Udph {
@@ -36,7 +37,25 @@ struct NOVTABLE Udph {
 
 
 class UdpCoreSocket: public CoreSocket {
+	friend class Udp;
+protected:
+	Mutex _lock;
+
+	// Socket identifier
+	Tuple _id;
+
+	// For a connected socket, the last route
+	Ip::Route* _cached_route;
+
+	// Receive queue
+	Deque<IOBuffer*> _recvq;
+
+	// Flags
+	bool _connected:1;			// Connected UDP socket
+
 public:
+	~UdpCoreSocket();
+
 	bool Bind(const NetAddr& arg);
 	bool Connect(const NetAddr& dest);
 	bool GetSockAddr(NetAddr& addr);
@@ -52,9 +71,28 @@ public:
 
 
 class Udp {
+	friend class UdpCoreSocket;
+
+	Mutex _lock;
+	HashMap<Tuple, UdpCoreSocket*> _socklist;
+
+	uint16_t _portnum;
+
 public:
+	Udp() : _portnum(32768) { }
+
 	// Create UDP socket
-	static UdpCoreSocket* Create();
+	UdpCoreSocket* Create();
+	void Receive(IOBuffer* buf);
+
+protected:
+	void Deregister(UdpCoreSocket* s);
+	void Register(UdpCoreSocket* s);
+	UdpCoreSocket* Find(const Tuple& t);
 };
+
+
+extern Udp _udp;
+
 
 #endif // __UDP_H__

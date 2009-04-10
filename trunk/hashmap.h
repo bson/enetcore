@@ -73,12 +73,12 @@ public:
 		return true;
 	}
 
-private:
 	uint Lookup(const K& key) const {
 		KV dummy(key, V());
 		return _table.Find(&dummy);
 	}
 
+private:
 	HashMap(const HashMap&);
 	HashMap& operator=(const HashMap&);
 };

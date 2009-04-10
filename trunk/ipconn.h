@@ -13,6 +13,12 @@ struct Tuple {
 	uint16_t sport;
 	uint16_t dport;
 
+	Tuple() : saddr(0), daddr(0), sport(0), dport(0) { }
+
+	Tuple(const Tuple& arg) :
+		saddr(arg.saddr), daddr(arg.daddr), sport(arg.sport), dport(arg.dport)
+	{ }
+
 	bool operator==(const Tuple& arg) const { return !memcmp(this, &arg, sizeof (Tuple)); }
 
 	// Hash tuple
