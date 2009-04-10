@@ -52,15 +52,16 @@ flash sector in link.cmd.
 
 ---
 
-Code footprint (as of #105):
+Code footprint (as of #159):
 
- -Os         				 84k
- -Os -DTRACE 				 85k
- -Os -DTRACE -DDEBUG		 95k
- -O0 -DTRACE -DDEBUG		189k
- -O1 -DTRACE -DDEBUG		135k
- -O2 -DTRACE -DDEBUG		130k
- -O3 -DTRACE -DDEBUG		139k
+ -Os         				 39k
+ -Os -DTRACE 				 40k
+ -Os -DTRACE -DDEBUG		 45k
+ -O0 -DTRACE -DDEBUG		 88k
+ -O1 -DTRACE -DDEBUG		 61k
+ -O2 -DTRACE -DDEBUG		 58k
+ -O3 -DTRACE -DDEBUG		 62k
+ -O3 -DTRACE				 54k
 
 ---
 
