@@ -259,14 +259,16 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 void Ip::Receive(IOBuffer* packet)
 {
 	Mutex::Scoped L(_lock);
-	if (_routes.Empty()) {
-		// Nothing configured - drop
+
+	Iph& iph = GetIph(packet);
+
+	if (_routes.Empty() || packet->Size() < 16 + Ntohs(iph.len) || !iph.ValidateCsum()) {
 		BufferPool::FreeBuffer(packet);
 		return;
 	}
 
-	const in_addr_t dest = GetIph(packet).dest;
-	const in_addr_t source = GetIph(packet).source;
+	const in_addr_t dest = iph.dest;
+	const in_addr_t source = iph.source;
 	Route* hostrt = NULL;
 	Route* netif = NULL;
 

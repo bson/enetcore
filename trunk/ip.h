@@ -86,6 +86,13 @@ struct NOVTABLE Iph {
 		sum = Htons(~ipcksum((const uint16_t*)this, GetHLen()));
 		if (!sum) --sum;
 	}
+
+	bool ValidateCsum() {
+		const int16_t tmp = exch<uint16_t>(sum, 0);
+		const bool equal = tmp == Htons(~ipcksum((const uint16_t*)this, GetHLen()));
+		sum = tmp;
+		return equal;
+	}
 };
 
 

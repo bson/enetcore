@@ -1,7 +1,3 @@
-Fix UDP checksum (Udph::SetCSum())
-
-IP: verify checksum on input
-
 Add UDP sockets
 
 Add ICMP
