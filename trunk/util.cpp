@@ -1,8 +1,7 @@
 #include "enetkit.h"
 #include "util.h"
-//#include "netaddr.h"
 #include "sha1.h"
-#include "object.h"
+//#include "object.h"
 #include "mutex.h"
 
 
@@ -170,12 +169,14 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				dest.PushBack(va_arg(va, const NetAddr*)->Printable(*fmt == 'A').CStr());
 				break;
 			}
+#if 0
 			case 'o': {
 				Object* o = va_arg(va, Object*);
 				if (o) o->AsJson(dest);
 				else dest.PushBack((const uchar*)"(null)");
 				break;
 			}
+#endif
 			case 'h': {
 				uint len = param ? param : 20;
 				for (const uchar* p = va_arg(va, uchar*); len > 0; --len, ++p) {
