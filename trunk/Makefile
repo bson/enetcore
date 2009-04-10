@@ -4,8 +4,7 @@ CC      = arm-elf-g++-4.3.2
 LD      = arm-elf-ld -v
 AR      = arm-elf-ar
 AS      = arm-elf-as
-OCP      = arm-elf-objcopy
-OD		= arm-elf-objdump
+SIZE 	= arm-elf-size
 
 ODIR=build
 #  -fno-common
@@ -35,22 +34,14 @@ TOUCH_ODIR=$(ODIR)/.touch
 OBJS=$(patsubst %.cpp,$(ODIR)/%.o,$(SRCS))
 DEPS = $(patsubst %.cpp, $(ODIR)/%.d, $(SRCS))
 
-all: $(ODIR)/image.bin $(ODIR)/image.dmp $(ODIR)/image.hex
+all: $(ODIR)/image
 
 clean:
 	-rm -rf $(ODIR)
 
 $(ODIR)/image: $(ODIR)/crt.o $(OBJS) link.cmd 
 	$(LD) $(LFLAGS) -o $@ $(ODIR)/crt.o $(OBJS) $(LIBS)
-
-$(ODIR)/%.bin: $(ODIR)/%
-	$(OCP) $(CPFLAGS) $< $@
-
-$(ODIR)/%.dmp: $(ODIR)/%
-	$(OD) $(ODFLAGS) $< >$@
-
-$(ODIR)/%.hex: $(ODIR)/%
-	$(OCP) $(HEXFLAGS) $< $@
+	$(SIZE) $@
 
 $(ODIR)/crt.o: crt.s $(TOUCH_ODIR)
 	$(AS) $(AFLAGS) crt.s > $(ODIR)/crt.lst
