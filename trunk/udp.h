@@ -14,7 +14,7 @@ struct NOVTABLE Udph {
 	uint16_t CSum(const Iph& iph) {
 		sum = 0;
 		uint16_t csum = ipcksum((const uint16_t*)this, Ntohs(len),
-								iph.source + iph.dest + iph.proto + len);
+								iph.source + iph.dest + iph.proto + iph.len);
 		csum = ~Htons(csum);
 		if (!csum) --csum;
 		return csum;
