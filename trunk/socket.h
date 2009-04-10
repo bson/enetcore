@@ -6,6 +6,9 @@
 
 // Socket interface.  Sockets are always non-blocking by design.
 class CoreSocket: public EventObject {
+	uint _error;
+	uint _evmask;
+	uint _event;
 public:
 	enum {
 		EVENT_READABLE = 1,		// Recv queue is non-empty (or listen socket has conn)
@@ -14,26 +17,36 @@ public:
 		EVENT_CLOSE = 8			// Socket is closed
 	};
 
-	// These functions return true on success, false on failure.
-	// On failure, the last socket error can be obtained with GetError().
-	virtual bool Listen(uint backlog) = 0;
-	virtual CoreSocket* Accept(NetAddr& from) = 0;
+	CoreSocket() : _error(NO_ERROR), _evmask(0), _event(0) { }
+	virtual ~CoreSocket() { }
+
+	virtual bool Listen(uint backlog) { _error = ERR_BAD_OP; return false; }
+	virtual CoreSocket* Accept(NetAddr& from) { _error = ERR_BAD_OP; return false; }
 	virtual bool Bind(const NetAddr& arg) = 0;
 	virtual bool Connect(const NetAddr& dest) = 0;
 	virtual bool GetSockAddr(NetAddr& addr) = 0;
 	virtual bool GetPeerAddr(NetAddr& addr) = 0;
-	virtual bool GetEvent(uint& state) = 0;
-	virtual bool SetEventMask(uint mask) = 0;
-	virtual void SetError(uint e) = 0;
-	virtual uint GetError() = 0;
 	virtual uint GetRecvAvail() = 0;
 	virtual uint GetSendSpace() = 0;
 	virtual bool Send(const void* data, uint len) = 0;
-	virtual bool SendTo(const void* data, uint len, const NetAddr& dest) = 0;
+	virtual bool SendTo(const void* data, uint len, const NetAddr& dest) {
+		_error = ERR_BAD_OP; return false;
+	}
 	virtual bool Recv(void* data, uint& len) = 0;
-	virtual bool RecvFrom(void* data, uint& len, NetAddr& sender) = 0;
-	virtual bool Shutdown(int dir) = 0;
+	virtual bool RecvFrom(void* data, uint& len, NetAddr& sender) {
+		_error = ERR_BAD_OP; return false;
+	}
+	virtual bool Shutdown(int dir) { _error = ERR_BAD_OP; return false; }
 	virtual bool Close() = 0;
+
+	uint GetEvent() { return _event; }
+	bool SetEventMask(uint mask) { _evmask = mask; return true; }
+	void AddEvent(uint event) {
+		_event |= event; if (event & _evmask)  EventObject::Set();
+	}
+	void ClearEvent(uint event) { _event &= ~event; }
+	void SetError(uint e) { _error = e; }
+	uint GetError() { return _error; }
 };
 
 #endif // __SOCKET_H__

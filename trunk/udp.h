@@ -36,6 +36,18 @@ struct NOVTABLE Udph {
 
 
 class UdpCoreSocket: public CoreSocket {
+public:
+	bool Bind(const NetAddr& arg);
+	bool Connect(const NetAddr& dest);
+	bool GetSockAddr(NetAddr& addr);
+	bool GetPeerAddr(NetAddr& addr);
+	uint GetRecvAvail();
+	uint GetSendSpace();
+	bool Send(const void* data, uint len);
+	bool SendTo(const void* data, uint len, const NetAddr& dest);
+	bool Recv(void* data, uint& len);
+	bool RecvFrom(void* data, uint& len, NetAddr& sender);
+	bool Close();
 };
 
 
