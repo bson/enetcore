@@ -5,11 +5,8 @@ enum {
 	NO_ERROR = 0,
 	ERR_NO_ROUTE = 1,
 	ERR_CONN_REFUSED = 2,
-	ERR_TIMEOUT = 3
+	ERR_NO_DATA = 3,			// Nothing to recv
+	ERR_NO_SPACE = 4			// No space in buffer for send
 };
-
-
-inline int GetLastError() { return Self().GetTLS()._last_error; }
-inline void SetLastError(int e) { Self().GetTLS()._last_error = e; }
 
 #endif // __ERROR_H__

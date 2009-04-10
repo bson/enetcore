@@ -7,9 +7,7 @@ class Thread {
 public:
 	typedef void* (*Start)(void*);
 
-	struct TLS {
-		int _last_error;
-	};
+	struct TLS { };
 
 private:
 	static Spinlock _lock;		// Global thread lock
