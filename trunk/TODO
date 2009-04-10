@@ -20,9 +20,6 @@ Implement CRC7
 
 Implement FAT32
 
-EventObject should keep count of waiters and don't call
-WakeAll/WakeSingle on a zero count.
-
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value

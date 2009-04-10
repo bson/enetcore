@@ -22,49 +22,24 @@ protected:
 
 	mutable Spinlock _lock;
 	mutable ThreadId _tid;
-	mutable uint _count;
+	mutable uint16_t _count;
+	mutable uint16_t _waiters;
 
 public:
-	Mutex() {
-		_tid = 0;
-		_count = 0;
-	}
+	Mutex() :
+		_tid(0), _count(0), _waiters(0)
+	{ }
 
-	virtual ~Mutex() {  }
+	~Mutex() {  }
 
 	void AssertLocked() const {
 		assert(_count);
 		assert(_tid == &Self());
 	}
 
-	bool TryLock() const {
-		Spinlock::Scoped L(_lock);
-		if (_count) return false;
-		
-		_tid = &Self();
-		++_count;
-		return true;
-	}
-
-	void Lock() const {
-		Spinlock::Scoped L(_lock);
-		while (_count && _tid != &Self()) {
-			_lock.Unlock();
-			Self().WaitFor(this);
-			_lock.Lock();
-		}
-
-		assert((!_tid && !_count) || (_count && _tid == &Self()));
-		_tid = &Self();
-		++_count;
-	}
-
-	void Unlock() const { 
-		AssertLocked();
-
-		if (!--_count) _tid = 0;
-		Self().WakeSingle(this);
-	}
+	bool TryLock() const;
+	void Lock() const;
+	void Unlock() const;
 
 	typedef ScopedLock<Mutex> Scoped;
 
@@ -102,14 +77,15 @@ private:
 
 
 class CondVar {
+	uint16_t _count;
 public:
-	CondVar() {  }
+	CondVar() : _count(0) {  }
 	virtual ~CondVar() {  }
 
 	void Wait(Mutex& m, const Time& delay);
 	void Wait(Mutex& m);
-	void Signal() { Self().WakeSingle(this); }
-	void Broadcast() { Self().WakeAll(this); }
+	void Signal() { if (_count) Self().WakeSingle(this); }
+	void Broadcast() { if (_count) Self().WakeAll(this); }
 private:
 	// These make no sense
 	CondVar(const CondVar&);

@@ -3,17 +3,60 @@
 #include "thread.h"
 
 
+bool Mutex::TryLock() const 
+{
+	Spinlock::Scoped L(_lock);
+	if (_count) return false;
+		
+	_tid = &Self();
+	++_count;
+	return true;
+}
+
+
+void Mutex::Lock() const
+{
+	Spinlock::Scoped L(_lock);
+	while (_count && _tid != &Self()) {
+		++_waiters;
+		_lock.Unlock();
+		Self().WaitFor(this);
+		_lock.Lock();
+		assert(_waiters);
+		--_waiters;
+	}
+
+	assert((!_tid && !_count) || (_count && _tid == &Self()));
+	_tid = &Self();
+	++_count;
+}
+
+
+void Mutex::Unlock() const
+{
+	AssertLocked();
+
+	if (!--_count) _tid = 0;
+	if (_waiters) Self().WakeSingle(this);
+}
+
+
 void CondVar::Wait(Mutex& m)
 {
 	m.AssertLocked();
 
+	++_count;
+
 	// Temporarily release mutex regardless of recursion depth
-	const uint count = exch<uint>(m._count, 1);
+	const uint count = exch<uint16_t>(m._count, 1);
 	m.Unlock();
 
 	Self().WaitFor(this);
 
 	m.Lock();
+	assert(_count);
+	--_count;
+
 	m._count = count;
 }
 
@@ -22,13 +65,17 @@ void CondVar::Wait(Mutex& m, const Time& delay)
 {
 	m.AssertLocked();
 
+	++_count;
+
 	// Temporarily release mutex regardless of recursion depth
-	const uint count = exch<uint>(m._count, 1);
+	const uint count = exch<uint16_t>(m._count, 1);
 	m.Unlock();
 
 	Self().WaitFor(this, Time::Now() + delay);
 
 	m.Lock();
+	assert(_count);
+	--_count;
 	m._count = count;
 }
 
