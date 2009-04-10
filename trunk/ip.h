@@ -321,7 +321,7 @@ public:
 	//    _cached_route = NULL;
 	//
 	//    // ... send packet ...
-	//    Route* r = Ip::Send(packet, _cached_route);
+	//    Route* r = _ip.Send(packet, _cached_route);
 	//    if (r != _cached_route) {
 	//      if (r)  r->Retain();
 	//      _cached_route = r;
