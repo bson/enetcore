@@ -91,6 +91,29 @@ void FormatTime(Vector<uchar>& dest, const Time* t, bool with_date)
 }
 
 
+void FormatCString(Vector<uchar>& dest, const uchar* s, uint flags, uint param)
+{
+	uint len = xstrlen(s);
+	if (param)  {
+		// Truncate string at specified length
+		len = min(len, param);
+
+		// Calculate pad needed
+		param -= min(param, len);
+	}
+
+	if (!(flags & FMT_LEFT)) {
+		while (param) {
+			dest.PushBack((uchar)' ');
+			--param;
+		}
+	}
+	dest.PushBack(s, len);
+
+	while (param--) dest.PushBack((uchar)' ');
+}
+
+
 const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 {
 	const uint result = dest.Size();
@@ -157,11 +180,11 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				break;
 			}
 			case 's': {
-				dest.PushBack(va_arg(va, const uchar*));
+				FormatCString(dest, va_arg(va, const uchar*), flags, param);
 				break;
 			}
 			case 'S': {
-				dest.PushBack(va_arg(va, const String*)->CStr());
+				FormatCString(dest, va_arg(va, const String*)->CStr(), flags, param);
 				break;
 			}
 			case 'a':
