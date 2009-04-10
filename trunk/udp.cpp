@@ -90,6 +90,7 @@ UdpCoreSocket* Udp::Find(const Tuple& t)
 
 UdpCoreSocket::~UdpCoreSocket()
 {
+	if (_cached_route)  _cached_route->Release();
 	_udp.Deregister(this);
 }
 
@@ -168,11 +169,50 @@ uint UdpCoreSocket::GetSendSpace()
 
 bool UdpCoreSocket::Send(const void* data, uint len)
 {
+	if (!_connected) {
+		SetError(ERR_NOT_CONNECTED);
+		return false;
+	}
+
+	return SendTo(data, len, NetAddr(_id.daddr, Ntohs(_id.dport)));
 }
 
 
 bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 {
+	IOBuffer* buf = BufferPool::Alloc();
+	if (!buf) {
+		SetError(ERR_NO_SPACE);
+		return false;
+	}
+
+	buf->SetHead(0);
+
+	Udph& udph = *(Udph*)(*buf + 16 + sizeof (Iph));
+	udph.sport = _id.sport;
+	udph.dport = Htons(dest.GetPort());
+	udph.len = Htons(len + sizeof (Udph));
+	buf->SetSize(16 + sizeof (Iph) + sizeof (Udph) + len);
+	memcpy(udph.GetPayload(), data, len);
+
+	Iph& iph = *(Iph*)(*buf + 16);
+	iph.dest = dest.GetAddr4();	// Needed for Udph::SetCsum
+	iph.source = INADDR_ANY;	// Needed for Udph::SetCsum
+	udph.SetCsum(iph);
+
+	Ip::Route* rt = _connected ? _cached_route : NULL;
+	Ip::Route* r = _ip.Send(buf, dest.GetAddr4(), rt);
+	if (_connected && r != _cached_route) {
+		if (r) r->Retain();
+		_cached_route = r;
+	}
+
+	if (!r) {
+		SetError(ERR_NO_ROUTE);
+		return false;
+	}
+
+	return true;
 }
 
 
