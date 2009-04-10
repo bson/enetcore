@@ -178,14 +178,41 @@ bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 
 bool UdpCoreSocket::Recv(void* data, uint& len)
 {
+	NetAddr tmp;
+	return RecvFrom(data, len, tmp);
 }
 
 
 bool UdpCoreSocket::RecvFrom(void* data, uint& len, NetAddr& sender)
 {
+	if (_recvq.Empty()) {
+		SetError(ERR_NO_DATA);
+		return false;
+	}
+
+	Mutex::Scoped L(_lock);
+
+	IOBuffer* buf = _recvq.Front();
+	_recvq.PopFront();
+	buf->SetHead(16);
+	Iph& iph = *(Iph*)(*buf + 0);
+	Udph& udph = *(Udph*)iph.GetTransport();
+	const void* payload = udph.GetPayload();
+	len = min<uint>(len, Ntohs(udph.len) - sizeof (Udph));
+	memcpy(data, payload, len);
+
+	sender = NetAddr(iph.source, Ntohs(udph.sport));
+
+	if (_recvq.Empty())
+		ClearEvent(CoreSocket::EVENT_READABLE);
+
+	BufferPool::FreeBuffer(buf);
+
+	return true;
 }
 
 
 bool UdpCoreSocket::Close()
 {
+	_udp.Deregister(this);
 }
