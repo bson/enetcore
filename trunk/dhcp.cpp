@@ -79,6 +79,10 @@ bool Dhcp::Receive(IOBuffer* buf)
 			_lease = pkt->yiaddr;
 
 			// Extract config info
+			const in_addr_t prev_lease = _lease;
+			const in_addr_t prev_mask = _netmask;
+			const in_addr_t prev_gw = _gw;
+
 			buf->SetHead(_netif.GetPrealloc());
 			Extract(pkt->options, buf->Size() - offsetof(Packet, options));
 
@@ -93,6 +97,12 @@ bool Dhcp::Receive(IOBuffer* buf)
 			console("DHCP: addr %a/%a  gw %a", &addr, &mask, &gw);
 			console("DHCP: name server %a, domain \"%S\"", &dns, &_domain);
 			DMSG("DHCP: ttl %u sec", expire);
+
+			if (_lease != prev_lease || _netmask != prev_mask || _gw != prev_gw) {
+				_ip.RemoveInterface(_netif);
+				_ip.AddInterface(_netif, _lease, _netmask);
+				_ip.AddDefaultRoute(_netif, _gw);
+			}
 
 			break;
 		}

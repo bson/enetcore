@@ -1,5 +1,3 @@
-Make DHCP configure interfaces and routes
-
 Fix UDP checksum (Udph::SetCSum())
 
 Add Thread TLS LastError, GetLastError
