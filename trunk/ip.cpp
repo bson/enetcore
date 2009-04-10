@@ -258,8 +258,6 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 
 void Ip::Receive(IOBuffer* packet)
 {
-	Mutex::Scoped L(_lock);
-
 	Iph& iph = GetIph(packet);
 
 	if (_routes.Empty() || packet->Size() < 16 + Ntohs(iph.len) || !iph.ValidateCsum()) {
@@ -272,34 +270,37 @@ void Ip::Receive(IOBuffer* packet)
 	Route* hostrt = NULL;
 	Route* netif = NULL;
 
-	for (uint i = _routes.Size()-1; i >= 0; --i) {
-		Route* rt = _routes[i];
-		if (rt->dest == dest & rt->netmask) {
-			if (rt->type == Route::TYPE_HOSTRT) {
-				rt->ResetExpire();
-				// Glean ARP info
-				memcpy(rt->macaddr, GetMacSource(packet), 6);
-				rt->macvalid = true;
-				hostrt = rt;
-				ReleasePendingARP();
-			} else if (rt->type == Route::TYPE_IF) {
-				netif = rt;
-				break;
+	{
+		Mutex::Scoped L(_lock);
+
+		for (uint i = _routes.Size()-1; i >= 0; --i) {
+			Route* rt = _routes[i];
+			if (rt->dest == dest & rt->netmask) {
+				if (rt->type == Route::TYPE_HOSTRT) {
+					rt->ResetExpire();
+					// Glean ARP info
+					memcpy(rt->macaddr, GetMacSource(packet), 6);
+					rt->macvalid = true;
+					hostrt = rt;
+					ReleasePendingARP();
+				} else if (rt->type == Route::TYPE_IF) {
+					netif = rt;
+					break;
+				}
 			}
 		}
-	}
 
-	if (!netif) {
-		// IcmpErrorReply(packet, ICMP_UNREACH, ICMP_HOST_UNREACH);
-		BufferPool::FreeBuffer(packet);
-		return;
-	}
+		if (!netif) {
+			BufferPool::FreeBuffer(packet);
+			return;
+		}
 
-	if (!hostrt) {
-		hostrt = AddHostRoute(source, netif);
-		memcpy(hostrt->macaddr, GetMacSource(packet), 6);
-		hostrt->macvalid = true;
-		ReleasePendingARP();
+		if (!hostrt) {
+			hostrt = AddHostRoute(source, netif);
+			memcpy(hostrt->macaddr, GetMacSource(packet), 6);
+			hostrt->macvalid = true;
+			ReleasePendingARP();
+		}
 	}
 
 	const uint8_t proto = GetIph(packet).proto;

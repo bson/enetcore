@@ -5,7 +5,7 @@ Add ICMP
 Add ARP timer to IP (ARP rexmit, ARP timeout)
 
 Fix SPI driver
-- Run using FIQ
+- Run using thread, without interrupts
 - Operations needed:
   1. Send byte sequence
   2. Send 0xff and read, returning result
