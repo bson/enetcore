@@ -83,7 +83,7 @@ void Ip::AddDefaultRoute(Ethernet& nic, in_addr_t router)
 	if (!netif) return;
 
 	// Insert immediately following last TYPE_IF
-	uint pos;
+	int pos;
 	for (pos = _routes.Size() - 1; pos >= 0; --pos) {
 		if (_routes[pos]->type == Route::TYPE_IF) {
 			Route* rt = new Route(nic, Route::TYPE_RT, 0, 0);
@@ -104,7 +104,7 @@ void Ip::AddNetRoute(Ethernet& nic, in_addr_t network, in_addr_t netmask, in_add
 	if (!netif) return;
 
 	// Insert immediately following last TYPE_RT
-	for (uint pos = _routes.Size() - 1; pos >= 0; --pos) {
+	for (int pos = _routes.Size() - 1; pos >= 0; --pos) {
 		if (_routes[pos]->type == Route::TYPE_RT) {
 			Route* rt = new Route(nic, Route::TYPE_RT, network, netmask);
 			rt->nexthop = router;
@@ -140,7 +140,7 @@ void Ip::ReleasePendingARP()
 		const in_addr_t dest = GetIph(packet).dest;
 		bool remove_packet = false;
 
-		for (uint n = _routes.Size() - 1; n >= 0; --n) {
+		for (int n = _routes.Size() - 1; n >= 0; --n) {
 			Route* rt = _routes[n];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->macvalid) {
@@ -222,7 +222,7 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 		}
 	}
 
-	for (uint i = _routes.Size()-1; i >= 0; --i) {
+	for (int i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
 		if (rt->dest == dest & rt->netmask) {
 			if (rt->macvalid) {
@@ -346,7 +346,7 @@ void Ip::ArpReceive(IOBuffer* packet)
 	memcpy(&arp_addr, arp.sip, 4);	// Not 32 bit aligned
 	const uint8_t* arp_macaddr = arp.sea;
 
-	for (uint i = _routes.Size()-1; i >= 0; --i) {
+	for (int i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
 		if (rt->dest == arp_addr & rt->netmask) {
 			memcpy(rt->macaddr, arp_macaddr, 6);
