@@ -19,7 +19,7 @@ namespace Util {
 		return tmp;
 	}
 
-	// Flags for FormatNumber
+	// Formatting flags
 	enum {
 		FMT_UNSIGNED = 1,
 		FMT_ZEROPAD = 2,
@@ -29,6 +29,7 @@ namespace Util {
 		FMT_DOT = 32			// %.u
 	};
 	void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits = 0);
+	void FormatCString(Vector<uchar>& dest, const uchar* s, uint flags, uint param);
 
 	void Trim(Deque<uchar>& buffer);
 
