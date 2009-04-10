@@ -79,6 +79,8 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "platform.h"
 #include "freelist.h"
 #include "pstring.h"
+#include "thread.h"
+#include "error.h"
 #include "netaddr.h"
 #include "network.h"
 

@@ -249,7 +249,8 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 	}
 
 	// No route
-	BufferPool::FreeBuffer(buf); // XXX could a transport ever not want this?
+	SetLastError(ERR_NO_ROUTE);
+	BufferPool::FreeBuffer(buf);
 	return NULL;
 }
 

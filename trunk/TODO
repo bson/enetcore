@@ -1,10 +1,5 @@
 Fix UDP checksum (Udph::SetCSum())
 
-Add Thread TLS LastError, GetLastError
-Add error.h with ERR_xxx, GetLastError, SetLastError, include from enetcore.h
-
-Make Ip::Send call SetLastError for ERR_NO_ROUTE
-
 Add UDP sockets
 
 Add ICMP
