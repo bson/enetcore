@@ -1,7 +1,7 @@
 PATH:=/opt/local/bin:$(PATH)
 
 CC      = arm-elf-g++-4.3.2
-LD      = arm-elf-ld -v
+LD      = arm-elf-ld
 AR      = arm-elf-ar
 AS      = arm-elf-as
 SIZE 	= arm-elf-size
