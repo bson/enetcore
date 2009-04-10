@@ -125,9 +125,10 @@ private:
 	mutable Spinlock _lock;
 	uint8_t _state;
 	uint8_t _mode;
+	uint16_t _count;			// Number of waiters
 public:
 	EventObject(uint8_t state = 0, Mode mode = SELF_RESET) :
-		_state(state), _mode(mode)
+		_state(state), _mode(mode), _count(0)
 	{
 	}
 

@@ -3,6 +3,8 @@
 
 #include "ip.h"
 #include "netaddr.h"
+#include "ipconn.h"
+#include "socket.h"
 
 
 struct NOVTABLE Udph {
@@ -33,8 +35,14 @@ struct NOVTABLE Udph {
 };
 
 
+class UdpCoreSocket: public CoreSocket {
+};
+
+
 class Udp {
 public:
+	// Create UDP socket
+	static UdpCoreSocket* Create();
 };
 
 #endif // __UDP_H__
