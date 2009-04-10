@@ -11,28 +11,23 @@ struct NOVTABLE Udph {
 	uint16_t len;				// Length
 	uint16_t sum;				// Checksum
 
-	// UDP pseudo header
-	struct UPH {
-		in_addr_t phsaddr;
-		in_addr_t phdaddr;
-		uint8_t phzero;
-		uint8_t phproto;
-		uint16_t phlen;
-	};
-
-	uint16_t CSum(const Iph& iph) const {
-		const UPH ph = { iph.source, iph.dest, 0, iph.proto, len };
-
-		uint16_t csum = ipcksum((const uint16_t*)&ph, sizeof ph);
-		csum = ipcksum((const uint16_t*)((uint8_t*)this + sizeof (Udph)),
-					   Ntohs(len) - sizeof (Udph), csum);
-		csum = Htons(~csum);
+	uint16_t CSum(const Iph& iph) {
+		sum = 0;
+		uint16_t csum = ipcksum((const uint16_t*)this, Ntohs(len),
+								iph.source + iph.dest + iph.proto + len);
+		csum = ~Htons(csum);
 		if (!csum) --csum;
 		return csum;
 	}
 
 	void SetCsum(const Iph& iph) { sum = CSum(iph); }
-	bool ValidateCsum(const Iph& iph) const { return sum == CSum(iph); }
+
+	bool ValidateCsum(const Iph& iph) {
+		const int16_t tmp = exch<uint16_t>(sum, 0);
+		const bool equal = tmp == CSum(iph);
+		sum = tmp;
+		return equal;
+	}
 
 	uint8_t* GetPayload() { return (uint8_t*)this + sizeof (Udph); }
 };

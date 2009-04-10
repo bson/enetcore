@@ -11,6 +11,7 @@ uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)
 
 	len /= 2;
 
+	// XXX make this a 32-bit op on ARM
 	while (len--) sum += Ntohs(*block++);
 
 	if (unaligned)  sum += *(const uint8_t*)block << 8;

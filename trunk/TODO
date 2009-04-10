@@ -1,5 +1,7 @@
 Fix UDP checksum (Udph::SetCSum())
 
+IP: verify checksum on input
+
 Add UDP sockets
 
 Add ICMP
@@ -40,6 +42,10 @@ Thread features
 - Track max stack usage
 
 Containers should have a _resize flag to enable/disable auto resizing.
+
+Inline-asm Ntohs/Ntohl, etc
+
+Optimize IP checksumming
 
 Optimize memset, memcpy
 - If operands are 32 bit aligned, use 32-bit ops
