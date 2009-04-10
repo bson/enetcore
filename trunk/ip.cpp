@@ -273,7 +273,7 @@ void Ip::Receive(IOBuffer* packet)
 	{
 		Mutex::Scoped L(_lock);
 
-		for (uint i = _routes.Size()-1; i >= 0; --i) {
+		for (int i = _routes.Size()-1; i >= 0; --i) {
 			Route* rt = _routes[i];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->type == Route::TYPE_HOSTRT) {
