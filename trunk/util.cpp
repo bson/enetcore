@@ -102,15 +102,17 @@ void FormatCString(Vector<uchar>& dest, const uchar* s, uint flags, uint param)
 		param -= min(param, len);
 	}
 
+	const uchar pad = (flags & FMT_SPACEPAD) ? ' ' : '.';
+
 	if (!(flags & FMT_LEFT)) {
 		while (param) {
-			dest.PushBack((uchar)' ');
+			dest.PushBack(pad);
 			--param;
 		}
 	}
 	dest.PushBack(s, len);
 
-	while (param--) dest.PushBack((uchar)' ');
+	while (param--) dest.PushBack(pad);
 }
 
 
