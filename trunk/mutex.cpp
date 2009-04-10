@@ -85,11 +85,15 @@ void EventObject::Set(uint8_t new_state)
 	_lock.Lock();
 	const uint8_t prev_state = exch(_state, new_state);
 	_lock.Unlock();
-	if (new_state && new_state != prev_state && _count) {
-		if (_mode == SELF_RESET)
-			Self().WakeSingle(this);
-		else
-			Self().WakeAll(this);
+	if (new_state && new_state != prev_state) {
+		if (_evob) _evob->Set();
+
+		if (_count) {
+			if (_mode == SELF_RESET)
+				Self().WakeSingle(this);
+			else
+				Self().WakeAll(this);
+		}
 	}
 }
 

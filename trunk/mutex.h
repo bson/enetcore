@@ -102,9 +102,10 @@ private:
 	uint8_t _state;
 	uint8_t _mode;
 	uint16_t _count;			// Number of waiters
+	EventObject* _evob;			// Event aggregation
 public:
 	EventObject(uint8_t state = 0, Mode mode = SELF_RESET) :
-		_state(state), _mode(mode), _count(0)
+		_state(state), _mode(mode), _count(0), _evob(NULL)
 	{
 	}
 
@@ -115,6 +116,8 @@ public:
 	void Wait();
 	bool Wait(Time delay);
 	uint8_t GetState() const;
+
+	void ChainEvent(EventObject* eo) { _evob = eo; }
 };
 
 #endif	// __MUTEX_H__
