@@ -38,7 +38,7 @@ void EventObject::Set(uint8_t new_state)
 	_lock.Lock();
 	const uint8_t prev_state = exch(_state, new_state);
 	_lock.Unlock();
-	if (new_state && new_state != prev_state) {
+	if (new_state && new_state != prev_state && _count) {
 		if (_mode == SELF_RESET)
 			Self().WakeSingle(this);
 		else
@@ -52,9 +52,12 @@ void EventObject::Wait()
 	Spinlock::Scoped L(_lock);
 
 	while (!_state) {
+		++_count;
 		_lock.Unlock();
 		Self().WaitFor(this);
 		_lock.Lock();
+		assert(_count);
+		--_count;
 	}
 	if (_mode == SELF_RESET) _state = 0;
 }
@@ -67,9 +70,12 @@ bool EventObject::Wait(Time delay)
 	Spinlock::Scoped L(_lock);
 
 	while (!_state && Time::Now() < deadline) {
+		++_count;
 		_lock.Unlock();
 		Self().WaitFor(this, deadline);
 		_lock.Lock();
+		assert(_count);
+		--_count;
 	}
 	const bool retval = _state != 0;
 	if (_mode == SELF_RESET) _state = 0;
