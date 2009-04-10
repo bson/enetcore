@@ -76,12 +76,12 @@ bool Dhcp::Receive(IOBuffer* buf)
 
 //			DMSG("DHCP: Received DHCPACK");
 
-			_lease = pkt->yiaddr;
-
 			// Extract config info
 			const in_addr_t prev_lease = _lease;
 			const in_addr_t prev_mask = _netmask;
 			const in_addr_t prev_gw = _gw;
+
+			_lease = pkt->yiaddr;
 
 			buf->SetHead(_netif.GetPrealloc());
 			Extract(pkt->options, buf->Size() - offsetof(Packet, options));
