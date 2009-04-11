@@ -197,7 +197,7 @@ bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 
 	Iph& iph = *(Iph*)(*buf + 16);
 	iph.dest = dest.GetAddr4();	// Needed for Udph::SetCsum
-	iph.source = INADDR_ANY;	// Needed for Udph::SetCsum
+	iph.source = _ip.GetSource(); // Needed for Udph::SetCsum
 	udph.SetCsum(iph);
 
 	Ip::Route* rt = _connected ? _cached_route : NULL;

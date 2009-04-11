@@ -167,6 +167,17 @@ void Ip::ReleasePendingARP()
 }
 
 
+// XXX hack - see ip.h
+in_addr_t Ip::GetSource()
+{
+	if (_routes.Empty())  return INADDR_ANY; // OMG!!1!  This is rather scary.
+
+	if (_routes[0]->type != Route::TYPE_IF)  return INADDR_ANY; // Sooo broken...
+
+	return _routes[0]->nexthop;
+}
+
+
 void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
 {
 	buf->SetHead(0);

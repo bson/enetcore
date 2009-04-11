@@ -352,6 +352,15 @@ public:
 	// Return header ID
 	uint16_t GetId() { return ++_id; }
 
+	// XXX hack
+	// Return IP address of outbound packets.
+	// UDP, TCP need this to checksum the pseudo header.
+	// Better would be to parameterize the checksumming as a functor
+	// to Send(), to be invoked after the Route has been determined to
+	// finalize the datagram before it goes out on the wire.  This
+	// hack assumes there is only one MAC interface.
+	in_addr_t GetSource();
+
 private:
 	// Find the Route entry for a network interface
 	Route* FindIfRoute(Ethernet& netif);
