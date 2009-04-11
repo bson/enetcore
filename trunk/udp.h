@@ -26,6 +26,8 @@ struct NOVTABLE Udph {
 	void SetCsum(const Iph& iph) { sum = CSum(iph); }
 
 	bool ValidateCsum(const Iph& iph) {
+		if (!sum) return true;
+
 		const int16_t tmp = exch<uint16_t>(sum, 0);
 		const bool equal = tmp == CSum(iph);
 		sum = tmp;
