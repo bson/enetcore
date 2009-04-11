@@ -148,52 +148,41 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 
 			switch (*++fmt) {
 			case '%':  dest.PushBack('%'); break;
-			case 'd':  {
+			case 'd':
 				FormatNumber(dest, va_arg(va, int), flags, 10, param);
 				break;
-			}
-			case 'D':  {
+			case 'D':
 				FormatNumber(dest, va_arg(va, int64_t), flags, 10, param);
 				break;
-			}
-			case 'u': {
+			case 'u':
 				FormatNumber(dest, va_arg(va, uint), flags | FMT_UNSIGNED, 10, param);
 				break;
-			}
-			case 'U': {
+			case 'U':
 				FormatNumber(dest, va_arg(va, uint64_t), flags | FMT_UNSIGNED, 10, param);
 				break;
-			}
-			case 'x': {
+			case 'x':
 				FormatNumber(dest, va_arg(va, uint), flags | FMT_UNSIGNED, 16, param);
 				break;
-			}
-			case 'X': {
+			case 'X':
 				FormatNumber(dest, va_arg(va, uint64_t), flags | FMT_UNSIGNED, 16, param);
 				break;
-			}
-			case 'p': {
+			case 'p':
 				dest.PushBack(STR("0x"));
 				FormatNumber(dest, va_arg(va, uintptr_t), flags | FMT_UNSIGNED, 16, sizeof(uintptr_t)*2);
 				break;
-			}
-			case 'c': {
+			case 'c':
 				dest.PushBack(va_arg(va, int));
 				break;
-			}
-			case 's': {
+			case 's':
 				FormatCString(dest, va_arg(va, const uchar*), flags, param);
 				break;
-			}
-			case 'S': {
+			case 'S':
 				FormatCString(dest, va_arg(va, const String*)->CStr(), flags, param);
 				break;
-			}
 			case 'a':
-			case 'A': {
+			case 'A':
 				dest.PushBack(va_arg(va, const NetAddr*)->Printable(*fmt == 'A').CStr());
 				break;
-			}
 #if 0
 			case 'o': {
 				Object* o = va_arg(va, Object*);
@@ -214,15 +203,13 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 			}
 
 			// yyyy-MM-dd hh:mm:ss
-			case 'T': {
+			case 'T':
 				FormatTime(dest, va_arg(va, Time*), true);
 				break;
-			}
 			// hh:mm:ss.msec
-			case 't': {
+			case 't':
 				FormatTime(dest, va_arg(va, Time*), false);
 				break;
-			}
 			case 0:
 				--fmt;
 			default:
