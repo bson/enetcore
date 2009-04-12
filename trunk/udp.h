@@ -87,7 +87,13 @@ public:
 	UdpCoreSocket* Create();
 	void Receive(IOBuffer* buf);
 
-	void Checksum(IOBuffer* buf); // * implements Checksummer::Checksum
+	void Checksum(IOBuffer* buf) const; // * implements Checksummer::Checksum
+
+	void IcmpError(Icmph::Type type, uint code,
+				   in_addr_t sender, // Sender of ICMP message (e.g., router)
+				   in_addr_t dest,	 // Destination datagram was for
+				   in_addr_t source, // Datagram sender (i.e., ourselves)
+				   const Udph& udp); // Start of original packet
 
 protected:
 	void Deregister(UdpCoreSocket* s);

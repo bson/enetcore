@@ -4,6 +4,11 @@
 #include "mutex.h"
 #include "ethernet.h"
 
+// Checksum
+uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
+
+#include "icmp.h"
+
 
 // IP protocols of interest
 enum IpProto {
@@ -40,9 +45,6 @@ struct Arph {
 	uint8_t dip[4];				// Destination's IP address
 };
 
-
-// Checksum
-uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
 
 
 // IP header
@@ -100,7 +102,15 @@ struct NOVTABLE Iph {
 class Checksummer {
 public:
 	// Called with buf head set to IP header
-	virtual void Checksum(IOBuffer* buf) = 0;
+	virtual void Checksum(IOBuffer* buf) const = 0;
+};
+
+
+// A dummy checksummer that can be passed in to Ip::Send when the
+// transport doesn't need the IP header to calculate the checksum.
+class DummyChecksummer: public Checksummer {
+public:
+	void Checksum(IOBuffer*) const { }
 };
 
 
@@ -252,6 +262,9 @@ public:
 
 		Route* ifroute;			// Points back to TYPE_IF Route for netif
 
+		Time lasticmp;			// Last time we sent an ICMP message
+
+
 		Route(Ethernet& n, Type t, in_addr_t addr, in_addr_t mask = 0xffffffff) :
 			netif(n)
 		{
@@ -352,7 +365,7 @@ public:
 	// INADDR_ANY.
 	//
 	// df indicates whether the don't-fragment flag should be set (for PMTU)
-	Route* Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
+	Route* Send(IOBuffer* buf, in_addr_t dest, const Checksummer& tcsum,
 				Route* rt = NULL, bool df = false);
 
 	// Receive for ETHERTYPE_IP
@@ -364,14 +377,8 @@ public:
 	// Return header ID
 	uint16_t GetId() { return ++_id; }
 
-	// XXX hack
-	// Return IP address of outbound packets.
-	// UDP, TCP need this to checksum the pseudo header.
-	// Better would be to parameterize the checksumming as a functor
-	// to Send(), to be invoked after the Route has been determined to
-	// finalize the datagram before it goes out on the wire.  This
-	// hack assumes there is only one MAC interface.
-	in_addr_t GetSource();
+	// Send ICMP message
+	void IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet);
 
 private:
 	// Find the Route entry for a network interface
@@ -402,6 +409,9 @@ private:
 
 	// Fill in datagram with IP header
 	void FillHeader(IOBuffer* packet, Route* rt, bool df);
+
+	// ICMP receiver
+	void IcmpReceive(IOBuffer* packet);
 };
 
 extern Ip _ip;

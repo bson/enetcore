@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "ip.h"
+#include "udp.h"
 
 
 Ip _ip;
@@ -138,16 +139,28 @@ void Ip::ReleasePendingARP()
 	for (uint i = 0; i < _pending_arp.Size(); ) {
 		IOBuffer* packet = _pending_arp[i];
 		const in_addr_t dest = GetIph(packet).dest;
+		const bool is_icmp = GetIph(packet).proto == IPPROTO_ICMP;
 		bool remove_packet = false;
 
 		for (int n = _routes.Size() - 1; n >= 0; --n) {
 			Route* rt = _routes[n];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->macvalid) {
+					if (is_icmp) {
+						// Throttle ICMP
+						if (Time::Now() < rt->lasticmp + Time::FromSec(1)) {
+							BufferPool::FreeBuffer(packet);
+							remove_packet = true;
+							goto done;
+						}
+						rt->lasticmp = Time::Now();
+					}
+
 					FillMacHeader(packet, rt);
 					rt->netif.Send(packet);
 					remove_packet = true;
 				}
+				// remove_packet = false;
 				goto done;
 			}
 		}
@@ -207,7 +220,7 @@ void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
 }
 
 
-Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
+Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, const Checksummer& tcsum,
 					Ip::Route* prevrt, bool df)
 {
 	Iph& iph = GetIph(buf);
@@ -219,6 +232,18 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
 		if (prevrt->invalid) {
 			prevrt->Release();
 		} else {
+#if 0
+			// Throttle back ICMP.  We throttle before adding to the ARP list as
+			// well as when we drain it after successful ARP.
+			// XXX we never get here...
+			if (iph.proto == IPPROTO_ICMP) {
+				if (Time::Now() < prevrt->lasticmp + Time::FromSec(1)) {
+					BufferPool::FreeBuffer(buf);
+					return prevrt;
+				}
+				prevrt->lasticmp = Time::Now();
+			}
+#endif
 			FillHeader(buf, prevrt, df);
 			buf->SetHead(prevrt->netif.GetPrealloc());
 			tcsum.Checksum(buf);
@@ -234,9 +259,20 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
 		}
 	}
 
+	const bool is_icmp = iph.proto == IPPROTO_ICMP;
+
 	for (int i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
 		if (rt->dest == dest & rt->netmask) {
+			if (is_icmp) {
+				// Throttle ICMP
+				if (Time::Now() < rt->lasticmp + Time::FromSec(1)) {
+					BufferPool::FreeBuffer(buf);
+					return rt;
+				}
+				rt->lasticmp = Time::Now();
+			}
+
 			if (rt->macvalid) {
 				FillHeader(buf, rt, df);
 				buf->SetHead(rt->netif.GetPrealloc());
@@ -317,24 +353,26 @@ void Ip::Receive(IOBuffer* packet)
 		}
 	}
 
-	const uint8_t proto = GetIph(packet).proto;
+	assert(netif);
+	const uint proto = GetIph(packet).proto;
+
+	// Skip past MAC header for transport
+	packet->SetHead(netif->netif.GetPrealloc());
+
 	switch (proto) {
-#if 0
 	case IPPROTO_ICMP:
 		IcmpReceive(packet);
 		break;
-#endif
-#if 0
 	case IPPROTO_UDP:
-		Udp::Receive(packet);
+		_udp.Receive(packet);
 		break;
-#endif
 #if 0
 	case IPPROTO_TCP:
 		Tcp::Receive(packet);
 		break;
 #endif
 	default:
+		IcmpSend(source, Icmph::ICMP_DEST_UNREACH, Icmph::ICMP_PROTO_UNREACH, packet);
 		BufferPool::FreeBuffer(packet);
 		return;
 	}
@@ -446,4 +484,71 @@ void Ip::HandleARP(IOBuffer* packet)
 			return;
 		}
 	}
+}
+
+
+void Ip::IcmpReceive(IOBuffer* packet)
+{
+	Iph& iph = GetIph(packet);
+	Icmph& icmph = *(Icmph*)iph.GetTransport();
+
+	const Icmph::Type type = (Icmph::Type)icmph.type;
+	const uint code = icmph.code;
+
+	switch (type) {
+	case Icmph::ICMP_ECHO_REQ:
+		IcmpSend(iph.dest, Icmph::ICMP_ECHO_REPLY, 0, packet);
+		break;
+	case Icmph::ICMP_DEST_UNREACH:
+		Iph& iph2 = *(Iph*)icmph.GetEnclosed();
+
+		if (icmph.GetEnclosed() + sizeof iph2 >= &packet->Back() ||
+			iph2.GetHLen() < 20 ||
+			icmph.GetEnclosed() + iph2.GetHLen() + sizeof (Udph) + 8 >= &packet->Back() ||
+			!iph2.ValidateCsum()) {
+			break;
+		}
+
+		switch (iph2.proto) {
+		case IPPROTO_UDP:
+			_udp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
+						   *(Udph*)iph2.GetTransport());
+			break;
+#if 0
+		case IPPROTO_TCP:
+			_tcp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
+						   *(Tcph*)iph2.GetTransport());
+			break;
+#endif
+		}
+	}
+	
+	BufferPool::FreeBuffer(packet);
+}
+
+
+void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
+{
+	IOBuffer* buf = BufferPool::Alloc();
+	if (!buf) return;
+
+	buf->SetHead(0);
+
+	Iph& iph = *(Iph*)(*buf + 16);
+	Icmph& icmph = *(Icmph*)iph.GetTransport();
+	iph.proto = IPPROTO_ICMP;
+	iph.source = INADDR_ANY;
+
+	icmph.type = type;
+	icmph.code = code;
+
+	const uint bufspace = &buf->Back() - icmph.GetEnclosed();
+	const uint toinclude = min(bufspace, packet->Size());
+	assert(toinclude >= sizeof (Iph) + 16);
+
+	memcpy(icmph.GetEnclosed(), &packet->Front(), toinclude);
+	buf->SetSize((uint8_t*)icmph.GetEnclosed() - &buf->Front() + toinclude);
+	icmph.SetCsum(sizeof icmph + toinclude);
+
+	_ip.Send(buf, dest, DummyChecksummer());
 }

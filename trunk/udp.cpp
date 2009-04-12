@@ -28,7 +28,6 @@ UdpCoreSocket* Udp::Create()
 
 void Udp::Receive(IOBuffer* buf)
 {
-	buf->SetHead(16);
 	Iph& iph = *(Iph*)(*buf + 0);
 	Udph& udph = *(Udph*)iph.GetTransport();
 
@@ -41,23 +40,25 @@ void Udp::Receive(IOBuffer* buf)
 
 	UdpCoreSocket* s;
 
-	{
-		Mutex::Scoped L(_lock);
-		if (!_socklist.Find(t, s)) {
-			// Then try non-connected
-			t.daddr = INADDR_ANY;
-			t.dport = 0;
+	_lock.Lock();
+	if (!_socklist.Find(t, s)) {
+		// Then try non-connected
+		t.daddr = INADDR_ANY;
+		t.dport = 0;
 
-			if (!_socklist.Find(t, s)) {
-				// XXX
-				// IcmpError(... ICMP_PORT_UNREACH ...)
-				BufferPool::FreeBuffer(buf);
-				return;
-			}
+		if (!_socklist.Find(t, s)) {
+			_lock.Unlock();
+			_ip.IcmpSend(iph.source, Icmph::ICMP_DEST_UNREACH, Icmph::ICMP_PORT_UNREACH,
+						 buf);
+			BufferPool::FreeBuffer(buf);
+			return;
 		}
 	}
+	_lock.Unlock();
 
-	Mutex::Scoped L2(s->_lock);
+	assert(s);
+
+	Mutex::Scoped L(s->_lock);
 
 	s->_recvq.PushBack(buf);
 	s->AddEvent(CoreSocket::EVENT_READABLE);
@@ -88,11 +89,41 @@ UdpCoreSocket* Udp::Find(const Tuple& t)
 }
 
 
-void Udp::Checksum(IOBuffer* buf)
+void Udp::Checksum(IOBuffer* buf) const
 {
 	Iph& iph = *(Iph*)(*buf + 0);
 	Udph& udph = *(Udph*)iph.GetTransport();
 	udph.SetCsum(iph);
+}
+
+
+void Udp::IcmpError(Icmph::Type type, uint code, in_addr_t sender, in_addr_t dest,
+					in_addr_t source, const Udph& udph)
+{
+	Tuple t;
+
+	// First try finding a connected socket
+	t.saddr = source;
+	t.daddr = dest;
+	t.sport = udph.sport;
+	t.dport = udph.dport;
+
+	UdpCoreSocket* s;
+
+	Mutex::Scoped L(_lock);
+
+	if (!_socklist.Find(t, s)) {
+		// Then try non-connected
+		t.daddr = INADDR_ANY;
+		t.dport = 0;
+
+		if (!_socklist.Find(t, s))
+			return;
+	}
+
+	assert(s);
+	// XXX maybe we should provide an event mechanism with more detailed reporting
+	s->SetError(ERR_DEST_UNREACH);
 }
 
 
@@ -204,6 +235,7 @@ bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 	buf->SetSize(16 + sizeof (Iph) + sizeof (Udph) + len);
 	memcpy(udph.GetPayload(), data, len);
 
+	iph.proto = IPPROTO_UDP;
 	iph.source = INADDR_ANY /* _id.saddr */;
 
 	Ip::Route* rt = _connected ? _cached_route : NULL;
