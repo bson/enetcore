@@ -1,7 +1,5 @@
 Fix stack back traces
 
-Add ICMP
-
 Add ARP timer to IP (ARP rexmit, ARP timeout)
 
 Fix SPI driver
