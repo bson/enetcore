@@ -18,7 +18,7 @@ void Initialize(uint num)
 
 	_pool.Reserve(num);
 	for (uint i = 0; i < num; ++i) {
-		IOBuffer* buf = new IOBuffer(1600);
+		IOBuffer* buf = new IOBuffer(1520);
 		buf->SetAutoCompact(false);
 		_pool.PushBack(buf);
 	}

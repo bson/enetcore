@@ -20,6 +20,8 @@ Implement CRC7
 
 Implement FAT32
 
+Implement TCP
+
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value
