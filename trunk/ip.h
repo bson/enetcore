@@ -262,6 +262,7 @@ public:
 		Route* ifroute;			// Points back to TYPE_IF Route for netif
 
 		Time lasticmp;			// Last time we sent an ICMP message
+		uint16_t pmtu;
 
 		bool macvalid:1;		// Mac addr is valid
 		bool invalid:1;			// Route has been removed from table
@@ -279,6 +280,7 @@ public:
 			macvalid = false;
 			invalid = false;
 			ifroute = NULL;
+			pmtu = 1520;
 		}
 
 		void Retain() { Spinlock::Scoped L(lock); assert(refcount); ++refcount; }

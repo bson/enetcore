@@ -522,17 +522,22 @@ void Ip::IcmpReceive(IOBuffer* packet)
 			break;
 		}
 
-		switch (iph2.proto) {
-		case IPPROTO_UDP:
-			_udp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
-						   *(Udph*)iph2.GetTransport());
-			break;
+		if (code == Icmph::ICMP_DF_SET) {
+			// XXX Look up route
+			// rt->pmtu = Ntohs(((const uint16_t*)icmph.GetEnclosed())[1]);
+		} else {
+			switch (iph2.proto) {
+			case IPPROTO_UDP:
+				_udp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
+							   *(Udph*)iph2.GetTransport());
+				break;
 #if 0
-		case IPPROTO_TCP:
-			_tcp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
-						   *(Tcph*)iph2.GetTransport());
-			break;
+			case IPPROTO_TCP:
+				_tcp.IcmpError(type, code, iph.source, iph2.dest, iph2.source,
+							   *(Tcph*)iph2.GetTransport());
+				break;
 #endif
+			}
 		}
 	}
 	
