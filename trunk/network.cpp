@@ -44,7 +44,7 @@ void* NetThread(void*)
 	Self().SetPriority(NET_THREAD_PRIORITY);
 	Self().ReadyToWork();
 
-	BufferPool::Initialize(10);
+	BufferPool::Initialize(20);
 
 // Moved to hwinit - needs to be done before EINT2 is enabled
 //	_eth0.Initialize();
@@ -53,6 +53,7 @@ void* NetThread(void*)
 	_dhcp0.Reset();
 
 	Time dhcp_next = _dhcp0.GetServiceTime();
+	Time ip_next = _ip.GetServiceTime();
 	bool link = !_eth0.GetLinkStatus();
 
 	for (;;) {
@@ -65,8 +66,8 @@ void* NetThread(void*)
 			// if (link)  _dhcp0.Reset();
 		}
 
-		const Time now = Time::Now();
-		Time next = dhcp_next;
+		Time now = Time::Now();
+		Time next = min(dhcp_next, ip_next);
 		if (!link) next = min(next, now + Time::FromSec(1));
 
 		if (now < next)
@@ -88,7 +89,9 @@ void* NetThread(void*)
 			BufferPool::FreeBuffer(packet);
 		}
 
-		if (Time::Now() >= dhcp_next)
-			dhcp_next = _dhcp0.Service();
+		now = Time::Now();
+
+		if (now >= dhcp_next) dhcp_next = _dhcp0.Service();
+		if (now >= ip_next)  ip_next = _ip.Service();
 	}
 }

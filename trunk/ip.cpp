@@ -306,6 +306,19 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, const Checksummer& tcsum,
 }
 
 
+void Ip::SatisfiedARP(Route* rt, const uint8_t* macaddr)
+{
+	_lock.AssertLocked();
+
+	SetRouteTimer(rt, HOSTRT_EXPIRE);
+	memcpy(rt->macaddr, macaddr, 6);
+	rt->macvalid = true;
+	rt->arpcount = 0;
+	ReleasePendingARP();
+}
+
+
+
 void Ip::Receive(IOBuffer* packet)
 {
 	Iph& iph = GetIph(packet);
@@ -327,12 +340,8 @@ void Ip::Receive(IOBuffer* packet)
 			Route* rt = _routes[i];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->type == Route::TYPE_HOSTRT) {
-					rt->ResetExpire();
-					// Glean ARP info
-					memcpy(rt->macaddr, GetMacSource(packet), 6);
-					rt->macvalid = true;
+					SatisfiedARP(rt, GetMacSource(packet)); // Glean ARP info
 					hostrt = rt;
-					ReleasePendingARP();
 				} else if (rt->type == Route::TYPE_IF) {
 					netif = rt;
 					break;
@@ -346,10 +355,7 @@ void Ip::Receive(IOBuffer* packet)
 		}
 
 		if (!hostrt) {
-			hostrt = AddHostRoute(source, netif);
-			memcpy(hostrt->macaddr, GetMacSource(packet), 6);
-			hostrt->macvalid = true;
-			ReleasePendingARP();
+			SatisfiedARP(hostrt, GetMacSource(packet));
 		}
 	}
 
@@ -402,7 +408,7 @@ void Ip::ArpReceive(IOBuffer* packet)
 		Route* rt = _routes[i];
 		if (rt->dest == arp_addr & rt->netmask) {
 			memcpy(rt->macaddr, arp_macaddr, 6);
-			rt->ResetExpire();
+			SetRouteTimer(rt, HOSTRT_EXPIRE);
 			ReleasePendingARP();
 			break;
 		}
@@ -414,6 +420,8 @@ void Ip::RequestARP(Route* rt)
 {
 	_lock.AssertLocked();
 	if (_routes.Empty()) return; // Can't ARP without a configure i/f
+
+	if (rt->type == Route::TYPE_IF) return; // Don't ARP for a local interface!
 
 	int netif = -1;
 	for (uint i = 0; i < _routes.Size(); ++i) {
@@ -446,6 +454,11 @@ void Ip::RequestARP(Route* rt)
 	memcpy(arp.sip, &_routes[netif]->nexthop, 4);
 	memset(arp.dea, 0, sizeof arp.dea);
 	memcpy(arp.dip, &rt->nexthop, 4);
+
+	rt->macvalid = false;
+
+	++rt->arpcount;
+	SetRouteTimer(rt, 1);
 
 	rt->netif.Send(buf);
 }
@@ -551,4 +564,70 @@ void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
 	icmph.SetCsum(sizeof icmph + toinclude);
 
 	_ip.Send(buf, dest, DummyChecksummer());
+}
+
+
+void Ip::SetRouteTimer(Route* rt, uint secs)
+{
+	_lock.AssertLocked();
+	_timer.Erase(rt);
+	rt->expire = Time::Now() + Time::FromSec(secs);
+	_timer.Insert(rt);
+	_net_event.Set();
+}
+
+
+Time Ip::GetServiceTime() const
+{
+	Mutex::Scoped L(_lock);
+
+	if (_timer.Empty())  return Time::Now() + Time::FromSec(120);
+
+	return _timer.Front()->expire;
+}
+
+
+Time Ip::Service()
+{
+	Mutex::Scoped L(_lock);
+
+	const Time now = Time::Now();
+	bool release_pending = false;
+
+	while (!_timer.Empty() && _timer.Front()->expire <= now) {
+		Route* rt = _timer.Front();
+
+		if (rt->macvalid || rt->arpcount == ARP_LIMIT) {
+			// Route expired or reached max ARP.
+			if (rt->type == Route::TYPE_HOSTRT) {
+				_timer.Erase(rt);
+				rt->invalid = true;
+				rt->Release();
+				// If the entry expired (macvalid), there can't be anything for it
+				// on the pending list.  Trigger a release if we failed to ARP.
+				// When releasing the pending list abandoned packets will be dropped.
+				release_pending |= !rt->macvalid;
+			} else if (rt->type == Route::TYPE_RT) {
+				rt->arpcount = 0;
+				RequestARP(rt);
+			} else {
+				_timer.Erase(rt);
+			}
+		} else {
+			RequestARP(rt);
+		}
+	}
+
+	if (release_pending) ReleasePendingARP();
+
+	return GetServiceTime();
+}
+
+
+// * static
+bool Ip::Route::Order(const void* ra, const void* rb) 
+{
+	const Route& a = **(Route**)ra;
+	const Route& b = **(Route**)rb;
+	return a.expire > b.expire;
 }

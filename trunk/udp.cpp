@@ -122,8 +122,9 @@ void Udp::IcmpError(Icmph::Type type, uint code, in_addr_t sender, in_addr_t des
 	}
 
 	assert(s);
-	// XXX maybe we should provide an event mechanism with more detailed reporting
+
 	s->SetError(ERR_DEST_UNREACH);
+	s->AddEvent(CoreSocket::EVENT_ERROR);
 }
 
 

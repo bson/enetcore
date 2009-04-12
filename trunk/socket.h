@@ -13,8 +13,9 @@ public:
 	enum {
 		EVENT_READABLE = 1,		// Recv queue is non-empty (or listen socket has conn)
 		EVENT_WRITEABLE = 2,	// Send queue is less than full
-		EVENT_CONNECTED = 4,	// Socket is connected
-		EVENT_CLOSE = 8			// Socket is closed
+		EVENT_CONNECT = 4,		// Socket is connected
+		EVENT_CLOSE = 8,		// Socket is closed
+		EVENT_ERROR = 16		// Connection error (get reason with GetError())
 	};
 
 	CoreSocket() : _error(NO_ERROR), _evmask(0), _event(0) { }

@@ -1,6 +1,8 @@
 Fix stack back traces
 
-Add ARP timer to IP (ARP rexmit, ARP timeout)
+Let Ethernet specify MTU - get rid of random constants
+
+Add Route::_pmtu
 
 Fix SPI driver
 - Run using thread, without interrupts

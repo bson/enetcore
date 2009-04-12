@@ -234,6 +234,7 @@ public:
 //       pending_arp.remove(PACKET)
 
 enum { HOSTRT_EXPIRE = 120 };
+enum { ARP_LIMIT = 5 };			// Number of times we try to ARP
 
 class Ip {
 
@@ -251,18 +252,19 @@ public:
 		in_addr_t dest;			// Route/ARP dest, or IFaddr
 		in_addr_t netmask;
 		in_addr_t nexthop;		// Next hop
-		Time expire;			// For TYPE_ARP, entry expiration
+		Time expire;			// For TYPE_ARP, entry expiration or rexmit if !macvalid
 		uint8_t type;			// Type of entry
 		uint8_t macaddr[6];
-		bool macvalid:1;		// Mac addr is valid
-		bool invalid:1;			// Route has been removed from table
-
+		uint8_t arpcount;		// Number of times we've ARPed
 		uint8_t refcount;
 		Spinlock lock;			// Protects refcount
 
 		Route* ifroute;			// Points back to TYPE_IF Route for netif
 
 		Time lasticmp;			// Last time we sent an ICMP message
+
+		bool macvalid:1;		// Mac addr is valid
+		bool invalid:1;			// Route has been removed from table
 
 
 		Route(Ethernet& n, Type t, in_addr_t addr, in_addr_t mask = 0xffffffff) :
@@ -276,11 +278,8 @@ public:
 			memset(macaddr, 0, sizeof macaddr);
 			macvalid = false;
 			invalid = false;
-			ResetExpire();
 			ifroute = NULL;
 		}
-
-		void ResetExpire() { expire = Time::Now() + Time::FromSec(HOSTRT_EXPIRE); }
 
 		void Retain() { Spinlock::Scoped L(lock); assert(refcount); ++refcount; }
 		void Release() {
@@ -288,13 +287,17 @@ public:
 			if (!refcount) { lock.Unlock(); delete this; }
 			else lock.Unlock();
 		}
+
+		// Ordering for rexmit list.  True if *ra > *rb
+		static bool Order(const void* ra, const void* rb);
 	};
 private:
 
-	Mutex _lock;
+	mutable Mutex _lock;
 
 	Vector<Route*> _routes;
 	Vector<IOBuffer*> _pending_arp;
+	Set<Route*, Route::Order> _timer; // Route timer list
 
 	uint16_t _id;				// ID counter
 
@@ -380,6 +383,12 @@ public:
 	// Send ICMP message
 	void IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet);
 
+	// Get next service time
+	Time GetServiceTime() const;
+
+	// Service entry - returns next service time
+	Time Service();
+
 private:
 	// Find the Route entry for a network interface
 	Route* FindIfRoute(Ethernet& netif);
@@ -412,6 +421,12 @@ private:
 
 	// ICMP receiver
 	void IcmpReceive(IOBuffer* packet);
+
+	// Reset Route timer
+	void SetRouteTimer(Route* rt, uint secs);
+
+	// Fill in ARP info
+	void SatisfiedARP(Route* rt, const uint8_t* macaddr);
 };
 
 extern Ip _ip;
