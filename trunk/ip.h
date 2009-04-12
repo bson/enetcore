@@ -96,6 +96,14 @@ struct NOVTABLE Iph {
 };
 
 
+// Checksummer interface.  Calculates transport checksum.
+class Checksummer {
+public:
+	// Called with buf head set to IP header
+	virtual void Checksum(IOBuffer* buf) = 0;
+};
+
+
 // This IP implementation is pretty much a routing table manager.
 //
 // The values in the IP routing table are used as follows:
@@ -336,12 +344,16 @@ public:
 	// because host was physically reconnected to a different network,
 	// or a route/interface was manually reconfigured).
 	//
+	// tcsum is used to fill in the checksum and is passed buf (or a copy
+	// of buf) with head set to point to the IP header.
+	//
 	// XXX Doesn't currently take into account the source address when
 	// selecting an interface.  It's always treated as if it were
 	// INADDR_ANY.
 	//
 	// df indicates whether the don't-fragment flag should be set (for PMTU)
-	Route* Send(IOBuffer* buf, in_addr_t dest, Route* rt = NULL, bool df = false);
+	Route* Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
+				Route* rt = NULL, bool df = false);
 
 	// Receive for ETHERTYPE_IP
 	void Receive(IOBuffer* packet);
@@ -384,8 +396,11 @@ private:
 	// Get source/dest mac address from frame
 	uint8_t* GetMacSource(IOBuffer* buf) { return *buf + 2 + 6; }
 	uint8_t* GetMacDest(IOBuffer* buf) { return *buf + 2; }
+	
+	// Fill in datagram with MAC header
+	void FillMacHeader(IOBuffer* packet, Route* rt);
 
-	// Fill in datagram with frame header
+	// Fill in datagram with IP header
 	void FillHeader(IOBuffer* packet, Route* rt, bool df);
 };
 

@@ -144,7 +144,7 @@ void Ip::ReleasePendingARP()
 			Route* rt = _routes[n];
 			if (rt->dest == dest & rt->netmask) {
 				if (rt->macvalid) {
-					FillHeader(packet, rt, false);
+					FillMacHeader(packet, rt);
 					rt->netif.Send(packet);
 					remove_packet = true;
 				}
@@ -167,24 +167,19 @@ void Ip::ReleasePendingARP()
 }
 
 
-// XXX hack - see ip.h
-in_addr_t Ip::GetSource()
-{
-	if (_routes.Empty())  return INADDR_ANY; // OMG!!1!  This is rather scary.
-
-	if (_routes[0]->type != Route::TYPE_IF)  return INADDR_ANY; // Sooo broken...
-
-	return _routes[0]->nexthop;
-}
-
-
-void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
+void Ip::FillMacHeader(IOBuffer* buf, Route* rt)
 {
 	buf->SetHead(0);
 	memcpy(*buf + 2, rt->macaddr, 6);
 	memcpy(*buf + 2 + 6, rt->netif.GetMacAddr(), 6);
 	const uint16_t et = Htons(ETHERTYPE_IP);
 	memcpy(*buf + 2 + 6, &et, 2);
+}
+
+
+void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
+{
+	FillMacHeader(buf, rt);
 
 	// Fill in source addr
 	Iph& iph = GetIph(buf);
@@ -212,7 +207,8 @@ void Ip::FillHeader(IOBuffer* buf, Route* rt, bool df)
 }
 
 
-Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
+Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Checksummer& tcsum,
+					Ip::Route* prevrt, bool df)
 {
 	Iph& iph = GetIph(buf);
 	iph.dest = dest;
@@ -220,14 +216,19 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 	Mutex::Scoped L(_lock);
 
 	if (prevrt) {
-		if (prevrt->invalid)
+		if (prevrt->invalid) {
 			prevrt->Release();
-		else if (prevrt->macvalid) {
-			FillHeader(buf, prevrt, df);
-			prevrt->netif.Send(buf);
-			return prevrt;
 		} else {
-			// No ARP info yet
+			FillHeader(buf, prevrt, df);
+			buf->SetHead(prevrt->netif.GetPrealloc());
+			tcsum.Checksum(buf);
+
+			if (prevrt->macvalid) {
+				prevrt->netif.Send(buf);
+				return prevrt;
+			} 
+
+			// No ARP info yet.
 			_pending_arp.PushBack(buf);
 			return prevrt;
 		}
@@ -238,6 +239,9 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, Ip::Route* prevrt, bool df)
 		if (rt->dest == dest & rt->netmask) {
 			if (rt->macvalid) {
 				FillHeader(buf, rt, df);
+				buf->SetHead(rt->netif.GetPrealloc());
+				tcsum.Checksum(buf);
+
 				if (rt->type == Route::TYPE_IF) {
 					if (rt->dest == dest) {
 						rt->netif.Send(buf); // Loopback: ethernet driver will return it

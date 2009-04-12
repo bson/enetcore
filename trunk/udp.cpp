@@ -88,6 +88,14 @@ UdpCoreSocket* Udp::Find(const Tuple& t)
 }
 
 
+void Udp::Checksum(IOBuffer* buf)
+{
+	Iph& iph = *(Iph*)(*buf + 0);
+	Udph& udph = *(Udph*)iph.GetTransport();
+	udph.SetCsum(iph);
+}
+
+
 UdpCoreSocket::~UdpCoreSocket()
 {
 	if (_cached_route)  _cached_route->Release();
@@ -188,20 +196,18 @@ bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 
 	buf->SetHead(0);
 
-	Udph& udph = *(Udph*)(*buf + 16 + sizeof (Iph));
+	Iph& iph = *(Iph*)(*buf + 16);
+	Udph& udph = *(Udph*)iph.GetTransport();
 	udph.sport = _id.sport;
 	udph.dport = Htons(dest.GetPort());
 	udph.len = Htons(len + sizeof (Udph));
 	buf->SetSize(16 + sizeof (Iph) + sizeof (Udph) + len);
 	memcpy(udph.GetPayload(), data, len);
 
-	Iph& iph = *(Iph*)(*buf + 16);
-	iph.dest = dest.GetAddr4();	// Needed for Udph::SetCsum
-	iph.source = _ip.GetSource(); // Needed for Udph::SetCsum
-	udph.SetCsum(iph);
+	iph.source = INADDR_ANY /* _id.saddr */;
 
 	Ip::Route* rt = _connected ? _cached_route : NULL;
-	Ip::Route* r = _ip.Send(buf, dest.GetAddr4(), rt);
+	Ip::Route* r = _ip.Send(buf, dest.GetAddr4(), _udp, rt);
 	if (_connected && r != _cached_route) {
 		if (r) r->Retain();
 		_cached_route = r;

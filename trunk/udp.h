@@ -72,7 +72,7 @@ public:
 };
 
 
-class Udp {
+class Udp: public Checksummer {
 	friend class UdpCoreSocket;
 
 	Mutex _lock;
@@ -86,6 +86,8 @@ public:
 	// Create UDP socket
 	UdpCoreSocket* Create();
 	void Receive(IOBuffer* buf);
+
+	void Checksum(IOBuffer* buf); // * implements Checksummer::Checksum
 
 protected:
 	void Deregister(UdpCoreSocket* s);
