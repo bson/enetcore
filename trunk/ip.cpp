@@ -575,10 +575,15 @@ void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
 void Ip::SetRouteTimer(Route* rt, uint secs)
 {
 	_lock.AssertLocked();
+	const Time prev_top = !_timer.Empty() ? _timer.Front()->expire : Time::InfTim;
+
 	_timer.Erase(rt);
 	rt->expire = Time::Now() + Time::FromSec(secs);
 	_timer.Insert(rt);
-	_net_event.Set();
+
+	// Make net thread aware that we now have a reduced service timer
+	if (_timer.Front()->expire < prev_top)
+		_net_event.Set();
 }
 
 
