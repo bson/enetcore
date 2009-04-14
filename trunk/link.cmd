@@ -151,7 +151,9 @@ SECTIONS
 {
 	. = 0;						/* set location counter to address zero  */
 	
-	startup : { *(.startup)} >flash		/* the startup code goes into FLASH */
+	startup : {
+		KEEP(*(.startup))
+	} >flash		/* the startup code goes into FLASH */
 	
 	.text :						/* collect all sections that should go into FLASH after startup  */ 
 	{
@@ -159,8 +161,8 @@ SECTIONS
 		*(.text*)				/* all .text sections (code)  */
 
 		_ctors_start_ = .;
-		*(.ctors)
-		*(SORT(.ctors.*))		/* Sort constructors */
+		KEEP(*(.ctors))
+		KEEP(*(SORT(.ctors.*)))		/* Sort constructors */
 		_ctors_end_ = .;
 
 		_dtors_start_ = .;
@@ -198,16 +200,19 @@ No need to keep dtors if main() never returns
 	.bss :								/* collect all uninitialized .bss sections that go into RAM  */
 	{
 		_bss_start = .;					/* define a global symbol marking the start of the .bss section */
-		*(.bss)							/* all .bss sections  */
-			. = ALIGN(4);						/* advance location counter to the next 32-bit boundary */
+		*(.dynbss)
+		*(.bss .bss.* .gnu.linkonce.b.*)
+		*(COMMON)
+		. = ALIGN(4);						/* advance location counter to the next 32-bit boundary */
 		_bss_end = . ;						/* define a global symbol marking the end of the .bss section */
 	} >xram								/* put all the above in RAM (it will be cleared in the startup code */
 
 
+	/* Define a section .xflash for external flash */
 	.xflash :
 	{
 		_xflash = .;
-		*(.xflash)
+		*(.xflash .xflash.*)
 		_exflash = .;
 	} >xflash
 }
