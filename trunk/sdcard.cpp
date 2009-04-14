@@ -14,14 +14,20 @@ void SDCard::Init()
 	if (_initialized) return;
 
 	_spi.Init();
-	_spi0.SetSpeed(600000);
+	_spi.SetSpeed(100000);
 
 	_spi.Select();
 	
-	DMSG("SDCard: performing CMD0");
+	DMSG("SDCard: reset");
 
-	if (SendCMD(0) != 1) {
-		DMSG("SDCard: CMD0 failed - no card in slot?");
+	uint8_t status = 0xff;
+
+	for (uint i = 0; i < 100 && status != 1; ++i)
+		status = SendCMD(0);
+
+	if (status != 1) {
+		abort();
+		DMSG("SDCard: CMD0 failed - missing card?");
 		_spi.Deselect();
 		return;
 	}
@@ -33,14 +39,9 @@ void SDCard::Init()
 		return;
 	}
 
-	_version2 = true;
-	if (value == 5) {
-		// Invalid command - not a 2.00 card
-		DMSG("Version 1 SD Card");
-		_version2 = false;
-	} else {
-		DMSG("Version 2 SD Card");
-	}
+	_version2 = value != 5;		// 5: Invalid command - not a 2.00 card
+
+	console("Version %u SD Card", (int)_version2 + 1);
 
 	for (uint i = 0; i < 100; ++i) {
 		if (!SendACMD(41)) {
@@ -51,6 +52,8 @@ void SDCard::Init()
 	
 	if (!_initialized) {
 		console("SDCard: initialization failed - card not ready");
+	} else {
+		_spi.SetSpeed(24000000);
 	}
 }
 
@@ -61,7 +64,8 @@ uint8_t SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 
 	const uint8_t cmdbuf[] = { 0xff, 0x40 | cmd, a >> 8, a, b, c, cmd ? 0 : 0x95, 0xff };
 
-	return _spi.Send(cmdbuf, sizeof cmdbuf);
+	_spi.Send(cmdbuf, sizeof cmdbuf);
+	return _spi.Read();
 }
 
 
@@ -82,23 +86,18 @@ bool SDCard::ReadSector(uint secnum, Deque<uint8_t>& buf)
 
 	const uint pos = 512 * secnum;
 
-	DMSG("Sending CMD17 to read");
-
-	const uint8_t result = SendCMD(17, pos >> 16, pos >> 8, pos);
+	SendCMD(17, pos >> 16, pos >> 8, pos);
+	const uint8_t result = _spi.Read();
 	if (result == 0xff) return false;
-
-	DMSG("Getting first block");
 
 	Time t = Time::Now();
 
-	// Wait up to 100 msec for a reply, polling continuously
-	const uint8_t b1 = _spi.ReadReply(0, 100000);
-
-	DMSG("Result = %u, block1 = %x", result, b1);
+	// Wait up to 100 msec for a reply, retrying in 1msec intervals
+	const uint8_t b1 = _spi.ReadReply(1000, 100);
 
 	if (result || b1 != 0xfe) return false;
-	
-	_spi.ReadBuffer(buf, 514);
+
+	_spi.ReadBuffer(buf, 512);
 
 	const uint16_t crc = (_spi.Read() << 8) | _spi.Read();
 	

@@ -14,9 +14,7 @@ int	main ()
 	_sd.Init();
 
 	Deque<uint8_t> buf;
-	_sd.ReadSector(1, buf);
-
-	for (;;) ;
+	_sd.ReadSector(0, buf);
 
 	abort();
 }

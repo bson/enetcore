@@ -23,8 +23,10 @@ void SPI::SetSpeed(uint hz)
 	Select();
 
 	const uint scaler = PCLK/hz & ~1;
-	DMSG("SPI: Prescaler = %u", max(min(scaler, (uint)254), (uint)8));
-	_base[SPCCR] = max(min(scaler, (uint)254), (uint)8);
+	const uint prescaler = max(min(scaler, (uint)254), (uint)8);
+	_base[SPCCR] = prescaler;
+
+	DMSG("SPI: Prescaler = %u, clock = %u kHz", prescaler, PCLK/prescaler/1000);
 
 	// SPIE=1, LSBF=0, MSTR=1, CPOL=1, CPHA=0
 	_base[SPCR] = 0b00110000;
@@ -52,15 +54,18 @@ void SPI::Deselect()
 
 uint8_t SPI::Read(uint8_t code)
 {
+	// Xmit
+	_base[SPDR] = code;
+
+	// Wait for clocking to finish
 	while (!(_base[SPSR] & 0x80)) continue;
 
-	if ((_base[SPSR] & 0b11111000) == 0x80) {
-		_base[SPDR] = code;
-		return _base[SPDR];
-	} else {
-		const uint tmp = _base[SPDR];
-		return 0xff;
-	}
+	const bool ok = (_base[SPSR] & 0b11111000) == 0x80;
+
+	// Always read, to clear SPSR SPIF (0x80) flag
+	const uint8_t tmp =  _base[SPDR];
+
+	return ok ? tmp : 0xff;
 }
 
 
@@ -80,7 +85,13 @@ uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
 		const uint8_t tmp = Read(code);
 		if (tmp != 0xff) return tmp;
 
-		if (interval)  udelay(interval);
+		if (interval)  {
+			// If delay is > 25 usec, use scheduler
+			if (interval > 25)
+				Self().Sleep(Time::FromUsec(interval));
+			else
+				udelay(interval);
+		}
 	}
 
 	return 0xff;

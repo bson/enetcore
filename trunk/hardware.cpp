@@ -321,7 +321,7 @@ void hwinit()
 	_vic.ClearPending();
 	_vic.EnableChannel(16);
 
-	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
+//	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }
 
 
