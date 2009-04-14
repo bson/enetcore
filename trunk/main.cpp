@@ -11,12 +11,12 @@ int	main ()
 	_lcd.Write(String(STR("\xfe\1Enetcore 0.1 DEV")));
 	_lcd.SyncDrain();
 
-	for (;;) ;
-
 	_sd.Init();
 
-	static char buf[512];
+	Deque<uint8_t> buf;
 	_sd.ReadSector(1, buf);
+
+	for (;;) ;
 
 	abort();
 }

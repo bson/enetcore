@@ -14,6 +14,11 @@ Fix SPI driver
   5. Repeat 2 to fill a buffer
 - Parameterize polarity and phase
 
+Add Gpio abstraction
+- Gpio(base)[3]
+- With Pin proxy: has 8-bit pin #, Gpio #
+- Make Spi accept Pin&
+
 Implement SD card block driver
 
 Implement CRC7

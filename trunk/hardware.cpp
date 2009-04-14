@@ -282,9 +282,6 @@ void hwinit()
 	_uart0.SetSpeed(115200);
 	_uart0.Write(STR("\r\n\n"));
 
-	_vic.InstallHandler(10, SPI::Interrupt);
-	_vic.EnableChannel(10);
-
 	_vic.InstallHandler(16, Ethernet::Interrupt);
 
 	// Enable interrupts
