@@ -41,7 +41,7 @@ public:
 	uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff);
 
 	// Read a given number of bytes, appending to buffer
-	void ReadBuffer(Deque<uint8_t>& buffer, uint len);
+	void ReadBuffer(void* buffer, uint len);
 
 	// Keep reading response until we get give value
 	bool WaitReady(uint interval, uint num_tries, uint8_t value);

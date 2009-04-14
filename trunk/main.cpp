@@ -4,6 +4,19 @@
 #include "sdcard.h"
 
 
+struct NOVTABLE PartEnt {
+	uint8_t boot_flag;
+	uint8_t chs_begin[3];
+	uint8_t type_code;
+	uint8_t chs_end[3];
+	uint32_t lba_begin;
+	uint32_t num_sect;
+};
+
+
+static PartEnt _part[4];
+
+
 int	main ()
 {
 	_malloc_region.SetReserve(4096);
@@ -13,8 +26,16 @@ int	main ()
 
 	_sd.Init();
 
-	Deque<uint8_t> buf;
-	_sd.ReadSector(0, buf);
+	static uint8_t sector[512];
+	_sd.ReadSector(0, sector);
+
+	memcpy(_part, sector + 446, sizeof _part);
+
+	for (uint i = 0; i < 4; ++i) {
+		PartEnt* p = _part + i;
+		DMSG("%u: flag=%d  type=0x%x  lba=%u  num_sec=%u",
+			 i, (uint)p->boot_flag, (uint)p->type_code, p->lba_begin, p->num_sect);
+	}
 
 	abort();
 }

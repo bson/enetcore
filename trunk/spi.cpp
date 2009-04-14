@@ -98,10 +98,11 @@ uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
 }
 
 
-void SPI::ReadBuffer(Deque<uint8_t>& buffer, uint len)
+void SPI::ReadBuffer(void* buffer, uint len)
 {
-	while (len--)
-		buffer.PushBack(Read());
+	uint8_t* p = (uint8_t*)buffer;
+
+	while (len--) *p++ = Read();
 }
 
 

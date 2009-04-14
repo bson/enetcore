@@ -14,7 +14,7 @@ public:
 	SDCard(SPI& spi);
 	void Init();
 	
-	bool ReadSector(uint secnum, Deque<uint8_t>& buf);
+	bool ReadSector(uint secnum, void* buf);
 
 private:
 	// Send SD CMD

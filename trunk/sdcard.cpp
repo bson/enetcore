@@ -80,7 +80,7 @@ uint8_t SDCard::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 }
 
 
-bool SDCard::ReadSector(uint secnum, Deque<uint8_t>& buf)
+bool SDCard::ReadSector(uint secnum, void* buf)
 {
 	Mutex::Scoped L(_lock);
 
