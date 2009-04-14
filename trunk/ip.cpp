@@ -581,7 +581,7 @@ void Ip::SetRouteTimer(Route* rt, uint secs)
 	rt->expire = Time::Now() + Time::FromSec(secs);
 	_timer.Insert(rt);
 
-	// Make net thread aware that we now have a reduced service timer
+	// Make net thread aware that we now have a reduced IP service timer
 	if (_timer.Front()->expire < prev_top)
 		_net_event.Set();
 }
