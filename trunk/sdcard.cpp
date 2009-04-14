@@ -89,14 +89,20 @@ bool SDCard::ReadSector(uint secnum, Deque<uint8_t>& buf)
 
 	DMSG("Getting first block");
 
-	const uint8_t b1 = _spi.Read();
+	Time t = Time::Now();
+
+	// Wait up to 10 msec for a reply, polling continuously
+	const uint8_t b1 = _spi.ReadReply(0, 10000);
 
 	DMSG("Result = %u, block1 = %x", result, b1);
 
-	if (result != 0 || b1 != 0xfe) return false;
+	if (result || b1 != 0xfe) return false;
+	
+	_spi.ReadBuffer(buf, 514);
 
+	const uint16_t crc = (_spi.Read() << 8) | _spi.Read();
 	
-	_spi.ReadBuffer(buf, 512);
-	
-	DMSG("Successfully read sector");
+	t = Time::Now() - t;
+
+	DMSG("Successfully read sector in %u usec", t.GetUsec());
 }

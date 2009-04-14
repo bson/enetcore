@@ -80,7 +80,7 @@ uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
 		const uint8_t tmp = Read(code);
 		if (tmp != 0xff) return tmp;
 
-		udelay(interval);
+		if (interval)  udelay(interval);
 	}
 
 	return 0xff;

@@ -16,11 +16,11 @@ public:
 	
 	bool ReadSector(uint secnum, Deque<uint8_t>& buf);
 
-
 private:
 	// Send SD CMD
 	uint8_t SendCMD(uint8_t cmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
 	uint8_t SendACMD(uint8_t acmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
+
 };
 
 
