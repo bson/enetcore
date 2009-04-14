@@ -91,8 +91,8 @@ bool SDCard::ReadSector(uint secnum, Deque<uint8_t>& buf)
 
 	Time t = Time::Now();
 
-	// Wait up to 10 msec for a reply, polling continuously
-	const uint8_t b1 = _spi.ReadReply(0, 10000);
+	// Wait up to 100 msec for a reply, polling continuously
+	const uint8_t b1 = _spi.ReadReply(0, 100000);
 
 	DMSG("Result = %u, block1 = %x", result, b1);
 
