@@ -90,18 +90,11 @@ bool SDCard::ReadSector(uint secnum, Deque<uint8_t>& buf)
 	const uint8_t result = _spi.Read();
 	if (result == 0xff) return false;
 
-	Time t = Time::Now();
-
-	// Wait up to 100 msec for a reply, retrying in 1msec intervals
-	const uint8_t b1 = _spi.ReadReply(1000, 100);
-
+	// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 100 usec)
+	const uint8_t b1 = _spi.ReadReply(250, 40);
 	if (result || b1 != 0xfe) return false;
 
 	_spi.ReadBuffer(buf, 512);
 
 	const uint16_t crc = (_spi.Read() << 8) | _spi.Read();
-	
-	t = Time::Now() - t;
-
-	DMSG("Successfully read sector in %u usec", t.GetUsec());
 }
