@@ -3,8 +3,10 @@
 
 #include "spi.h"
 #include "mutex.h"
+#include "blockdev.h"
 
-class SDCard {
+
+class SDCard: public BlockDev {
 	Mutex _lock;
 	SPI& _spi;
 	bool _initialized;
@@ -14,13 +16,14 @@ public:
 	SDCard(SPI& spi);
 	void Init();
 	
+	uint GetSectorSize() const { return 512; }
 	bool ReadSector(uint secnum, void* buf);
+	bool WriteSector(uint secnum, const void* buf) { abort(); }
 
 private:
 	// Send SD CMD
 	uint8_t SendCMD(uint8_t cmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
 	uint8_t SendACMD(uint8_t acmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
-
 };
 
 

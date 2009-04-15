@@ -21,9 +21,13 @@ template <typename T> inline T exch(T& a, const T& b) { const T tmp = a; a = b; 
 #if IS_LITTLE_ENDIAN
 #define Htons Swap16
 #define Htonl Swap32
+#define LE16(V) uint16_t(V)
+#define LE32(V) uint32_t(V)
 #else
 #define Htons(V) uint16_t(V)
 #define Htonl(V) uint32_t(V)
+#define LE16 Swap16
+#define LE32 Swap32
 #endif
 
 #define Ntohs Htons
