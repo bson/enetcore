@@ -97,4 +97,6 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 	_spi.ReadBuffer(buf, 512);
 
 	const uint16_t crc = (_spi.Read() << 8) | _spi.Read();
+
+	return true;
 }
