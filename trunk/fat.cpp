@@ -100,7 +100,6 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 		if (d->IsLFN()) continue;
 		if (d->IsVolume()) continue;
 
-		bool mismatch = false;
 		for (uint i = 0; ; ++i) {
 			if (namebuf[i] != Util::ToUpper(d->name[i]))  break;
 			if (i == 11)  return d;
