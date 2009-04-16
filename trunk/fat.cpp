@@ -65,8 +65,8 @@ bool Fat::Mount(uint partnum, bool rw)
 	if (!_fat32) {
 		memcpy(&_max_root, sector + VID_Max_Root_Dir, 2);
 		_max_root = LE16(_max_root);
-		_root_dir_clus = (uint32_t)-(_max_root / 512);
-		_cluster0 += _max_root / 32;
+		_root_dir_clus = (uint32_t)-(_max_root * 32 / 512);
+		_cluster0 += _max_root * 32 / 512;
 	}
 
 	ok = true;
@@ -179,7 +179,7 @@ FatFile* Fat::Open(const String& path)
 
 		if (!i && !_fat32) {
 			// FAT16: root dir is sector #
-			if (!LoadDataSectors(dir, walk, _max_root/512)) goto done;
+			if (!LoadDataSectors(dir, walk, _max_root * 32 / 512)) goto done;
 		} else {
 			if (!GetFileClusters(dir_clusters, walk)) goto done;
 			if (!LoadDataClusters(dir, dir_clusters)) goto done;
@@ -203,7 +203,7 @@ FatFile* Fat::Open(const String& path)
 		delete exch<FatFile*>(file, NULL);
 
 done:
-	pathlist.DeleteEntries();
+	pathlist.DeleteObjects();
 	return file;
 }
 
@@ -261,6 +261,7 @@ uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 
 uint FatFile::Write(const void* buf, uint numbytes)
 {
+	return 0;
 }
 
 
