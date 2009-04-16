@@ -65,7 +65,7 @@ bool Fat::Mount(uint partnum, bool rw)
 	if (!_fat32) {
 		memcpy(&_max_root, sector + VID_Max_Root_Dir, 2);
 		_max_root = LE16(_max_root);
-		_root_dir_clus = _cluster0;
+		_root_dir_clus = ClusterToSector(_cluster0) - _max_root / 512;
 		_cluster0 += _max_root / 32;
 	}
 
@@ -145,6 +145,16 @@ bool Fat::LoadDataSector(uint8_t* buf, uint32_t sector)
 }
 
 
+bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sectors)
+{
+	while (num_sectors--) {
+		if (!_dev.ReadSector(_cluster0 + sector, buf + buf.Grow(512)))
+			return false;
+	}
+	return true;
+}
+
+
 FatFile* Fat::Open(const String& path)
 {
 	Vector<String*> pathlist;
@@ -164,12 +174,17 @@ FatFile* Fat::Open(const String& path)
 	uint32_t file_size = 0;
 
 	for (uint i = 0; i < pathlist.Size(); ++i) {
-		dir_clusters.SetSize(0);
-		if (!GetFileClusters(dir_clusters, walk)) goto done;
-
 		// Load directory contents
+		dir_clusters.SetSize(0);
 		dir.SetSize(0);
-		if (!LoadDataClusters(dir, dir_clusters)) goto done;
+
+		if (!i && !_fat32) {
+			// FAT16: root dir is sector #
+			if (!LoadDataSectors(dir, walk, _max_root/512)) goto done;
+		} else {
+			if (!GetFileClusters(dir_clusters, walk)) goto done;
+			if (!LoadDataClusters(dir, dir_clusters)) goto done;
+		}
 
 		dirent = FindFile(dir, *pathlist[i]);
 		if (!dirent) goto done;

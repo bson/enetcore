@@ -69,13 +69,13 @@ class Fat {
 	uint32_t _lba0;				// First LBA of partition
 	uint32_t _size;				// Partition size in sectors
 	uint32_t _fat_num_sect;		// Sectors per FAT
-	uint32_t _root_dir_clus;	// Root directory cluster
+	uint32_t _root_dir_clus;	// Root directory cluster (FAT16: root dir sector)
 	uint16_t _resv_clus;		// Rserved clusters
 	uint8_t _sec_per_clus;		// Sectors per cluster
 	uint8_t _clus_bits;			// Log2(_sec_per_clus)
 	uint32_t _fat_sector;		// First sector of FAT
 	uint32_t _cluster0;			// Sector of first cluster (following FAT).
-	uint16_t _max_root;			// FAT16: Max root dir size
+	uint16_t _max_root;			// FAT16: Max root dir size in bytes
 	bool _fat32:1;				// Volume is FAT32 (otherwise FAT16)
 	bool _rw:1;					// Read-write mount
 
@@ -138,8 +138,9 @@ protected:
 	bool LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster);
 	bool LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_list);
 
-	// Load data sector into memory
+	// Load data sector(s) into memory
 	bool LoadDataSector(uint8_t* buf, uint32_t sector);
+	bool LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sectors);
 };
 
 #endif // __FAT_H__
