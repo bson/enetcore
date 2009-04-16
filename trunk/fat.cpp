@@ -65,7 +65,7 @@ bool Fat::Mount(uint partnum, bool rw)
 	if (!_fat32) {
 		memcpy(&_max_root, sector + VID_Max_Root_Dir, 2);
 		_max_root = LE16(_max_root);
-		_root_dir_clus = ClusterToSector(_cluster0) - _max_root / 512;
+		_root_dir_clus = (uint32_t)-(_max_root / 512);
 		_cluster0 += _max_root / 32;
 	}
 
