@@ -95,10 +95,10 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 		namebuf[i] = Util::ToUpper(namebuf[i]);
 		
 	for (FatDirEnt* d = (FatDirEnt*)&dir.Front(); d < (FatDirEnt*)&dir.Back(); ++d) {
+		if (!d->IsUsed()) continue;
 		// XXX we really want to check against LFN here
 		if (d->IsLFN()) continue;
 		if (d->IsVolume()) continue;
-		if (!d->IsUsed()) continue;
 
 		bool mismatch = false;
 		for (uint i = 0; ; ++i) {
