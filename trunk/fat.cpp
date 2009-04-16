@@ -74,3 +74,171 @@ failed:
 	xfree(sector);
 	return ok;
 }
+
+
+FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
+{
+	// XXX NYI
+	return NULL;
+}
+
+
+bool Fat::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
+{
+	// XXX NYI
+	return false;
+}
+
+
+bool Fat::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
+{
+	uint32_t sector1 = ClusterToSector(cluster);
+	for (uint32_t sector = sector1; sector < sector1 + ClusterToSector(1); ++sector) {
+		if (!LoadDataSector(buffer + buffer.Grow(512), sector))
+			return false;
+	}
+	return true;
+}
+
+
+bool Fat::LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_list)
+{
+	for (uint i = 0; i < cluster_list.Size(); ++i) {
+		if (!LoadDataCluster(buffer, cluster_list[i]))
+			return false;
+	}
+	return true;
+}
+
+
+bool Fat::LoadDataSector(uint8_t* buf, uint32_t sector)
+{
+	return _dev.ReadSector(_cluster0 + sector, buf);
+}
+
+
+FatFile* Fat::Open(const String& path)
+{
+	Vector<String*> pathlist;
+	path.Split(pathlist, STR("/"));
+
+	Vector<uint8_t> dir;
+	Vector<uint32_t> dir_clusters;
+
+	uint32_t walk = _root_dir_clus;
+
+	dir.Reserve(512 * ClusterToSector(1));
+
+	// Walk the path chain
+	FatDirEnt* dirent = NULL;
+
+	FatFile* file = NULL;
+	uint32_t file_size = 0;
+
+	for (uint i = 0; i < pathlist.Size(); ++i) {
+		dir_clusters.SetSize(0);
+		if (!GetFileClusters(dir_clusters, walk)) goto done;
+
+		// Load directory contents
+		dir.SetSize(0);
+		if (!LoadDataClusters(dir, dir_clusters)) goto done;
+
+		dirent = FindFile(dir, *pathlist[i]);
+		if (!dirent) goto done;
+
+		// Check if attempting to open a dir, or descend into a file
+		if (dirent->IsDir() == (i == pathlist.Size() - 1)) goto done;
+
+		// Descend, but remember file size
+		file_size = LE32(dirent->size);
+		walk = dirent->GetCluster();
+	}
+
+	file = new FatFile(*this);
+	file->_size = file_size;
+
+	if (!GetFileClusters(file->_clusters, walk))
+		delete exch<FatFile*>(file, NULL);
+
+done:
+	pathlist.DeleteEntries();
+	return file;
+}
+
+
+bool FatFile::Seek(filepos_t new_pos)
+{
+	_pos = new_pos;
+}
+
+
+uint FatFile::Read(void* buf, uint numbytes)
+{
+	uint result = 0;
+
+	numbytes = min(_size, _pos + numbytes) - numbytes;
+
+	while (numbytes) {
+		if (!BufferSector(_fat.FileposToSector(_pos))) break;
+
+		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
+		assert(tocopy);
+
+		memcpy(buf, _sector + (_pos & 511), tocopy);
+
+		_pos += tocopy;
+		(uint8_t*&)buf += tocopy;
+		result += tocopy;
+	}
+
+	return result;
+}
+
+
+uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
+{
+	uint result = 0;
+
+	numbytes = min(_size, _pos + numbytes) - numbytes;
+
+	while (numbytes) {
+		if (!BufferSector(_fat.FileposToSector(_pos)))  break;
+
+		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
+		assert(tocopy);
+
+		buf.PushBack(_sector + (_pos & 511), tocopy);
+
+		_pos += tocopy;
+		result += tocopy;
+	}
+
+	return result;
+}
+
+
+uint FatFile::Write(const void* buf, uint numbytes)
+{
+}
+
+
+void FatFile::Close()
+{
+	delete this;
+}
+
+
+bool FatFile::BufferSector(uint32_t sector)
+{
+	if (_buf_sec == NOT_FOUND || _buf_sec != sector) {
+		if (_fat.LoadDataSector(_sector, _clusters[_fat.SectorToCluster(sector)] +
+								(sector & (_fat.ClusterToSector(1)-1)))) {
+			_buf_sec = sector;
+		} else {
+			// I/O error
+			_buf_sec = NOT_FOUND;
+			return false;
+		}
+	}
+	return true;
+}

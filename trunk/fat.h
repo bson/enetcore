@@ -1,6 +1,7 @@
 #ifndef __FAT_H__
 #define __FAT_H__
 
+#include "file.h"
 #include "blockdev.h"
 
 
@@ -15,7 +16,55 @@ struct NOVTABLE PartEnt {
 };
 
 
+// FAT directory entry
+struct NOVTABLE FatDirEnt {
+	uint8_t name[11];			// 8.3 short file name
+	uint8_t attrib;				// File attribute
+	uint8_t pad[8];
+	uint16_t clushi;			// Cluster, high 16 bits
+	uint8_t pad2[4];
+	uint16_t cluslo;			// Cluster, low 16 bits
+	uint32_t size;				// File size in bytes
+
+	INLINE_ALWAYS uint32_t GetCluster() const { return (LE16(clushi) << 16) + LE16(cluslo); }
+	INLINE_ALWAYS bool IsUsed() const { return name[0] != 0xe5; }
+	INLINE_ALWAYS bool IsLFN() const { return (attrib & 0xf) == 0xf; }
+	INLINE_ALWAYS bool IsVolume() const { return (attrib & 8) != 0; }
+	INLINE_ALWAYS bool IsDir() const { return (attrib & 16) != 0; }
+	INLINE_ALWAYS bool IsRO() const { return (attrib & 1) != 0; }
+};
+
+
+class FatFile: public File {
+protected:
+	friend class Fat;
+
+	class Fat& _fat;			// File system this file is on
+
+	Vector<uint32_t> _clusters;	// File cluster list
+	filepos_t _size;			// File size, in bytes
+	filepos_t _pos;				// Current file position
+
+	uint32_t _buf_sec;			// Sector in buffer (NOT_FOUND if none)
+	uint8_t _sector[512];		// Sector buffer
+
+	FatFile(Fat& fs) : _fat(fs), _pos(0), _buf_sec(NOT_FOUND) { }
+	~FatFile() { }
+public:
+	uint32_t GetSize() const { return _size; }
+	bool Seek(filepos_t new_pos);
+	filepos_t Tell() const { return _pos; }
+	uint Read(void* buf, uint numbytes);
+	uint Read(Deque<uint8_t>& buf, uint numbytes);
+	uint Write(const void* buf, uint numbytes);
+	void Close();
+private:
+	bool BufferSector(uint32_t sector);
+};
+
+
 class Fat {
+	// XXX we don't really need all this state
 	BlockDev& _dev;
 	uint32_t _lba0;				// First LBA of partition
 	uint32_t _size;				// Partition size in sectors
@@ -47,17 +96,50 @@ public:
 	// Mount first partition on device
 	bool Mount(uint partnum, bool rw);
 	
-	
-private:
+	// Open file
+	FatFile* Open(const String& path);
+
+protected:
+	friend class FatFile;
+
 	// Simple numeric conversions
-	uint32_t ClusterToSector(uint32_t cluster) const { return cluster << _clus_bits; }
-	uint32_t SectorToCluster(uint32_t sector) const { return sector >> _clus_bits; }
-	bool IsValidCluster(uint32_t cluster) const { return ClusterToSector(cluster) < _size; }
+	INLINE_ALWAYS uint32_t ClusterToSector(uint32_t cluster) const {
+		return cluster << _clus_bits;
+	}
+	INLINE_ALWAYS uint32_t SectorToCluster(uint32_t sector) const {
+		return sector >> _clus_bits;
+	}
+	INLINE_ALWAYS bool IsValidCluster(uint32_t cluster) const {
+		return ClusterToSector(cluster) < _size;
+	}
 
 	// Find LBA for first sector in data cluster
-	uint32_t DataClusterToLBA(uint32_t cluster) const {
+	INLINE_ALWAYS uint32_t DataClusterToLBA(uint32_t cluster) const {
 		return ClusterToSector(cluster) + _cluster0;
 	}
+
+	INLINE_ALWAYS uint32_t FileposToSector(filepos_t pos) const { return pos / 512; }
+	INLINE_ALWAYS uint32_t FileposToCluster(filepos_t pos) const {
+		return SectorToCluster(FileposToSector(pos));
+	}
+
+	// Test if position is in particular cluster
+	INLINE_ALWAYS bool IsInCluster(uint32_t cluster, filepos_t pos) {
+		return FileposToCluster(pos) == cluster;
+	}
+
+	// Find directory entry, or NULL if not found
+	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name);
+
+	// Scan cluster list for file
+	bool GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1);
+
+	// Load data cluster into memory, appending to buffer
+	bool LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster);
+	bool LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_list);
+
+	// Load data sector into memory
+	bool LoadDataSector(uint8_t* buf, uint32_t sector);
 };
 
 #endif // __FAT_H__

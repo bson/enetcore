@@ -16,5 +16,7 @@ int	main()
 
 	_fat.Mount(0, false);
 
+	file_t file = _fat.Open("test.txt");
+
 	abort();
 }
