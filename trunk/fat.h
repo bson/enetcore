@@ -70,7 +70,7 @@ class Fat {
 	uint32_t _size;				// Partition size in sectors
 	uint32_t _fat_num_sect;		// Sectors per FAT
 	uint32_t _root_dir_clus;	// Root directory cluster (FAT16: root dir sector)
-	uint16_t _resv_clus;		// Rserved clusters
+	uint16_t _resv_clus;		// Reserved clusters
 	uint8_t _sec_per_clus;		// Sectors per cluster
 	uint8_t _clus_bits;			// Log2(_sec_per_clus)
 	uint32_t _fat_sector;		// First sector of FAT
@@ -131,8 +131,11 @@ protected:
 	// Find directory entry, or NULL if not found
 	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name);
 
-	// Scan cluster list for file
+	// Obtain cluster list for file
 	bool GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1);
+
+	template <typename Cluster>
+	bool GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1);
 
 	// Load data cluster into memory, appending to buffer
 	bool LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster);

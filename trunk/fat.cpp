@@ -110,10 +110,49 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 }
 
 
+template <typename Cluster>
+bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
+{
+	uint32_t fatsec = NOT_FOUND; // FAT Sector we currently have loaded
+	uint8_t* fat = (uint8_t*)xmalloc(512); // FAT Sector buffer
+
+	bool success = false;
+
+	enum { NUM_FAT_PER_SEC = 512 / sizeof (Cluster) };
+
+	Cluster clus = cluster1;
+
+	while (clus && clus < (Cluster)0xfffffff0) {
+		const uint32_t next_fatsec = clus / NUM_FAT_PER_SEC;
+		if (next_fatsec >= _fat_num_sect) goto done;
+
+		clusters.PushBack((uint32_t)clus);
+
+		if (fatsec == NOT_FOUND || fatsec != next_fatsec) {
+			// Need different FAT sector - load it
+			if (!_dev.ReadSector(_fat_sector + next_fatsec, fat)) goto done;
+			fatsec = next_fatsec;
+		}
+
+		clus = ((const Cluster*)fat)[clus & (NUM_FAT_PER_SEC - 1)];
+	}
+
+	// If we ran into anything other than an end-of-chain marker we have
+	// a corrupt FAT.
+	success = clus > (Cluster)0xfffffff8;
+
+done:
+	if (!success)  console("Corrupt FAT/DIR entry");
+
+	xfree(fat);
+	return success;
+}
+
+
 bool Fat::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
 {
-	// XXX NYI
-	return false;
+	return _fat32 ? GetFileClustersImpl<uint32_t>(clusters, cluster1) :
+		GetFileClustersImpl<uint16_t>(clusters, cluster1);
 }
 
 
