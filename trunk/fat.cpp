@@ -1,5 +1,6 @@
 #include "enetkit.h"
 #include "fat.h"
+#include "util.h"
 
 
 Fat::Fat(BlockDev& dev) :
@@ -78,7 +79,30 @@ failed:
 
 FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 {
-	// XXX NYI
+	if (dir.Empty()) return NULL;
+
+	const uint namelen = name.Size();
+
+	uint8_t namebuf[11];
+	uint dotpos = name.FindLast((uchar)'.');
+	if (dotpos == NOT_FOUND)  dotpos = namelen;
+	const uint namepart = min<uint>(dotpos, 8);
+	memset(namebuf, ' ', sizeof namebuf);
+	memcpy(namebuf, name.CStr(), namepart);
+	memcpy(namebuf + 8, name.CStr() + dotpos, min<uint>(namelen - dotpos, 3));
+
+	for (uint i = 0; i < 11; ++i)
+		namebuf[i] = Util::ToUpper(namebuf[i]);
+		
+	for (FatDirEnt* d = (FatDirEnt*)&dir.Front(); d < (FatDirEnt*)&dir.Back(); ++d) {
+		// XXX we really want to check against LFN here
+		if (d->IsLFN()) continue;
+		if (d->IsVolume()) continue;
+		if (!d->IsUsed()) continue;
+
+		if (!memcmp(namebuf, d->name, sizeof d->name)) return d;
+	}
+
 	return NULL;
 }
 
