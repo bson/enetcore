@@ -139,10 +139,10 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 	// If we ran into anything other than an end-of-chain marker we have
 	// a corrupt FAT.
-	success = clus > (Cluster)0xfffffff8;
+	success = clus >= (Cluster)0xfffffff8;
 
 done:
-	if (!success)  console("Corrupt FAT/DIR entry");
+	if (!success)  console("Corrupt FAT/DIR entry for cluster %x", (uint)clus);
 
 	xfree(fat);
 	return success;
@@ -237,6 +237,7 @@ FatFile* Fat::Open(const String& path)
 
 	file = new FatFile(*this);
 	file->_size = file_size;
+	file->_clusters.Reserve(SectorToCluster(file_size / 512));
 
 	if (!GetFileClusters(file->_clusters, walk))
 		delete exch<FatFile*>(file, NULL);
