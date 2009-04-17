@@ -88,13 +88,15 @@ class Fat {
 		VID_Sect_Per_FAT = 0x24,	// Sectors per FAT, 32 bits
 		VID16_Sect_Per_FAT = 0x16,	// Sectors per FAT16, 16 bits
 		VID_Root_Dir_Clus = 0x2c,	// Root dir cluster, 32 bits (usually 2)
-		VID_Max_Root_Dir = 0x11		// FAT16: max # of entries in root dir
+		VID_Max_Root_Dir = 0x11, // FAT16: max # of entries in root dir
+		VID16_Volume_Name = 0x2b,	// FAT16: volume name
+		VID_Volume_Name = 0x47		// FAT32: volume name
 	};
 
 public:
 	Fat(BlockDev& dev);
 
-	// Mount first partition on device
+	// Mount specified partition
 	bool Mount(uint partnum, bool rw);
 	
 	// Open file

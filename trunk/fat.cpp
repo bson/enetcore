@@ -80,6 +80,16 @@ bool Fat::Mount(uint partnum, bool rw)
 
 	ok = true;
 
+	{
+		const String vol((uint8_t*)(sector + (_fat32 ? VID_Volume_Name : VID16_Volume_Name)), 11);
+		console("sd0.%u: %S %uMB (FAT%u, %uk)",
+				partnum,
+				&vol,
+				_size / 2 / 1024,
+				_fat32 ? 32 : 16, 
+				_sec_per_clus / 2);
+	}
+
 failed:
 	xfree(sector);
 	return ok;
