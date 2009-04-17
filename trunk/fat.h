@@ -70,7 +70,7 @@ class Fat {
 	uint32_t _size;				// Partition size in sectors
 	uint32_t _fat_num_sect;		// Sectors per FAT
 	uint32_t _root_dir_clus;	// Root directory cluster (FAT16: root dir sector)
-	uint16_t _resv_clus;		// Reserved clusters
+	uint16_t _resv_sect;		// Reserved sectors
 	uint8_t _sec_per_clus;		// Sectors per cluster
 	uint8_t _clus_bits;			// Log2(_sec_per_clus)
 	uint32_t _fat_sector;		// First sector of FAT
@@ -86,6 +86,7 @@ class Fat {
 		VID_Res_Sects = 0xe,		// Reserved sectors, 16 bits
 		VID_Num_FATs = 0x10,		// Number of FATs (always 2), 8 bits
 		VID_Sect_Per_FAT = 0x24,	// Sectors per FAT, 32 bits
+		VID16_Sect_Per_FAT = 0x16,	// Sectors per FAT16, 16 bits
 		VID_Root_Dir_Clus = 0x2c,	// Root dir cluster, 32 bits (usually 2)
 		VID_Max_Root_Dir = 0x11		// FAT16: max # of entries in root dir
 	};

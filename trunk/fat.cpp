@@ -24,8 +24,8 @@ bool Fat::Mount(uint partnum, bool rw)
 	if (!_dev.ReadSector(0, sector + 2)) goto failed;
 	if (*(uint16_t*)(sector + 512) != LE16(0xaa55)) goto failed;
 
-	_lba0 = part[partnum].lba_begin;
-	_size = part[partnum].num_sect;
+	_lba0 = LE32(part[partnum].lba_begin);
+	_size = LE32(part[partnum].num_sect);
 
 	if (!_lba0 || !_size) goto failed;
 
@@ -34,30 +34,39 @@ bool Fat::Mount(uint partnum, bool rw)
 	type = part[partnum].type_code;
 
 	if (type == 0xb || type == 0xc) _fat32 = true;
-	else if (part[partnum].type_code != 6)  goto failed;
+	else if (type != 6 && type != 4)  goto failed;
 
 	// Read volume ID
 	if (!_dev.ReadSector(_lba0, sector)) goto failed;
 	if (*(uint16_t*)(sector + 510) != LE16(0xaa55)) goto failed;
 
-	memcpy(&_fat_num_sect, sector + VID_Sect_Per_FAT, sizeof _fat_num_sect);
-	_fat_num_sect = LE32(_fat_num_sect);
+	uint16_t byte_per_sect;
+	memcpy(&byte_per_sect, sector + VID_Bytes_Per_Sec, sizeof byte_per_sect);
+	if (LE16(byte_per_sect) != 512) goto failed;
+
+	uint16_t tmp;
+	if (_fat32) {
+		memcpy(&_fat_num_sect, sector + VID_Sect_Per_FAT, sizeof _fat_num_sect);
+		_fat_num_sect = LE32(_fat_num_sect);
+	} else {
+		memcpy(&tmp, sector + VID16_Sect_Per_FAT, sizeof tmp);
+		_fat_num_sect = LE16(tmp);
+	}
 
 	memcpy(&_root_dir_clus, sector + VID_Root_Dir_Clus, sizeof _root_dir_clus);
 	_root_dir_clus = LE32(_root_dir_clus);
 
-	memcpy(&_resv_clus, sector + VID_Res_Sects, sizeof _resv_clus);
-	_resv_clus = LE16(_resv_clus);
+	memcpy(&_resv_sect, sector + VID_Res_Sects, sizeof _resv_sect);
+	_resv_sect = LE16(_resv_sect);
 
 	_sec_per_clus = sector[VID_Sect_Per_Clus];
 	_clus_bits = Util::ffs(_sec_per_clus);
 
 	if (!_fat_num_sect || _sec_per_clus != (1 << _clus_bits) ||
-		!IsValidCluster(_root_dir_clus) ||
-		sector[VID_Num_FATs] != 2)
+		(_fat32 && !IsValidCluster(_root_dir_clus)) || sector[VID_Num_FATs] != 2)
 		goto failed;
 
-	_fat_sector = _lba0 + _resv_clus;
+	_fat_sector = _lba0 + _resv_sect;
 	_cluster0 = _fat_sector + 2 * _fat_num_sect;
 
 	// FAT16: advance _cluster0 past root dir and fill in _root_dir_clus
@@ -70,7 +79,7 @@ bool Fat::Mount(uint partnum, bool rw)
 	}
 
 	ok = true;
-		
+
 failed:
 	xfree(sector);
 	return ok;

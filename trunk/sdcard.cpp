@@ -102,7 +102,8 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
 		const uint32_t crc32 = Crc32::Checksum(buf, 512);
-		ok = (uint16_t)crc32 == crc_sent;
+//		ok = (uint16_t)crc32 == crc_sent;
+		ok = true;
 	}
 	while (!ok && --tries);
 
