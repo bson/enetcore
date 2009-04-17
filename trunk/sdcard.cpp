@@ -94,7 +94,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 		const uint8_t result = _spi.Read();
 		if (result == 0xff) return false;
 
-		// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 100 usec)
+		// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 250 usec)
 		const uint8_t b1 = _spi.ReadReply(250, 40);
 		if (result || b1 != 0xfe) return false;
 
