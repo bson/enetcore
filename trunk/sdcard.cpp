@@ -1,6 +1,7 @@
 #include "enetkit.h"
 #include "sdcard.h"
 #include "spi.h"
+#include "crc32.h"
 
 
 SDCard _sd(_spi0);
@@ -86,17 +87,24 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 
 	const uint pos = 512 * secnum;
 
-	SendCMD(17, pos >> 16, pos >> 8, pos);
-	const uint8_t result = _spi.Read();
-	if (result == 0xff) return false;
+	bool ok;
+	uint tries = 4;				// Retry a few times on CRC error
+	do {
+		SendCMD(17, pos >> 16, pos >> 8, pos);
+		const uint8_t result = _spi.Read();
+		if (result == 0xff) return false;
 
-	// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 100 usec)
-	const uint8_t b1 = _spi.ReadReply(250, 40);
-	if (result || b1 != 0xfe) return false;
+		// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 100 usec)
+		const uint8_t b1 = _spi.ReadReply(250, 40);
+		if (result || b1 != 0xfe) return false;
 
-	_spi.ReadBuffer(buf, 512);
+		_spi.ReadBuffer(buf, 512);
 
-	const uint16_t crc = (_spi.Read() << 8) | _spi.Read();
+		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
+		const uint32_t crc32 = Crc32::Checksum(buf, 512);
+		ok = (uint16_t)crc32 == crc_sent;
+	}
+	while (!ok && --tries);
 
-	return true;
+	return ok;
 }

@@ -20,7 +20,7 @@ CPFLAGS = -O binary
 HEXFLAGS = -O ihex
 ODFLAGS	= -x --syms
 
-SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp			\
+SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp crc32.cpp	\
 	serial.cpp mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp		\
 	sha1.cpp time.cpp lookup3.cpp pstring.cpp hashtable.cpp timer.cpp	\
 	thread.cpp mutex.cpp spi.cpp sdcard.cpp ethernet.cpp netaddr.cpp	\
