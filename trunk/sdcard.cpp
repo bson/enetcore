@@ -1,7 +1,7 @@
 #include "enetkit.h"
 #include "sdcard.h"
 #include "spi.h"
-#include "crc32.h"
+#include "crc16.h"
 
 
 SDCard _sd(_spi0);
@@ -101,7 +101,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 		_spi.ReadBuffer(buf, 512);
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
-		const uint32_t crc32 = Crc32::Checksum(buf, 512);
+		const uint32_t crc16 = Crc16::Checksum(buf, 512);
 //		ok = (uint16_t)crc32 == crc_sent;
 		ok = true;
 	}
