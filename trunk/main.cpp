@@ -27,6 +27,7 @@ int	main()
 		DMSG("test.txt: \"%s\"", buffer);
 		xfree(buffer);
 
+		file->Close();
 	}
 
 	abort();
