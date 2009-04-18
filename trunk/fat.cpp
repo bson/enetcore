@@ -300,8 +300,6 @@ uint FatFile::Read(void* buf, uint numbytes)
 
 uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 {
-	uint result = 0;
-
 	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
 	return Read(buf + buf.Grow(numbytes), numbytes);
