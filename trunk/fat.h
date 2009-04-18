@@ -35,33 +35,7 @@ struct NOVTABLE FatDirEnt {
 };
 
 
-class FatFile: public File {
-protected:
-	friend class Fat;
-
-	class Fat& _fat;			// File system this file is on
-
-	Vector<uint32_t> _clusters;	// File cluster list
-	filepos_t _size;			// File size, in bytes
-	filepos_t _pos;				// Current file position
-
-	uint32_t _buf_sec;			// Sector in buffer (NOT_FOUND if none)
-	uint8_t _sector[512];		// Sector buffer
-
-	FatFile(Fat& fs) : _fat(fs), _pos(0), _buf_sec(NOT_FOUND) { }
-	~FatFile() { }
-public:
-	uint32_t GetSize() const { return _size; }
-	bool Seek(filepos_t new_pos);
-	filepos_t Tell() const { return _pos; }
-	uint Read(void* buf, uint numbytes);
-	uint Read(Deque<uint8_t>& buf, uint numbytes);
-	uint Write(const void* buf, uint numbytes);
-	void Close();
-private:
-	bool BufferSector(uint32_t sector);
-};
-
+class FatFile;
 
 class Fat {
 	// XXX we don't really need all this state
@@ -121,14 +95,9 @@ protected:
 		return ClusterToSector(cluster) + _cluster0;
 	}
 
-	INLINE_ALWAYS uint32_t FileposToSector(filepos_t pos) const { return pos / 512; }
-	INLINE_ALWAYS uint32_t FileposToCluster(filepos_t pos) const {
-		return SectorToCluster(FileposToSector(pos));
-	}
-
 	// Test if position is in particular cluster
 	INLINE_ALWAYS bool IsInCluster(uint32_t cluster, filepos_t pos) {
-		return FileposToCluster(pos) == cluster;
+		return SectorToCluster(pos / 512) == cluster;
 	}
 
 	// Find directory entry, or NULL if not found
@@ -148,5 +117,43 @@ protected:
 	bool LoadDataSector(uint8_t* buf, uint32_t sector);
 	bool LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sectors);
 };
+
+
+class FatFile: public File {
+protected:
+	friend class Fat;
+
+	class Fat& _fat;			// File system this file is on
+
+	Vector<uint32_t> _clusters;	// File cluster list
+	filepos_t _size;			// File size, in bytes
+	filepos_t _pos;				// Current file position
+
+	uint32_t _buf_sec;			// Sector in buffer (NOT_FOUND if none)
+	uint8_t _sector[512];		// Sector buffer
+
+	FatFile(Fat& fs) : _fat(fs), _pos(0), _buf_sec(NOT_FOUND) { }
+	~FatFile() { }
+public:
+	uint32_t GetSize() const { return _size; }
+	bool Seek(filepos_t new_pos);
+	filepos_t Tell() const { return _pos; }
+	uint Read(void* buf, uint numbytes);
+	uint Read(Deque<uint8_t>& buf, uint numbytes);
+	uint Write(const void* buf, uint numbytes);
+	void Close();
+private:
+	bool BufferSector(uint32_t sector);
+
+	uint32_t FileposToCluster(filepos_t pos) const {
+		return _clusters[_fat.SectorToCluster(pos / 512)] - 2;
+	}
+
+	uint32_t FileposToSector(filepos_t pos) const {
+		return _fat.ClusterToSector(FileposToCluster(pos)) +
+			((pos / 512) & (_fat.ClusterToSector(1) - 1));
+	}
+};
+
 
 #endif // __FAT_H__

@@ -278,10 +278,10 @@ uint FatFile::Read(void* buf, uint numbytes)
 {
 	uint result = 0;
 
-	numbytes = min(_size, _pos + numbytes) - numbytes;
+	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
 	while (numbytes) {
-		if (!BufferSector(_fat.FileposToSector(_pos))) break;
+		if (!BufferSector(FileposToSector(_pos))) break;
 
 		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
 		assert(tocopy);
@@ -291,6 +291,7 @@ uint FatFile::Read(void* buf, uint numbytes)
 		_pos += tocopy;
 		(uint8_t*&)buf += tocopy;
 		result += tocopy;
+		numbytes -= tocopy;
 	}
 
 	return result;
@@ -301,10 +302,10 @@ uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 {
 	uint result = 0;
 
-	numbytes = min(_size, _pos + numbytes) - numbytes;
+	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
 	while (numbytes) {
-		if (!BufferSector(_fat.FileposToSector(_pos)))  break;
+		if (!BufferSector(FileposToSector(_pos)))  break;
 
 		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
 		assert(tocopy);
@@ -313,6 +314,7 @@ uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 
 		_pos += tocopy;
 		result += tocopy;
+		numbytes -= tocopy;
 	}
 
 	return result;
@@ -334,8 +336,7 @@ void FatFile::Close()
 bool FatFile::BufferSector(uint32_t sector)
 {
 	if (_buf_sec == NOT_FOUND || _buf_sec != sector) {
-		if (_fat.LoadDataSector(_sector, _clusters[_fat.SectorToCluster(sector)] +
-								(sector & (_fat.ClusterToSector(1)-1)))) {
+		if (_fat.LoadDataSector(_sector, sector)) {
 			_buf_sec = sector;
 		} else {
 			// I/O error

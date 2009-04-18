@@ -16,7 +16,18 @@ int	main()
 
 	_fat.Mount(0, false);
 
-	file_t file = _fat.Open("test.txt");
+	File* file = _fat.Open("test.txt");
+
+	if (file) {
+		uint8_t* buffer = (uint8_t*)xmalloc(100);
+
+		uint len = file->Read(buffer, 99);
+		buffer[len] = 0;
+		
+		DMSG("test.txt: \"%s\"", buffer);
+		xfree(buffer);
+
+	}
 
 	abort();
 }
