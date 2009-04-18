@@ -108,7 +108,7 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 	const uint namepart = min<uint>(dotpos, 8);
 	memset(namebuf, ' ', sizeof namebuf);
 	memcpy(namebuf, name.CStr(), namepart);
-	memcpy(namebuf + 8, name.CStr() + dotpos, min<uint>(namelen - dotpos, 3));
+	memcpy(namebuf + 8, name.CStr() + dotpos + 1, min<uint>(namelen - dotpos, 3));
 
 	for (uint i = 0; i < 11; ++i)
 		namebuf[i] = Util::ToUpper(namebuf[i]);
@@ -120,8 +120,8 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 		if (d->IsVolume()) continue;
 
 		for (uint i = 0; ; ++i) {
-			if (namebuf[i] != Util::ToUpper(d->name[i]))  break;
-			if (i == 11)  return d;
+			if (namebuf[i] != d->name[i])  break;
+			if (i == 10)  return d;
 		}
 	}
 
@@ -207,6 +207,7 @@ bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sector
 	while (num_sectors--) {
 		if (!_dev.ReadSector(_cluster0 + sector, buf + buf.Grow(512)))
 			return false;
+		++sector;
 	}
 	return true;
 }
@@ -256,7 +257,7 @@ FatFile* Fat::Open(const String& path)
 
 	file = new FatFile(*this);
 	file->_size = file_size;
-	file->_clusters.Reserve(SectorToCluster(file_size / 512));
+	file->_clusters.Reserve(SectorToCluster((file_size + 511) / 512) + 1);
 
 	if (!GetFileClusters(file->_clusters, walk))
 		delete exch<FatFile*>(file, NULL);

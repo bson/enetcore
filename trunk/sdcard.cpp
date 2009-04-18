@@ -87,7 +87,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 
 	const uint pos = 512 * secnum;
 
-	bool ok;
+	bool crcok;
 	uint tries = 4;				// Retry a few times on CRC error
 	do {
 		SendCMD(17, pos >> 16, pos >> 8, pos);
@@ -101,11 +101,10 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 		_spi.ReadBuffer(buf, 512);
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
-		const uint32_t crc16 = Crc16::Checksum(buf, 512);
-//		ok = (uint16_t)crc32 == crc_sent;
-		ok = true;
+		const uint16_t crc16 = Crc16::Checksum(buf, 512);
+		crcok = (uint16_t)crc16 == crc_sent;
 	}
-	while (!ok && --tries);
+	while (!crcok && --tries);
 
-	return ok;
+	return crcok;
 }
