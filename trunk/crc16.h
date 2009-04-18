@@ -6,6 +6,7 @@
 
 class Crc16 {
 	uint16_t _crc;
+	static const uint16_t _crc_table[256];
 public:
 	Crc16() : _crc(0x8408) { }
 	void Update(uint8_t byte);
