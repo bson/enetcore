@@ -304,20 +304,7 @@ uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 
 	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
-	while (numbytes) {
-		if (!BufferSector(FileposToSector(_pos)))  break;
-
-		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
-		assert(tocopy);
-
-		buf.PushBack(_sector + (_pos & 511), tocopy);
-
-		_pos += tocopy;
-		result += tocopy;
-		numbytes -= tocopy;
-	}
-
-	return result;
+	return Read(buf + buf.Grow(numbytes), numbytes);
 }
 
 
