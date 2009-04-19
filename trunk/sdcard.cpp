@@ -56,7 +56,7 @@ bool SDCard::Init()
 		const uint8_t response = (r1 != 0xff ? r1 : r2);
 
 		if (response != 0xff && (response & ~1)) {
-			console("SD Card: command error %x", response);
+			DMSG("SD Card: command error %x", response);
 		} else if (!response) {
 			_initialized = true;
 		} else {
