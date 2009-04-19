@@ -53,6 +53,7 @@ bool Fat::Mount(uint partnum, bool rw)
 		_fat_num_sect = LE16(tmp);
 	}
 
+	// This is for FAT32; the value is calculated later for FAT16
 	memcpy(&_root_dir_clus, sector + VID_Root_Dir_Clus, sizeof _root_dir_clus);
 	_root_dir_clus = LE32(_root_dir_clus);
 
@@ -177,7 +178,7 @@ bool Fat::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 bool Fat::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
 {
-	uint32_t sector1 = ClusterToSector(cluster);
+	uint32_t sector1 = ClusterToSector(cluster - 2);
 	for (uint32_t sector = sector1; sector < sector1 + ClusterToSector(1); ++sector) {
 		if (!LoadDataSector(buffer + buffer.Grow(512), sector))
 			return false;
