@@ -1,6 +1,9 @@
-Fix FAT32 file Open
-
-Fix version 2 card init sequence
+Add Gpio abstraction
+- Gpio(base)[3]
+- With Pin proxy: has 8-bit pin #, Gpio #
+- Make Spi accept Pin&
+- Add abstract Output
+- Add PinOutput, PinNegOutput
 
 Add SD card detect
 
@@ -9,11 +12,6 @@ Fix stack back traces
 Let Ethernet specify MTU - get rid of random constants
 
 Add Route::_pmtu
-
-Add Gpio abstraction
-- Gpio(base)[3]
-- With Pin proxy: has 8-bit pin #, Gpio #
-- Make Spi accept Pin&
 
 Make FAT16 use half the space of FAT32 for cluster list
 

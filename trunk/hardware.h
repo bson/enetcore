@@ -201,6 +201,11 @@ enum { TIMER0_BASE = 0xe0004000,
 };
 
 
+enum { GPIO0_BASE = 0xe0028000,
+	   GPIO1_BASE = 0xe0028010
+};
+
+
 #define __irq   __attribute__((interrupt("IRQ")))
 #define __fiq   __attribute__((interrupt("FIQ")))
 #define __abort   __attribute__((interrupt("ABT")))

@@ -2,6 +2,7 @@
 
 #include "lpc22xx.h"
 
+#include "gpio.h"
 #include "serial.h"
 #include "timer.h"
 #include "thread.h"
@@ -14,6 +15,9 @@
 Thread* _main_thread;
 void* _main_thread_stack;
 void* _intr_thread_stack;
+
+
+Gpio _gpio[2];
 
 
 extern "C" {
@@ -212,6 +216,9 @@ void hwinit()
 	// WST1 >= (135+20)/17 - 2 >= 7.11 (8)
 	// WST2 >= (110-17+5)/17 >= 5.76 (6)
 	BCFG2 = BCFGVAL(0, 8, 6, 0, 0, 1, 1);
+
+	_gpio[0].Init(GPIO0_BASE, 0);
+	_gpio[1].Init(GPIO0_BASE, 1);
 
 	// Enable UARTs as output, SPI0 on pins
 	PINSEL0 = 0b00000000000001010101010100000101;
