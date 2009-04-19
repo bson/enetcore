@@ -129,17 +129,24 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 			if (result != 0xff) break;
 			result = _spi.Read();
 		}
-		if (result == 0xff) return false;
+		if (result == 0xff) {
+			DMSG("SD: no response to read command");
+			return false;
+		}
 
-		// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 250 usec)
-		const uint8_t b1 = _spi.ReadReply(250, 40);
-		if (result || b1 != 0xfe) return false;
+		// Wait up to 100 msec for a reply, retrying in 250usec intervals (400 times 250 usec)
+		const uint8_t b1 = _spi.ReadReply(250, 400);
+		if (result || b1 != 0xfe) {
+			DMSG("SD: Read Command failed: %x, %x", result, b1);
+			return false;
+		}
 
 		_spi.ReadBuffer(buf, 512);
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
 		const uint16_t crc16 = Crc16::Checksum(buf, 512);
 		crcok = (uint16_t)crc16 == crc_sent;
+		if (!crcok) DMSG("SD: CRC error, sector 0x%x", secnum);
 	}
 	while (!crcok && --tries);
 
