@@ -141,7 +141,7 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 	Cluster clus = cluster1;
 
-	while (clus && clus < (Cluster)0xfffffff0) {
+	while (clus && clus < (Cluster)0x0ffffff0) {
 		const uint32_t next_fatsec = clus / NUM_FAT_PER_SEC;
 		if (next_fatsec >= _fat_num_sect) goto done;
 
@@ -158,10 +158,10 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 	// If we ran into anything other than an end-of-chain marker we have
 	// a corrupt FAT.
-	success = clus >= (Cluster)0xfffffff8;
+	success = clus >= (Cluster)0x0ffffff8;
 
 done:
-	if (!success)  console("Corrupt FAT/DIR entry for cluster %x", (uint)clus);
+	if (!success)  console("Corrupt FAT/DIR entry: end of chain 0x%08x", (uint)clus);
 
 	xfree(fat);
 	return success;

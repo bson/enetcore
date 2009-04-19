@@ -45,7 +45,7 @@ void SDCard::Init()
 	console("Version %u SD Card", (int)_version2 + 1);
 
 	for (uint i = 0; i < 100; ++i) {
-		if (!SendACMD(41)) {
+		if (!SendACMD(41) || !_spi.Read()) {
 			_initialized = true;
 			break;
 		}
@@ -90,8 +90,11 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 	bool crcok;
 	uint tries = 4;				// Retry a few times on CRC error
 	do {
-		SendCMD(17, pos >> 16, pos >> 8, pos);
-		const uint8_t result = _spi.Read();
+		uint8_t result = SendCMD(17, pos >> 16, pos >> 8, pos);
+		for (uint i = 0; i < 10; ++i) {
+			if (result != 0xff) break;
+			result = _spi.Read();
+		}
 		if (result == 0xff) return false;
 
 		// Wait up to 10 msec for a reply, retrying in 250usec intervals (40 times 250 usec)
