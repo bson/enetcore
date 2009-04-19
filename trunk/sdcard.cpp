@@ -43,13 +43,18 @@ bool SDCard::Init()
 	_sdhc = false;
 	_version2 = value != 5;		// 5: Invalid command - not a 2.00 card
 
+	// The SD Card Simplified Physical Layer Spec V2.00 includes a CMD58 (read OCR)
+	// during initialization.  While optional prior to ACMD41, we transmit it just
+	// in case some cards require it to advance state during init.  We don't really
+	// care about the result - it mainly specifies operating voltages, and we have
+	// no control over those.
 	const uint64_t r3 = SendCMDR(5, 58);
 	if ((r3 >> 32) != 1)  return false; // Card should be initializing at this point
 
 	const uint32_t ocr = (uint32_t)r3;
-	DMSG("SD card OCR=0x%x", ocr);
+//	DMSG("SD card OCR=0x%x", ocr);
 
-	const Time deadline = Time::Now() + Time::FromMsec(250);
+	const Time deadline = Time::Now() + Time::FromMsec(1500); // 1.5sec limit is somewhat arbitrary
 	while (!_initialized && Time::Now() < deadline) {
 		const uint8_t r1 = SendACMD(41, 0x4000); // 0x40000000 = host supports high capacity
 		const uint8_t r2 = _spi.Read(); // Some devices aren't quick enough to respond immediately
