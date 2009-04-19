@@ -69,13 +69,7 @@ bool SDCard::Init()
 		if ((r3 >> 32) != 0)  return false; // R1 part of R3: should no longer be initializing
 
 		const uint32_t ocr = (uint32_t)r3;
-		if (ocr & 0x80000000) {
-			// Second chance - some SDHC cards appear to never respond to ACMD 41 with idle=0
-			_initialized = true;
-			_sdhc = (ocr & 0x40000000) != 0;
-		}
-
-		if (_initialized && _sdhc)  DMSG("SDHC card");
+		if (ocr & 0x80000000)  _sdhc = (ocr & 0x40000000) != 0;
 	}
 
 
