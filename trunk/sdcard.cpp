@@ -119,7 +119,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 {
 	Mutex::Scoped L(_lock);
 
-	const uint pos = 512 * secnum;
+	const uint pos = _sdhc ? secnum : 512 * secnum;
 
 	bool crcok;
 	uint tries = 4;				// Retry a few times on CRC error
