@@ -178,6 +178,9 @@ bool Fat::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 bool Fat::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
 {
+	assert(cluster >= 2);
+	assert(cluster < 0x0ffffff0);
+
 	uint32_t sector1 = ClusterToSector(cluster - 2);
 	for (uint32_t sector = sector1; sector < sector1 + ClusterToSector(1); ++sector) {
 		if (!LoadDataSector(buffer + buffer.Grow(512), sector))
