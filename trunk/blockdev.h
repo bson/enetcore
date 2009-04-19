@@ -4,7 +4,7 @@
 
 class BlockDev {
 public:
-	virtual void Init() = 0;
+	virtual bool Init() = 0;
 	virtual uint GetSectorSize() const = 0;
 	virtual bool ReadSector(uint secnum, void* buf) = 0;
 	virtual bool WriteSector(uint secnum, const void* buf) = 0;

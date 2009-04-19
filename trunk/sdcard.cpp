@@ -8,18 +8,18 @@ SDCard _sd(_spi0);
 
 SDCard::SDCard(SPI& spi) : _spi(spi) { }
 
-void SDCard::Init()
+bool SDCard::Init()
 {
 	Mutex::Scoped L(_lock);
 
-	if (_initialized) return;
+	if (_initialized) return true;
 
 	_spi.Init();
 	_spi.SetSpeed(100000);
 
 	_spi.Select();
 	
-	DMSG("SDCard: reset");
+	DMSG("SDCard: init");
 
 	uint8_t status = 0xff;
 
@@ -30,21 +30,21 @@ void SDCard::Init()
 		abort();
 		DMSG("SDCard: CMD0 failed - missing card?");
 		_spi.Deselect();
-		return;
+		return false;
 	}
 	
 	const uint8_t value = SendCMD(8, 0, 1, 0xaa);
 	if (value == 0xff) {
 		DMSG("SDCard: initialization failed");
 		_spi.Deselect();
-		return;
+		return false;
 	}
 
 	_version2 = value != 5;		// 5: Invalid command - not a 2.00 card
 
-	console("Version %u SD Card", (int)_version2 + 1);
+	console("Found SD%s Card in slot", _version2 ? "HC" : "");
 
-	for (uint i = 0; i < 100; ++i) {
+	for (uint i = 0; i < 500; ++i) {
 		if (!SendACMD(41) || !_spi.Read()) {
 			_initialized = true;
 			break;
@@ -56,6 +56,8 @@ void SDCard::Init()
 	} else {
 		_spi.SetSpeed(24000000);
 	}
+
+	return _initialized;
 }
 
 

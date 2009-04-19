@@ -2,6 +2,8 @@ Fix FAT32 file Open
 
 Fix version 2 card init sequence
 
+Add SD card detect
+
 Fix stack back traces
 
 Let Ethernet specify MTU - get rid of random constants

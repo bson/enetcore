@@ -14,7 +14,9 @@ class SDCard: public BlockDev {
 
 public:
 	SDCard(SPI& spi);
-	void Init();
+
+	// Try initializing card, if any
+	bool Init();
 	
 	uint GetSectorSize() const { return 512; }
 	bool ReadSector(uint secnum, void* buf);
