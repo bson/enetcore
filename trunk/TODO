@@ -1,9 +1,6 @@
-Add Gpio abstraction
-- Gpio(base)[3]
-- With Pin proxy: has 8-bit pin #, Gpio #
-- Make Spi accept Pin&
-- Add abstract Output
-- Add PinOutput, PinNegOutput
+GPIO:
+- Make sdcard take Output for SSEL
+- Make fat take Output for activity light
 
 Add SD card detect
 
