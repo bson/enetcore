@@ -226,7 +226,7 @@ void* memmove(void* s1, const void* s2, size_t n)
 	// s1 > s2
 	asm volatile("add %0, %0, %2; add %1, %1, %2;"
 				 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; subs %2, %2, #1; bne 1b"
-				 : : "r" (s1), "r" (s2), "r" (n) : "r2");
+				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
 
 	return s1;
 }
@@ -237,7 +237,7 @@ char* strchr(const char* s, int c)
 	asm volatile("sub %0, %0, #1;"
 				 "1: ldrb r2, [%0,#1]!; cmp r2, #0; cmpne r2, %1; bne 1b;"
 				 "cmp r2, #0; moveq %0, #0"
-				 : "=r" (s) : "0" (s), "r" (c) : "r2");
+				 : "=r" (s) : "0" (s), "r" (c) : "r2", "cc");
 	return (char*)s;
 
 #if 0
@@ -256,7 +256,7 @@ char* strrchr(const char* s, int c)
 	asm volatile("sub %1, %1, #1; mov %0, #0;"
 				 "1: ldrb r2, [%1,#1]!; cmp r2, %2; moveq %0, %1;"
 				 "cmp r2, %2; bne 1b"
-				 : "=&r" (last) : "r" (s), "r" (c) : "r2");
+				 : "=&r" (last) : "r" (s), "r" (c) : "r2", "cc");
 	return last;
 #if 0
 	const char* last = NULL;
