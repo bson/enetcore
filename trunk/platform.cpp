@@ -219,13 +219,13 @@ int memcmp(const void* s1, const void* s2, size_t n)
 
 void* memmove(void* s1, const void* s2, size_t n)
 {
-	if (s1 == s2) return s1;
+	if (!n || s1 == s2) return s1;
 
 	if (s1 < s2)  return memcpy(s1, s2, n);
 
 	// s1 > s2
 	asm volatile("add %0, %0, %2; add %1, %1, %2;"
-				 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; sub %2, %2, #1; bne 1b"
+				 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; subs %2, %2, #1; bne 1b"
 				 : : "r" (s1), "r" (s2), "r" (n) : "r2");
 
 	return s1;
