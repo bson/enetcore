@@ -4,17 +4,20 @@
 
 
 SPI _spi0(SPI0_BASE);
+SPI _spi1(SPI1_BASE);
 
 
 SPI::SPI(uint32_t base)
 {
 	_base = (volatile uint8_t*)base;
+	_ssel = NULL;
 }
 
 
-void SPI::Init()
+void SPI::Init(Output* ssel)
 {
 	Deselect();
+	_ssel = ssel;
 }
 
 
@@ -24,46 +27,46 @@ void SPI::SetSpeed(uint hz)
 
 	const uint scaler = PCLK/hz & ~1;
 	const uint prescaler = max(min(scaler, (uint)254), (uint)8);
-	_base[SPCCR] = prescaler;
+	_base[SPI_SPCCR] = prescaler;
 
 	DMSG("SPI: Prescaler = %u, clock = %u kHz", prescaler, PCLK/prescaler/1000);
 
 	// SPIE=1, LSBF=0, MSTR=1, CPOL=1, CPHA=0
-	_base[SPCR] = 0b00110000;
+	_base[SPI_SPCR] = 0b00110000;
 
 	for (uint i = 0; i < 20; ++i) {
-		_base[SPDR] = 0xff;
-		while (!(_base[SPSR] & 0x80)) ;
+		_base[SPI_SPDR] = 0xff;
+		while (!(_base[SPI_SPSR] & 0x80)) ;
 	}
 
-	_base[SPCR] = 0b10110000;
+	_base[SPI_SPCR] = 0b10110000;
 }
 
 
 void SPI::Select()
 {
-	IO0CLR = 1 << 10;
+	if (_ssel) _ssel->Raise();
 }
 
 
 void SPI::Deselect()
 {
-	IO0SET = 1 << 10;
+	if (_ssel) _ssel->Lower();
 }
 
 
 uint8_t SPI::Read(uint8_t code)
 {
 	// Xmit
-	_base[SPDR] = code;
+	_base[SPI_SPDR] = code;
 
 	// Wait for clocking to finish
-	while (!(_base[SPSR] & 0x80)) continue;
+	while (!(_base[SPI_SPSR] & 0x80)) continue;
 
-	const bool ok = (_base[SPSR] & 0b11111000) == 0x80;
+	const bool ok = (_base[SPI_SPSR] & 0b11111000) == 0x80;
 
 	// Always read, to clear SPSR SPIF (0x80) flag
-	const uint8_t tmp =  _base[SPDR];
+	const uint8_t tmp =  _base[SPI_SPDR];
 
 	return ok ? tmp : 0xff;
 }

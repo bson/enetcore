@@ -177,6 +177,7 @@
 #define I2C_I2SCLL     (*((volatile unsigned short*) 0xE001C014))
 #define I2C_I2CONCLR   (*((volatile unsigned char *) 0xE001C018))
 
+#if 0
 /* SPI (Serial Peripheral Interface) */
 #define SPI_SPCR       (*((volatile unsigned char *) 0xE0020000))
 #define SPI_SPSR       (*((volatile unsigned char *) 0xE0020004))
@@ -186,6 +187,7 @@
 #define SPI_SPTSR      (*((volatile unsigned char *) 0xE0020014))
 #define SPI_SPTOR      (*((volatile unsigned char *) 0xE0020018))
 #define SPI_SPINT      (*((volatile unsigned char *) 0xE002001C))
+#endif
 
 /* Real Time Clock */
 #define RTC_ILR        (*((volatile unsigned char *) 0xE0024000))

@@ -1,7 +1,4 @@
 #include "enetkit.h"
-
-#include "lpc22xx.h"
-
 #include "gpio.h"
 #include "serial.h"
 #include "timer.h"
@@ -18,6 +15,9 @@ void* _intr_thread_stack;
 
 
 Gpio _gpio[2];
+
+PinNegOutput _led;
+PinNegOutput _ssel0;
 
 
 extern "C" {
@@ -36,9 +36,9 @@ void busy_wait () NAKED;
 void fault0(uint num)
 {
 	for (uint n = num; n; --n) {
-		IO1CLR = 0x00800000;
+		_led.Raise();
 		for (int j = 0; j < 100000; j++ ) continue;
-		IO1SET = 0x00800000;
+		_led.Lower();
 		if (num)
 			for (int j = 0; j < 800000; j++ ) continue;
 	}
@@ -226,20 +226,19 @@ void hwinit()
 	// Enable CS2 on P3.25
 	PINSEL2 = (PINSEL2 & ~(0b11 << 14)) | (0b01 << 14);
 
-	IO1DIR |= 0x00800000;	 // Make P1.23 an output, everything else stays input
+	_gpio[1].MakeOutput(23);	// P1.23 is an output
+	_led = _gpio[1].GetPin(23);
+	_led.Lower();
+	_led.Raise();
 
-	IO1SET =  0x00800000;	 // led off
-	IO1CLR =  0x00800000;	// led on
-
-	IO0DIR |= 0x80;				   // GPIO 0.7 is output (soft SSEL)
-	IO0DIR |= 0x40 | 0x10;		   // GPIO 0.4 (SCK), 0.6 (MOSI) are out
-	IO0DIR &= ~0x20;			   // GPIO 0.5 (MISO) is in
-	IO0DIR |= 1 << 10;			   // GPIO 0.10 is output (CARD_CS)
+	_gpio[0].MakeOutputs(0b10011010000);// SSEL0, MOSI0, SCK0, soft SSEL0 (P0.10)
+	_gpio[0].MakeInput(5);		// MISO0
+	_ssel0 = _gpio[0].GetPin(10);
 
 	// Enable SPI1, AIN0
 	PINSEL1 = 0b00000000001000000000000010101000;
-	IO1DIR |= 0b1101 << 17;		// SCK1, MOSI1, SSEL1 are out
-	IO1DIR &= ~(0b0010 << 17);		// MISO1 is in
+	_gpio[1].MakeOutputs(0b1101 << 17);	// SCK1, MOSI1, SSEL1 are outputs
+	_gpio[1].MakeInput(18);				// MISO1 is input
 
 	// Grab 32 bytes from AIN0
 	uint8_t buf[32];
@@ -309,6 +308,9 @@ void hwinit()
 		 _main_thread_stack, sp, _intr_thread_stack);
 
 	DMSG("Random uint: 0x%x", Util::Random<uint>());
+
+	_spi0.Init(&_ssel0);
+	_spi1.Init();
 
 	_eth0.Initialize();
 

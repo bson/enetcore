@@ -2,14 +2,6 @@
 #define __GPIO_H__
 
 
-enum {
-	IOPIN = 0,
-	IOSET = 1,
-	IODIR = 2,
-	IOCLR = 3
-};
-
-
 extern class Gpio _gpio[2];
 
 class Gpio {
@@ -29,28 +21,28 @@ public:
 #endif
 	}
 	void MakeInput(uint8_t pin) {
-		_base[IODIR] &= ~(1 << pin);
+		_base[GPIO_IODIR] &= ~(1 << pin);
 #ifdef DEBUG
 		_inputs |= 1 << pin;
 		_outputs &= ~(1 << pin);
 #endif
 	}
 	void MakeInputs(uint32_t mask) {
-		_base[IODIR] &= ~mask;
+		_base[GPIO_IODIR] &= ~mask;
 #ifdef DEBUG
 		_inputs |= mask;
 		_outputs &= ~mask;
 #endif
 	}
 	void MakeOutput(uint8_t pin) {
-		_base[IODIR] |= 1 << pin;
+		_base[GPIO_IODIR] |= 1 << pin;
 #ifdef DEBUG
 		_outputs |= 1 << pin;
 		_inputs &= ~(1 << pin);
 #endif
 	}
 	void MakeOutputs(uint32_t mask) {
-		_base[IODIR] |= mask;
+		_base[GPIO_IODIR] |= mask;
 #ifdef DEBUG
 		_outputs |= mask;
 		_inputs &= ~mask;
@@ -60,19 +52,19 @@ public:
 #ifdef DEBUG
 		assert(_outputs & (1 << pin));
 #endif
-		_base[IOSET] |= 1 << pin;
+		_base[GPIO_IOSET] |= 1 << pin;
 	}
 	void ResetPin(uint8_t pin) {
 #ifdef DEBUG
 		assert(_outputs & (1 << pin));
 #endif
-		_base[IOCLR] |= 1 << pin;
+		_base[GPIO_IOCLR] |= 1 << pin;
 	}
-	bool GetPin(uint8_t pin) {
+	bool TestPin(uint8_t pin) {
 #ifdef DEBUG
 		assert(_inputs & (1 << pin));
 #endif
-		return (_base[IOPIN] & (1 << pin)) != 0;
+		return (_base[GPIO_IOPIN] & (1 << pin)) != 0;
 	}
 
 	// Self-contained Pin
@@ -80,6 +72,7 @@ public:
 		uint8_t _portnum;
 		uint8_t _pin;
 	public:
+		Pin() : _portnum(0), _pin(0) { }
 		Pin(uint8_t port, uint8_t pin) : _portnum(port), _pin(pin) { }
 		Pin(const Pin& arg) : _portnum(arg._portnum), _pin(arg._pin) { }
 		Pin& operator=(const Pin& arg) {
@@ -89,7 +82,7 @@ public:
 
 		void Set() { _gpio[_portnum].SetPin(_pin); }
 		void Reset() { _gpio[_portnum].ResetPin(_pin); }
-		bool Get() { return _gpio[_portnum].GetPin(_pin); }
+		bool Test() { return _gpio[_portnum].TestPin(_pin); }
 	};
 
 	const Pin GetPin(uint8_t pin) const { return Pin(_portnum, pin); }
@@ -104,23 +97,27 @@ public:
 };
 
 
-class PinOutput: public Gpio::Pin {
+class PinOutput: public Gpio::Pin,
+				 public Output {
 public:
+	PinOutput() { }
 	PinOutput(const Gpio::Pin& pin) : Gpio::Pin(pin) { }
+	PinOutput(const PinOutput& arg) : Gpio::Pin(arg) { }
+	PinOutput& operator=(const PinOutput& arg) { new (this) PinOutput(arg); }
 	void Raise() { Set(); }
 	void Lower() { Reset(); }
-private:
-	PinOutput();				// Disabled
 };
 
 
-class PinNegOutput: public Gpio::Pin {
+class PinNegOutput: public Gpio::Pin,
+					public Output {
 public:
+	PinNegOutput() { }
 	PinNegOutput(const Gpio::Pin& pin) : Gpio::Pin(pin) { }
+	PinNegOutput(const PinNegOutput& arg) : Gpio::Pin(arg) { }
+	PinNegOutput& operator=(const PinNegOutput& arg) { new (this) PinNegOutput(arg); }
 	void Raise() { Reset(); }
 	void Lower() { Set(); }
-private:
-	PinNegOutput();				// Disabled
 };
 
 

@@ -3,7 +3,7 @@
 
 #include "assert.h"
 
-#include "lpc22xx.h"
+ #include "lpc22xx.h"
 
 INLINE_ALWAYS uint DisableInterrupts() {
 	uint prev;
@@ -83,7 +83,18 @@ enum { CCLK = 14745600 };
 enum { PLL_MULT = 4 };
 enum { PCLK = CCLK * PLL_MULT };
 
+
 // Base addresses for peripherals
+
+enum { SPI0_BASE = 0xe0020000,
+	   SPI1_BASE = 0xe0030000,
+	   SPI_SPCR = 0,
+	   SPI_SPSR = 4,
+	   SPI_SPDR = 8,
+	   SPI_SPCCR = 0xc,
+	   SPI_SPINT = 0x1c
+};
+
 enum { UART0_BASE = 0xe000c000,
 	   UART1_BASE = 0xe0010000,
 	   UART_RBR = 0,
@@ -202,7 +213,11 @@ enum { TIMER0_BASE = 0xe0004000,
 
 
 enum { GPIO0_BASE = 0xe0028000,
-	   GPIO1_BASE = 0xe0028010
+	   GPIO1_BASE = 0xe0028010,
+	   GPIO_IOPIN = 0,
+	   GPIO_IOSET = 1,
+	   GPIO_IODIR = 2,
+	   GPIO_IOCLR = 3
 };
 
 

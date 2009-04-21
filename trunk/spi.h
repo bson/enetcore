@@ -2,28 +2,19 @@
 #define __SPI_H__
 
 #include "mutex.h"
+#include "gpio.h"
 
-
-#define SPI0_BASE 0xe0020000
-// #define SPI1_BASE 0xe0030000
-
-enum {
-	SPCR = 0,
-	SPSR = 4,
-	SPDR = 8,
-	SPCCR = 0xc,
-	SPINT = 0x1c
-};
 
 class SPI {
 private:
 	volatile uint8_t* _base;
+	Output* _ssel;				// SSEL output or NULL if none
 
 public:
 
 	SPI(uint32_t base);
 
-	void Init();
+	void Init(Output* ssel = NULL);
 	void SetSpeed(uint hz);
 
 	void Select();
@@ -47,6 +38,6 @@ public:
 	bool WaitReady(uint interval, uint num_tries, uint8_t value);
 };
 
-extern SPI _spi0;
+extern SPI _spi0, _spi1;
 
 #endif // __SPI_H__

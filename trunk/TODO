@@ -1,4 +1,5 @@
 GPIO:
+- Move all GPIO into Gpio abstraction
 - Make sdcard take Output for SSEL
 - Make fat take Output for activity light
 
@@ -46,3 +47,5 @@ ethernet Mac address.  See if we can set aside a small internet
 flash sector in link.cmd.
 
 Move arm-specific stuff into arm.cpp, arm.h
+
+Eliminate dependency on lpc22xx.h
