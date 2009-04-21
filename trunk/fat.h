@@ -156,4 +156,6 @@ private:
 };
 
 
+extern Fat _fat;
+
 #endif // __FAT_H__

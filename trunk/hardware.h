@@ -230,8 +230,17 @@ enum { GPIO0_BASE = 0xe0028000,
 
 typedef void (*IRQHandler)();
 
+
 extern "C" {
-	void Unexpected_Interrupt() __irq NAKED;
+void Unexpected_Interrupt() __irq NAKED;
+void Data_Abort_Exception() __abort NAKED;
+void Program_Abort_Exception() __abort NAKED;
+void Undef_Exception() __undef NAKED;
+void SWI_Trap() __swi NAKED;
+
+void feed();
+void busy_wait () NAKED;
+
 }
 
 // Vectored interrupt controller

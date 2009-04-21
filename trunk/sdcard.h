@@ -9,6 +9,8 @@
 class SDCard: public BlockDev {
 	Mutex _lock;
 	SPI& _spi;
+	Output* _drivelock;			// Removal lock (or warning light)
+	uint8_t _inuse;				// Use counter
 	bool _initialized:1;
 	bool _version2:1;
 	bool _sdhc:1;				// High capacity
@@ -16,12 +18,21 @@ class SDCard: public BlockDev {
 public:
 	SDCard(SPI& spi);
 
-	// Try initializing card, if any
+	// Try initializing SD card.
+	// Will reset the card into SPI mode.
+	// Returns true if card was found and it could be initialized.
 	bool Init();
 	
+	// Specify device lock
+	void SetLock(Output* lock);
+
 	uint GetSectorSize() const { return 512; }
 	bool ReadSector(uint secnum, void* buf);
 	bool WriteSector(uint secnum, const void* buf) { abort(); }
+
+	// Prevent media removal
+	void Retain();
+	void Release();
 
 private:
 	// Send SD CMD

@@ -5,8 +5,6 @@
 #include "fat.h"
 
 
-Fat _fat(_sd);
-
 int	main()
 {
 	_malloc_region.SetReserve(4096);

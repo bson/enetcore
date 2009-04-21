@@ -3,9 +3,6 @@
 #include "thread.h"
 
 
-Clock _clock;
-
-
 void Timer::SetResolution(uint8_t r)
 {
 	_resolution = r;

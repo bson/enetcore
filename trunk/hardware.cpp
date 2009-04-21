@@ -7,6 +7,8 @@
 #include "network.h"
 #include "ethernet.h"
 #include "util.h"
+#include "sdcard.h"
+#include "fat.h"
 
 
 Thread* _main_thread;
@@ -19,18 +21,15 @@ Gpio _gpio[2];
 PinNegOutput _led;
 PinNegOutput _ssel0;
 
+SDCard _sd(_spi0);
 
-extern "C" {
-void Unexpected_Interrupt() __irq NAKED;
-void Data_Abort_Exception() __abort NAKED;
-void Program_Abort_Exception() __abort NAKED;
-void Undef_Exception() __undef NAKED;
-void SWI_Trap() __swi NAKED;
+Fat _fat(_sd);
 
-void feed();
-void busy_wait () NAKED;
+SerialPort _uart0((volatile void*)UART0_BASE, 115200);
+SerialPort _uart1((volatile void*)UART1_BASE, 9600);
 
-}
+Clock _clock;
+
 
 
 void fault0(uint num)
@@ -329,6 +328,8 @@ void hwinit()
 	EXTINT = 4;				   // Clear any stray EINT2 flag
 	_vic.ClearPending();
 	_vic.EnableChannel(16);
+
+	_sd.SetLock(&_led);
 
 //	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }

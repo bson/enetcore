@@ -3,10 +3,6 @@
 #include "thread.h"
 
 
-SerialPort _uart0((volatile void*)UART0_BASE, 115200);
-SerialPort _uart1((volatile void*)UART1_BASE, 9600);
-
-
 void SerialPort::SetSpeed(uint speed, uint framing)
 {
 	const uint prescale = PCLK / speed / 16;

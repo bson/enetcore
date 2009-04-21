@@ -4,9 +4,22 @@
 #include "crc16.h"
 
 
-SDCard _sd(_spi0);
+SDCard::SDCard(SPI& spi) :
+	_spi(spi)
+{
+	_drivelock = NULL;
+	_inuse = 0;
+	_initialized = false;
+	_version2 = false;
+	_sdhc = false;
+}
 
-SDCard::SDCard(SPI& spi) : _spi(spi) { }
+
+void SDCard::SetLock(Output *lock)
+{
+	_drivelock = lock;
+}
+
 
 bool SDCard::Init()
 {
@@ -19,8 +32,6 @@ bool SDCard::Init()
 
 	_spi.Select();
 	
-	DMSG("SDCard: init");
-
 	uint8_t status = 0xff;
 
 	for (uint i = 0; i < 100 && status != 1; ++i)
@@ -39,6 +50,8 @@ bool SDCard::Init()
 		_spi.Deselect();
 		return false;
 	}
+
+	Retain();
 
 	_sdhc = false;
 	_version2 = value != 5;		// 5: Invalid command - not a 2.00 card
@@ -71,7 +84,8 @@ bool SDCard::Init()
 
 	if (_version2) {
 		const uint64_t r3 = SendCMDR(5, 58);
-		if ((r3 >> 32) != 0)  return false; // R1 part of R3: should no longer be initializing
+		if ((r3 >> 32) != 0) 
+			_initialized = false; // R1 part of R3: should no longer be initializing
 
 		const uint32_t ocr = (uint32_t)r3;
 		if (ocr & 0x80000000)  _sdhc = (ocr & 0x40000000) != 0;
@@ -84,6 +98,8 @@ bool SDCard::Init()
 	} else {
 		console("SDCard: initialization failed - card not ready");
 	}
+
+	Release();
 
 	return _initialized;
 }
@@ -156,4 +172,19 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 	while (!crcok && --tries);
 
 	return crcok;
+}
+
+
+void SDCard::Retain()
+{
+	Mutex::Scoped L(_lock);
+	if (!_inuse++ && _drivelock) _drivelock->Raise();
+}
+
+
+void SDCard::Release()
+{
+	Mutex::Scoped L(_lock);
+	assert(_inuse);
+	if (!--_inuse && _drivelock) _drivelock->Lower();
 }

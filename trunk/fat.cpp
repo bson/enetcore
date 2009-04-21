@@ -11,6 +11,8 @@ Fat::Fat(BlockDev& dev) :
 
 bool Fat::Mount(uint partnum, bool rw)
 {
+	_dev.Retain();
+
 	_rw = rw;
 
 	uint8_t* sector = (uint8_t*)xmalloc(514);
@@ -93,6 +95,8 @@ bool Fat::Mount(uint partnum, bool rw)
 
 failed:
 	xfree(sector);
+
+	_dev.Release();
 	return ok;
 }
 
@@ -219,6 +223,8 @@ bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sector
 
 FatFile* Fat::Open(const String& path)
 {
+	_dev.Retain();
+
 	Vector<String*> pathlist;
 	path.Split(pathlist, STR("/"));
 
@@ -268,6 +274,7 @@ FatFile* Fat::Open(const String& path)
 
 done:
 	pathlist.DeleteObjects();
+	if (!file) _dev.Release();
 	return file;
 }
 
@@ -318,6 +325,7 @@ uint FatFile::Write(const void* buf, uint numbytes)
 
 void FatFile::Close()
 {
+	_fat._dev.Release();
 	delete this;
 }
 
