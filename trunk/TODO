@@ -1,7 +1,7 @@
-GPIO:
-- Move all GPIO into Gpio abstraction
-- Make sdcard take Output for SSEL
-- Make fat take Output for activity light
+Improve SPI ReadBuffer
+- update prvious CRC during current SPI phase
+- when reading multiple sectors, use the read multiple command
+- analyze read latency variance and see if we can predict future latency
 
 Add SD card detect
 
