@@ -127,4 +127,56 @@ template <typename T> inline void move(T* dest, T* src, uint items) {
 }
 
 
+#if 0
+// XXX put this and varius memcpy stuff in arm_asm.s?
+
+INLINE_ALWAYS uint ReadLE16(const void* mem)
+{
+	uint tmp;
+	asm volatile (" ldrb %0, [%1], #1;"
+				  " ldrb r2, [%1];"
+				  " or %0, r2, lsl #8";
+				  : "=r" (tmp) : "r" (mem) : "r2" );
+	return tmp;
+}
+
+
+INLINE_ALWAYS uint ReadLE32(const void* mem)
+{
+	uint tmp;
+	asm volatile (" ldrb %0, [%1], #1;"
+				  " ldrb r2, [%1], #1;"
+				  " or %0, r2, lsl #8;"
+				  " ldrb r2, [%1], #1;"
+				  " or %0, r2, lsl #16;"
+				  " ldrb r2, [%1];"
+				  " or %0, r2, lsl #24"
+				  : "=r" (tmp) : "r" (mem) : "r2" );
+	return tmp;
+}
+
+
+INLINE_ALWAYS void StoreLE16(uint val, const void* mem)
+{
+	asm volatile (" strb %0, [%1], #1;"
+				  " mov %0, %0, lsr #8;"
+				  " strb %0, [%1]"
+				  : : "r" (val), "r" (mem) );
+}
+
+
+INLINE_ALWAYS void StoreLE32(uint val, const void* mem)
+{
+	asm volatile (" strb %0, [%1], #1;"
+				  " mov %0, %0, lsr #8;"
+				  " strb %0, [%1], #1;"
+				  " mov %0, %0, lsr #8;"
+				  " strb %0, [%1], #1;"
+				  " mov %0, %0, lsr #8;"
+				  " strb %0, [%1]"
+				  : : "r" (val), "r" (mem) );
+}
+
+#endif // 0
+
 #endif // __MEM_H__

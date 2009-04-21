@@ -35,7 +35,6 @@ Containers should have a _resize flag to enable/disable auto resizing.
 Inline-asm Ntohs/Ntohl, etc;
 - ReadBE32(), ReadBE16(), StoreBE16(), StoreBE32(),
 - ReadLE32(), ReadLE16(), StoreLE16(), StoreLE32(),
-- ReadSwap32(), ReadSwap16(), StoreSwap16(), StoreSwap32(),
 
 Optimize IP checksumming
 
@@ -45,3 +44,5 @@ Implement Watchdog
 Assign an internal flash sector for non-volatile params, like the
 ethernet Mac address.  See if we can set aside a small internet
 flash sector in link.cmd.
+
+Move arm-specific stuff into arm.cpp, arm.h
