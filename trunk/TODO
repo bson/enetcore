@@ -32,12 +32,12 @@ Thread features
 
 Containers should have a _resize flag to enable/disable auto resizing.
 
-Inline-asm Ntohs/Ntohl, etc
+Inline-asm Ntohs/Ntohl, etc;
+- ReadBE32(), ReadBE16(), StoreBE16(), StoreBE32(),
+- ReadLE32(), ReadLE16(), StoreLE16(), StoreLE32(),
+- ReadSwap32(), ReadSwap16(), StoreSwap16(), StoreSwap32(),
 
 Optimize IP checksumming
-
-Optimize memset, memcpy
-- If operands are 32 bit aligned, use 32-bit ops
 
 Implement Watchdog
 - Use hw watchdog

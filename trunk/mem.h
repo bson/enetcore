@@ -43,11 +43,7 @@ INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
 }
 
 
-INLINE_ALWAYS void* memcpy(void*  s1, const void* s2, size_t n) {
-	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
-				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
-	return s1;
-}
+void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
 
 INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
 	asm volatile("1: ldrb r2, [%1], #1; strb r2, [%1], #1; cmp r2, #0; bne 1b"

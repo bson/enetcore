@@ -198,7 +198,7 @@ int strncasecmp(const char* s1, const char* s2, size_t n)
 }
 
 
-int memcmp(const void* s1, const void* s2, size_t n) 
+int memcmp(const void* __restrict s1, const void* __restrict s2, size_t n) 
 {
 	const char* p1 = (const char*)s1;
 	const char* p2 = (const char*)s2;
@@ -217,18 +217,72 @@ int memcmp(const void* s1, const void* s2, size_t n)
 }
 
 
+inline void* memcpy(void* s1, const void* s2, size_t n)
+{
+	if (s1 == s2 || !n) return s1;
+
+	void* s0 = s1;
+
+	uint align1 = (uintptr_t)s1 & 3;
+	uint align2 = (uintptr_t)s2 & 3;
+
+	if (align1 && align1 == align2) {
+		// Equal misalignment - bring to alignment
+		asm volatile("1: ldrb r2, [%1], #1; strb r2, [%0], #1;"
+					 "   sub %2, %2, #1; tst %2, #3; bne 1b"
+					 : "=r" (s1), "=r" (s2)
+					 : "0" (s1), "1" (s2), "r" (n)
+					 : "r2", "memory", "cc");
+		n -= align1;
+		align1 = 0;
+		align2 = 0;
+	}
+
+	if (!align1 && !align2) {
+		// 32-bit aligned operands
+		asm volatile("1: subs %2, %2, #4; ldrge r2, [%1], #4; strge r2, [%0], #4; bgt 1b;"
+					 : "=r" (s1), "=r" (s2)
+					 : "0" (s1), "1" (s2), "r" (n)
+					 : "r2", "memory", "cc");
+		n &= 3;
+	}
+
+	// Byte copy remainder
+	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
+				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
+	return s0;
+}
+
+
+// Copy descending
+inline void* memcpyd(void* s1, const void* s2, size_t n)
+{
+	if (s1 == s2 || !n) return s1;
+
+	if (!((uintptr_t)s1 & 3) && !((uintptr_t)s2 & 3)) {
+		// 32-bit aligned operands.  First bring to alignment.
+		asm volatile("   add %0, %0, %2; add %1, %1, %2;"
+					 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!;"
+					 "   sub %2, %2, #1; tst %2, #3; bne 1b;"
+					 "2: ldr r2, [%1,#-1]!; str r2, [%0,#-1]!;"
+					 "   subs %2, %2, #4; bne 2b"
+					 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
+	} else {
+		asm volatile("add %0, %0, %2; add %1, %1, %2;"
+					 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; subs %2, %2, #1; bne 1b"
+					 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
+	}
+
+	return s1;
+}
+
+
 void* memmove(void* s1, const void* s2, size_t n)
 {
-	if (!n || s1 == s2) return s1;
-
 	if (s1 < s2)  return memcpy(s1, s2, n);
 
 	// s1 > s2
-	asm volatile("add %0, %0, %2; add %1, %1, %2;"
-				 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; subs %2, %2, #1; bne 1b"
-				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
-
-	return s1;
+	return memcpyd(s1, s2, n);
 }
 
 
@@ -288,12 +342,8 @@ char* strstr(const char* s1, const char* s2)
 // For gcc
 #ifdef USE_ASM_MEMOPS
 #undef memset
-#undef memcpy
 
 void* memset(void* b, int c, size_t n) { return xxmemset(b, c, n); }
-void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n) {
-	return xxmemcpy(s1, s2, n);
-}
 
 #endif
 
