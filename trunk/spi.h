@@ -33,9 +33,6 @@ public:
 
 	// Read a given number of bytes, appending to buffer
 	void ReadBuffer(void* buffer, uint len);
-
-	// Keep reading response until we get give value
-	bool WaitReady(uint interval, uint num_tries, uint8_t value);
 };
 
 extern SPI _spi0, _spi1;

@@ -107,14 +107,3 @@ void SPI::ReadBuffer(void* buffer, uint len)
 
 	while (len--) *p++ = Read();
 }
-
-
-bool SPI::WaitReady(uint interval, uint num_tries, uint8_t value)
-{
-	while (num_tries--) {
-		const uint8_t tmp = Read();
-		if (tmp == value)  return true;
-
-		udelay(interval);
-	}
-}
