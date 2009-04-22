@@ -3,6 +3,7 @@
 
 #include "mutex.h"
 #include "gpio.h"
+#include "crc16.h"
 
 
 class SPI {
@@ -31,8 +32,9 @@ public:
 	// was received.
 	uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff);
 
-	// Read a given number of bytes, appending to buffer
-	void ReadBuffer(void* buffer, uint len);
+	// Read a given number of bytes, appending to buffer, computing CRC on the fly.
+	// Returns false if we had an error during the receive
+	bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL);
 };
 
 extern SPI _spi0, _spi1;

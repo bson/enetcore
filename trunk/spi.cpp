@@ -101,9 +101,31 @@ uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
 }
 
 
-void SPI::ReadBuffer(void* buffer, uint len)
+bool SPI::ReadBuffer(void* buffer, uint len, Crc16* crc)
 {
+	if (!len) return true;
+
 	uint8_t* p = (uint8_t*)buffer;
 
-	while (len--) *p++ = Read();
+	bool ok = true;
+
+	_base[SPI_SPDR] = 0xff;
+
+	while (len--) {
+		uint spsr;
+		while (!((spsr = _base[SPI_SPSR]) & 0x80)) continue;
+
+		ok &= (spsr & 0xf8) == 0x80;
+
+		// Read received byte and start transmission of next if anything left
+		const uint tmp = _base[SPI_SPDR];
+		if (len) _base[SPI_SPDR] = 0xff;
+
+		// Then during SPI clocking store the value read and update
+		// running Crc
+		*p++ = tmp;
+		crc->Update(tmp);
+	}
+
+	return ok;
 }

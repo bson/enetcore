@@ -145,6 +145,8 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 	bool crcok;
 	uint tries = 4;				// Retry a few times on CRC error
 	do {
+		const Time rdstart = Time::Now();
+
 		uint8_t result = SendCMD(17, pos >> 16, pos >> 8, pos);
 		for (uint i = 0; i < 10; ++i) {
 			if (result != 0xff) break;
@@ -161,12 +163,16 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 			DMSG("SD: Read Command failed: %x, %x", result, b1);
 			return false;
 		}
+		DMSG("SD read: %u usec", (uint)(Time::Now() - rdstart).GetUsec());
 
-		_spi.ReadBuffer(buf, 512);
+		const Time txstart = Time::Now();
+		Crc16 crc16;
+		_spi.ReadBuffer(buf, 512, &crc16);
+
+		DMSG("SD sector transfer: %u usec", (uint)(Time::Now() - txstart).GetUsec());
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
-		const uint16_t crc16 = Crc16::Checksum(buf, 512);
-		crcok = (uint16_t)crc16 == crc_sent;
+		crcok = (uint16_t)crc16.GetValue() == crc_sent;
 		if (!crcok) DMSG("SD: CRC error, sector 0x%x", secnum);
 	}
 	while (!crcok && --tries);
