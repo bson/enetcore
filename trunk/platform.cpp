@@ -95,21 +95,12 @@ uint GetFreeMem()
 
 // Runtime compat stuff that needs to go in global namespace
 
-#ifndef USE_ASM_MEMOPS
+#if !defined(__arm__)
 void* memset(void* b, int c, size_t n)
 {
 	uint8_t* p = (uint8_t*)b;
 	while (n--)  *p++ = c;
 	return b;
-}
-
-
-void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n)
-{
-	uint8_t* p1 = (uint8_t*)s1;
-	const uint8_t* p2 = (const uint8_t*)s2;
-	while (n--)  *p1++ = *p2++;
-	return s1;
 }
 
 
@@ -133,7 +124,7 @@ size_t strlen(const char* s)
 	while (*s++) ++n;
 	return n;
 }
-#endif // USE_ASM_MEMOPS
+#endif
 
 
 int strcmp(const char* s1, const char* s2) 
@@ -217,22 +208,24 @@ int memcmp(const void* __restrict s1, const void* __restrict s2, size_t n)
 }
 
 
-inline void* memcpy(void* s1, const void* s2, size_t n)
+
+void* memcpy(void* s1, const void* s2, size_t n)
 {
 	if (s1 == s2 || !n) return s1;
 
-	void* s0 = s1;
+	uint8_t* dst = (uint8_t*)s1;
+	const uint8_t* src = (const uint8_t*)s2;
 
-	uint align1 = (uintptr_t)s1 & 3;
-	uint align2 = (uintptr_t)s2 & 3;
+#if defined(__arm__)
+	uint align1 = (uintptr_t)dst & 3;
+	uint align2 = (uintptr_t)src & 3;
 
 	if (align1 && align1 == align2) {
 		// Equal misalignment - bring to alignment
-		asm volatile("1: ldrb r2, [%1], #1; strb r2, [%0], #1;"
-					 "   sub %2, %2, #1; tst %2, #3; bne 1b"
-					 : "=r" (s1), "=r" (s2)
-					 : "0" (s1), "1" (s2), "r" (n)
-					 : "r2", "memory", "cc");
+		align1 = 4-align1;
+		byte_copy_ascending(dst, src, align1);
+		dst += align1;
+		src += align1;
 		n -= align1;
 		align1 = 0;
 		align2 = 0;
@@ -241,30 +234,35 @@ inline void* memcpy(void* s1, const void* s2, size_t n)
 	if (!align1 && !align2) {
 		// 32-bit aligned operands
 		asm volatile("1: subs %2, %2, #4; ldrge r2, [%1], #4; strge r2, [%0], #4; bgt 1b;"
-					 : "=r" (s1), "=r" (s2)
-					 : "0" (s1), "1" (s2), "r" (n)
+					 : : "r" (dst), "r" (src), "r" (n)
 					 : "r2", "memory", "cc");
+		dst += (n & ~3);
+		src += (n & ~3);
 		n &= 3;
 	}
 
 	// Byte copy remainder
-	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
-				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
-	return s0;
+	byte_copy_ascending(dst, src, n);
+#else
+	// Trivial reference implementation
+	while (n--) *dst++ = *src++;
+#endif
+	return s1;
 }
 
 
 // Copy descending
-inline void* memcpyd(void* s1, const void* s2, size_t n)
+void* memcpyd(void* s1, const void* s2, size_t n)
 {
 	if (s1 == s2 || !n) return s1;
 
+#if defined(__arm__)
 	if (!((uintptr_t)s1 & 3) && !((uintptr_t)s2 & 3)) {
-		// 32-bit aligned operands.  First bring to alignment.
+		// 32-bit aligned operands.
 		asm volatile("   add %0, %0, %2; add %1, %1, %2;"
-					 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!;"
+					 "1: ldrb r2, [%1, #-1]!; strb r2, [%0, #-1]!;"
 					 "   sub %2, %2, #1; tst %2, #3; bne 1b;"
-					 "2: ldr r2, [%1,#-1]!; str r2, [%0,#-1]!;"
+					 "2: ldr r2, [%1, #-4]!; str r2, [%0, #-4]!;"
 					 "   subs %2, %2, #4; bne 2b"
 					 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
 	} else {
@@ -272,6 +270,12 @@ inline void* memcpyd(void* s1, const void* s2, size_t n)
 					 "1: ldrb r2, [%1,#-1]!; strb r2, [%0,#-1]!; subs %2, %2, #1; bne 1b"
 					 : : "r" (s1), "r" (s2), "r" (n) : "r2", "cc", "memory");
 	}
+#else
+	// Trivial reference implementation
+	uint8_t* dst = (uint8_t*)s1 + n;
+	const uint8_t* src = (const uint8_t*)s2 + n;
+	while (n--) *--dst = *--src;
+#endif
 
 	return s1;
 }
@@ -288,13 +292,13 @@ void* memmove(void* s1, const void* s2, size_t n)
 
 char* strchr(const char* s, int c)
 {
+#ifdef __arm__
 	asm volatile("sub %0, %0, #1;"
 				 "1: ldrb r2, [%0,#1]!; cmp r2, #0; cmpne r2, %1; bne 1b;"
 				 "cmp r2, #0; moveq %0, #0"
 				 : "=r" (s) : "0" (s), "r" (c) : "r2", "cc");
 	return (char*)s;
-
-#if 0
+#else
 	while (*s && *s != c) s++;
 
 	if (!*s) return NULL;
@@ -306,13 +310,14 @@ char* strchr(const char* s, int c)
 
 char* strrchr(const char* s, int c)
 {
+#ifdef __arm__
 	char* last;
 	asm volatile("sub %1, %1, #1; mov %0, #0;"
 				 "1: ldrb r2, [%1,#1]!; cmp r2, %2; moveq %0, %1;"
 				 "cmp r2, %2; bne 1b"
 				 : "=&r" (last) : "r" (s), "r" (c) : "r2", "cc");
 	return last;
-#if 0
+#else
 	const char* last = NULL;
 
 	while (*s) {

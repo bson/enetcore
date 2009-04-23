@@ -24,17 +24,19 @@ inline void operator delete(void *ptr) { xfree(ptr); }
 #ifdef ENETCORE
 //  libc replacements
 
-#define USE_ASM_MEMOPS
-
-#ifdef USE_ASM_MEMOPS
 extern "C" {
 // These need C linkage so gcc can use them from initializers
 void* memset(void* b, int c, size_t n);
 void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
 }
 
-#define memset xxmemset
-#define memcpy xxmemcpy
+#ifdef __arm__
+INLINE_ALWAYS void byte_copy_ascending(void* s1, const void* s2, uint n)
+{
+	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
+				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
+}
+
 
 INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
 	asm volatile("1: strb %2, [%0], #1; subs %1, %1, #1; bne 1b"
@@ -42,8 +44,6 @@ INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
 	return b;
 }
 
-
-void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
 
 INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
 	asm volatile("1: ldrb r2, [%1], #1; strb r2, [%1], #1; cmp r2, #0; bne 1b"
@@ -68,7 +68,6 @@ INLINE_ALWAYS size_t strlen(const char* s) {
 }
 #else
 void* memset(void* b, int c, size_t n);
-void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
 char* strcpy(char* __restrict dest, const char* __restrict src);
 char* strncpy(char* __restrict dest, const char* __restrict src, size_t n);
 size_t strlen(const char* s);
@@ -88,7 +87,7 @@ int strncasecmp(const char* s1, const char* s2, size_t n);
 int strcmp(const char* s1, const char* s2);
 int memcmp(const void* s1, const void* s2, size_t n);
 void* memmove(void* s1, const void* s2, size_t n);
-#endif
+#endif	// ENETCORE
 
 
 uchar* xstrdup(const uchar* s);

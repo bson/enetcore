@@ -117,6 +117,12 @@ void Vic::ClearPending()
 
 void hwinit()
 {
+	uint32_t tmp2[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	memmove(tmp2 + 1, tmp2, 8);
+	memmove(tmp2, tmp2+3, 12);
+	memmove(tmp2, tmp2+5, 3);
+
+
 	// Setting Multiplier and Divider values
   	PLLCFG=0x23;
   	feed();
@@ -217,7 +223,7 @@ void hwinit()
 	BCFG2 = BCFGVAL(0, 8, 6, 0, 0, 1, 1);
 
 	_gpio[0].Init(GPIO0_BASE, 0);
-	_gpio[1].Init(GPIO0_BASE, 1);
+	_gpio[1].Init(GPIO1_BASE, 1);
 
 	// Enable UARTs as output, SPI0 on pins
 	PINSEL0 = 0b00000000000001010101010100000101;
