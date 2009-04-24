@@ -10,6 +10,7 @@ class SPI {
 private:
 	volatile uint8_t* _base;
 	Output* _ssel;				// SSEL output or NULL if none
+	uint8_t _prescaler;
 
 public:
 

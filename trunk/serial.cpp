@@ -41,6 +41,8 @@ void SerialPort::FillFifo()
 
 void SerialPort::SyncDrain()
 {
+	Spinlock::Scoped L(_lock);
+
 	while (!_sendq.Empty()) {
 		while (_base[UART_LSR] & 0b100000) {
 			uchar c = _sendq.Front();

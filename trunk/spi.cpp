@@ -11,6 +11,7 @@ SPI::SPI(uint32_t base)
 {
 	_base = (volatile uint8_t*)base;
 	_ssel = NULL;
+	_prescaler = 254;
 }
 
 
@@ -25,10 +26,11 @@ void SPI::SetSpeed(uint hz)
 	Select();
 
 	const uint scaler = PCLK/hz & ~1;
-	const uint prescaler = max(min(scaler, (uint)254), (uint)8);
-	_base[SPI_SPCCR] = prescaler;
 
-	DMSG("SPI: Prescaler = %u, clock = %u kHz", prescaler, PCLK/prescaler/1000);
+	_prescaler = max(min(scaler, (uint)254), (uint)8);
+	_base[SPI_SPCCR] = _prescaler;
+
+	DMSG("SPI: Prescaler = %u, clock = %u kHz", _prescaler, PCLK/_prescaler/1000);
 
 	// SPIE=1, LSBF=0, MSTR=1, CPOL=1, CPHA=0
 	_base[SPI_SPCR] = 0b00110000;
@@ -105,7 +107,6 @@ bool SPI::ReadBuffer(void* buffer, uint len, Crc16* crc)
 	if (!len) return true;
 
 	uint8_t* p = (uint8_t*)buffer;
-
 	bool ok = true;
 
 	_base[SPI_SPDR] = 0xff;
@@ -125,6 +126,5 @@ bool SPI::ReadBuffer(void* buffer, uint len, Crc16* crc)
 		*p++ = tmp;
 		crc->Update(tmp);
 	}
-
 	return ok;
 }
