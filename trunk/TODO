@@ -1,6 +1,3 @@
-Double check that CS8900A needs to have interrupts disabled while
-reading frame.
-
 Improve SPI ReadBuffer
 - a 512 transfer currently takes ~7msec, of which > 5msec is crc16!!!
 
