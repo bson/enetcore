@@ -1,6 +1,9 @@
+Set r11 (fp) to 0 before calling busy_wait/hwinit and in thread
+creation.
+
+SDcard should set block size to 512 at Init
+
 Improve SPI ReadBuffer
-- update prvious CRC during current SPI phase
-- when reading multiple sectors, use the read multiple command
 - analyze read latency variance and see if we can predict future latency
 
 Add SD card detect
