@@ -234,7 +234,6 @@ void hwinit()
 	_gpio[1].MakeOutput(23);	// P1.23 is an output
 	_led = _gpio[1].GetPin(23);
 	_led.Lower();
-	_led.Raise();
 
 	_gpio[0].MakeOutputs(0b10011010000);// SSEL0, MOSI0, SCK0, soft SSEL0 (P0.10)
 	_gpio[0].MakeInput(5);		// MISO0
