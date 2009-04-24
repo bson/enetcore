@@ -314,7 +314,9 @@ void hwinit()
 
 	DMSG("Random uint: 0x%x", Util::Random<uint>());
 
-	_spi0.Init(&_ssel0);
+	_spi0.Init();
+	_spi0.SetSSEL(&_ssel0);
+
 	_spi1.Init();
 
 	_eth0.Initialize();

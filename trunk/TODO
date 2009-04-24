@@ -1,5 +1,5 @@
-Set r11 (fp) to 0 before calling busy_wait/hwinit and in thread
-creation.
+Double check that CS8900A needs to have interrupts disabled while
+reading frame.
 
 SDcard should set block size to 512 at Init
 

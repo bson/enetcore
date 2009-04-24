@@ -15,7 +15,9 @@ public:
 
 	SPI(uint32_t base);
 
-	void Init(Output* ssel = NULL);
+	void Init();
+	INLINE_ALWAYS void SetSSEL(Output* ssel) { _ssel = ssel; }
+
 	void SetSpeed(uint hz);
 
 	void Select();

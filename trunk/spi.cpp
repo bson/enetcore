@@ -14,10 +14,9 @@ SPI::SPI(uint32_t base)
 }
 
 
-void SPI::Init(Output* ssel)
+void SPI::Init()
 {
 	Deselect();
-	_ssel = ssel;
 }
 
 
