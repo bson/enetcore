@@ -112,7 +112,7 @@ _init:
 				ldmfd	sp!, {r0-r1}
 				b		3b
 4:		
-				/* Enter the C code  */
+				mov		fp, #0
 				bl		hwinit
                 b       main
 

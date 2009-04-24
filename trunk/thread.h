@@ -153,10 +153,10 @@ private:
 	}
 
 
-	// Change currently running thread's stack
+	// Change currently running thread's stack and start new frame chain
 	static void INLINE_ALWAYS SetStack(void* new_stack) {
 		_lock.AssertLocked();
-		asm volatile ("mov sp, %0" : : "r"(new_stack) : "memory");
+		asm volatile ("mov sp, %0; mov fp, #0" : : "r"(new_stack) : "memory");
 	}
 
 	// Take snapshot of current thread state.
