@@ -1,14 +1,10 @@
 Double check that CS8900A needs to have interrupts disabled while
 reading frame.
 
-SDcard should set block size to 512 at Init
-
 Improve SPI ReadBuffer
-- analyze read latency variance and see if we can predict future latency
+- a 512 transfer currently takes ~7msec, of which > 5msec is crc16!!!
 
 Add SD card detect
-
-Fix stack back traces
 
 Let Ethernet specify MTU - get rid of random constants
 

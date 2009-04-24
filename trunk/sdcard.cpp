@@ -32,19 +32,19 @@ bool SDCard::Init()
 
 	_spi.Select();
 	
-	uint8_t status = 0xff;
+	uint8_t value = 0xff;
 
-	for (uint i = 0; i < 100 && status != 1; ++i)
-		status = SendCMD(0);
+	for (uint i = 0; i < 100 && value != 1; ++i)
+		value = SendCMD(0);
 
-	if (status != 1) {
+	if (value != 1) {
 		abort();
 		DMSG("SDCard: CMD0 failed - missing card?");
 		_spi.Deselect();
 		return false;
 	}
 	
-	const uint8_t value = SendCMD(8, 0, 1, 0xaa);
+	value = SendCMD(8, 0, 1, 0xaa);
 	if (value == 0xff) {
 		DMSG("SDCard: initialization failed");
 		_spi.Deselect();
@@ -91,6 +91,10 @@ bool SDCard::Init()
 		if (ocr & 0x80000000)  _sdhc = (ocr & 0x40000000) != 0;
 	}
 
+
+	if (!_sdhc) {
+		value = SendCMD(16, 0, 2, 0); // SET_BLOCKLEN(512)
+	}
 
 	if (_initialized) {
 		_spi.SetSpeed(24000000);
