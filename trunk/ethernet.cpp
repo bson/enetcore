@@ -12,13 +12,13 @@ static Spinlock _lock;
 
 static Vector<IOBuffer*> _pool;
 
-void Initialize(uint num)
+void Initialize(uint num, uint size)
 {
 	Spinlock::Scoped L(_lock);
 
 	_pool.Reserve(num);
 	for (uint i = 0; i < num; ++i) {
-		IOBuffer* buf = new IOBuffer(1520);
+		IOBuffer* buf = new IOBuffer(size);
 		buf->SetAutoCompact(false);
 		_pool.PushBack(buf);
 	}

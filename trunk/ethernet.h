@@ -5,7 +5,7 @@
 
 
 namespace BufferPool {
-	void Initialize(uint num);
+	void Initialize(uint num, uint size);
 	IOBuffer* Alloc();
 	void FreeBuffer(IOBuffer* buf);
 }
@@ -76,6 +76,10 @@ public:
 	// keeps any following headers 32-bit aligned.
 	// Similarly on the receive side.
 	uint GetPrealloc() const { return 16; }
+
+	// MTU, buffer size
+	uint GetMTU() const { return 1500; }
+	uint GetBufSize() const { return 1502; }
 
 	// True if buffer dest addr is broadcast
 	static bool IsBrodcast(const IOBuffer& buf) {

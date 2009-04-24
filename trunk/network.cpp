@@ -9,6 +9,8 @@ EventObject _net_event;
 Thread* _net_thread;
 
 
+// XXX move this stuff to IP
+
 const Vector<InterfaceInfo*>& GetNetworkInterfaces()
 {
 	static Vector<InterfaceInfo*> iflist;
@@ -44,7 +46,7 @@ void* NetThread(void*)
 	Self().SetPriority(NET_THREAD_PRIORITY);
 	Self().ReadyToWork();
 
-	BufferPool::Initialize(20);
+	BufferPool::Initialize(20, _eth0.GetBufSize());
 
 // Moved to hwinit - needs to be done before EINT2 is enabled
 //	_eth0.Initialize();
