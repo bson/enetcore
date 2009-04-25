@@ -152,11 +152,12 @@ private:
 			: : "r"(_curpcb) : "memory", "cc");
 	}
 
-
 	// Change currently running thread's stack and start new frame chain
-	static void INLINE_ALWAYS SetStack(void* new_stack) {
+	// Also set up stack limit.  end is lowest addr (i.e. start of region).
+	static void INLINE_ALWAYS SetStack(void* end, void* new_stack) {
 		_lock.AssertLocked();
-		asm volatile ("mov sp, %0; mov fp, #0" : : "r"(new_stack) : "memory");
+		asm volatile ("mov sp, %0; mov fp, #0"
+					  : : "r"(new_stack) : "memory");
 	}
 
 	// Take snapshot of current thread state.

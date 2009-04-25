@@ -58,10 +58,10 @@ void SerialPort::Interrupt()
 {
 	SaveStateExc(4);
 
-	if (_vic.ChannelPending(6))
+	if (_vic.ChannelPending(INTCH_UART0))
 		_uart0.HandleInterrupt();
 
-	if (_vic.ChannelPending(7))
+	if (_vic.ChannelPending(INTCH_UART1))
 		_uart1.HandleInterrupt();
 
 	_vic.ClearPending();

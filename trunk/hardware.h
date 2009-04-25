@@ -221,11 +221,11 @@ enum { GPIO0_BASE = 0xe0028000,
 };
 
 
-#define __irq   __attribute__((interrupt("IRQ")))
-#define __fiq   __attribute__((interrupt("FIQ")))
-#define __abort   __attribute__((interrupt("ABT")))
-#define __undef   __attribute__((interrupt("UNDEF")))
-#define __swi   __attribute__((interrupt("SWI")))
+#define __irq   __attribute__((interrupt("IRQ"))) NOINSTRUMENT
+#define __fiq   __attribute__((interrupt("FIQ"))) NOINSTRUMENT
+#define __abort   __attribute__((interrupt("ABT"))) NOINSTRUMENT
+#define __undef   __attribute__((interrupt("UNDEF"))) NOINSTRUMENT
+#define __swi   __attribute__((interrupt("SWI"))) NOINSTRUMENT
 
 
 typedef void (*IRQHandler)();
@@ -237,11 +237,19 @@ void Data_Abort_Exception() __abort NAKED;
 void Program_Abort_Exception() __abort NAKED;
 void Undef_Exception() __undef NAKED;
 void SWI_Trap() __swi NAKED;
-
-void feed();
-void busy_wait () NAKED;
+void busy_wait () NOINSTRUMENT NAKED;
 
 }
+
+// Interrupt channels
+enum {
+	INTCH_TIMER0 = 4,
+	INTCH_TIMER1 = 5,
+	INTCH_UART0 = 6,
+	INTCH_UART1 = 7,
+	INTCH_EINT2 = 16
+};
+
 
 // Vectored interrupt controller
 class Vic {

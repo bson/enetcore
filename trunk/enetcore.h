@@ -49,6 +49,7 @@ typedef uint32_t in_addr_t;
 #define NOINLINE  __attribute__((noinline))	// Do not inline
 #define INLINE_ALWAYS inline __attribute__((always_inline))
 #define NAKED __attribute((naked))
+#define NOINSTRUMENT __attribute__((no_instrument_function))
 
 #define NOVTABLE
 #define PACKED __attributed__((packed))

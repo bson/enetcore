@@ -48,7 +48,7 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 	if (Suspend()) {
 		_curthread = this;
 		_curpcb = &_pcb;
-		SetStack((uint8_t*)_estack - 4);
+		SetStack(_stack, (uint8_t*)_estack - 4);
 		_state = STATE_RUN;
 		_func = func;			// Move these off the stack
 		_arg = arg;

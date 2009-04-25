@@ -51,10 +51,10 @@ void Timer::Interrupt()
 {
 	SaveStateExc(4);
 
-	if (_vic.ChannelPending(4))
+	if (_vic.ChannelPending(INTCH_TIMER0))
 		_clock.HandleInterrupt(0); // Timer0 uses MR0
 
-	if (_vic.ChannelPending(5))
+	if (_vic.ChannelPending(INTCH_TIMER1))
 		_systimer.HandleInterrupt(1); // Timer1 uses MR1
 
 	_vic.ClearPending();

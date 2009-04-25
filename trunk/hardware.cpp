@@ -117,26 +117,23 @@ void Vic::ClearPending()
 
 void hwinit()
 {
-	uint32_t tmp2[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-	memmove(tmp2 + 1, tmp2, 8);
-	memmove(tmp2, tmp2+3, 12);
-	memmove(tmp2, tmp2+5, 3);
-
-
 	// Setting Multiplier and Divider values
   	PLLCFG=0x23;
-  	feed();
+	PLLFEED=0xaa;
+	PLLFEED=0x55;
   
 	// Enabling the PLL
 	PLLCON=0x1;
-	feed();
+	PLLFEED=0xaa;
+	PLLFEED=0x55;
   
 	// Wait for the PLL to lock to set frequency
 	while (!(PLLSTAT & PLOCK)) continue;
   
 	// Connect the PLL as the clock source
 	PLLCON=0x3;
-	feed();
+	PLLFEED=0xaa;
+	PLLFEED=0x55;
   
 	// Setting peripheral Clock (pclk) to System Clock (cclk)
 	VPBDIV=0x1;
@@ -264,7 +261,6 @@ void hwinit()
 	// Since the region allocates low to high we do this by installing a reserve...
 	_stack_region.SetReserve(MAIN_THREAD_STACK);
 	_main_thread_stack = (uint8_t*)_stack_region.GetEnd() - MAIN_THREAD_STACK;
-	// This is picked up by Thread::Initialize to wrap the current thread as the main thread
 
 	// Allocate interrupt thread stack and install it
 	// Allocate and install FIQ stack
@@ -280,19 +276,19 @@ void hwinit()
 				   "r"(fiq_stack + 16) : "cc", "r2", "memory");
 
 	// Install IRQ handlers
-	_vic.InstallHandler(4, Clock::Interrupt); // Channel 4 is TIMER0/Clock
-	_vic.EnableChannel(4);
+	_vic.InstallHandler(INTCH_TIMER0, Clock::Interrupt); // Channel 4 is TIMER0/Clock
+	_vic.EnableChannel(INTCH_TIMER0);
 
-	_vic.InstallHandler(5, SysTimer::Interrupt); // Channel 5 is TIMER1/SysTimer
-	_vic.EnableChannel(5);
+	_vic.InstallHandler(INTCH_TIMER1, SysTimer::Interrupt); // Channel 5 is TIMER1/SysTimer
+	_vic.EnableChannel(INTCH_TIMER1);
 
-	_vic.InstallHandler(6, SerialPort::Interrupt); // Channel 6 is UART0
-	_vic.EnableChannel(6);
+	_vic.InstallHandler(INTCH_UART0, SerialPort::Interrupt); // Channel 6 is UART0
+	_vic.EnableChannel(INTCH_UART0);
 	_uart0.SetInterrupts(true);
 	_uart0.SetSpeed(115200);
 	_uart0.Write(STR("\r\n\n"));
 
-	_vic.InstallHandler(16, Ethernet::Interrupt);
+	_vic.InstallHandler(INTCH_EINT2, Ethernet::Interrupt);
 
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
@@ -308,7 +304,7 @@ void hwinit()
 
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
-	DMSG("Main thread stack at (approx) %p (sp=%p); interrupt thread stack at %p",
+	DMSG("Main thread stack at %p (sp=%p); interrupt thread stack at %p",
 		 _main_thread_stack, sp, _intr_thread_stack);
 
 	DMSG("Random uint: 0x%x", Util::Random<uint>());
@@ -342,14 +338,8 @@ void hwinit()
 }
 
 
-void feed()
+void Unexpected_Interrupt()
 {
-	PLLFEED=0xAA;
-	PLLFEED=0x55;
-}
-
-
-void Unexpected_Interrupt()  {
 	console("Unhandled interrupt");
 	_vic.ClearPending();
 }

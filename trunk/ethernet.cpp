@@ -207,11 +207,11 @@ void Ethernet::Interrupt()
 {
 	SaveStateExc(4);
 
-	if (_vic.ChannelPending(16)) {
+	if (_vic.ChannelPending(INTCH_EINT2)) {
 		_eth0.HandleInterrupt();
-		_vic.DisableChannel(16);
+		_vic.DisableChannel(INTCH_EINT2);
 		EXTINT = 4;					// Clear EINT2 flag
-		_vic.EnableChannel(16);
+		_vic.EnableChannel(INTCH_EINT2);
 	}
 
 	_vic.ClearPending();

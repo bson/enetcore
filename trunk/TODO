@@ -1,5 +1,6 @@
 Improve SPI ReadBuffer
 - a 512 transfer currently takes ~7msec, of which > 5msec is crc16!!!
+- use READ_MULTIPLE for cluster?  Still, the READ_BLOCK itself is only 3-10%.
 
 Add SD card detect
 
