@@ -103,6 +103,8 @@ failed:
 
 void Fat::CollectLFN(Vector<uchar>& lfn, const uint8_t* p)
 {
+	if (lfn.Headroom() < 13) return; // Egads, broken DIR
+
 	// LFN dir entries are in reverse order, so insert new entry up front
 	lfn.Insert(0, 13);
 
