@@ -6,9 +6,10 @@ Add SD card detect
 
 Add Route::_pmtu
 
-Make FAT16 use half the space of FAT32 for cluster list
-
-FAT: need to mask FAT entries since high bits may technically be used.
+FAT:
+- need to mask FAT entries since high bits may technically be used.
+- Add LFN support
+- Make FAT16 use half the space of FAT32 for cluster list
 
 Implement CRC7
 

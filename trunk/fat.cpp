@@ -144,7 +144,7 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 	enum { NUM_FAT_PER_SEC = 512 / sizeof (Cluster) };
 
-	Cluster clus = cluster1;
+	Cluster clus = cluster1 & 0x0fffffff;
 
 	while (clus && clus < (Cluster)0x0ffffff0) {
 		const uint32_t next_fatsec = clus / NUM_FAT_PER_SEC;
@@ -159,6 +159,7 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 		}
 
 		clus = ((const Cluster*)fat)[clus & (NUM_FAT_PER_SEC - 1)];
+		clus &= 0x0fffffff;
 	}
 
 	// If we ran into anything other than an end-of-chain marker we have
