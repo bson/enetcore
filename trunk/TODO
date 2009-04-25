@@ -7,9 +7,12 @@ Add SD card detect
 Add Route::_pmtu
 
 FAT:
-- need to mask FAT entries since high bits may technically be used.
 - Add LFN support
 - Make FAT16 use half the space of FAT32 for cluster list
+
+Add EINT connect support
+- Signal EventObject on interrupt
+- Add support for timer capture-and-interrupt for precise event time capture
 
 Implement CRC7
 

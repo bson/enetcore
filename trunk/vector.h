@@ -80,7 +80,7 @@ public:
 	uint Grow(uint num) {
 		_used += num;
 		if (_used > _alloc) {
-			assert(_autoresize);
+			if (!_autoresize) panic("static container overflow");
 			_alloc = _used + 32;
 			_mem = (T*)xrealloc(_mem, sizeof(T) * _alloc);
 		}

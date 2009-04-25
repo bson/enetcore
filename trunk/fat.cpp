@@ -101,6 +101,30 @@ failed:
 }
 
 
+void Fat::CollectLFN(Vector<uchar>& lfn, const uint8_t* p)
+{
+	// LFN dir entries are in reverse order, so insert new entry up front
+	lfn.Insert(0, 13);
+
+	uint pos = 0;
+
+	++p;
+
+	for (uint i = 0; i < 5; ++i, p += 2)
+		lfn[pos++] = *p;
+
+	p += 3;
+	
+	for (uint i = 0; i < 6; ++i, p += 2)
+		lfn[pos++] = *p;
+
+	p += 2;
+	lfn[pos++] = *p;
+	p += 2;
+	lfn[pos++] = *p;
+}
+
+
 FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 {
 	if (dir.Empty()) return NULL;
@@ -118,16 +142,41 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 	for (uint i = 0; i < 11; ++i)
 		namebuf[i] = Util::ToUpper(namebuf[i]);
 		
-	for (FatDirEnt* d = (FatDirEnt*)&dir.Front(); d < (FatDirEnt*)&dir.Back(); ++d) {
-		if (!d->IsUsed()) continue;
-		// XXX we really want to check against LFN here
-		if (d->IsLFN()) continue;
-		if (d->IsVolume()) continue;
+	Vector<uchar> lfn;			// Collects LFN
+	lfn.Reserve(256);
+	lfn.SetAutoResize(false);
 
+	for (FatDirEnt* d = (FatDirEnt*)&dir.Front(); d < (FatDirEnt*)&dir.Back(); ++d) {
+		if (!d->IsUsed()) goto next_entry;
+
+		if (d->IsLFN()) {
+			CollectLFN(lfn, (const uint8_t*)d);
+			continue;
+		}
+		if (d->IsVolume()) goto next_entry;
+
+		// Remove trailing LFN spaces
+		int i;
+		for (i = lfn.Size() - 1; i >= 0; --i) {
+			if (lfn[i] != ' ')
+				break;
+		}
+		if (i >= 0)  lfn.SetSize(i);
+
+		// First try a case insensitive match of long name
+		if (!lfn.Empty()) {
+			lfn.PushBack((uchar)0);
+			if (!::xstrcasecmp(lfn + 0, name.CStr()))  return d;
+		}
+
+		// Otherwise compare short names
 		for (uint i = 0; ; ++i) {
 			if (namebuf[i] != d->name[i])  break;
-			if (i == 10)  return d;
+			if (i == 10)  return d;					
 		}
+
+	next_entry:
+		lfn.Clear();
 	}
 
 	return NULL;

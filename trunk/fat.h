@@ -103,6 +103,9 @@ protected:
 	// Find directory entry, or NULL if not found
 	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name);
 
+	// Collect LFN directory.  p points to 32-byte LFN directory entry.
+	void CollectLFN(Vector<uchar>& lfn, const uint8_t* p);
+
 	// Obtain cluster list for file
 	bool GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1);
 
