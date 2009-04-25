@@ -20,6 +20,7 @@ void Initialize(uint num, uint size)
 	for (uint i = 0; i < num; ++i) {
 		IOBuffer* buf = new IOBuffer(size);
 		buf->SetAutoCompact(false);
+		buf->SetAutoResize(false); // Trap on attempts to grow buffer
 		_pool.PushBack(buf);
 	}
 }

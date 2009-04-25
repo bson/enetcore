@@ -4,8 +4,6 @@ Improve SPI ReadBuffer
 
 Add SD card detect
 
-Let Ethernet specify MTU - get rid of random constants
-
 Add Route::_pmtu
 
 Make FAT16 use half the space of FAT32 for cluster list
@@ -29,8 +27,6 @@ Thread features
 - Thread structure should be in internal mem (maybe at the top of the
   thread's stack) - for single-cycle access
 - Track max stack usage
-
-Containers should have a _resize flag to enable/disable auto resizing.
 
 Inline-asm Ntohs/Ntohl, etc;
 - ReadBE32(), ReadBE16(), StoreBE16(), StoreBE32(),

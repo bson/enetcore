@@ -33,6 +33,7 @@ public:
 
 	T* Grab(uint& used, uint& start, uint& alloc) { return _v.Grab(used, start, alloc); }
 
+	void SetAutoResize(bool flag) { _v.SetAutoResize(flag); }
 	void Reserve(uint new_size) { _v.Reserve(new_size); }
 	uint GetReserve() const { return _v.GetReserve(); }
 	uint Grow(uint num) { return _v.Grow(num); }

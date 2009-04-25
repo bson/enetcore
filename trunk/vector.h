@@ -8,12 +8,15 @@ template <typename T> class Vector {
 	T* _mem;
 	uint _alloc;
 	uint _used;
+	bool _autoresize;
 
 	typedef Vector<T> Self;
 
 public:
-	Vector() : _mem(NULL), _alloc(0), _used(0) { }
-	Vector(uint reserve) : _mem(NULL), _alloc(0), _used(0) { Reserve(reserve); }
+	Vector() : _mem(NULL), _alloc(0), _used(0), _autoresize(true) { }
+	Vector(uint reserve) : _mem(NULL), _alloc(0), _used(0), _autoresize(true) {
+		Reserve(reserve);
+	}
 
 	Self& assign(const Self& arg) {
 		if (&arg == this)  return *this;
@@ -35,6 +38,8 @@ public:
 	Self& operator=(const Self& arg) { return assign(arg); }
 
 	virtual ~Vector() { free(_mem); }
+
+	void SetAutoResize(bool flag) { _autoresize = flag; }
 
 	void FreeEntries(uint start = 0) { for (uint i = start; i < _used; ++i)  xfree(_mem[i]); }
 	void DeleteEntries(uint start = 0) {
@@ -75,6 +80,7 @@ public:
 	uint Grow(uint num) {
 		_used += num;
 		if (_used > _alloc) {
+			assert(_autoresize);
 			_alloc = _used + 32;
 			_mem = (T*)xrealloc(_mem, sizeof(T) * _alloc);
 		}
@@ -85,7 +91,13 @@ public:
 	void SetSize(uint arg) { assert(arg <= _alloc); _used = arg; }
 
 	uint Size() const { return _used; }
-	void Clear() { free(exch<T*>(_mem, NULL)); _alloc = _used = 0; }
+	void Clear() {
+		if (_autoresize) {
+			free(exch<T*>(_mem, NULL));
+			_alloc = 0;
+		}
+		_used = 0;
+	}
 	bool Empty() const { return _used == 0; }
 	
 	T& Front() { assert(_used); return _mem[0]; }

@@ -25,6 +25,7 @@ public:
 
 	/// These are all the same as OVector<>
 
+	void SetAutoResize(bool flag) { _v.SetAutoResize(flag); }
 	void Reserve(uint new_size) { _v.Reserve(new_size); }
 	void Grow(uint num) { _v.Grow(num); }
 	uint Headroom() const { return _v.Headroom(); }

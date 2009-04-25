@@ -46,6 +46,7 @@ public:
 		if (_v.Size() > 32 && _head > _v.Size() / 2)  Compact();
 	}
 
+	void SetAutoResize(bool flag) { _v.SetAutoResize(flag); }
 	void SetAutoCompact(bool arg) { _autocompact = arg; }
 
 	void Reserve(uint new_size) { AutoCompact(); _v.Reserve(new_size + _head); }

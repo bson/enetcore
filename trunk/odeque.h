@@ -37,6 +37,7 @@ public:
 		}
 	}
 
+	void SetAutoResize(bool flag) { _v.SetAutoResize(flag); }
 	uint GetReserve() const { return _v.GetReserve(); }
 	void Reserve(uint new_size) { AutoCompact(); _v.Reserve(new_size + _head); }
 
