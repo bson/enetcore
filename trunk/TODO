@@ -1,27 +1,19 @@
-Improve SPI ReadBuffer
-- a 512 transfer currently takes ~7msec, of which > 5msec is crc16!!!
-- use READ_MULTIPLE for cluster?  Still, the READ_BLOCK itself is only 3-10%.
-
-Add SD card detect
-
-Add Route::_pmtu
-
-FAT:
-- Add LFN support
-- Make FAT16 use half the space of FAT32 for cluster list
+Implement TCP
 
 Add EINT connect support
 - Signal EventObject on interrupt
 - Add support for timer capture-and-interrupt for precise event time capture
 
-Implement CRC7
+Add Route::_pmtu, TCP PMTU
 
-Implement TCP
+Optimize IP checksumming
 
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value
 - Increase default timer to 8 seconds
+
+Add SD card detect
 
 Improve exeption handler - traceback all threads, print thread state
 - Write tool to symbolize console crash output
@@ -32,11 +24,18 @@ Thread features
   thread's stack) - for single-cycle access
 - Track max stack usage
 
+FAT:
+- Make FAT16 use half the space of FAT32 for cluster list
+
+Implement CRC7
+
 Inline-asm Ntohs/Ntohl, etc;
 - ReadBE32(), ReadBE16(), StoreBE16(), StoreBE32(),
 - ReadLE32(), ReadLE16(), StoreLE16(), StoreLE32(),
 
-Optimize IP checksumming
+Improve SPI ReadBuffer
+- a 512 transfer currently takes ~7msec, of which > 5msec is crc16!!!
+- use READ_MULTIPLE for cluster?  Still, the READ_BLOCK itself is only 3-10%.
 
 Implement Watchdog
 - Use hw watchdog

@@ -100,11 +100,19 @@ protected:
 		return SectorToCluster(pos / 512) == cluster;
 	}
 
-	// Find directory entry, or NULL if not found
-	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name);
+	// Find directory entry, or NULL if not found.
+	// If name is Empty, return next name.
+	// Can be used either to find a particular file, or to enumerate
+	// directory contents.
+	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name,
+						String& file_found, FatDirEnt* reent = NULL);
 
 	// Collect LFN directory.  p points to 32-byte LFN directory entry.
 	void CollectLFN(Vector<uchar>& lfn, const uint8_t* p);
+
+	// Generate short filename string from 11 char 8.3 name buffer.
+	// E.g. "FOO 2   TM " becomes "FOO 2.TM"
+	void NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf);
 
 	// Obtain cluster list for file
 	bool GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1);

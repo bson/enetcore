@@ -127,9 +127,36 @@ void Fat::CollectLFN(Vector<uchar>& lfn, const uint8_t* p)
 }
 
 
-FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
+void Fat::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 {
-	if (dir.Empty()) return NULL;
+	uint last_nonspace = NOT_FOUND;
+	for (uint i = 0; i < 9; ++i) {
+		if (dirbuf[i] != ' ') last_nonspace = i;
+		sfn.PushBack(dirbuf[i]);
+	}
+
+	if (last_nonspace != NOT_FOUND)  sfn.SetSize(last_nonspace + 1);
+	
+	sfn.PushBack((uchar)'.');
+	
+	last_nonspace = NOT_FOUND;
+	for (uint i = 9; i < 12; ++i) {
+		if (dirbuf[i] != ' ') last_nonspace = i;
+		sfn.PushBack(dirbuf[i]);
+	}
+
+	if (last_nonspace != NOT_FOUND)  sfn.SetSize(last_nonspace + 1);
+}
+
+
+FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name,
+						 String& file_found,
+						 FatDirEnt* reent)
+{
+	if (dir.Empty() || reent == (FatDirEnt*)&dir.Back()) return NULL;
+
+	assert(!reent || reent >= (FatDirEnt*)&dir.Front());
+	assert(!reent || reent < (FatDirEnt*)&dir.Back());
 
 	const uint namelen = name.Size();
 
@@ -148,7 +175,9 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 	lfn.Reserve(256);
 	lfn.SetAutoResize(false);
 
-	for (FatDirEnt* d = (FatDirEnt*)&dir.Front(); d < (FatDirEnt*)&dir.Back(); ++d) {
+	reent = reent ? reent + 1 : (FatDirEnt*)&dir.Front();
+
+	for (FatDirEnt* d = reent; d < (FatDirEnt*)&dir.Back(); ++d) {
 		if (!d->IsUsed()) goto next_entry;
 
 		if (d->IsLFN()) {
@@ -163,18 +192,28 @@ FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name)
 			if (lfn[i] != ' ')
 				break;
 		}
-		if (i >= 0)  lfn.SetSize(i);
+		lfn.SetSize(i+1);
 
 		// First try a case insensitive match of long name
 		if (!lfn.Empty()) {
 			lfn.PushBack((uchar)0);
-			if (!::xstrcasecmp(lfn + 0, name.CStr()))  return d;
+			if (name.Empty() || !::xstrcasecmp(lfn + 0, name.CStr())) {
+				file_found.Take(lfn);
+				return d;
+			}
 		}
 
 		// Otherwise compare short names
-		for (uint i = 0; ; ++i) {
-			if (namebuf[i] != d->name[i])  break;
-			if (i == 10)  return d;					
+		i = 0;
+		for (;;) {
+			if (name.Empty() || i == 11) {
+				Vector<uchar> sfn;
+				NameFrom83(sfn, d->name);
+				file_found.Take(sfn);
+				return d;
+			}
+			if (namebuf[i] != d->name[i]) break;
+			++i;
 		}
 
 	next_entry:
@@ -306,7 +345,8 @@ FatFile* Fat::Open(const String& path)
 			if (!LoadDataClusters(dir, dir_clusters)) goto done;
 		}
 
-		dirent = FindFile(dir, *pathlist[i]);
+		String filename;
+		dirent = FindFile(dir, *pathlist[i], filename, NULL);
 		if (!dirent) goto done;
 
 		// Check if attempting to open a dir, or descend into a file
