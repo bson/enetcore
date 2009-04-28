@@ -149,9 +149,9 @@ void Fat::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 }
 
 
-FatDirEnt* Fat::FindFile(const Vector<uint8_t>& dir, const String& name,
-						 String& file_found,
-						 FatDirEnt* reent)
+FatDirEnt* Fat::FindDirEnt(const Vector<uint8_t>& dir, const String& name,
+						   String& file_found,
+							   FatDirEnt* reent)
 {
 	if (dir.Empty() || reent == (FatDirEnt*)&dir.Back()) return NULL;
 
@@ -346,7 +346,7 @@ FatFile* Fat::Open(const String& path)
 		}
 
 		String filename;
-		dirent = FindFile(dir, *pathlist[i], filename, NULL);
+		dirent = FindDirEnt(dir, *pathlist[i], filename, NULL);
 		if (!dirent) goto done;
 
 		// Check if attempting to open a dir, or descend into a file

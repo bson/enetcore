@@ -104,8 +104,8 @@ protected:
 	// If name is Empty, return next name.
 	// Can be used either to find a particular file, or to enumerate
 	// directory contents.
-	FatDirEnt* FindFile(const Vector<uint8_t>& dir, const String& name,
-						String& file_found, FatDirEnt* reent = NULL);
+	FatDirEnt* FindDirEnt(const Vector<uint8_t>& dir, const String& name,
+						  String& file_found, FatDirEnt* reent = NULL);
 
 	// Collect LFN directory.  p points to 32-byte LFN directory entry.
 	void CollectLFN(Vector<uchar>& lfn, const uint8_t* p);
