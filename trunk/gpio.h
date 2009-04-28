@@ -60,7 +60,7 @@ public:
 #endif
 		_base[GPIO_IOCLR] |= 1 << pin;
 	}
-	bool TestPin(uint8_t pin) {
+	bool TestPin(uint8_t pin) const {
 #ifdef DEBUG
 		assert(_inputs & (1 << pin));
 #endif
@@ -82,7 +82,10 @@ public:
 
 		void Set() { _gpio[_portnum].SetPin(_pin); }
 		void Reset() { _gpio[_portnum].ResetPin(_pin); }
-		bool Test() { return _gpio[_portnum].TestPin(_pin); }
+		bool Test() const { return _gpio[_portnum].TestPin(_pin); }
+
+		void operator=(uint arg) { if (arg) Set(); else Reset(); }
+		operator bool() const { return Test(); }
 	};
 
 	const Pin GetPin(uint8_t pin) const { return Pin(_portnum, pin); }
