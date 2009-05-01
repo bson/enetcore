@@ -212,7 +212,8 @@ bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sector
 }
 
 
-Fat::FTWalker::FTWalker(Fat& fat) : _fat(fat)
+Fat::FTWalker::FTWalker(Fat& fat) :
+	_fat(fat)
 {
 	Reset();
 }
