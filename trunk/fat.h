@@ -32,12 +32,14 @@ struct NOVTABLE FatDirEnt {
 	INLINE_ALWAYS bool IsVolume() const { return (attrib & 8) != 0; }
 	INLINE_ALWAYS bool IsDir() const { return (attrib & 16) != 0; }
 	INLINE_ALWAYS bool IsRO() const { return (attrib & 1) != 0; }
+	INLINE_ALWAYS uint32_t GetFileSize() const { return LE32(size); }
 };
 
 
 class FatFile;
 
 class Fat {
+protected:
 	// XXX we don't really need all this state
 	BlockDev& _dev;
 	uint32_t _lba0;				// First LBA of partition
@@ -78,6 +80,52 @@ public:
 
 protected:
 	friend class FatFile;
+	friend class FTWalker;
+
+	// File tree walker
+	class FTWalker {
+		Fat& _fat;				// File system we're traversing
+		Vector<uint8_t> _dir;	// Holds current directory
+	public:
+		FTWalker(Fat& fat);
+
+		// Walk path, descending directories
+		// If 'enclosing' is true, we want directory enclosing path,
+		// in which case enclosed is set to the enclosed name.
+		bool Find(const String& path, bool enclosing, String& enclosed);
+
+		// (Re)load root dir.
+		bool Reset();
+
+		// Descend
+		bool Load(uint entry);
+
+		// Find next matching directory entry, or NULL if not found.
+		// If name is Empty, return next name.
+		// Can be used either to find a particular file, or to enumerate
+		// directory contents.
+		// XXX make 'name' a globbing pattern
+		uint FindNext(const String& name, uint start = NOT_FOUND);
+
+		// Collect LFN directory.  Entry indexes a directory entry
+		// Returns false if entry lacks a valid LFN
+		bool GetLFN(String& lfn, uint entry) const;
+
+		// Return SFN
+		bool GetSFN(String& sfn, uint entry) const;
+
+		// Return directory entry
+		FatDirEnt* GetDirEnt(uint entry);
+		const FatDirEnt* GetDirEnt(uint entry) const;
+
+		// Return # of entries
+		uint Size() const { return _dir.Size() / sizeof (FatDirEnt); }
+
+	private:
+		// Generate short filename string from 11 char 8.3 name buffer.
+		// E.g. "FOO 2   TM " becomes "FOO 2.TM"
+		static void NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf);
+	};
 
 	// Simple numeric conversions
 	INLINE_ALWAYS uint32_t ClusterToSector(uint32_t cluster) const {
@@ -99,20 +147,6 @@ protected:
 	INLINE_ALWAYS bool IsInCluster(uint32_t cluster, filepos_t pos) {
 		return SectorToCluster(pos / 512) == cluster;
 	}
-
-	// Find directory entry, or NULL if not found.
-	// If name is Empty, return next name.
-	// Can be used either to find a particular file, or to enumerate
-	// directory contents.
-	FatDirEnt* FindDirEnt(const Vector<uint8_t>& dir, const String& name,
-						  String& file_found, FatDirEnt* reent = NULL);
-
-	// Collect LFN directory.  p points to 32-byte LFN directory entry.
-	void CollectLFN(Vector<uchar>& lfn, const uint8_t* p);
-
-	// Generate short filename string from 11 char 8.3 name buffer.
-	// E.g. "FOO 2   TM " becomes "FOO 2.TM"
-	void NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf);
 
 	// Obtain cluster list for file
 	bool GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1);

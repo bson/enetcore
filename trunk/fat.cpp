@@ -101,33 +101,8 @@ failed:
 }
 
 
-void Fat::CollectLFN(Vector<uchar>& lfn, const uint8_t* p)
-{
-	if (lfn.Headroom() < 13) return; // Egads, broken DIR
-
-	// LFN dir entries are in reverse order, so insert new entry up front
-	lfn.Insert(0, 13);
-
-	uint pos = 0;
-
-	++p;
-
-	for (uint i = 0; i < 5; ++i, p += 2)
-		lfn[pos++] = *p;
-
-	p += 3;
-	
-	for (uint i = 0; i < 6; ++i, p += 2)
-		lfn[pos++] = *p;
-
-	p += 2;
-	lfn[pos++] = *p;
-	p += 2;
-	lfn[pos++] = *p;
-}
-
-
-void Fat::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
+// * static
+void Fat::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 {
 	uint last_nonspace = NOT_FOUND;
 	for (uint i = 0; i < 9; ++i) {
@@ -146,81 +121,6 @@ void Fat::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 	}
 
 	if (last_nonspace != NOT_FOUND)  sfn.SetSize(last_nonspace + 1);
-}
-
-
-FatDirEnt* Fat::FindDirEnt(const Vector<uint8_t>& dir, const String& name,
-						   String& file_found,
-							   FatDirEnt* reent)
-{
-	if (dir.Empty() || reent == (FatDirEnt*)&dir.Back()) return NULL;
-
-	assert(!reent || reent >= (FatDirEnt*)&dir.Front());
-	assert(!reent || reent < (FatDirEnt*)&dir.Back());
-
-	const uint namelen = name.Size();
-
-	uint8_t namebuf[11];
-	uint dotpos = name.FindLast((uchar)'.');
-	if (dotpos == NOT_FOUND)  dotpos = namelen;
-	const uint namepart = min<uint>(dotpos, 8);
-	memset(namebuf, ' ', sizeof namebuf);
-	memcpy(namebuf, name.CStr(), namepart);
-	memcpy(namebuf + 8, name.CStr() + dotpos + 1, min<uint>(namelen - dotpos, 3));
-
-	for (uint i = 0; i < 11; ++i)
-		namebuf[i] = Util::ToUpper(namebuf[i]);
-		
-	Vector<uchar> lfn;			// Collects LFN
-	lfn.Reserve(256);
-	lfn.SetAutoResize(false);
-
-	reent = reent ? reent + 1 : (FatDirEnt*)&dir.Front();
-
-	for (FatDirEnt* d = reent; d < (FatDirEnt*)&dir.Back(); ++d) {
-		if (!d->IsUsed()) goto next_entry;
-
-		if (d->IsLFN()) {
-			CollectLFN(lfn, (const uint8_t*)d);
-			continue;
-		}
-		if (d->IsVolume()) goto next_entry;
-
-		// Remove trailing LFN spaces
-		int i;
-		for (i = lfn.Size() - 1; i >= 0; --i) {
-			if (lfn[i] != ' ')
-				break;
-		}
-		lfn.SetSize(i+1);
-
-		// First try a case insensitive match of long name
-		if (!lfn.Empty()) {
-			lfn.PushBack((uchar)0);
-			if (name.Empty() || !::xstrcasecmp(lfn + 0, name.CStr())) {
-				file_found.Take(lfn);
-				return d;
-			}
-		}
-
-		// Otherwise compare short names
-		i = 0;
-		for (;;) {
-			if (name.Empty() || i == 11) {
-				Vector<uchar> sfn;
-				NameFrom83(sfn, d->name);
-				file_found.Take(sfn);
-				return d;
-			}
-			if (namebuf[i] != d->name[i]) break;
-			++i;
-		}
-
-	next_entry:
-		lfn.Clear();
-	}
-
-	return NULL;
 }
 
 
@@ -312,60 +212,193 @@ bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sector
 }
 
 
+Fat::FTWalker::FTWalker(Fat& fat) : _fat(fat)
+{
+	Reset();
+}
+
+
+bool Fat::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
+{
+	Vector<String*> pathlist;
+	path.Split(pathlist, STR("/"));
+	assert(!pathlist.Empty());
+
+	bool ok = false;
+
+	const uint depth = pathlist.Size() - (enclosing ? 1 : 0);
+	if (!depth)  goto done;
+
+	for (uint i = 0; i < depth; ++i) {
+		const uint entry = FindNext(*pathlist[i]);
+		if (entry == NOT_FOUND) goto done;
+		if (!GetDirEnt(entry)->IsDir()) goto done;
+		Load(entry);			// Descend
+	}
+
+	if (enclosing) enclosed = *pathlist.Back();
+
+	ok = true;
+done:
+	pathlist.DeleteObjects();
+	return ok;
+}
+
+
+bool Fat::FTWalker::Reset()
+{
+	_dir.Clear();
+
+	if (_fat._fat32) {
+		Vector<uint32_t> dir_clusters;
+
+		if (!_fat.GetFileClusters(dir_clusters, _fat._root_dir_clus)) return false;
+		if (!_fat.LoadDataClusters(_dir, dir_clusters)) return false;
+	} else {
+		// FAT16: root dir is sector #
+		if (!_fat.LoadDataSectors(_dir, _fat._root_dir_clus, _fat._max_root * 32 / 512))
+			return false;
+	}
+
+	return true;
+}
+
+
+bool Fat::FTWalker::Load(uint entry)
+{
+	assert(entry != NOT_FOUND);
+
+	const uint32_t cluster1 = GetDirEnt(entry)->GetCluster();
+
+	Vector<uint32_t> dir_clusters;
+
+	if (!_fat.GetFileClusters(dir_clusters, cluster1)) return false;
+	if (!_fat.LoadDataClusters(_dir, dir_clusters)) return false;
+
+	return true;
+}
+
+
+uint Fat::FTWalker::FindNext(const String& name, uint start)
+{
+	if (_dir.Empty() || start == Size())  return NOT_FOUND;
+
+	assert(!start || (int)start >= 0);
+	assert(!start || start < Size());
+
+	for (uint entry = start != NOT_FOUND ? start + 1 : 0; entry < Size(); ++entry) {
+		const FatDirEnt* d = GetDirEnt(entry);
+
+		if (!d->IsUsed()) continue;
+		if (d->IsLFN()) continue;
+		if (d->IsVolume()) continue;
+
+		String fn;
+
+		// Compare in order: LFN, SFN
+		if (name.Empty() || (GetLFN(fn, entry) && fn.Equals(name))) return entry;
+		if (GetSFN(fn, entry) && fn.Equals(name)) return entry;
+	}
+
+	return NOT_FOUND;
+}
+
+
+bool Fat::FTWalker::GetLFN(String& lfn, uint entry) const
+{
+	assert(entry != NOT_FOUND);
+
+	Vector<uchar> fn;			// Collects LFN
+	fn.Reserve(256);
+	fn.SetAutoResize(false);
+
+	while ((int)entry >= 0) {
+
+		const FatDirEnt* d = GetDirEnt(entry);
+
+		if (!d->IsLFN()) break;
+
+		// XXX maybe check dirent LFN ordinal?  Nah...
+
+		if (fn.Headroom() < 13) return false; // Egads, broken DIR
+
+		const uint8_t* p = (const uint8_t*)d;
+		++p;
+		for (uint i = 0; i < 5; ++i, p += 2)  fn.PushBack(*p);
+		p += 3;
+		for (uint i = 0; i < 6; ++i, p += 2)  fn.PushBack(*p);
+		p += 2;
+		fn.PushBack(*p);
+		p += 2;
+		fn.PushBack(*p);
+
+		--entry;
+	}
+
+	// Remove trailing LFN spaces
+	int i;
+	for (i = fn.Size() - 1; i >= 0; --i) {
+		if (fn[i] != ' ') break;
+	}
+	fn.SetSize(i+1);
+
+	lfn.Take(fn);
+
+	return true;
+}
+
+
+bool Fat::FTWalker::GetSFN(String& sfn, uint entry) const
+{
+	const FatDirEnt* d = GetDirEnt(entry);
+
+	Vector<uchar> v;
+	NameFrom83(v, d->name);
+	sfn.Take(v);
+	return true;
+}
+
+
+FatDirEnt* Fat::FTWalker::GetDirEnt(uint entry)
+{
+	assert(entry != NOT_FOUND);
+	if (entry * sizeof (FatDirEnt) >= _dir.Size()) return NULL;
+
+	return (FatDirEnt*)(_dir + 0) + entry;
+}
+
+
+const FatDirEnt* Fat::FTWalker::GetDirEnt(uint entry) const
+{
+	assert(entry != NOT_FOUND);
+	if (entry * sizeof (FatDirEnt) >= _dir.Size()) return NULL;
+
+	return (FatDirEnt*)(_dir + 0) + entry;
+}
+
+
 FatFile* Fat::Open(const String& path)
 {
 	_dev.Retain();
 
-	Vector<String*> pathlist;
-	path.Split(pathlist, STR("/"));
-
-	Vector<uint8_t> dir;
-	Vector<uint32_t> dir_clusters;
-
-	uint32_t walk = _root_dir_clus;
-
-	dir.Reserve(512 * ClusterToSector(1));
-
-	// Walk the path chain
-	FatDirEnt* dirent = NULL;
-
 	FatFile* file = NULL;
-	uint32_t file_size = 0;
 
-	for (uint i = 0; i < pathlist.Size(); ++i) {
-		// Load directory contents
-		dir_clusters.SetSize(0);
-		dir.SetSize(0);
+	FTWalker ftw(*this);
+	String filename;
+	if (ftw.Find(path, true, filename)) {
+		const uint entry = ftw.FindNext(filename);
+		if (entry != NOT_FOUND) {
+			file = new FatFile(*this);
 
-		if (!i && !_fat32) {
-			// FAT16: root dir is sector #
-			if (!LoadDataSectors(dir, walk, _max_root * 32 / 512)) goto done;
-		} else {
-			if (!GetFileClusters(dir_clusters, walk)) goto done;
-			if (!LoadDataClusters(dir, dir_clusters)) goto done;
+			const FatDirEnt* dirent = ftw.GetDirEnt(entry);
+			file->_size = dirent->GetFileSize();
+			file->_clusters.Reserve(SectorToCluster((file->_size + 511) / 512) + 1);
+
+			if (!GetFileClusters(file->_clusters, dirent->GetCluster()))
+				delete exch<FatFile*>(file, NULL);
 		}
-
-		String filename;
-		dirent = FindDirEnt(dir, *pathlist[i], filename, NULL);
-		if (!dirent) goto done;
-
-		// Check if attempting to open a dir, or descend into a file
-		if (dirent->IsDir() == (i == pathlist.Size() - 1)) goto done;
-
-		// Descend, but remember file size
-		file_size = LE32(dirent->size);
-		walk = dirent->GetCluster();
 	}
 
-	file = new FatFile(*this);
-	file->_size = file_size;
-	file->_clusters.Reserve(SectorToCluster((file_size + 511) / 512) + 1);
-
-	if (!GetFileClusters(file->_clusters, walk))
-		delete exch<FatFile*>(file, NULL);
-
-done:
-	pathlist.DeleteObjects();
 	if (!file) _dev.Release();
 	return file;
 }
