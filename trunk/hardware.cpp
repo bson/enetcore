@@ -21,9 +21,9 @@ Gpio _gpio[2];
 PinNegOutput _led;
 PinNegOutput _ssel0;
 
-SDCard _sd(_spi0);
-
-Fat _fat(_sd);
+SpiDev _cardslot(_spi0);		// Card slot - on SPI bus 0
+SDCard _sd(_cardslot);			// Card block device - on card slot
+Fat _fat(_sd);					// Fat device - on SD block dev
 
 SerialPort _uart0((volatile void*)UART0_BASE, 115200);
 SerialPort _uart1((volatile void*)UART1_BASE, 9600);
@@ -310,7 +310,7 @@ void hwinit()
 	DMSG("Random uint: 0x%x", Util::Random<uint>());
 
 	_spi0.Init();
-	_spi0.SetSSEL(&_ssel0);
+	_cardslot.SetSSEL(&_ssel0);
 
 	_spi1.Init();
 

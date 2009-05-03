@@ -8,7 +8,7 @@
 
 class SDCard: public BlockDev {
 	Mutex _lock;
-	SPI& _spi;
+	SpiDev& _spi;
 	Output* _drivelock;			// Removal lock (or warning light)
 	uint8_t _inuse;				// Use counter
 	bool _initialized:1;
@@ -16,7 +16,7 @@ class SDCard: public BlockDev {
 	bool _sdhc:1;				// High capacity
 
 public:
-	SDCard(SPI& spi);
+	SDCard(SpiDev& spi);
 
 	// Try initializing SD card.
 	// Will reset the card into SPI mode.

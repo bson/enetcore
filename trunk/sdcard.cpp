@@ -4,7 +4,7 @@
 #include "crc16.h"
 
 
-SDCard::SDCard(SPI& spi) :
+SDCard::SDCard(SpiDev& spi) :
 	_spi(spi)
 {
 	_drivelock = NULL;
@@ -31,7 +31,7 @@ bool SDCard::Init()
 	_spi.SetSpeed(100000);
 
 	_spi.Select();
-	
+
 	uint8_t value = 0xff;
 
 	for (uint i = 0; i < 100 && value != 1; ++i)

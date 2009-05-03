@@ -6,23 +6,19 @@
 #include "crc16.h"
 
 
-class SPI {
-private:
+// SPI bus
+class SpiBus {
 	volatile uint8_t* _base;
-	Output* _ssel;				// SSEL output or NULL if none
-	uint8_t _prescaler;
+	uint8_t _prescaler;			// Current prescaler setting
 
 public:
 
-	SPI(uint32_t base);
+	SpiBus(uint32_t base);
 
 	void Init();
-	INLINE_ALWAYS void SetSSEL(Output* ssel) { _ssel = ssel; }
 
+	// Recomputes prescaler
 	void SetSpeed(uint hz);
-
-	void Select();
-	void Deselect();
 
 	// Send byte sequence, returns byte received on last byte
 	uint8_t Send(const uint8_t* s, uint len);
@@ -40,6 +36,41 @@ public:
 	bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL);
 };
 
-extern SPI _spi0, _spi1;
+extern SpiBus _spi0, _spi1;
+
+
+// Simple SPI device
+// Devices are associated with a bus and are distinguished by the output
+// used for SSEL.
+// While each device has its own speed, currently polarity and clock phase
+// aren't settable per device.
+
+class SpiDev {
+	SpiBus& _bus;
+	Output* _ssel;				// SSEL output for this device or NULL if none
+	uint _speed;				// Speed setting
+	bool _selected;				// Tracks whether currently selected
+public:
+	SpiDev(SpiBus& bus);
+	
+	// Init is currently a no-op
+	INLINE_ALWAYS void Init() { }
+	INLINE_ALWAYS void SetSSEL(Output* ssel) { _ssel = ssel; }
+	INLINE_ALWAYS void SetSpeed(uint hz) { _speed = hz; }
+
+	void Select();
+	void Deselect();
+
+	// These are delegated from bus - see SPI declaration for comments
+	INLINE_ALWAYS uint8_t Send(const uint8_t* s, uint len) { return _bus.Send(s, len); }
+	INLINE_ALWAYS uint8_t Read(uint8_t code = 0xff) { return _bus.Read(code); }
+	INLINE_ALWAYS uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) {
+		return _bus.ReadReply(interval, num_tries, code);
+	}
+	INLINE_ALWAYS bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL) {
+		return _bus.ReadBuffer(buffer, len, crc);
+	}
+};
+
 
 #endif // __SPI_H__

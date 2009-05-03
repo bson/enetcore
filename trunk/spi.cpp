@@ -3,36 +3,32 @@
 #include "thread.h"
 
 
-SPI _spi0(SPI0_BASE);
-SPI _spi1(SPI1_BASE);
+SpiBus _spi0(SPI0_BASE);
+SpiBus _spi1(SPI1_BASE);
 
 
-SPI::SPI(uint32_t base)
+SpiBus::SpiBus(uint32_t base)
 {
 	_base = (volatile uint8_t*)base;
-	_ssel = NULL;
 	_prescaler = 254;
 }
 
 
-void SPI::Init()
+void SpiBus::Init()
 {
-	Deselect();
 }
 
 
-void SPI::SetSpeed(uint hz)
+void SpiBus::SetSpeed(uint hz)
 {
-	Select();
-
 	const uint scaler = PCLK/hz & ~1;
 
 	_prescaler = max(min(scaler, (uint)254), (uint)8);
 	_base[SPI_SPCCR] = _prescaler;
 
-	DMSG("SPI: Prescaler = %u, clock = %u kHz", _prescaler, PCLK/_prescaler/1000);
+	DMSG("SpiBus: Prescaler = %u, clock = %u kHz", _prescaler, PCLK/_prescaler/1000);
 
-	// SPIE=1, LSBF=0, MSTR=1, CPOL=1, CPHA=0
+	// SPIE=0, LSBF=0, MSTR=1, CPOL=1, CPHA=0
 	_base[SPI_SPCR] = 0b00110000;
 
 	for (uint i = 0; i < 20; ++i) {
@@ -43,20 +39,7 @@ void SPI::SetSpeed(uint hz)
 	_base[SPI_SPCR] = 0b10110000;
 }
 
-
-void SPI::Select()
-{
-	if (_ssel) _ssel->Raise();
-}
-
-
-void SPI::Deselect()
-{
-	if (_ssel) _ssel->Lower();
-}
-
-
-uint8_t SPI::Read(uint8_t code)
+uint8_t SpiBus::Read(uint8_t code)
 {
 	// Xmit
 	_base[SPI_SPDR] = code;
@@ -73,7 +56,7 @@ uint8_t SPI::Read(uint8_t code)
 }
 
 
-uint8_t SPI::Send(const uint8_t* s, uint len)
+uint8_t SpiBus::Send(const uint8_t* s, uint len)
 {
 	uint8_t tmp = 0xff;
 	while (len--)
@@ -83,7 +66,7 @@ uint8_t SPI::Send(const uint8_t* s, uint len)
 }
 
 
-uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
+uint8_t SpiBus::ReadReply(uint interval, uint num_tries, uint8_t code)
 {
 	while (num_tries--) {
 		const uint8_t tmp = Read(code);
@@ -102,7 +85,7 @@ uint8_t SPI::ReadReply(uint interval, uint num_tries, uint8_t code)
 }
 
 
-bool SPI::ReadBuffer(void* buffer, uint len, Crc16* crc)
+bool SpiBus::ReadBuffer(void* buffer, uint len, Crc16* crc)
 {
 	if (!len) return true;
 
@@ -127,4 +110,31 @@ bool SPI::ReadBuffer(void* buffer, uint len, Crc16* crc)
 		crc->Update(tmp);
 	}
 	return ok;
+}
+
+
+SpiDev::SpiDev(SpiBus& bus) :
+	_bus(bus),
+	_ssel(NULL),
+	_speed(100000),
+	_selected(false)
+{
+}
+
+void SpiDev::Select()
+{
+	if (!_selected)  {
+		_bus.SetSpeed(_speed);
+		if (_ssel) _ssel->Raise();
+		_selected = true;
+	}
+}
+
+
+void SpiDev::Deselect()
+{
+	if (_selected) {
+		if (_ssel) _ssel->Lower();
+		_selected = false;
+	}
 }
