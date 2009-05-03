@@ -32,9 +32,8 @@ void SerialPort::FillFifo()
 	Spinlock::Scoped L(_lock);
 
 	while (!_sendq.Empty() && (_base[UART_LSR] & 0b100000)) {
-		uchar c = _sendq.Front();
+		_base[UART_THR] = _sendq.Front();
 		_sendq.PopFront();
-		_base[UART_THR] = c;
 	}
 }
 
@@ -45,9 +44,8 @@ void SerialPort::SyncDrain()
 
 	while (!_sendq.Empty()) {
 		while (_base[UART_LSR] & 0b100000) {
-			uchar c = _sendq.Front();
+			_base[UART_THR] = _sendq.Front();
 			_sendq.PopFront();
-			_base[UART_THR] = c;
 		}
 	}
 }

@@ -5,14 +5,14 @@
 class SerialPort {
 	volatile uint8_t* _base;
 	Deque<uchar> _sendq;		// Tx buffer
-	Deque<uchar> _recvq;		// Tx buffer
+	Deque<uchar> _recvq;		// Rx buffer
 	mutable Spinlock _lock;
 
 public:
 	SerialPort(volatile void* base, uint default_speed = 9600) : 
 		_base((volatile uint8_t*)base)
 	{
-		SetSpeed(9600);
+		SetSpeed(default_speed);
 	}
 
 	~SerialPort() { }
