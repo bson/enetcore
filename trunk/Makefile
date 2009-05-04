@@ -26,7 +26,7 @@ SRCS=main.cpp hardware.cpp platform.cpp assert.cpp trace.cpp crc32.cpp	\
 	crc16.cpp serial.cpp mem.cpp malloc.cpp freelist.cpp util.cpp		\
 	arc4.cpp sha1.cpp time.cpp lookup3.cpp pstring.cpp hashtable.cpp	\
 	timer.cpp thread.cpp mutex.cpp spi.cpp sdcard.cpp ethernet.cpp		\
-	netaddr.cpp network.cpp dhcp.cpp ip.cpp udp.cpp fat.cpp
+	netaddr.cpp network.cpp dhcp.cpp ip.cpp udp.cpp fat.cpp i2c.cpp
 
 # Omit this for now (it should go in enetkit anyway!)
 # object.cpp

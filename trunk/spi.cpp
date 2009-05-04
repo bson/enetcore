@@ -3,9 +3,6 @@
 #include "thread.h"
 
 
-SpiBus _spi0(SPI0_BASE);
-SpiBus _spi1(SPI1_BASE);
-
 
 SpiBus::SpiBus(uint32_t base)
 {

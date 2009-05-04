@@ -9,6 +9,7 @@
 #include "util.h"
 #include "sdcard.h"
 #include "fat.h"
+#include "i2c.h"
 
 
 Thread* _main_thread;
@@ -21,15 +22,21 @@ Gpio _gpio[2];
 PinNegOutput _led;
 PinNegOutput _ssel0;
 
+SpiBus _spi0(SPI0_BASE);
+SpiBus _spi1(SPI1_BASE);
+
 SpiDev _cardslot(_spi0);		// Card slot - on SPI bus 0
 SDCard _sd(_cardslot);			// Card block device - on card slot
 Fat _fat(_sd);					// Fat device - on SD block dev
 
-SerialPort _uart0((volatile void*)UART0_BASE, 115200);
-SerialPort _uart1((volatile void*)UART1_BASE, 9600);
+SerialPort _uart0(UART0_BASE, 115200);
+SerialPort _uart1(UART1_BASE, 9600);
 
 Clock _clock;
 
+I2cBus _i2c0(I2C_BASE);
+
+Ethernet _eth0(CS8900A_BASE);
 
 
 void fault0(uint num)
@@ -276,17 +283,20 @@ void hwinit()
 				   "r"(fiq_stack + 16) : "cc", "r2", "memory");
 
 	// Install IRQ handlers
-	_vic.InstallHandler(INTCH_TIMER0, Clock::Interrupt); // Channel 4 is TIMER0/Clock
+	_vic.InstallHandler(INTCH_TIMER0, Clock::Interrupt);
 	_vic.EnableChannel(INTCH_TIMER0);
 
-	_vic.InstallHandler(INTCH_TIMER1, SysTimer::Interrupt); // Channel 5 is TIMER1/SysTimer
+	_vic.InstallHandler(INTCH_TIMER1, SysTimer::Interrupt);
 	_vic.EnableChannel(INTCH_TIMER1);
 
-	_vic.InstallHandler(INTCH_UART0, SerialPort::Interrupt); // Channel 6 is UART0
+	_vic.InstallHandler(INTCH_UART0, SerialPort::Interrupt);
 	_vic.EnableChannel(INTCH_UART0);
 	_uart0.SetInterrupts(true);
 	_uart0.SetSpeed(115200);
 	_uart0.Write(STR("\r\n\n"));
+
+	_vic.InstallHandler(INTCH_I2C, I2cBus::Interrupt);
+	_vic.EnableChannel(INTCH_I2C);
 
 	_vic.InstallHandler(INTCH_EINT2, Ethernet::Interrupt);
 
@@ -313,6 +323,9 @@ void hwinit()
 	_cardslot.SetSSEL(&_ssel0);
 
 	_spi1.Init();
+
+	_i2c0.Init();
+	_i2c0.SetSpeed(400000);		// std I2C
 
 	_eth0.Initialize();
 

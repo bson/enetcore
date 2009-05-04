@@ -3,8 +3,6 @@
 #include "util.h"
 
 
-Ethernet _eth0(CS8900A_BASE);
-
 
 namespace BufferPool {
 

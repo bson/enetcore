@@ -221,6 +221,17 @@ enum { GPIO0_BASE = 0xe0028000,
 };
 
 
+enum { I2C_BASE = 0xe001c000,
+	   I2C_CONSET = 0,
+	   I2C_CONCLR = 6,
+	   I2C_STAT = 1,
+	   I2C_DAT = 2,
+	   I2C_ADR = 3,
+	   I2C_SCLH = 4,
+	   I2C_SCLL = 5
+};
+
+
 #define __irq   __attribute__((interrupt("IRQ"))) NOINSTRUMENT
 #define __fiq   __attribute__((interrupt("FIQ"))) NOINSTRUMENT
 #define __abort   __attribute__((interrupt("ABT"))) NOINSTRUMENT
@@ -243,11 +254,22 @@ void busy_wait () NOINSTRUMENT NAKED;
 
 // Interrupt channels
 enum {
+	INTCH_WDT = 0,
 	INTCH_TIMER0 = 4,
 	INTCH_TIMER1 = 5,
 	INTCH_UART0 = 6,
 	INTCH_UART1 = 7,
-	INTCH_EINT2 = 16
+	INTCH_PWM0 = 8,
+	INTCH_I2C = 9,
+	INTCH_SPI0 = 10,
+	INTCH_SPI1 = 11,
+	INTCH_PLL = 12,
+	INTCH_RTC = 13,
+	INTCH_EINT0 = 14,
+	INTCH_EINT1 = 15,
+	INTCH_EINT2 = 16,
+	INTCH_EINT3 = 17,
+	INTCH_ADC = 18
 };
 
 

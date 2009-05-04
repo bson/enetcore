@@ -9,7 +9,7 @@ class SerialPort {
 	mutable Spinlock _lock;
 
 public:
-	SerialPort(volatile void* base, uint default_speed = 9600) : 
+	SerialPort(uintptr_t base, uint default_speed = 9600) : 
 		_base((volatile uint8_t*)base)
 	{
 		SetSpeed(default_speed);
