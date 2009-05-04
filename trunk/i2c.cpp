@@ -64,6 +64,7 @@ void I2cBus::HandleInterrupt()
 			break;
 		case 0x30:				// Data byte NACK
 			// Retransmit last byte
+			assert(_pos);
 			--_pos;
 			// fallthru
 		case 0x18:				// SLA+W sent, ACK recvd
