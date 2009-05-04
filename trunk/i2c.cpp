@@ -150,12 +150,15 @@ uint I2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
 	_buflen = len;
 	_pos = 0;
 	
-	// Send Start
+	// Send Start to kick off state machine
 	_base[I2C_CONCLR] = CON_AA|CON_SI;
 	_base[I2C_CONSET] = CON_STA;
 
 	while (_state != STATE_DONE)
 		_change.Wait(_lock);
+
+	_state = STATE_IDLE;
+	_change.Signal();
 
 	return _pos;
 }

@@ -325,7 +325,7 @@ void hwinit()
 	_spi1.Init();
 
 	_i2c0.Init();
-	_i2c0.SetSpeed(400000);		// std I2C
+	_i2c0.SetSpeed(100000);		// 100k is std I2C; fast is 400k
 
 	_eth0.Initialize();
 
