@@ -1,8 +1,33 @@
-Implement TCP
+Add I2C support
+- Bus, device
+- LIS302DL use case
+
+Add Toshiba LCD driver
+
+Abstraction
+- Move CS8900A into cs8900a.{h,cpp}, typedef driver to Ethernet
+- Use similar scheme for SerialPort: LpcSerialPort and typedef, lpcserial.{h,cpp}
+- Repeat for Timer: LpcTimer, lpctimer.{h,cpp}
+- Repeat for SPI, I2C
+- Move LPC files into lpc/ dir
+- Add board dir olimex-lpc-l2294/
+- Make feature set more configurable
+  + I2C normal (100kHz)/fast mode (400kHz)
+  + *ALL* networking support on/off
+  + TCP on/off
+  + SD card support on/off
+  + FAT write support on/off
+  + #define _console _uart0
+
+Add LCD panel text driver
+- Add graphics support
+- Custom text?
 
 Add EINT connect support
 - Signal EventObject on interrupt
 - Add support for timer capture-and-interrupt for precise event time capture
+
+Implement TCP
 
 Add Route::_pmtu, TCP PMTU
 
@@ -24,10 +49,9 @@ Thread features
   thread's stack) - for single-cycle access
 - Track max stack usage
 
-FAT:
-- Make FAT16 use half the space of FAT32 for cluster list
-
-Implement CRC7
+Implement CRC
+- SD CRC7
+- Get fast crc16 to work!!!
 
 Inline-asm Ntohs/Ntohl, etc;
 - ReadBE32(), ReadBE16(), StoreBE16(), StoreBE32(),

@@ -8,7 +8,8 @@ I2cBus::I2cBus(uintptr_t base) :
 	_state(STATE_IDLE),
 	_slave(0),
 	_bufptr(NULL),
-	_buflen(0)
+	_buflen(0),
+	_acquired(false)
 {
 }
 
@@ -58,7 +59,7 @@ void I2cBus::HandleInterrupt()
 			break;
 		case 0x08:				// Sent Start
 		case 0x10:				// Sent repeated Start
-			_base[I2C_DAT] = _slave | SLA_W;
+			_base[I2C_DAT] = _slave & ~SLA_R;
 			_base[I2C_CONCLR] = CON_AA|CON_STA;
 			_base[I2C_CONSET] = 0;
 			break;
@@ -75,8 +76,8 @@ void I2cBus::HandleInterrupt()
 				_base[I2C_CONCLR] = CON_STA;
 				_base[I2C_CONSET] = CON_AA;
 			} else {
-				_base[I2C_CONCLR] = CON_STA|CON_AA;
-				_base[I2C_CONSET] = CON_STO;
+				_base[I2C_CONCLR] = _final && _final_nak ? CON_STA : CON_STA|CON_AA;
+				_base[I2C_CONSET] = _final ? CON_STO : 0;
 				_state = STATE_DONE;
 			}
 			break;
@@ -93,7 +94,7 @@ void I2cBus::HandleInterrupt()
 			break;
 		case 0x08:				// Sent Start
 		case 0x10:				// Sent repeated Start
-			_base[I2C_DAT] = _slave & ~SLA_W;
+			_base[I2C_DAT] = _slave | SLA_R;
 			_base[I2C_CONCLR] = CON_AA;
 			_base[I2C_CONSET] = CON_STA;
 			break;
@@ -108,15 +109,15 @@ void I2cBus::HandleInterrupt()
 				_base[I2C_CONCLR] = CON_STA;
 				_base[I2C_CONSET] = CON_AA;
 			} else {
-				_base[I2C_CONCLR] = CON_STA|CON_AA;
-				_base[I2C_CONSET] = CON_STO;
+				_base[I2C_CONCLR] = _final && _final_nak ? CON_STA : CON_STA|CON_AA;
+				_base[I2C_CONSET] = _final ? CON_STO : 0;
 				_state = STATE_DONE;
 			}
 			break;
 		case 0x58:				// Data byte, NACK
 			// Simply stop, returning what we received
-			_base[I2C_CONCLR] = CON_STA|CON_AA;
-			_base[I2C_CONSET] = CON_STO;
+			_base[I2C_CONCLR] = _final && _final_nak ? CON_STA : CON_STA|CON_AA;
+			_base[I2C_CONSET] = _final ? CON_STO : 0;
 			_state = STATE_DONE;
 			break;
 		}
@@ -136,6 +137,22 @@ void I2cBus::HandleInterrupt()
 }
 
 
+void I2cBus::Acquire()
+{
+	Mutex::Scoped L(_lock);
+	while (_acquired)  _change.Wait(_lock);
+	_acquired = true;
+}
+
+
+void I2cBus::Release()
+{
+	Mutex::Scoped L(_lock);
+	_acquired = false;
+	_change.Signal();
+}
+
+
 uint I2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
 {
 	Mutex::Scoped L(_lock);
@@ -149,6 +166,8 @@ uint I2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
 	_bufptr = buf;
 	_buflen = len;
 	_pos = 0;
+	_final = false;
+	_final_nak = true;			// Default to NAK after last receive
 	
 	// Send Start to kick off state machine
 	_base[I2C_CONCLR] = CON_AA|CON_SI;

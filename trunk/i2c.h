@@ -14,7 +14,7 @@ class I2cBus {
 		CON_EN  = 0b1000000
 	};
 
-	enum { SLA_W = 0x80 };
+	enum { SLA_R = 1 };
 
 	enum Mode {
 		STATE_IDLE = 0,			// Idle
@@ -35,6 +35,9 @@ class I2cBus {
 	uint8_t* _bufptr;	   // Byte string to send/receive
 	uint8_t _buflen;	   // Number of bytes left
 	uint8_t _pos;		   // Next byte to send/receive
+	bool _final:1;		   // Request is final (issue STO after)
+	bool _final_nak:1;	   // End last receive with NAK rather than ACK prior to Stop
+	bool _acquired:1;	   // Bus is acquired
 
 public:
 	I2cBus(uintptr_t base);
@@ -46,12 +49,23 @@ public:
 
 	void HandleInterrupt();
 
+	// Acquire/release bus
+	void Acquire();
+	void Release();
+
 	// Write buffer to slave
 	void Write(uint8_t slave, const uint8_t* buf, uint len);
 
 	// Read buffer from slave
 	// Returns actual number of bytes received
 	uint Read(uint8_t slave, uint8_t* buf, uint len);
+
+	// Set final flag - read/write is last is series and will be
+	// finished with Stop
+	INLINE_ALWAYS void Final() { _final = true; }
+
+	// Indicate final transaction ends with ACK rather than the default NAK
+	INLINE_ALWAYS void FinalAck() { _final_nak = false; }
 
 private:
 	// Master cycle (send/recv)
@@ -70,17 +84,12 @@ class I2cDev {
 public:
 	I2cDev(I2cBus& bus, uint8_t slave);
 
+	INLINE_ALWAYS void AcquireBus() { _bus.Acquire(); }
+	INLINE_ALWAYS void ReleaseBus() { _bus.Release(); }
+	INLINE_ALWAYS void Final() { _bus.Final(); }
+	INLINE_ALWAYS void FinalAck() { _bus.FinalAck(); }
 	INLINE_ALWAYS void Write(const uint8_t* buf, uint len) { _bus.Write(_slave, buf, len); }
 	INLINE_ALWAYS uint Read(uint8_t* buf, uint len) { return _bus.Read(_slave, buf, len); }
-
-	// Read/write simple scalar
-	template <typename T> void Write(T val) { Write((const uint8_t*)&val, sizeof val); }
-	template <typename T> NOINLINE T Read() {
-		T temp;  uint len;
-		while (Read((uint8_t*)&temp, sizeof temp) != sizeof temp)
-			;
-		return temp;
-	}
 };
 
 #endif // __I2C_H__
