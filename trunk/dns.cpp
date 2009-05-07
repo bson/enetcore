@@ -26,8 +26,7 @@ void Dns::CreateLookupQuery(Deque<uint8_t>& buf, const String& host)
 	dnsh.rd = true;
 	dnsh.questions = Htons(1);
 
-	uint query_len = 4 + fqdn.Size() / 4 + 1;
-	query_len += 4 - (query_len & 3); // Pad 1-4 zero bytes
+	const uint query_len = 4 + fqdn.Size() + 1;
 
 	uint8_t* query = buf + buf.Grow(query_len);
 
@@ -52,7 +51,7 @@ void Dns::CreateLookupQuery(Deque<uint8_t>& buf, const String& host)
 		}
 	}
 
-	uint16_t* type_class = (uint16_t*)(buf + buf.Grow(4));
-	type_class[0] = Htons(TYPE_A);
-	type_class[1] = Htons(CLASS_IN);
+	const uint16_t type_class[2] = { Htons(TYPE_A), Htons(CLASS_IN) };
+
+	memcpy(buf + buf.Grow(4), type_class, 4);
 }
