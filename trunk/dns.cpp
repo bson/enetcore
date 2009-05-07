@@ -21,7 +21,6 @@ void Dns::Init()
 	assert(_sock);
 	_sock->SetEventMask(CoreSocket::EVENT_READABLE);
 	_sock->Bind(NetAddr(INADDR_ANY, DNS_PORT));
-	_change.Signal();
 }
 
 
