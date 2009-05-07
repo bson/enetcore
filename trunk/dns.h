@@ -3,6 +3,10 @@
 
 #include "ethernet.h"
 #include "network.h"
+#include "udp.h"
+
+
+enum { DNS_PORT = 123 };
 
 
 // Base DNS header
@@ -26,41 +30,84 @@ struct NOVTABLE Dnsh {
 	uint16_t rr_answers;		// RR answers
 	uint16_t rr_auth;			// Authority RRs
 	uint16_t rr_add;			// Additional RRs
-};
 
-
-// Common reply data.  NAME precedes this, and RDATA follows.
-struct NOVTABLE DnsRdata {
-	uint16_t type;
-	uint16_t cl;
-	uint32_t ttl;
-	uint16_t length;
-};
-	
-class Dns {
-	static uint16_t _id;		// ID counter
+	// Common reply data.  NAME precedes this, and RDATA follows.
+	struct NOVTABLE DnsRdata {
+		uint16_t type;
+		uint16_t cl;
+		uint32_t ttl;
+		uint16_t length;
+	};
 
 	enum {
 		TYPE_A = 1,				// IPv4 addr
 		CLASS_IN = 1			// INET4
 	};
 		
-	static String _domain;
-
-public:
 	// Add forward A RR query for host to buf
 	// The buffer head should be at the first byte to fill in
 	static void CreateLookupQuery(Deque<uint8_t>& buf, const String& host);
 
-	// Return default search domain
-	INLINE_ALWAYS static const String& GetDomain() { return _domain; }
-
-	// Set search domain
-	INLINE_ALWAYS static void SetDomain(const String& arg) { _domain = arg; }
-
 	// Retrieve first RR A record from reply
 	// On a DNS server failure, rcode contains the reason
 	static bool GetRRA1(const Deque<uint8_t>& dnspkt, in_addr_t& addr, uint& rcode);
+
 };
+
+	
+class Dns {
+	uint16_t _id;				// ID counter
+	in_addr_t _ns;				// Name server
+	String _domain;
+	UdpCoreSocket* _sock;		// NS socket
+
+	enum State {
+		STATE_IDLE,
+		STATE_RESOLVING
+	};
+
+	uint8_t _state;
+	mutable Mutex _lock;
+	CondVar _change;			// Signals state change
+
+	enum { MAX_ATTEMPTS = 5 };
+	enum { NS_TIMEOUT = 5 };
+
+public:
+	Dns();
+
+	// Initialize
+	void Init();
+
+	// Set name server
+	void SetNS(in_addr_t ns);
+
+	// Return default search domain
+	INLINE_ALWAYS const String& GetDomain() { return _domain; }
+
+	// Set search domain
+	INLINE_ALWAYS void SetDomain(const String& arg) {
+		_domain = arg;
+		_change.Broadcast();
+	}
+
+	// Name to addr lookup
+	bool GetAddrByName(const String& name, in_addr_t& addr);
+
+	// ID management
+	// XXX This is currently naive, but in the future we should make
+	// it a random sequence.
+	uint16_t CurId() { return _id; }
+	uint16_t NextId() { return ++_id; }
+
+	// State management
+	void SetState(State new_state);
+	void Acquire();
+	void Release();
+
+};
+
+extern Dns _dns;
+
 
 #endif // __DNS_H__
