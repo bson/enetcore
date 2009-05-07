@@ -32,6 +32,9 @@ void Dns::SetNS(in_addr_t ns)
 	if (ns != _ns) {
 		_ns = ns;
 
+		NetAddr a(ns, DNS_PORT);
+		DMSG("DNS: NS set to %A", &a);
+
 		assert(_sock);
 		_sock->Connect(NetAddr(ns, DNS_PORT));
 		_change.Signal();
@@ -68,6 +71,8 @@ bool Dns::GetAddrByName(const String& name, in_addr_t& addr)
 				uint rcode;
 				if (Dnsh::GetRRA1(req, addr, rcode)) {
 					Release();
+					NetAddr a(addr, 0);
+					DMSG("DNS: %S: result: %a", &name, &a);
 					return true;
 				}
 				DMSG("DNS: IN A query for %S failed: rcode=%u", &name, rcode);
