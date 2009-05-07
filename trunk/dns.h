@@ -8,9 +8,9 @@
 // Base DNS header
 struct NOVTABLE Dnsh {
 	uint16_t id;
-	bool response:1;			// Query/response
+	bool qr:1;					// Query/response
 
-	enum { OPCODE_QUERY = 0 };
+	enum { OPCODE_QUERY = 0	};
 
 	uint8_t opcode:4;
 	bool aa:1;					// Authoritative
@@ -29,6 +29,14 @@ struct NOVTABLE Dnsh {
 };
 
 
+// Common reply data.  NAME precedes this, and RDATA follows.
+struct NOVTABLE DnsRdata {
+	uint16_t type;
+	uint16_t cl;
+	uint32_t ttl;
+	uint16_t length;
+};
+	
 class Dns {
 	static uint16_t _id;		// ID counter
 
@@ -42,10 +50,17 @@ class Dns {
 public:
 	// Add forward A RR query for host to buf
 	// The buffer head should be at the first byte to fill in
-	static void CreateLookupQuery(IOBuffer& buf, const String& host);
+	static void CreateLookupQuery(Deque<uint8_t>& buf, const String& host);
 
 	// Return default search domain
 	INLINE_ALWAYS static const String& GetDomain() { return _domain; }
+
+	// Set search domain
+	INLINE_ALWAYS static void SetDomain(const String& arg) { _domain = arg; }
+
+	// Retrieve first RR A record from reply
+	// On a DNS server failure, rcode contains the reason
+	static bool GetRRA1(const Deque<uint8_t>& dnspkt, in_addr_t& addr, uint& rcode);
 };
 
 #endif // __DNS_H__
