@@ -45,8 +45,6 @@ bool Dns::GetAddrByName(const String& name, in_addr_t& addr)
 
 	assert(_sock);
 
-	uint backoff_sec = NS_TIMEOUT;
-
 	for (uint attempt = 0; attempt < MAX_ATTEMPTS; ++attempt) {
 		Deque<uchar> req;
 
@@ -55,7 +53,7 @@ bool Dns::GetAddrByName(const String& name, in_addr_t& addr)
 		// Generate fresh IN A query
 		Dnsh::CreateLookupQuery(req, name);
 
-		const Time deadline = Time::Now() + Time::FromSec(backoff_sec);
+		const Time deadline = Time::Now() + Time::FromSec(NS_TIMEOUT);
 
 		_sock->Send(req + 0, req.Size());
 		while (Time::Now() < deadline) {
@@ -74,9 +72,6 @@ bool Dns::GetAddrByName(const String& name, in_addr_t& addr)
 				}
 				DMSG("DNS: IN A query for %S failed: rcode=%u", &name, rcode);
 			}
-
-			backoff_sec += 10;	// XXX make this RFC compliant
-			DMSG("DNS: failed; backoff now = %u", backoff_sec);
 		}
 	}
 
