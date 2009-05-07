@@ -19,6 +19,11 @@ Abstraction
   + FAT write support on/off
   + #define _console _uart0
 
+Better instrumentation control
+- NDMSG to suppress debug messages
+- Break out assert into BoundsCheck() and Invariant().
+- Add StackCheck()
+
 Add LCD panel text driver
 - Add graphics support
 - Custom text?
