@@ -3,7 +3,7 @@
 #include "udp.h"
 
 
-Ip _ip;
+Ip _ip0(_udp0);
 
 
 uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)
@@ -568,7 +568,7 @@ void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
 	buf->SetSize((uint8_t*)icmph.GetEnclosed() - &buf->Front() + toinclude);
 	icmph.SetCsum(sizeof icmph + toinclude);
 
-	_ip.Send(buf, dest, DummyChecksummer());
+	Ip::Send(buf, dest, DummyChecksummer());
 }
 
 

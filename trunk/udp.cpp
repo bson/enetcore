@@ -1,8 +1,9 @@
 #include "enetkit.h"
 #include "udp.h"
+#include "ip.h"
 
 
-Udp _udp;
+Udp _udp0(_ip0);
 
 
 UdpCoreSocket* Udp::Create()
@@ -131,7 +132,7 @@ void Udp::IcmpError(Icmph::Type type, uint code, in_addr_t sender, in_addr_t des
 UdpCoreSocket::~UdpCoreSocket()
 {
 	if (_cached_route)  _cached_route->Release();
-	_udp.Deregister(this);
+	_udp0.Deregister(this);
 }
 
 
@@ -140,19 +141,19 @@ bool UdpCoreSocket::Bind(const NetAddr& arg)
 	Tuple t(_id);
 	t.sport = Htons(arg.GetPort());
 	t.saddr = arg.GetAddr4();
-	if (_udp.Find(t)) {
+	if (_udp0.Find(t)) {
 		CoreSocket::SetError(ERR_ADDR_IN_USE);
 		return false;
 	}
 
 	// Can't hold lock across _udp calls, or we'll deadlock with
 	// network thread
-	_udp.Deregister(this);
+	_udp0.Deregister(this);
 	{
 		Mutex::Scoped L(_lock);
 		_id = t;
 	}
-	_udp.Register(this);
+	_udp0.Register(this);
 	return true;
 }
 
@@ -163,17 +164,17 @@ bool UdpCoreSocket::Connect(const NetAddr& dest)
 	Tuple t(_id);
 	t.dport = Ntohs(dest.GetPort());
 	t.daddr = dest.GetAddr4();
-	if (_udp.Find(t)) {
+	if (_udp0.Find(t)) {
 		CoreSocket::SetError(ERR_ADDR_IN_USE);
 		return false;
 	}
 
-	_udp.Deregister(this);
+	_udp0.Deregister(this);
 	{
 		Mutex::Scoped L(_lock);
 		_id = t;
 	}
-	_udp.Register(this);
+	_udp0.Register(this);
 	
 	return true;
 }
@@ -240,7 +241,7 @@ bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 	iph.source = INADDR_ANY /* _id.saddr */;
 
 	Ip::Route* rt = _connected ? _cached_route : NULL;
-	Ip::Route* r = _ip.Send(buf, dest.GetAddr4(), _udp, rt);
+	Ip::Route* r = _ip0.Send(buf, dest.GetAddr4(), _udp0, rt);
 	if (_connected && r != _cached_route) {
 		if (r) r->Retain();
 		_cached_route = r;
@@ -293,5 +294,5 @@ bool UdpCoreSocket::RecvFrom(void* data, uint& len, NetAddr& sender)
 
 bool UdpCoreSocket::Close()
 {
-	_udp.Deregister(this);
+	_udp0.Deregister(this);
 }

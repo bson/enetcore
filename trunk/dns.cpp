@@ -1,11 +1,13 @@
 #include "enetkit.h"
 #include "dns.h"
+#include "udp.h"
 
 
-Dns _dns0;
+Dns _dns0(_udp0);
 
 
-Dns::Dns() :
+Dns::Dns(Udp& udp) :
+	_udp(udp),
 	_id(0),
 	_sock(NULL),
 	_state(STATE_IDLE)
@@ -17,7 +19,7 @@ void Dns::Init()
 {
 	Mutex::Scoped L(_lock);
 
-	_sock = _udp.Create();
+	_sock = _udp0.Create();
 	assert(_sock);
 	_sock->SetEventMask(CoreSocket::EVENT_READABLE);
 	_sock->Bind(NetAddr(INADDR_ANY, DNS_PORT));

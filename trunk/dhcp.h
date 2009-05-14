@@ -22,8 +22,11 @@ struct Dhcp {
 
 
 	Mutex _lock;
+
 	Ethernet& _netif;			// Interface to configure
-	Dns& _dns;
+	Ip& _ip;					// IP to configure
+	Dns& _dns;					// DNS to configure
+
 	Time _start;				// Time since we started DHCP process
 	Time _renew;				// If _leased: time when lease expires
 	uint32_t _xid;				// XID we use
@@ -120,7 +123,7 @@ struct Dhcp {
 		uint8_t options[312];
 	};
 
-	Dhcp(Ethernet& netif, Dns& dns);
+	Dhcp(Ethernet& netif, Ip& ip, Dns& dns);
 
 	// (Re)Initialize and start obtaining config.  Called on powerup and when
 	// the ethernet link is restored.

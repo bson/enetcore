@@ -76,12 +76,14 @@ class Udp: public Checksummer {
 	friend class UdpCoreSocket;
 
 	Mutex _lock;
+	Ip& _ip;
+
 	HashMap<Tuple, UdpCoreSocket*> _socklist;
 
 	uint16_t _portnum;
 
 public:
-	Udp() : _portnum(32768) { }
+	Udp(Ip& ip) : _ip(ip), _portnum(32768) { }
 
 	// Create UDP socket
 	UdpCoreSocket* Create();
@@ -102,7 +104,7 @@ protected:
 };
 
 
-extern Udp _udp;
+extern Udp _udp0;
 
 
 #endif // __UDP_H__

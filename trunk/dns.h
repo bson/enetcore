@@ -56,6 +56,7 @@ struct NOVTABLE Dnsh {
 
 	
 class Dns {
+	Udp& _udp;
 	uint16_t _id;				// ID counter
 	in_addr_t _ns;				// Name server
 	String _domain;
@@ -74,7 +75,7 @@ class Dns {
 	enum { NS_TIMEOUT = 5 };
 
 public:
-	Dns();
+	Dns(Udp& udp);
 
 	// Initialize
 	void Init();

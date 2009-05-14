@@ -51,11 +51,11 @@ void* NetThread(void*)
 // Moved to hwinit - needs to be done before EINT2 is enabled
 //	_eth0.Initialize();
 
-	_ip.Initialize();
+	_ip0.Initialize();
 	_dhcp0.Reset();
 
 	Time dhcp_next = _dhcp0.GetServiceTime();
-	Time ip_next = _ip.GetServiceTime();
+	Time ip_next = _ip0.GetServiceTime();
 	bool link = !_eth0.GetLinkStatus();
 
 	for (;;) {
@@ -82,10 +82,10 @@ void* NetThread(void*)
 			switch (et) {
 			case ETHERTYPE_IP:
 				if (!_dhcp0.Receive(packet))
-					_ip.Receive(packet);
+					_ip0.Receive(packet);
 				break;
 			case ETHERTYPE_ARP:
-				_ip.ArpReceive(packet);
+				_ip0.ArpReceive(packet);
 				break;
 			}
 			BufferPool::FreeBuffer(packet);
@@ -94,6 +94,6 @@ void* NetThread(void*)
 		now = Time::Now();
 
 		if (now >= dhcp_next) dhcp_next = _dhcp0.Service();
-		if (now >= ip_next)  ip_next = _ip.Service();
+		if (now >= ip_next)  ip_next = _ip0.Service();
 	}
 }

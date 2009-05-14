@@ -7,12 +7,13 @@
 #include "dns.h"
 
 
-Dhcp _dhcp0(_eth0, _dns0);
+Dhcp _dhcp0(_eth0, _ip0, _dns0);
 
 static const uint8_t dhcp_magic[] = { 0x63, 0x82, 0x53, 0x63 };
 
-Dhcp::Dhcp(Ethernet& netif, Dns& dns) :
+Dhcp::Dhcp(Ethernet& netif, Ip& ip, Dns& dns) :
 	_netif(netif),
+	_ip(ip),
 	_dns(dns)
 {
 	_xid = Util::Random<uint32_t>();

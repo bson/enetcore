@@ -297,6 +297,8 @@ private:
 
 	mutable Mutex _lock;
 
+	class Udp& _udp;					// UDP
+
 	Vector<Route*> _routes;
 	Vector<IOBuffer*> _pending_arp;
 	Set<Route*, Route::Order> _timer; // Route timer list
@@ -304,6 +306,8 @@ private:
 	uint16_t _id;				// ID counter
 
 public:
+	Ip(Udp& udp) : _udp(udp) { }
+
 	void Initialize();
 	
 	// Remove interface and all entries that refer to it
@@ -431,6 +435,6 @@ private:
 	void SatisfiedARP(Route* rt, const uint8_t* macaddr);
 };
 
-extern Ip _ip;
+extern Ip _ip0;
 
 #endif // __IP_H__
