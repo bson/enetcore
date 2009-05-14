@@ -2,7 +2,7 @@
 #include "dns.h"
 
 
-Dns _dns;
+Dns _dns0;
 
 
 Dns::Dns() :
@@ -112,7 +112,7 @@ void Dnsh::CreateLookupQuery(Deque<uint8_t>& buf, const String& host)
 
 	if (fqdn.FindFirst('.') == NOT_FOUND) {
 		fqdn += STR(".");
-		fqdn += _dns.GetDomain();
+		fqdn += _dns0.GetDomain();
 	}
 
 	Dnsh& dnsh = *(Dnsh*)(buf + buf.Grow(sizeof (Dnsh)));
@@ -121,7 +121,7 @@ void Dnsh::CreateLookupQuery(Deque<uint8_t>& buf, const String& host)
 
 	// dnsh.opcode = OPCODE_QUERY;
 
-	dnsh.id = Htons(_dns.NextId());
+	dnsh.id = Htons(_dns0.NextId());
 	dnsh.rd = true;
 	dnsh.qr = true;
 	dnsh.questions = Htons(1);
@@ -169,7 +169,7 @@ bool Dnsh::GetRRA1(const Deque<uint8_t>& dnspkt, in_addr_t& addr, uint& rcode)
 
 	rcode = dnsh.rcode;
 
-	if (Ntohs(dnsh.id) != _dns.CurId() || dnsh.qr || dnsh.rcode || !dnsh.questions ||
+	if (Ntohs(dnsh.id) != _dns0.CurId() || dnsh.qr || dnsh.rcode || !dnsh.questions ||
 		!dnsh.rr_answers)
 		return false;
 

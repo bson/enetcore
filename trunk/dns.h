@@ -107,7 +107,7 @@ public:
 
 };
 
-extern Dns _dns;
+extern Dns _dns0;
 
 
 #endif // __DNS_H__

@@ -7,11 +7,13 @@
 #include "dns.h"
 
 
-Dhcp _dhcp0(_eth0);
+Dhcp _dhcp0(_eth0, _dns0);
 
 static const uint8_t dhcp_magic[] = { 0x63, 0x82, 0x53, 0x63 };
 
-Dhcp::Dhcp(Ethernet& netif) : _netif(netif)
+Dhcp::Dhcp(Ethernet& netif, Dns& dns) :
+	_netif(netif),
+	_dns(dns)
 {
 	_xid = Util::Random<uint32_t>();
 }
@@ -81,8 +83,6 @@ bool Dhcp::Receive(IOBuffer* buf)
 			const in_addr_t prev_lease = _lease;
 			const in_addr_t prev_mask = _netmask;
 			const in_addr_t prev_gw = _gw;
-			const in_addr_t prev_ns = _ns;
-			const String prev_domain(_domain);
 
 			_lease = pkt->yiaddr;
 
@@ -107,10 +107,8 @@ bool Dhcp::Receive(IOBuffer* buf)
 				_ip.AddDefaultRoute(_netif, _gw);
 			}
 
-			if (_ns != prev_ns || _domain != prev_domain) {
-				_dns.SetDomain(_domain);
-				_dns.SetNS(_ns);
-			}
+			_dns.SetDomain(_domain);
+			_dns.SetNS(_ns);
 
 			break;
 		}
