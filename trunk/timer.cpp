@@ -20,7 +20,7 @@ void Timer::RunTimerFreq(uint freq, uint mr)
 	_base[TIMER_PR] = prescale - 1;
 	_base[TIMER_MR0+mr] = match;
 
-	// Clear and reload TC on match
+	// Clear and reset TC on match
 	_base[TIMER_MCR] = 0b011 << (mr * 3);
 	
 	_base[TIMER_TCR] = 0b01;
@@ -46,7 +46,7 @@ void Timer::RunTimer(uint count, uint mr)
 
 
 
-// * static __irq
+// * static __irq NAKED
 void Timer::Interrupt()
 {
 	SaveStateExc(4);
@@ -73,7 +73,6 @@ void Timer::HandleInterrupt(uint mr)
 }
 
 
-// * implements Clock::GetTime
 void Clock::Tick()
 {
 	_time += TIMEBASE / HZ;

@@ -8,7 +8,7 @@ class Timer {
 	uint8_t _resolution;
 
 public:
-	Timer(uint32_t base) :
+	Timer(uintptr_t base) :
 		_base((volatile uint32_t*)base)
 	{ }
 
