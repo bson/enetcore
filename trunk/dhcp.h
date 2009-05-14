@@ -30,7 +30,7 @@ struct Dhcp {
 	in_addr_t _lease;			// Currently leased addr
 	in_addr_t _gw;				// Default gateway
 	in_addr_t _netmask;			// Netmask
-	in_addr_t _dns;				// DNS server
+	in_addr_t _ns;				// DNS server
 	String _domain;				// DNS domain
 	Time _rexmit;				// Next time we retransmit
 	uint8_t _backoff;			// Rexmit timer (4, 8, 16, 64 sec backoff)

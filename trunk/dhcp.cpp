@@ -4,6 +4,7 @@
 #include "udp.h"
 #include "ethernet.h"
 #include "util.h"
+#include "dns.h"
 
 
 Dhcp _dhcp0(_eth0);
@@ -80,6 +81,8 @@ bool Dhcp::Receive(IOBuffer* buf)
 			const in_addr_t prev_lease = _lease;
 			const in_addr_t prev_mask = _netmask;
 			const in_addr_t prev_gw = _gw;
+			const in_addr_t prev_ns = _ns;
+			const String prev_domain(_domain);
 
 			_lease = pkt->yiaddr;
 
@@ -92,7 +95,7 @@ bool Dhcp::Receive(IOBuffer* buf)
 			const NetAddr addr(_lease, 0);
 			const NetAddr mask(_netmask, 0);
 			const NetAddr gw(_gw, 0);
-			const NetAddr dns(_dns, 0);
+			const NetAddr dns(_ns, 0);
 			const uint expire = (_renew - Time::Now()).GetSec();
 			console("DHCP: addr %a/%a  gw %a", &addr, &mask, &gw);
 			console("DHCP: name server %a, domain \"%S\"", &dns, &_domain);
@@ -102,6 +105,11 @@ bool Dhcp::Receive(IOBuffer* buf)
 				_ip.RemoveInterface(_netif);
 				_ip.AddInterface(_netif, _lease, _netmask);
 				_ip.AddDefaultRoute(_netif, _gw);
+			}
+
+			if (_ns != prev_ns || _domain != prev_domain) {
+				_dns.SetDomain(_domain);
+				_dns.SetNS(_ns);
 			}
 
 			break;
@@ -299,7 +307,7 @@ void Dhcp::Extract(const uint8_t* options, uint len)
 
 	_netmask = INADDR_ANY;
 	_gw = INADDR_ANY;
-	_dns = INADDR_ANY;
+	_ns = INADDR_ANY;
 	_domain = STR("");
 
 	for (const uint8_t* p = options + 4; p < options + len; ) {
@@ -319,7 +327,7 @@ void Dhcp::Extract(const uint8_t* options, uint len)
 		}
 		case TAG_NS: {
 			const uint numns = len / 4;
-			memcpy(&_dns, p, 4);
+			memcpy(&_ns, p, 4);
 			break;
 		}
 		case TAG_DOMAIN: {
