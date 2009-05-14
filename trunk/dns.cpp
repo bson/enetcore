@@ -173,11 +173,23 @@ bool Dnsh::GetRRA1(const Deque<uint8_t>& dnspkt, in_addr_t& addr, uint& rcode)
 		!dnsh.rr_answers)
 		return false;
 
-	if (dnsh.questions) {
-		// XXX skip past the question
+	uint questions = 0;
+	// Skip past any question up front
+	// XXX we should really check it's OUR question...
+	for (uint q = 0; q < dnsh.questions && questions < dnspkt.Size(); ++q){
+		while (questions < dnspkt.Size() && dnspkt[questions])
+			++questions;
+
+		if (dnspkt.Size() - questions < 4)
+			return false;
+
+		questions += 4;
 	}
 
-	const uint8_t* rr = dnspkt + sizeof (Dnsh); 
+	if (dnspkt.Size() < sizeof (Dnsh) + questions + 1)
+		return false;
+
+	const uint8_t* rr = dnspkt + sizeof (Dnsh) + questions; 
 
 	uint len = &dnspkt.Back() - rr;
 	
