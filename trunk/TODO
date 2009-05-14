@@ -4,6 +4,10 @@ Add I2C support
 
 Add Toshiba LCD driver
 
+Heap should use Mutex, not Spinlock
+- Make sure no driver does dynamic allocation
+- Perhaps set a global flag when in IRQ, then assert on it in malloc (DEBUG only)
+
 Abstraction
 - Move CS8900A into cs8900a.{h,cpp}, typedef driver to Ethernet
 - Use similar scheme for SerialPort: LpcSerialPort and typedef, lpcserial.{h,cpp}
