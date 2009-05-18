@@ -135,3 +135,10 @@ void SpiDev::Deselect()
 		_selected = false;
 	}
 }
+
+
+void SpiDev::SetSpeed(uint hz) 
+{
+	_speed = hz;
+	if (_selected) _bus.SetSpeed(_speed);
+}

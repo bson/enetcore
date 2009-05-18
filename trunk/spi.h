@@ -56,7 +56,7 @@ public:
 	// Init is currently a no-op
 	INLINE_ALWAYS void Init() { }
 	INLINE_ALWAYS void SetSSEL(Output* ssel) { _ssel = ssel; }
-	INLINE_ALWAYS void SetSpeed(uint hz) { _speed = hz; }
+	void SetSpeed(uint hz);
 
 	void Select();
 	void Deselect();
