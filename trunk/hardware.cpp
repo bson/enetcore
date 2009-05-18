@@ -310,7 +310,8 @@ void hwinit()
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ, 0);
 
-	console("Enetcore 0.1 DEV");
+	_console.Write("Enetcore 0.1 DEV\r\nCopyright (c) 2009 Jan Brittenson\r\nAll Rights Reserved\r\n\n");
+//	_console.SyncDrain();
 
 	void *sp;
 	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");

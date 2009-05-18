@@ -105,7 +105,7 @@ failed:
 void Fat::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 {
 	uint last_nonspace = NOT_FOUND;
-	for (uint i = 0; i < 9; ++i) {
+	for (uint i = 0; i < 8; ++i) {
 		if (dirbuf[i] != ' ') last_nonspace = i;
 		sfn.PushBack(dirbuf[i]);
 	}
@@ -115,12 +115,12 @@ void Fat::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 	sfn.PushBack((uchar)'.');
 	
 	last_nonspace = NOT_FOUND;
-	for (uint i = 9; i < 12; ++i) {
-		if (dirbuf[i] != ' ') last_nonspace = i;
+	for (uint i = 8; i < 11; ++i) {
 		sfn.PushBack(dirbuf[i]);
+		if (dirbuf[i] != ' ') last_nonspace = sfn.Size();
 	}
 
-	if (last_nonspace != NOT_FOUND)  sfn.SetSize(last_nonspace + 1);
+	if (last_nonspace != NOT_FOUND)  sfn.SetSize(last_nonspace);
 }
 
 
@@ -228,7 +228,11 @@ bool Fat::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
 	bool ok = false;
 
 	const uint depth = pathlist.Size() - (enclosing ? 1 : 0);
-	if (!depth)  goto done;
+	if (!depth)  {
+		// Looking for this directory
+		ok = true;
+		goto done;
+	}
 
 	for (uint i = 0; i < depth; ++i) {
 		const uint entry = FindNext(*pathlist[i]);
@@ -237,10 +241,9 @@ bool Fat::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
 		Load(entry);			// Descend
 	}
 
-	if (enclosing) enclosed = *pathlist.Back();
-
 	ok = true;
 done:
+	if (ok && enclosing) enclosed = *pathlist.Back();
 	pathlist.DeleteObjects();
 	return ok;
 }
@@ -284,8 +287,8 @@ uint Fat::FTWalker::FindNext(const String& name, uint start)
 {
 	if (_dir.Empty() || start == Size())  return NOT_FOUND;
 
-	assert(!start || (int)start >= 0);
-	assert(!start || start < Size());
+	assert(start == NOT_FOUND || (int)start >= 0);
+	assert(start == NOT_FOUND || start < Size());
 
 	for (uint entry = start != NOT_FOUND ? start + 1 : 0; entry < Size(); ++entry) {
 		const FatDirEnt* d = GetDirEnt(entry);
