@@ -3,7 +3,7 @@
 #include "serial.h"
 
 
-void NORETURN AssertFailed(const char* expr, const char* file, int linenum)
+void __noreturn AssertFailed(const char* expr, const char* file, int linenum)
 {
 	console("Assert failed in %s line %u:", file, linenum);
 	console("Assert:   %s", expr);
@@ -23,7 +23,7 @@ void NORETURN AssertFailed(const char* expr, const char* file, int linenum)
 
 
 #ifdef DEBUG
-void NORETURN PanicStop(const uchar* msg, const char* file, int linenum)
+void __noreturn PanicStop(const uchar* msg, const char* file, int linenum)
 {
 	console("Panic: %s line %u:", file, linenum);
 	console("Panic:    %s", msg ? msg : STR("No panic string"));
@@ -36,7 +36,7 @@ void NORETURN PanicStop(const uchar* msg, const char* file, int linenum)
 	WaitForDebugger();
 }
 #else
-void NORETURN PanicStop(const uchar* msg)
+void __noreturn PanicStop(const uchar* msg)
 {
 	console("Panic: %s", msg ? msg : STR(""));
 
@@ -51,7 +51,7 @@ void NORETURN PanicStop(const uchar* msg)
 #endif
 
 #ifdef DEBUG
-void NORETURN WaitForDebugger()
+void __noreturn WaitForDebugger()
 {
 
 	fault(4);

@@ -93,11 +93,11 @@ public:
 	void ClrCtrl(uint8_t ctrlnum, uint8_t bits);
 
 	// Simple wrapper to read scalar, in host byte order
-	template <typename T> NOINLINE uint Read(uint8_t reg) {
+	template <typename T> __noinline uint Read(uint8_t reg) {
 		T tmp;
 		return Read(reg, &tmp, sizeof (T)) == sizeof(T) ? (uint)tmp : (uint)-1;
 	}
 
 	// Read status
-	INLINE_ALWAYS uint8_t GetStatus() { return Read<uint8_t>(REG_STATUS); }
+	__force_inline uint8_t GetStatus() { return Read<uint8_t>(REG_STATUS); }
 };

@@ -68,7 +68,7 @@ public:
 	}
 
 	// Self-contained Pin
-	class NOVTABLE Pin {
+	class __novtable Pin {
 		uint8_t _portnum;
 		uint8_t _pin;
 	public:

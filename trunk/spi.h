@@ -54,20 +54,20 @@ public:
 	SpiDev(SpiBus& bus);
 	
 	// Init is currently a no-op
-	INLINE_ALWAYS void Init() { }
-	INLINE_ALWAYS void SetSSEL(Output* ssel) { _ssel = ssel; }
+	__force_inline void Init() { }
+	__force_inline void SetSSEL(Output* ssel) { _ssel = ssel; }
 	void SetSpeed(uint hz);
 
 	void Select();
 	void Deselect();
 
 	// These are delegated from bus - see SPI declaration for comments
-	INLINE_ALWAYS uint8_t Send(const uint8_t* s, uint len) { return _bus.Send(s, len); }
-	INLINE_ALWAYS uint8_t Read(uint8_t code = 0xff) { return _bus.Read(code); }
-	INLINE_ALWAYS uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) {
+	__force_inline uint8_t Send(const uint8_t* s, uint len) { return _bus.Send(s, len); }
+	__force_inline uint8_t Read(uint8_t code = 0xff) { return _bus.Read(code); }
+	__force_inline uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) {
 		return _bus.ReadReply(interval, num_tries, code);
 	}
-	INLINE_ALWAYS bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL) {
+	__force_inline bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL) {
 		return _bus.ReadBuffer(buffer, len, crc);
 	}
 };

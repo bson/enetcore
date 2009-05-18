@@ -44,7 +44,7 @@ public:
 	void SyncDrain();
 
 	// Interrupt handler
-	static void Interrupt() __irq NAKED;
+	static void Interrupt() __irq __naked;
 
 	// Enable interrupts
 	void SetInterrupts(bool enable);

@@ -8,7 +8,7 @@
 #include "hashmap.h"
 
 
-struct NOVTABLE Udph {
+struct __novtable Udph {
 	uint16_t sport;				// Source port
 	uint16_t dport;				// Dest port
 	uint16_t len;				// Length

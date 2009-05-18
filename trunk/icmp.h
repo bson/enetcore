@@ -2,7 +2,7 @@
 #define __ICMP_H__
 
 
-struct NOVTABLE Icmph {
+struct __novtable Icmph {
 	// ICMP message types
 	enum Type {
 		ICMP_ECHO_REPLY, ICMP_1, ICMP_2, ICMP_DEST_UNREACH,

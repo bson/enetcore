@@ -10,7 +10,7 @@ enum { DNS_PORT = 123 };
 
 
 // Base DNS header
-struct NOVTABLE Dnsh {
+struct __novtable Dnsh {
 	uint16_t id;
 	bool qr:1;					// Query/response
 
@@ -32,7 +32,7 @@ struct NOVTABLE Dnsh {
 	uint16_t rr_add;			// Additional RRs
 
 	// Common reply data.  NAME precedes this, and RDATA follows.
-	struct NOVTABLE DnsRdata {
+	struct __novtable DnsRdata {
 		uint16_t type;
 		uint16_t cl;
 		uint32_t ttl;
@@ -84,10 +84,10 @@ public:
 	void SetNS(in_addr_t ns);
 
 	// Return default search domain
-	INLINE_ALWAYS const String& GetDomain() { return _domain; }
+	__force_inline const String& GetDomain() { return _domain; }
 
 	// Set search domain
-	INLINE_ALWAYS void SetDomain(const String& arg) {
+	__force_inline void SetDomain(const String& arg) {
 		_domain = arg;
 		_change.Broadcast();
 	}

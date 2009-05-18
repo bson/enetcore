@@ -5,7 +5,7 @@
 
  #include "lpc22xx.h"
 
-INLINE_ALWAYS uint DisableInterrupts() {
+__force_inline uint DisableInterrupts() {
 	uint prev;
 	asm volatile("mrs r12, cpsr\n"
 				 "mov %0, r12\n"
@@ -15,13 +15,13 @@ INLINE_ALWAYS uint DisableInterrupts() {
 	return prev;
 }
 
-INLINE_ALWAYS void EnableInterrupts(uint prev) {
+__force_inline void EnableInterrupts(uint prev) {
 	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
 }
 
 
 // Wait for interrupt - enter idle mode
-INLINE_ALWAYS void  WaitForInterrupt() {
+__force_inline void  WaitForInterrupt() {
 	PCON = 1;
 }
 
@@ -232,23 +232,23 @@ enum { I2C_BASE = 0xe001c000,
 };
 
 
-#define __irq   __attribute__((interrupt("IRQ"))) NOINSTRUMENT
-#define __fiq   __attribute__((interrupt("FIQ"))) NOINSTRUMENT
-#define __abort   __attribute__((interrupt("ABT"))) NOINSTRUMENT
-#define __undef   __attribute__((interrupt("UNDEF"))) NOINSTRUMENT
-#define __swi   __attribute__((interrupt("SWI"))) NOINSTRUMENT
+#define __irq   __attribute__((interrupt("IRQ"))) __noinstrument
+#define __fiq   __attribute__((interrupt("FIQ"))) __noinstrument
+#define __abort   __attribute__((interrupt("ABT"))) __noinstrument
+#define __undef   __attribute__((interrupt("UNDEF"))) __noinstrument
+#define __swi   __attribute__((interrupt("SWI"))) __noinstrument
 
 
 typedef void (*IRQHandler)();
 
 
 extern "C" {
-void Unexpected_Interrupt() __irq NAKED;
-void Data_Abort_Exception() __abort NAKED;
-void Program_Abort_Exception() __abort NAKED;
-void Undef_Exception() __undef NAKED;
-void SWI_Trap() __swi NAKED;
-void busy_wait () NOINSTRUMENT NAKED;
+void Unexpected_Interrupt() __irq __naked;
+void Data_Abort_Exception() __abort __naked;
+void Program_Abort_Exception() __abort __naked;
+void Undef_Exception() __undef __naked;
+void SWI_Trap() __swi __naked;
+void busy_wait () __noinstrument __naked;
 
 }
 

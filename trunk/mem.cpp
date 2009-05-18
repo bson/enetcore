@@ -3,7 +3,7 @@
 
 static MemStats memstats = { 0, 0, 0 };
 
-static NORETURN void OutOfMemory()
+static __noreturn void OutOfMemory()
 {
 	_malloc_region.SetReserve(0);
 	panic("Out of memory");

@@ -48,7 +48,7 @@ struct Arph {
 
 
 // IP header
-struct NOVTABLE Iph {
+struct __novtable Iph {
 	enum Flags {
 		IPFLAG_DF = 0x4000,		// Don't fragment - used for PMTU
 		IPFLAG_MF = 0x2000		// More fragments

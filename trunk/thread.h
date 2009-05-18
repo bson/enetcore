@@ -67,10 +67,10 @@ public:
 	// Initialize Thread system - must be called from main thread.  Returns its Thread.
 	static Thread& Initialize();
 
-	static INLINE_ALWAYS Thread& Self() { return *_curthread; }
+	static __force_inline Thread& Self() { return *_curthread; }
 
 	void Cancel() { _cancel = true; }
-	static INLINE_ALWAYS bool IsCanceled()  { return Self()._cancel; }
+	static __force_inline bool IsCanceled()  { return Self()._cancel; }
 
 	void Join();
 
@@ -115,7 +115,7 @@ public:
 
 	// Thread exception handler.  _curpcb should contain thread state
 	enum ExType { DATA_ABORT = 0, PROGRAM_ABORT, UNDEF, SWI };
-	static void Exception(ExType ex) NAKED NORETURN;
+	static void Exception(ExType ex) __naked __noreturn;
 
 private:
 	// Save/resume state of self - this function will return after save, then
@@ -139,7 +139,7 @@ private:
 	//    // _lock is no longer held here.  The thread is fully pre-emptible after
 	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
-	static bool NAKED Suspend();
+	static bool Suspend() __naked;
 	static void Resume() {
 		_curthread->_state = STATE_RESUME;	// Keep other CPUs from racing to resume
 		_curpcb = &_curthread->_pcb;
@@ -154,7 +154,7 @@ private:
 
 	// Change currently running thread's stack and start new frame chain
 	// Also set up stack limit.  end is lowest addr (i.e. start of region).
-	static void INLINE_ALWAYS SetStack(void* end, void* new_stack) {
+	static void __force_inline SetStack(void* end, void* new_stack) {
 		_lock.AssertLocked();
 		asm volatile ("mov sp, %0; mov fp, #0"
 					  : : "r"(new_stack) : "memory");
@@ -230,7 +230,7 @@ public:
 	static void SetTimer(uint usec);	// usec from now
 };
 
-INLINE_ALWAYS Thread& Self() { return Thread::Self(); }
+__force_inline Thread& Self() { return Thread::Self(); }
 
 extern Thread* _main_thread;
 

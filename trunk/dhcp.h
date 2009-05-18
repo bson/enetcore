@@ -94,7 +94,7 @@ struct Dhcp {
 
 	// Complete DHCP packet, sans frame header
 
-	struct NOVTABLE Packet {
+	struct __novtable Packet {
 		Iph iph;
 		Udph udph;
 

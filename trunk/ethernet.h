@@ -106,7 +106,7 @@ public:
 	void FillForBcast(IOBuffer* buf, uint16_t et);
 
 	// Interrupt handler
-	static void Interrupt() __irq NAKED;
+	static void Interrupt() __irq __naked;
 private:
 	// CS8900A TxCMD codes
 	// XXX The optimial TxStart depends on: CCLK, RAM wait states, and

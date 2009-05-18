@@ -6,7 +6,7 @@
 
 
 // PC partition entry
-struct NOVTABLE PartEnt {
+struct __novtable PartEnt {
 	uint8_t boot_flag;
 	uint8_t chs_begin[3];
 	uint8_t type_code;
@@ -17,7 +17,7 @@ struct NOVTABLE PartEnt {
 
 
 // FAT directory entry
-struct NOVTABLE FatDirEnt {
+struct __novtable FatDirEnt {
 	uint8_t name[11];			// 8.3 short file name
 	uint8_t attrib;				// File attribute
 	uint8_t pad[8];
@@ -26,13 +26,13 @@ struct NOVTABLE FatDirEnt {
 	uint16_t cluslo;			// Cluster, low 16 bits
 	uint32_t size;				// File size in bytes
 
-	INLINE_ALWAYS uint32_t GetCluster() const { return (LE16(clushi) << 16) + LE16(cluslo); }
-	INLINE_ALWAYS bool IsUsed() const { return name[0] != 0xe5; }
-	INLINE_ALWAYS bool IsLFN() const { return (attrib & 0xf) == 0xf; }
-	INLINE_ALWAYS bool IsVolume() const { return (attrib & 8) != 0; }
-	INLINE_ALWAYS bool IsDir() const { return (attrib & 16) != 0; }
-	INLINE_ALWAYS bool IsRO() const { return (attrib & 1) != 0; }
-	INLINE_ALWAYS uint32_t GetFileSize() const { return LE32(size); }
+	__force_inline uint32_t GetCluster() const { return (LE16(clushi) << 16) + LE16(cluslo); }
+	__force_inline bool IsUsed() const { return name[0] != 0xe5; }
+	__force_inline bool IsLFN() const { return (attrib & 0xf) == 0xf; }
+	__force_inline bool IsVolume() const { return (attrib & 8) != 0; }
+	__force_inline bool IsDir() const { return (attrib & 16) != 0; }
+	__force_inline bool IsRO() const { return (attrib & 1) != 0; }
+	__force_inline uint32_t GetFileSize() const { return LE32(size); }
 };
 
 
@@ -128,23 +128,23 @@ protected:
 	};
 
 	// Simple numeric conversions
-	INLINE_ALWAYS uint32_t ClusterToSector(uint32_t cluster) const {
+	__force_inline uint32_t ClusterToSector(uint32_t cluster) const {
 		return cluster << _clus_bits;
 	}
-	INLINE_ALWAYS uint32_t SectorToCluster(uint32_t sector) const {
+	__force_inline uint32_t SectorToCluster(uint32_t sector) const {
 		return sector >> _clus_bits;
 	}
-	INLINE_ALWAYS bool IsValidCluster(uint32_t cluster) const {
+	__force_inline bool IsValidCluster(uint32_t cluster) const {
 		return ClusterToSector(cluster) < _size;
 	}
 
 	// Find LBA for first sector in data cluster
-	INLINE_ALWAYS uint32_t DataClusterToLBA(uint32_t cluster) const {
+	__force_inline uint32_t DataClusterToLBA(uint32_t cluster) const {
 		return ClusterToSector(cluster) + _cluster0;
 	}
 
 	// Test if position is in particular cluster
-	INLINE_ALWAYS bool IsInCluster(uint32_t cluster, filepos_t pos) {
+	__force_inline bool IsInCluster(uint32_t cluster, filepos_t pos) {
 		return SectorToCluster(pos / 512) == cluster;
 	}
 

@@ -39,20 +39,20 @@ typedef intptr_t ptrdiff_t;
 
 typedef uint32_t in_addr_t;
 
-#define WEAK  __attribute__((weak))			// Weak symbol - can be redefined
-#define NORETURN  __attribute__((noreturn)) // Function never returns
-#define PURE __attribute__((pure)) // Indicates function has no meaningful side effects
-#define VERYPURE __attribute__((const)) // Indicates function does not dereference global memory
-#define CONSTRUCTOR  __attribute__((constructor)) // Static constructor, called before main
-#define DESTRUCTOR  __attribute__((destructor)) // Static destructor, called after exit
-#define NOALIAS  __attribute__((malloc)) // Return value is unalised pointer
-#define NOINLINE  __attribute__((noinline))	// Do not inline
-#define INLINE_ALWAYS inline __attribute__((always_inline))
-#define NAKED __attribute((naked))
-#define NOINSTRUMENT __attribute__((no_instrument_function))
+#define __weak  __attribute__((weak))			// Weak symbol - can be redefined
+#define __noreturn  __attribute__((noreturn)) // Function never returns
+#define __pure __attribute__((pure)) // Indicates function has no meaningful side effects
+#define __verypure __attribute__((const)) // Indicates function does not dereference global memory
+#define __constructor  __attribute__((constructor)) // Static constructor, called before main
+#define __destructor  __attribute__((destructor)) // Static destructor, called after exit
+#define __noalias  __attribute__((malloc)) // Return value is unalised pointer
+#define __noinline  __attribute__((noinline))	// Do not inline
+#define __force_inline inline __attribute__((always_inline))
+#define __naked __attribute((naked))
+#define __noinstrument __attribute__((no_instrument_function))
 
-#define NOVTABLE
-#define PACKED __attributed__((packed))
+#define __novtable
+#define __packed __attributed__((packed))
 
 typedef uint32_t time_t;
 

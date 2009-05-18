@@ -1,9 +1,9 @@
 #ifndef __MEM_H__
 #define __MEM_H__
 
-void NOALIAS *xmalloc(uint size);
-void NOALIAS *xrealloc(void *old, uint size);
-void NOALIAS *xmemdup(const void* block, uint size);
+void __noalias *xmalloc(uint size);
+void __noalias *xrealloc(void *old, uint size);
+void __noalias *xmemdup(const void* block, uint size);
 void xxfree(void* ptr);
 
 inline void xfree(void* ptr) { xxfree(ptr); }
@@ -31,27 +31,27 @@ void* memcpy(void* __restrict s1, const void* __restrict s2, size_t n);
 }
 
 #ifdef __arm__
-INLINE_ALWAYS void byte_copy_ascending(void* s1, const void* s2, uint n)
+__force_inline void byte_copy_ascending(void* s1, const void* s2, uint n)
 {
 	asm volatile("1: subs %2, %2, #1; ldrgeb r2, [%1], #1; strgeb r2, [%0], #1; bgt 1b"
 				 : : "r" (s1), "r" (s2), "r" (n) : "r2", "memory", "cc");
 }
 
 
-INLINE_ALWAYS void* memset(void* b, int c, size_t n) {
+__force_inline void* memset(void* b, int c, size_t n) {
 	asm volatile("1: strb %2, [%0], #1; subs %1, %1, #1; bne 1b"
 				 :  : "r" (b), "r" (n), "r" (c) : "memory", "cc");
 	return b;
 }
 
 
-INLINE_ALWAYS char* strcpy(char* __restrict dest, const char* __restrict src) {
+__force_inline char* strcpy(char* __restrict dest, const char* __restrict src) {
 	asm volatile("1: ldrb r2, [%1], #1; strb r2, [%1], #1; cmp r2, #0; bne 1b"
 				 : : "r" (dest), "r" (src) : "r2", "memory", "cc");
 	return dest;
 }
 
-INLINE_ALWAYS char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
+__force_inline char* strncpy(char* __restrict dest, const char* __restrict src, size_t n) {
 	asm volatile("1: subs %2, %2, #1;"
 				 "ldrgeb r2, [%1], #1; strgeb r2, [%1], #1;"
 				 "tstge r2, r2; bne 1b"
@@ -59,7 +59,7 @@ INLINE_ALWAYS char* strncpy(char* __restrict dest, const char* __restrict src, s
 	return dest;
 }
 
-INLINE_ALWAYS size_t strlen(const char* s) {
+__force_inline size_t strlen(const char* s) {
 	size_t len;
 	asm volatile("mov %0, #0;"
 				 "1: ldrb r2, [%1], #1; cmp r2, #0; addne %0, %0, #1; bne 1b"
@@ -73,7 +73,7 @@ char* strncpy(char* __restrict dest, const char* __restrict src, size_t n);
 size_t strlen(const char* s);
 #endif
 
-INLINE_ALWAYS int toupper(int c) {
+__force_inline int toupper(int c) {
 	return c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c;
 }
 
@@ -91,32 +91,32 @@ void* memmove(void* s1, const void* s2, size_t n);
 
 
 uchar* xstrdup(const uchar* s);
-uchar* NOALIAS xstrndup(const uchar* s, uint num);
+uchar* __noalias xstrndup(const uchar* s, uint num);
 uchar* xmemtostr(const void* block, uint size);
 
-INLINE_ALWAYS uint xstrlen(const uchar* s) { return ::strlen((const char*)s); }
+__force_inline uint xstrlen(const uchar* s) { return ::strlen((const char*)s); }
 inline int xstrncasecmp(const uchar* a, const uchar* b, uint len) {
 	return ::strncasecmp((const char*)a, (const char*)b, len);
 }
-INLINE_ALWAYS int xstrcasecmp(const uchar* a, const uchar* b) {
+__force_inline int xstrcasecmp(const uchar* a, const uchar* b) {
 	return ::strcasecmp((const char*)a, (const char*)b);
 }
-INLINE_ALWAYS int xstrcmp(const uchar* a, const uchar* b) {
+__force_inline int xstrcmp(const uchar* a, const uchar* b) {
 	return ::strcmp((const char*)a, (const char*)b);
 }
 
 // Note that s is const, but return value is non-const.  Just like strchr().
-INLINE_ALWAYS uchar* xstrchr(const uchar* s, uchar c) { return (uchar*)::strchr((const char*)s, c); }
-INLINE_ALWAYS uchar* xstrrchr(const uchar* s, uchar c) { return (uchar*)::strrchr((const char*)s, c); }
+__force_inline uchar* xstrchr(const uchar* s, uchar c) { return (uchar*)::strchr((const char*)s, c); }
+__force_inline uchar* xstrrchr(const uchar* s, uchar c) { return (uchar*)::strrchr((const char*)s, c); }
 
-INLINE_ALWAYS uchar* xstrstr(const uchar* s1, const uchar* s2) {
+__force_inline uchar* xstrstr(const uchar* s1, const uchar* s2) {
 	return (uchar*)::strstr((const char*)s1, (const char*)s2);
 }
 
-INLINE_ALWAYS uchar* xstrcpy(uchar* dest, const uchar* src) {
+__force_inline uchar* xstrcpy(uchar* dest, const uchar* src) {
 	return (uchar*)::strcpy((char*)dest, (const char*)src);
 }
-INLINE_ALWAYS uchar* xstrncpy(uchar* dest, const uchar* src, uint n) {
+__force_inline uchar* xstrncpy(uchar* dest, const uchar* src, uint n) {
 	return (uchar*)::strncpy((char*)dest, (const char*)src, n);
 }
 
@@ -129,7 +129,7 @@ template <typename T> inline void move(T* dest, T* src, uint items) {
 #if 0
 // XXX put this and varius memcpy stuff in arm_asm.s?
 
-INLINE_ALWAYS uint ReadLE16(const void* mem)
+__force_inline uint ReadLE16(const void* mem)
 {
 	uint tmp;
 	asm volatile (" ldrb %0, [%1], #1;"
@@ -140,7 +140,7 @@ INLINE_ALWAYS uint ReadLE16(const void* mem)
 }
 
 
-INLINE_ALWAYS uint ReadLE32(const void* mem)
+__force_inline uint ReadLE32(const void* mem)
 {
 	uint tmp;
 	asm volatile (" ldrb %0, [%1], #1;"
@@ -155,7 +155,7 @@ INLINE_ALWAYS uint ReadLE32(const void* mem)
 }
 
 
-INLINE_ALWAYS void StoreLE16(uint val, const void* mem)
+__force_inline void StoreLE16(uint val, const void* mem)
 {
 	asm volatile (" strb %0, [%1], #1;"
 				  " mov %0, %0, lsr #8;"
@@ -164,7 +164,7 @@ INLINE_ALWAYS void StoreLE16(uint val, const void* mem)
 }
 
 
-INLINE_ALWAYS void StoreLE32(uint val, const void* mem)
+__force_inline void StoreLE32(uint val, const void* mem)
 {
 	asm volatile (" strb %0, [%1], #1;"
 				  " mov %0, %0, lsr #8;"

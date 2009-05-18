@@ -57,8 +57,8 @@ namespace Platform {
 		void SetReserve(uint reserve);
 
 		// Get start of, end of (first byte following) region
-		INLINE_ALWAYS void* GetStart() const { return _start; }
-		INLINE_ALWAYS void* GetEnd() const { return _end; }
+		__force_inline void* GetStart() const { return _start; }
+		__force_inline void* GetEnd() const { return _end; }
 
 		// True if pointer falls in region
 		bool IsInRegion(const void* ptr) {
@@ -123,10 +123,10 @@ using Platform::_xflash_region;
 
 // Various compatibility functions
 int atoi(const char* s);		// in platform.cpp
-INLINE_ALWAYS int xatoi(const uchar* s) { return ::atoi((const char*)s); }
+__force_inline int xatoi(const uchar* s) { return ::atoi((const char*)s); }
 
 in_addr_t inet_addr(const char* a);
-INLINE_ALWAYS in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a); }
+__force_inline in_addr_t xinet_addr(const uchar* a) { return ::inet_addr((const char*)a); }
 
 long strtol(const char* __restrict str, char **__restrict endptr, int base);
 int64_t strtoll(const char* __restrict str, char **__restrict endptr, int base);

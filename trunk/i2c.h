@@ -45,7 +45,7 @@ public:
 	void Init();
 	void SetSpeed(uint hz);
 
-	static void Interrupt() __irq NAKED;
+	static void Interrupt() __irq __naked;
 
 	void HandleInterrupt();
 
@@ -62,10 +62,10 @@ public:
 
 	// Set final flag - read/write is last is series and will be
 	// finished with Stop
-	INLINE_ALWAYS void Final() { _final = true; }
+	__force_inline void Final() { _final = true; }
 
 	// Indicate final transaction ends with ACK rather than the default NAK
-	INLINE_ALWAYS void FinalAck() { _final_nak = false; }
+	__force_inline void FinalAck() { _final_nak = false; }
 
 private:
 	// Master cycle (send/recv)
@@ -84,12 +84,12 @@ class I2cDev {
 public:
 	I2cDev(I2cBus& bus, uint8_t slave);
 
-	INLINE_ALWAYS void AcquireBus() { _bus.Acquire(); }
-	INLINE_ALWAYS void ReleaseBus() { _bus.Release(); }
-	INLINE_ALWAYS void Final() { _bus.Final(); }
-	INLINE_ALWAYS void FinalAck() { _bus.FinalAck(); }
-	INLINE_ALWAYS void Write(const uint8_t* buf, uint len) { _bus.Write(_slave, buf, len); }
-	INLINE_ALWAYS uint Read(uint8_t* buf, uint len) { return _bus.Read(_slave, buf, len); }
+	__force_inline void AcquireBus() { _bus.Acquire(); }
+	__force_inline void ReleaseBus() { _bus.Release(); }
+	__force_inline void Final() { _bus.Final(); }
+	__force_inline void FinalAck() { _bus.FinalAck(); }
+	__force_inline void Write(const uint8_t* buf, uint len) { _bus.Write(_slave, buf, len); }
+	__force_inline uint Read(uint8_t* buf, uint len) { return _bus.Read(_slave, buf, len); }
 };
 
 #endif // __I2C_H__
