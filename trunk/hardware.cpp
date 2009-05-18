@@ -310,7 +310,23 @@ void hwinit()
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ, 0);
 
-	_console.Write("Enetcore 0.1 DEV\r\nCopyright (c) 2009 Jan Brittenson\r\nAll Rights Reserved\r\n\n");
+	extern char _build_rev[], _build_user[], _build_date[];
+
+	_console.Write("Enetcore 0.1 (build #");
+	_console.Write(_build_rev);
+	_console.Write(" ");
+	_console.Write(_build_user);
+	_console.Write(") ");
+	_console.Write(_build_date);
+#ifdef DEBUG
+	extern char _build_url[], _build_config[];
+
+	_console.Write("\r\nsvn: ");
+	_console.Write(_build_url);
+	_console.Write("\r\nconfig: ");
+	_console.Write(_build_config);
+#endif
+	_console.Write("\r\nCopyright (c) 2009 Jan Brittenson\r\nAll Rights Reserved\r\n\n");
 //	_console.SyncDrain();
 
 	void *sp;

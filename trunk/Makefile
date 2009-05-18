@@ -37,6 +37,8 @@ TOUCH_ODIR=$(ODIR)/.touch
 OBJS=$(patsubst %.cpp,$(ODIR)/%.o,$(SRCS))
 DEPS = $(patsubst %.cpp, $(ODIR)/%.d, $(SRCS))
 
+OBJS += $(ODIR)/buildinfo.o
+
 all: $(ODIR)/image
 
 clean:
@@ -48,6 +50,19 @@ $(ODIR)/image: $(ODIR)/crt.o $(OBJS) link.cmd
 
 $(ODIR)/crt.o: crt.s $(TOUCH_ODIR)
 	$(AS) $(AFLAGS) crt.s > $(ODIR)/crt.lst
+
+$(ODIR)/buildinfo.cpp: .svn/entries
+	@echo Generating $@
+	@echo "char _build_rev[] = \""`svn info | grep '^Last Changed Rev:' | cut -d: -f2-99 | cut -c2-99`"\";" >$@
+	@echo "char _build_date[] = \""`date`"\";" >>$@
+	@echo "char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
+	@echo "#ifdef DEBUG" >>$@
+	@echo "char _build_config[] = \"COPT="${COPT}"\";" >>$@
+	@echo "char _build_url[] = \""`svn info | grep '^URL:' | cut -d: -f2-99 | cut -c2-99`"\";" >>$@
+	@echo "#endif // DEBUG" >>$@
+
+$(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cpp
+	$(CC) $(CFLAGS) -MD -o $@ -c $<
 
 $(ODIR)/%.o: %.cpp $(TOUCH_ODIR)
 	$(CC) $(CFLAGS) -MD -o $@ -c $<
