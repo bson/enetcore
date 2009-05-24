@@ -3,52 +3,6 @@
 #include "util.h"
 
 
-
-namespace BufferPool {
-
-static Spinlock _lock;
-
-static Vector<IOBuffer*> _pool;
-
-void Initialize(uint num, uint size)
-{
-	Spinlock::Scoped L(_lock);
-
-	_pool.Reserve(num);
-	for (uint i = 0; i < num; ++i) {
-		IOBuffer* buf = new IOBuffer(size);
-		buf->SetAutoCompact(false);
-		buf->SetAutoResize(false); // Trap on attempts to grow buffer
-		_pool.PushBack(buf);
-	}
-}
-
-
-IOBuffer* Alloc()
-{
-	Spinlock::Scoped L(_lock);
-
-	if (_pool.Empty()) return NULL;
-
-	IOBuffer* buf = _pool.Back();
-	_pool.PopBack();
-	buf->SetHead(0);
-	buf->SetTail(buf->GetReserve());
-	return buf;
-}
-
-
-void FreeBuffer(IOBuffer* buf)
-{
-	Spinlock::Scoped L(_lock);
-
-	_pool.PushBack(buf);
-}
-
-
-} // namespace BufferPool
-
-
 // Broadcast address
 uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
 

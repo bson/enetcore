@@ -87,6 +87,4 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "netaddr.h"
 #include "network.h"
 
-typedef Deque<uint8_t> IOBuffer;
-
 #endif // __ENETCORE_H__

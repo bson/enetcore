@@ -4,13 +4,6 @@
 #include "mutex.h"
 
 
-namespace BufferPool {
-	void Initialize(uint num, uint size);
-	IOBuffer* Alloc();
-	void FreeBuffer(IOBuffer* buf);
-}
-
-
 // Ethernet frame
 struct EthFrame {
 	uint8_t pad[2];				// Used ot align IP header to 32 bytes

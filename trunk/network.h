@@ -1,13 +1,21 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
-#include "thread.h"
 #include "mutex.h"
+
+typedef Deque<uint8_t> IOBuffer;
 
 extern EventObject _net_event;	// Wait object for network thread
 extern Thread* _net_thread;
 
 void* NetThread(void*);
+
+
+namespace BufferPool {
+	void Initialize(uint num, uint size);
+	IOBuffer* Alloc();
+	void FreeBuffer(IOBuffer* buf);
+}
 
 
 enum EtherType {
