@@ -16,11 +16,8 @@ struct __novtable Udph {
 
 	uint16_t CSum(const Iph& iph) {
 		sum = 0;
-		uint16_t csum = ipcksum((const uint16_t*)this, Ntohs(len),
-								iph.source + iph.dest + iph.proto + iph.len);
-		csum = ~Htons(csum);
-		if (!csum) --csum;
-		return csum;
+		const uint16_t csum = ~ipcksum((const uint16_t*)this, Ntohs(len), iph.SumPH());
+		return csum ? Htons(csum) : ~0;
 	}
 
 	void SetCsum(const Iph& iph) { sum = CSum(iph); }

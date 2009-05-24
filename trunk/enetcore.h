@@ -48,11 +48,13 @@ typedef uint32_t in_addr_t;
 #define __noalias  __attribute__((malloc)) // Return value is unalised pointer
 #define __noinline  __attribute__((noinline))	// Do not inline
 #define __force_inline inline __attribute__((always_inline))
-#define __naked __attribute((naked))
+#define __naked __attribute__((naked))
 #define __noinstrument __attribute__((no_instrument_function))
 
 #define __novtable
-#define __packed __attributed__((packed))
+#define __packed __attribute__((packed))
+
+#define __section(SECT) __attribute__((section(SECT)))
 
 typedef uint32_t time_t;
 

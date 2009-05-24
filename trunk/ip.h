@@ -89,6 +89,12 @@ struct __novtable Iph {
 		if (!sum) --sum;
 	}
 
+	// Get pseudo header checksum, for UDP/TCP.
+	// Returns value in host byte order, as an unfolder 32-bit intermediate.
+	uint32_t SumPH() const {
+		return Ntohl(source) + Ntohl(dest) + proto + Ntohs(len);
+	}
+
 	bool ValidateCsum() {
 		const int16_t tmp = exch<uint16_t>(sum, 0);
 		const bool equal = tmp == Htons(~ipcksum((const uint16_t*)this, GetHLen()));
