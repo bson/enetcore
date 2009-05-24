@@ -238,22 +238,26 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 	if (rxev & 0x100) {			// RxOK
 
 		IOBuffer* buf;
-		if (!_recvq.Headroom() || !(buf = BufferPool::Alloc())) {
+		if (!_recvq.Headroom() || !(buf = BufferPool::AllocRx())) {
 			// No buffer available, or recvq full: drop packet
 			// XXX maybe count this
 			_pp[ETH_PP_RxCFG] = 0x40; // Skip_1
 			return;
 		}
 
-		const uint16_t rxstatus = _base[ETH_XD0];
-		const uint16_t len = _base[ETH_XD0];
+		const uint16_t rxstatus = _base[ETH_XD0]; // Remove Rx status frame
+		const uint16_t len = _base[ETH_XD0];	  // Frame length in bytes
 		buf->SetHead(2);
 		buf->SetSize(len);
+
+		// XXX inline asm frame read
+		// uint16_t* readfifo_16(uint16_t* dest, volatile uint16_t* fifo, uint count);
+		// uint16_t* p = readfifo_16((uint16_t*)(*buf + 0), _base + ETH_XD0, len/2);
 
 		uint16_t* p = (uint16_t*)(*buf+0);
 		for (uint i = 0; i < len/2; ++i)
 			*p++ = _base[ETH_XD0];
-		
+
 		if (len & 1) (*buf)[len-1] = (uint8_t&)_base[ETH_XD0];
 
 		// Ignore runt frames.  This is rare enough not to be worth

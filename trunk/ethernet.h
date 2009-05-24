@@ -24,7 +24,7 @@ class Ethernet {
 	enum TxState {
 		TX_IDLE = 0, 			// Not transmitting
 		TX_CMD,					// Have issued TxCMD, TxLEN
-		TX_XMIT					// Frame has been copied to chip, it's sending
+		TX_XMIT					// Frame has been copied to chip
 	};
 
 	TxState _tx_state;

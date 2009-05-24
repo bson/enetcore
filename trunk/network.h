@@ -5,15 +5,29 @@
 
 typedef Deque<uint8_t> IOBuffer;
 
-extern EventObject _net_event;	// Wait object for network thread
+extern EventObject _net_event;	// Event object for network thread
 extern Thread* _net_thread;
 
 void* NetThread(void*);
 
 
 namespace BufferPool {
+	// Indicates how many buffers are always reserved for AllocRx()
+	enum { TX_MIN_POOL = 4 };
+
+	// Initialize pool with num buffer each of a specific size.
 	void Initialize(uint num, uint size);
-	IOBuffer* Alloc();
+
+	// Allocate tx/rx buffer.  These return buffers from the same
+	// pool, except the Tx variant always leaves TX_MIN_POOL behind.
+	// This is to avoid using up the entire pool for transmits pending
+	// receive (e.g. IP pending an ARP reply) and then have no
+	// buffers left for the receive.  This is an issue when the
+	// buffer pool is small.
+	IOBuffer* AllocTx();
+	IOBuffer* AllocRx();
+
+	// Return buffer to pool
 	void FreeBuffer(IOBuffer* buf);
 }
 

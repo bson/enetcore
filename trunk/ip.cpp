@@ -435,7 +435,7 @@ void Ip::RequestARP(Route* rt)
 
 	assert(netif != -1);
 
-	IOBuffer* buf = BufferPool::Alloc();
+	IOBuffer* buf = BufferPool::AllocTx();
 	if (!buf) return;
 
 	buf->SetSize(16 + sizeof (Arph));
@@ -547,7 +547,7 @@ void Ip::IcmpReceive(IOBuffer* packet)
 
 void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
 {
-	IOBuffer* buf = BufferPool::Alloc();
+	IOBuffer* buf = BufferPool::AllocTx();
 	if (!buf) return;
 
 	buf->SetHead(0);

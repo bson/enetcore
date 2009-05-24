@@ -185,7 +185,7 @@ void Dhcp::LinkRecovered()
 
 IOBuffer* Dhcp::AllocPacket()
 {
-	IOBuffer* buf = BufferPool::Alloc();
+	IOBuffer* buf = BufferPool::AllocTx();
 	if (!buf) return NULL;
 
 	buf->SetHead(_netif.GetPrealloc());

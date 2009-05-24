@@ -29,10 +29,8 @@ void Initialize(uint num, uint size)
 }
 
 
-IOBuffer* Alloc()
+static IOBuffer* Alloc()
 {
-	Spinlock::Scoped L(_lock);
-
 	if (_pool.Empty()) return NULL;
 
 	IOBuffer* buf = _pool.Back();
@@ -40,6 +38,24 @@ IOBuffer* Alloc()
 	buf->SetHead(0);
 	buf->SetTail(buf->GetReserve());
 	return buf;
+}
+
+
+IOBuffer* AllocRx()
+{
+	Spinlock::Scoped L(_lock);
+
+	return Alloc();
+}
+
+
+IOBuffer* AllocTx()
+{
+	Spinlock::Scoped L(_lock);
+
+	if (_pool.Size() <= TX_MIN_POOL)  return NULL;
+
+	return Alloc();
 }
 
 

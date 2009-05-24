@@ -221,7 +221,7 @@ bool UdpCoreSocket::Send(const void* data, uint len)
 
 bool UdpCoreSocket::SendTo(const void* data, uint len, const NetAddr& dest)
 {
-	IOBuffer* buf = BufferPool::Alloc();
+	IOBuffer* buf = BufferPool::AllocTx();
 	if (!buf) {
 		SetError(ERR_NO_SPACE);
 		return false;
