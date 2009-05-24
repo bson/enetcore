@@ -5,10 +5,12 @@
 
 
 // Socket interface.  Sockets are always non-blocking by design.
+// Event delivery is edge triggered.
+
 class CoreSocket: public EventObject {
-	uint _error;
-	uint _evmask;
-	uint _event;
+	uint16_t _evmask;			// Events that signal EO
+	uint16_t _event;			// Current events
+	uint8_t _error;				// Last socket error
 public:
 	enum {
 		EVENT_READABLE = 1,		// Recv queue is non-empty (or listen socket has conn)

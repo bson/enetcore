@@ -12,17 +12,18 @@ struct __novtable Udph {
 	uint16_t sport;				// Source port
 	uint16_t dport;				// Dest port
 	uint16_t len;				// Length
-	uint16_t sum;				// Checksum
+	mutable uint16_t sum;		// Checksum
 
-	uint16_t CSum(const Iph& iph) {
-		sum = 0;
+	uint16_t CSum(const Iph& iph) const {
+		const uint16_t tmp = exch<uint16_t>(sum, 0);
 		const uint16_t csum = ~ipcksum((const uint16_t*)this, Ntohs(len), iph.SumPH());
+		sum = tmp;
 		return csum ? Htons(csum) : ~0;
 	}
 
 	void SetCsum(const Iph& iph) { sum = CSum(iph); }
 
-	bool ValidateCsum(const Iph& iph) {
+	bool ValidateCsum(const Iph& iph) const {
 		if (!sum) return true;
 
 		const int16_t tmp = exch<uint16_t>(sum, 0);
