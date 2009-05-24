@@ -1,9 +1,9 @@
-#ifndef __I2C_H__
-#define __I2C_H__
+#ifndef __LPC_I2C_H__
+#define __LPC_I2C_H__
 
 
 // I2C bus
-class I2cBus {
+class LpcI2cBus {
 
 	// Bits for I2C_CONSET/CONCLR.
 	enum {
@@ -40,7 +40,7 @@ class I2cBus {
 	bool _acquired:1;	   // Bus is acquired
 
 public:
-	I2cBus(uintptr_t base);
+	LpcI2cBus(uintptr_t base);
 
 	void Init();
 	void SetSpeed(uint hz);
@@ -73,16 +73,14 @@ private:
 };
 
 
-extern I2cBus _i2c0;
-
 
 // I2C device
-class I2cDev {
-	I2cBus& _bus;
+class LpcI2cDev {
+	LpcI2cBus& _bus;
 	uint8_t _slave;
 
 public:
-	I2cDev(I2cBus& bus, uint8_t slave);
+	LpcI2cDev(LpcI2cBus& bus, uint8_t slave);
 
 	__force_inline void AcquireBus() { _bus.Acquire(); }
 	__force_inline void ReleaseBus() { _bus.Release(); }
@@ -92,4 +90,4 @@ public:
 	__force_inline uint Read(uint8_t* buf, uint len) { return _bus.Read(_slave, buf, len); }
 };
 
-#endif // __I2C_H__
+#endif // __LPC_I2C_H__

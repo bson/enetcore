@@ -1,14 +1,14 @@
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef __LPC_TIMER_H__
+#define __LPC_TIMER_H__
 
 
-class Timer {
+class LpcTimer {
 	volatile uint32_t* const _base;
 	mutable Spinlock _lock;
 	uint8_t _resolution;
 
 public:
-	Timer(uintptr_t base) :
+	LpcTimer(uintptr_t base) :
 		_base((volatile uint32_t*)base)
 	{ }
 
@@ -31,15 +31,15 @@ public:
 	virtual void Tick() = 0;
 
 private:
-	Timer();
+	LpcTimer();
 };
 
 
 // System clock
-class Clock: public Timer {
+class Clock: public LpcTimer {
 	uint64_t _time;
 public:
-	Clock() : Timer(TIMER0_BASE), _time(0) { }
+	Clock() : LpcTimer(TIMER0_BASE), _time(0) { }
 
 	uint64_t GetTime() const { return _time + GetCount(); }
 
@@ -48,9 +48,9 @@ public:
 
 
 // System timer
-class SysTimer: public Timer {
+class SysTimer: public LpcTimer {
 public:
-	SysTimer() : Timer(TIMER1_BASE) { }
+	SysTimer() : LpcTimer(TIMER1_BASE) { }
 	void Tick();
 	void SetTimer(uint usec) { RunTimer(usec, 1); }
 };
@@ -58,4 +58,4 @@ public:
 extern Clock _clock;
 extern SysTimer _systimer;
 
-#endif // __TIMER_H__
+#endif // __LPC_TIMER_H__

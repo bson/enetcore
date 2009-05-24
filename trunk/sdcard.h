@@ -1,7 +1,6 @@
 #ifndef __SDCARD_H__
 #define __SDCARD_H__
 
-#include "spi.h"
 #include "mutex.h"
 #include "blockdev.h"
 

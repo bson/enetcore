@@ -1,7 +1,6 @@
 #include "enetkit.h"
 #include "thread.h"
 #include "platform.h"
-#include "timer.h"
 
 
 Spinlock Thread::_lock;

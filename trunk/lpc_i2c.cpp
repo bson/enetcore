@@ -1,9 +1,8 @@
 #include "enetkit.h"
-#include "i2c.h"
 #include "thread.h"
 
 
-I2cBus::I2cBus(uintptr_t base) :
+LpcI2cBus::LpcI2cBus(uintptr_t base) :
 	_base((volatile uint32_t*)base),
 	_state(STATE_IDLE),
 	_slave(0),
@@ -14,13 +13,13 @@ I2cBus::I2cBus(uintptr_t base) :
 }
 
 
-void I2cBus::Init()
+void LpcI2cBus::Init()
 {
 	_base[I2C_CONSET] = CON_EN;
 }
 
 
-void I2cBus::SetSpeed(uint hz)
+void LpcI2cBus::SetSpeed(uint hz)
 {
 	const uint div = max<uint>(PCLK / hz, 8);
 
@@ -33,7 +32,7 @@ void I2cBus::SetSpeed(uint hz)
 
 
 // * static __irq NAKED
-void I2cBus::Interrupt()
+void LpcI2cBus::Interrupt()
 {
 	SaveStateExc(4);
 
@@ -46,7 +45,7 @@ void I2cBus::Interrupt()
 }
 
 
-void I2cBus::HandleInterrupt()
+void LpcI2cBus::HandleInterrupt()
 {
 	switch (_state) {
 	case STATE_MXMIT: {
@@ -137,7 +136,7 @@ void I2cBus::HandleInterrupt()
 }
 
 
-void I2cBus::Acquire()
+void LpcI2cBus::Acquire()
 {
 	Mutex::Scoped L(_lock);
 	while (_acquired)  _change.Wait(_lock);
@@ -145,7 +144,7 @@ void I2cBus::Acquire()
 }
 
 
-void I2cBus::Release()
+void LpcI2cBus::Release()
 {
 	Mutex::Scoped L(_lock);
 	_acquired = false;
@@ -153,7 +152,7 @@ void I2cBus::Release()
 }
 
 
-uint I2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
+uint LpcI2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
 {
 	Mutex::Scoped L(_lock);
 
@@ -183,19 +182,19 @@ uint I2cBus::Cycle(uint8_t slave, uint8_t* buf, uint len, uint state0)
 }
 
 
-void I2cBus::Write(uint8_t slave, const uint8_t* buf, uint len)
+void LpcI2cBus::Write(uint8_t slave, const uint8_t* buf, uint len)
 {
 	Cycle(slave, (uint8_t*)buf, len, STATE_MXMIT);
 }
 
 
-uint I2cBus::Read(uint8_t slave, uint8_t* buf, uint len)
+uint LpcI2cBus::Read(uint8_t slave, uint8_t* buf, uint len)
 {
 	return Cycle(slave, buf, len, STATE_MRECV);
 }
 
 
-I2cDev::I2cDev(I2cBus& bus, uint8_t slave) :
+LpcI2cDev::LpcI2cDev(LpcI2cBus& bus, uint8_t slave) :
 	_bus(bus),
 	_slave(slave)
 {

@@ -1,22 +1,20 @@
 #include "enetkit.h"
-#include "spi.h"
 #include "thread.h"
 
 
-
-SpiBus::SpiBus(uint32_t base)
+LpcSpiBus::LpcSpiBus(uint32_t base)
 {
 	_base = (volatile uint8_t*)base;
 	_prescaler = 254;
 }
 
 
-void SpiBus::Init()
+void LpcSpiBus::Init()
 {
 }
 
 
-void SpiBus::SetSpeed(uint hz)
+void LpcSpiBus::SetSpeed(uint hz)
 {
 	const uint scaler = PCLK/hz & ~1;
 
@@ -36,7 +34,7 @@ void SpiBus::SetSpeed(uint hz)
 	_base[SPI_SPCR] = 0b10110000;
 }
 
-uint8_t SpiBus::Read(uint8_t code)
+uint8_t LpcSpiBus::Read(uint8_t code)
 {
 	// Xmit
 	_base[SPI_SPDR] = code;
@@ -53,7 +51,7 @@ uint8_t SpiBus::Read(uint8_t code)
 }
 
 
-uint8_t SpiBus::Send(const uint8_t* s, uint len)
+uint8_t LpcSpiBus::Send(const uint8_t* s, uint len)
 {
 	uint8_t tmp = 0xff;
 	while (len--)
@@ -63,7 +61,7 @@ uint8_t SpiBus::Send(const uint8_t* s, uint len)
 }
 
 
-uint8_t SpiBus::ReadReply(uint interval, uint num_tries, uint8_t code)
+uint8_t LpcSpiBus::ReadReply(uint interval, uint num_tries, uint8_t code)
 {
 	while (num_tries--) {
 		const uint8_t tmp = Read(code);
@@ -82,7 +80,7 @@ uint8_t SpiBus::ReadReply(uint interval, uint num_tries, uint8_t code)
 }
 
 
-bool SpiBus::ReadBuffer(void* buffer, uint len, Crc16* crc)
+bool LpcSpiBus::ReadBuffer(void* buffer, uint len, Crc16* crc)
 {
 	if (!len) return true;
 
@@ -110,7 +108,7 @@ bool SpiBus::ReadBuffer(void* buffer, uint len, Crc16* crc)
 }
 
 
-SpiDev::SpiDev(SpiBus& bus) :
+LpcSpiDev::LpcSpiDev(LpcSpiBus& bus) :
 	_bus(bus),
 	_ssel(NULL),
 	_speed(100000),
@@ -118,7 +116,7 @@ SpiDev::SpiDev(SpiBus& bus) :
 {
 }
 
-void SpiDev::Select()
+void LpcSpiDev::Select()
 {
 	if (!_selected)  {
 		_bus.SetSpeed(_speed);
@@ -128,7 +126,7 @@ void SpiDev::Select()
 }
 
 
-void SpiDev::Deselect()
+void LpcSpiDev::Deselect()
 {
 	if (_selected) {
 		if (_ssel) _ssel->Lower();
@@ -137,7 +135,7 @@ void SpiDev::Deselect()
 }
 
 
-void SpiDev::SetSpeed(uint hz) 
+void LpcSpiDev::SetSpeed(uint hz) 
 {
 	_speed = hz;
 	if (_selected) _bus.SetSpeed(_speed);

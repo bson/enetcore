@@ -1,9 +1,8 @@
 #include "enetkit.h"
-#include "serial.h"
 #include "thread.h"
 
 
-void SerialPort::SetSpeed(uint speed, uint framing)
+void LpcUart::SetSpeed(uint speed, uint framing)
 {
 	const uint prescale = PCLK / speed / 16;
 
@@ -17,7 +16,7 @@ void SerialPort::SetSpeed(uint speed, uint framing)
 }
 
 
-void SerialPort::Write(const String& s)
+void LpcUart::Write(const String& s)
 {
 	Spinlock::Scoped L(_lock);
 
@@ -27,7 +26,7 @@ void SerialPort::Write(const String& s)
 }
 
 
-void SerialPort::FillFifo()
+void LpcUart::FillFifo()
 {
 	Spinlock::Scoped L(_lock);
 
@@ -38,7 +37,7 @@ void SerialPort::FillFifo()
 }
 
 
-void SerialPort::SyncDrain()
+void LpcUart::SyncDrain()
 {
 	Spinlock::Scoped L(_lock);
 
@@ -52,7 +51,7 @@ void SerialPort::SyncDrain()
 
 
 // * static __irq
-void SerialPort::Interrupt()
+void LpcUart::Interrupt()
 {
 	SaveStateExc(4);
 
@@ -68,7 +67,7 @@ void SerialPort::Interrupt()
 }
 
 
-void SerialPort::HandleInterrupt()
+void LpcUart::HandleInterrupt()
 {
 	Spinlock::Scoped L(_lock);
 	const uint32_t iir = _base[UART_IIR];
@@ -102,7 +101,7 @@ void SerialPort::HandleInterrupt()
 }
 
 
-void SerialPort::SetInterrupts(bool enable)
+void LpcUart::SetInterrupts(bool enable)
 {
 	assert(enable);
 

@@ -1,17 +1,40 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-// This file maps hardware to canonical names and provides external decls.
+// This file maps SoC and board peripherals to canonical names and
+// provides external decls.
+
+#include "lpc_i2c.h"
+#include "lpc_uart.h"
+#include "lpc_spi.h"
+#include "lpc_timer.h"
+
+// SoC peripherals
+
+typedef LpcI2cBus I2cBus;
+typedef LpcI2cDev I2cDev;
+typedef LpcUart SerialPort;
+typedef LpcSpiBus SpiBus;
+typedef LpcSpiDev SpiDev;
+typedef LpcTimer Timer;
 
 extern Vic _vic;
 
+extern I2cBus _i2c0;
+
+extern SerialPort _uart0, _uart1;
+
+extern SpiBus _spi0, _spi1;
 
 
+// Board peripherals
+
+#define _console _uart0
+#define _lcd _uart1
 
 #include "cs8900a.h"
 typedef MacCS8900a Ethernet;
 
-// These are defined in hardware.cpp
 extern Ethernet _eth0;
 
 #endif // __BOARD_H__

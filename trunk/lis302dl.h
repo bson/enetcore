@@ -1,5 +1,5 @@
-#include "enetkit.h"
-#include "i2c.h"
+#ifndef __LIS302DL_H__
+#define __LIS302DL_H__
 
 
 // Device interface for LIS302DL accelerometer in I2C mode
@@ -101,3 +101,6 @@ public:
 	// Read status
 	__force_inline uint8_t GetStatus() { return Read<uint8_t>(REG_STATUS); }
 };
+
+
+#endif // __LIS302DL_H__

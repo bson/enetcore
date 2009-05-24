@@ -1,6 +1,5 @@
 #include "enetkit.h"
 #include "platform.h"
-#include "serial.h"
 
 
 namespace Platform {

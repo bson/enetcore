@@ -1,15 +1,15 @@
 #include "enetkit.h"
-#include "timer.h"
+#include "lpc_timer.h"
 #include "thread.h"
 
 
-void Timer::SetResolution(uint8_t r)
+void LpcTimer::SetResolution(uint8_t r)
 {
 	_resolution = r;
 }
 
 
-void Timer::RunTimerFreq(uint freq, uint mr)
+void LpcTimer::RunTimerFreq(uint freq, uint mr)
 {
 	const uint prescale = PCLK / (1 << _resolution);
 	const uint match = (1 << _resolution) / freq;
@@ -28,7 +28,7 @@ void Timer::RunTimerFreq(uint freq, uint mr)
 
 
 
-void Timer::RunTimer(uint count, uint mr)
+void LpcTimer::RunTimer(uint count, uint mr)
 {
 	const uint prescale = PCLK / (1 << _resolution);
 
@@ -47,7 +47,7 @@ void Timer::RunTimer(uint count, uint mr)
 
 
 // * static __irq NAKED
-void Timer::Interrupt()
+void LpcTimer::Interrupt()
 {
 	SaveStateExc(4);
 
@@ -63,7 +63,7 @@ void Timer::Interrupt()
 }
 
 
-void Timer::HandleInterrupt(uint mr)
+void LpcTimer::HandleInterrupt(uint mr)
 {
 	Spinlock::Scoped L(_lock);
 	if (_base[TIMER_IR] & (1 << mr)) {

@@ -1,5 +1,4 @@
 #include "enetkit.h"
-#include "serial.h"
 #include "util.h"
 #include "sdcard.h"
 #include "fat.h"

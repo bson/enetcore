@@ -1,5 +1,4 @@
 #include "enetkit.h"
-#include "serial.h"
 
 
 // Console message

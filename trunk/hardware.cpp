@@ -1,14 +1,11 @@
 #include "enetkit.h"
 #include "gpio.h"
-#include "serial.h"
-#include "timer.h"
 #include "thread.h"
-#include "spi.h"
 #include "network.h"
 #include "util.h"
 #include "sdcard.h"
 #include "fat.h"
-#include "i2c.h"
+#include "lpc_i2c.h"
 
 
 Thread* _main_thread;

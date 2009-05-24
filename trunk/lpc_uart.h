@@ -1,21 +1,21 @@
-#ifndef __SERIAL_H__
-#define __SERIAL_H__
+#ifndef __LPC_UART_H__
+#define __LPC_UART_H__
 
 
-class SerialPort {
+class LpcUart {
 	volatile uint8_t* _base;
 	Deque<uchar> _sendq;		// Tx buffer
 	Deque<uchar> _recvq;		// Rx buffer
 	mutable Spinlock _lock;
 
 public:
-	SerialPort(uintptr_t base, uint default_speed = 9600) : 
+	LpcUart(uintptr_t base, uint default_speed = 9600) : 
 		_base((volatile uint8_t*)base)
 	{
 		SetSpeed(default_speed);
 	}
 
-	~SerialPort() { }
+	~LpcUart() { }
 
 	enum {
 		FRAMING_5_BITS = 0,
@@ -33,7 +33,6 @@ public:
 
 		FRAMING_8N1 = FRAMING_8_BITS | FRAMING_PARITY_NONE | FRAMING_1_STOP_BIT, // 8N1
 	};
-
 
 	void SetSpeed(uint speed, uint framing = FRAMING_8N1);
 
@@ -55,10 +54,4 @@ private:
 };
 
 
-extern SerialPort _uart0;
-extern SerialPort _uart1;
-
-#define _console _uart0
-#define _lcd _uart1
-
-#endif // __SERIAL_H__
+#endif // __LPC_UART_H__

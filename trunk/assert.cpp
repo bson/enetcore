@@ -1,6 +1,4 @@
 #include "enetkit.h"
-#include "trace.h"
-#include "serial.h"
 
 
 void __noreturn AssertFailed(const char* expr, const char* file, int linenum)

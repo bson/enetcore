@@ -298,7 +298,7 @@ private:
 	static void Unhandled_IRQ() __irq;
 };
 
-#include "timer.h"
+#include "lpc_timer.h"
 
 
 void fault0(uint num);

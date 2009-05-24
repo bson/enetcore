@@ -1,5 +1,5 @@
-#ifndef __SPI_H__
-#define __SPI_H__
+#ifndef __LPC_SPI_H__
+#define __LPC_SPI_H__
 
 #include "mutex.h"
 #include "gpio.h"
@@ -7,13 +7,13 @@
 
 
 // SPI bus
-class SpiBus {
+class LpcSpiBus {
 	volatile uint8_t* _base;
 	uint8_t _prescaler;			// Current prescaler setting
 
 public:
 
-	SpiBus(uint32_t base);
+	LpcSpiBus(uint32_t base);
 
 	void Init();
 
@@ -36,22 +36,21 @@ public:
 	bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL);
 };
 
-extern SpiBus _spi0, _spi1;
-
 
 // Simple SPI device
 // Devices are associated with a bus and are distinguished by the output
 // used for SSEL.
 // While each device has its own speed, currently polarity and clock phase
 // aren't settable per device.
+// This is probably not hardware specific, but might be bus specific.
 
-class SpiDev {
-	SpiBus& _bus;
+class LpcSpiDev {
+	LpcSpiBus& _bus;
 	Output* _ssel;				// SSEL output for this device or NULL if none
 	uint _speed;				// Speed setting
 	bool _selected;				// Tracks whether currently selected
 public:
-	SpiDev(SpiBus& bus);
+	LpcSpiDev(LpcSpiBus& bus);
 	
 	// Init is currently a no-op
 	__force_inline void Init() { }

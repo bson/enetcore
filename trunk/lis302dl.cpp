@@ -1,5 +1,4 @@
 #include "enetkit.h"
-#include "i2c.h"
 #include "lis302dl.h"
 
 

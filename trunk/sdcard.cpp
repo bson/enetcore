@@ -1,6 +1,5 @@
 #include "enetkit.h"
 #include "sdcard.h"
-#include "spi.h"
 #include "crc16.h"
 
 
