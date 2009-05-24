@@ -5,7 +5,6 @@
 #include "network.h"
 #include "time.h"
 #include "netaddr.h"
-#include "ethernet.h"
 #include "ip.h"
 #include "udp.h"
 #include "dns.h"

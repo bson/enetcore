@@ -2,7 +2,6 @@
 #include "network.h"
 #include "ip.h"
 #include "dhcp.h"
-#include "ethernet.h"
 
 
 EventObject _net_event;

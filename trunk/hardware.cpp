@@ -5,7 +5,6 @@
 #include "thread.h"
 #include "spi.h"
 #include "network.h"
-#include "ethernet.h"
 #include "util.h"
 #include "sdcard.h"
 #include "fat.h"

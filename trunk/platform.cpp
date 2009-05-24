@@ -1,7 +1,6 @@
 #include "enetkit.h"
 #include "platform.h"
 #include "serial.h"
-#include "ethernet.h"
 
 
 namespace Platform {

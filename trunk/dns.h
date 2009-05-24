@@ -1,7 +1,6 @@
 #ifndef __DNS_H__
 #define __DNS_H__
 
-#include "ethernet.h"
 #include "network.h"
 #include "udp.h"
 

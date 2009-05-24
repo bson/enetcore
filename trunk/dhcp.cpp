@@ -2,7 +2,6 @@
 #include "dhcp.h"
 #include "ip.h"
 #include "udp.h"
-#include "ethernet.h"
 #include "util.h"
 #include "dns.h"
 

@@ -1,20 +1,20 @@
 #include "enetkit.h"
-#include "ethernet.h"
+#include "cs8900a.h"
 #include "util.h"
 
 
 // Broadcast address
-uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
+uint16_t MacCS8900a::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
 
 
-Ethernet::Ethernet(uint32_t base)
+MacCS8900a::MacCS8900a(uint32_t base)
 {
 	_base = (volatile uint16_t*)base;
 	_pp._base = _base;
 }
 
 
-void Ethernet::Initialize()
+void MacCS8900a::Initialize()
 {
 	Spinlock::Scoped L(_lock);
 
@@ -101,7 +101,7 @@ void Ethernet::Initialize()
 }
 
 
-IOBuffer* Ethernet::Receive(uint16_t& et)
+IOBuffer* MacCS8900a::Receive(uint16_t& et)
 {
 	Spinlock::Scoped L(_lock);
 	if (_recvq.Empty()) return NULL;
@@ -119,7 +119,7 @@ IOBuffer* Ethernet::Receive(uint16_t& et)
 }
 
 
-void Ethernet::DiscardSendQ()
+void MacCS8900a::DiscardSendQ()
 {
 	_lock.AssertLocked();
 	while (!_sendq.Empty()) {
@@ -129,7 +129,7 @@ void Ethernet::DiscardSendQ()
 }
 
 
-void Ethernet::Send(IOBuffer* buf)
+void MacCS8900a::Send(IOBuffer* buf)
 {
 	Spinlock::Scoped L(_lock);
 
@@ -156,7 +156,7 @@ void Ethernet::Send(IOBuffer* buf)
 
 
 // * static __irq NAKED
-void Ethernet::Interrupt()
+void MacCS8900a::Interrupt()
 {
 	SaveStateExc(4);
 
@@ -172,7 +172,7 @@ void Ethernet::Interrupt()
 }
 
 
-void Ethernet::HandleInterrupt()
+void MacCS8900a::HandleInterrupt()
 {
 	Spinlock::Scoped L(_lock);
 
@@ -231,7 +231,7 @@ void Ethernet::HandleInterrupt()
 }
 
 
-void Ethernet::ReceiveFrame(uint16_t rxev)
+void MacCS8900a::ReceiveFrame(uint16_t rxev)
 {
 	_lock.AssertLocked();
 
@@ -274,7 +274,7 @@ void Ethernet::ReceiveFrame(uint16_t rxev)
 }
 
 
-void Ethernet::BeginTx()
+void MacCS8900a::BeginTx()
 {
 	_lock.AssertLocked();
 
@@ -317,7 +317,7 @@ void Ethernet::BeginTx()
 }
 
 
-void Ethernet::CopyTx()
+void MacCS8900a::CopyTx()
 {
 	_lock.AssertLocked();
 
@@ -348,7 +348,7 @@ void Ethernet::CopyTx()
 }
 
 
-void Ethernet::DiscardTx()
+void MacCS8900a::DiscardTx()
 {
 	_lock.AssertLocked();
 
@@ -360,7 +360,7 @@ void Ethernet::DiscardTx()
 }
 
 
-void Ethernet::FillForBcast(IOBuffer* buf, uint16_t et)
+void MacCS8900a::FillForBcast(IOBuffer* buf, uint16_t et)
 {
 	const uint hlen = GetAddrLen();
 	memcpy(*buf + 2, GetBcastAddr(), hlen);

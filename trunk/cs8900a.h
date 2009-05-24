@@ -12,7 +12,7 @@ struct EthFrame {
 	uint16_t et;				// Ethertype
 };
 
-class Ethernet {
+class MacCS8900a {
 	volatile uint16_t* _base;
 
 	Spinlock _lock;
@@ -48,7 +48,7 @@ class Ethernet {
 	volatile PacketPage _pp;
 
 public:
-	Ethernet(uint32_t base);
+	MacCS8900a(uint32_t base);
 
 	void Initialize();
 	void Send(IOBuffer* buf);
@@ -135,6 +135,5 @@ private:
 	void DiscardSendQ();
 };
 
-extern Ethernet _eth0;
 
 #endif // __ETHERNET_H__

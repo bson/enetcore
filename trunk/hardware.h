@@ -298,8 +298,6 @@ private:
 	static void Unhandled_IRQ() __irq;
 };
 
-extern Vic _vic;
-
 #include "timer.h"
 
 
@@ -341,6 +339,5 @@ enum { XRAM_SIZE = 1024*1024 };
 
 extern void* _main_thread_stack;
 extern void* _intr_thread_stack;
-
 
 #endif // __HARDWARE_H__

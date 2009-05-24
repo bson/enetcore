@@ -2,7 +2,7 @@
 #define __IP_H__
 
 #include "mutex.h"
-#include "ethernet.h"
+
 
 // Checksum
 uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
