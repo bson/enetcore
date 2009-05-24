@@ -2,7 +2,6 @@
 #define __LPC_SPI_H__
 
 #include "mutex.h"
-#include "gpio.h"
 #include "crc16.h"
 
 

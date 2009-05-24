@@ -1,5 +1,4 @@
 #include "enetkit.h"
-#include "gpio.h"
 #include "thread.h"
 #include "network.h"
 #include "util.h"

@@ -4,6 +4,7 @@
 // This file maps SoC and board peripherals to canonical names and
 // provides external decls.
 
+#include "lpc_gpio.h"
 #include "lpc_i2c.h"
 #include "lpc_uart.h"
 #include "lpc_spi.h"
@@ -17,15 +18,14 @@ typedef LpcUart SerialPort;
 typedef LpcSpiBus SpiBus;
 typedef LpcSpiDev SpiDev;
 typedef LpcTimer Timer;
+typedef LpcGpio Gpio;
 
 extern Vic _vic;
 
 extern I2cBus _i2c0;
-
 extern SerialPort _uart0, _uart1;
-
 extern SpiBus _spi0, _spi1;
-
+extern Gpio _gpio[2];
 
 // Board peripherals
 

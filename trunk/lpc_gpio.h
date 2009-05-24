@@ -1,10 +1,8 @@
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef __LPC_GPIO_H__
+#define __LPC_GPIO_H__
 
 
-extern class Gpio _gpio[2];
-
-class Gpio {
+class LpcGpio {
 	volatile uint32_t* _base;
 	uint8_t _portnum;
 #ifdef DEBUG
@@ -71,6 +69,7 @@ public:
 	class __novtable Pin {
 		uint8_t _portnum;
 		uint8_t _pin;
+		
 	public:
 		Pin() : _portnum(0), _pin(0) { }
 		Pin(uint8_t port, uint8_t pin) : _portnum(port), _pin(pin) { }
@@ -80,9 +79,12 @@ public:
 			return *this;
 		}
 
-		void Set() { _gpio[_portnum].SetPin(_pin); }
-		void Reset() { _gpio[_portnum].ResetPin(_pin); }
-		bool Test() const { return _gpio[_portnum].TestPin(_pin); }
+		void Set() { extern class LpcGpio _gpio[]; _gpio[_portnum].SetPin(_pin); }
+		void Reset() { extern class LpcGpio _gpio[]; _gpio[_portnum].ResetPin(_pin); }
+		bool Test() const {
+			extern class LpcGpio _gpio[]; 
+			return _gpio[_portnum].TestPin(_pin);
+		}
 
 		void operator=(uint arg) { if (arg) Set(); else Reset(); }
 		operator bool() const { return Test(); }
@@ -100,28 +102,28 @@ public:
 };
 
 
-class PinOutput: public Gpio::Pin,
+class PinOutput: public LpcGpio::Pin,
 				 public Output {
 public:
 	PinOutput() { }
-	PinOutput(const Gpio::Pin& pin) : Gpio::Pin(pin) { }
-	PinOutput(const PinOutput& arg) : Gpio::Pin(arg) { }
+	PinOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
+	PinOutput(const PinOutput& arg) : LpcGpio::Pin(arg) { }
 	PinOutput& operator=(const PinOutput& arg) { new (this) PinOutput(arg); }
 	void Raise() { Set(); }
 	void Lower() { Reset(); }
 };
 
 
-class PinNegOutput: public Gpio::Pin,
+class PinNegOutput: public LpcGpio::Pin,
 					public Output {
 public:
 	PinNegOutput() { }
-	PinNegOutput(const Gpio::Pin& pin) : Gpio::Pin(pin) { }
-	PinNegOutput(const PinNegOutput& arg) : Gpio::Pin(arg) { }
+	PinNegOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
+	PinNegOutput(const PinNegOutput& arg) : LpcGpio::Pin(arg) { }
 	PinNegOutput& operator=(const PinNegOutput& arg) { new (this) PinNegOutput(arg); }
 	void Raise() { Reset(); }
 	void Lower() { Set(); }
 };
 
 
-#endif // __GPIO_H__
+#endif // __LPC_GPIO_H__

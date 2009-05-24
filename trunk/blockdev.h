@@ -1,8 +1,6 @@
 #ifndef __BLOCKDEV_H__
 #define __BLOCKDEV_H__
 
-#include "gpio.h"
-
 
 class BlockDev {
 public:
