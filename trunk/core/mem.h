@@ -21,6 +21,11 @@ const MemStats& xmemstats();
 inline void* operator new(size_t size) { return xmalloc(size); }
 inline void operator delete(void *ptr) { xfree(ptr); }
 
+#ifdef DEBUG
+#else
+__force_inline void AssertNotInterrupt() { }
+#endif
+
 #ifdef ENETCORE
 //  libc replacements
 

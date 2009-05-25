@@ -9,10 +9,13 @@ class LpcUart {
 	mutable Spinlock _lock;
 
 public:
-	LpcUart(uintptr_t base, uint default_speed = 9600) : 
+	LpcUart(uintptr_t base, uint default_speed = 115200) : 
 		_base((volatile uint8_t*)base)
 	{
 		SetSpeed(default_speed);
+
+		_recvq.Reserve(256);
+		_recvq.SetAutoResize(false);
 	}
 
 	~LpcUart() { }

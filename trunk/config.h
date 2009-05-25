@@ -13,7 +13,8 @@ enum { SHUTDOWN_TIMEOUT = 10000 };
 
 // dlmalloc config - see dlmalloc.h
 #define USE_LOCKS 1
-#define MLOCK_T Spinlock
+// #define MLOCK_T Spinlock
+#define MLOCK_T Mutex
 #define INITIAL_LOCK(l) ((void)0)
 #define ACQUIRE_LOCK(l) ((l)->Lock(), 0)
 #define RELEASE_LOCK(l) ((l)->Unlock(), 0)

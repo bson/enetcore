@@ -8,6 +8,7 @@
 #define USE_LITERALS
 
 #include "hardware.h"
+#include "spinlock.h"
 #include "config.h"
 #include "mem.h"
 

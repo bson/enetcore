@@ -46,7 +46,7 @@ inline bool IntEnabled() {
 }
 
 
-// Test if in user more
+// Test if in user/system more (if not, we're in an exception mode)
 inline bool InSystemMode() {
 	uint32_t cpsr;
 	asm volatile("mrs %0, cpsr" : "=r"(cpsr) : : );
@@ -56,32 +56,6 @@ inline bool InSystemMode() {
 #error "Unsupported compiler"
 #endif
 
-
-class Spinlock {
-	mutable uint32_t _cpsr;
-	mutable uint _count;
-
-public:
-	Spinlock() : _count(0) { }
-	~Spinlock() { }
-	void Lock() { const uint32_t cpsr = DisableInterrupts(); if (!_count++) _cpsr = cpsr; }
-	void Unlock() {
-		assert((int)_count > 0);
-		if (!--_count) EnableInterrupts(_cpsr);
-	}
-	void AssertLocked() const { assert(_count); }
-
-	// Abandon lock - must be held.  This resets the lock, which must be held once
-	// by the caller.
-	void Abandon() { assert(_count == 1);  _count = 0; }
-
-	class Scoped {
-		mutable Spinlock& _lock;
-	public:
-		Scoped(const Spinlock& lock) : _lock((Spinlock&)lock) { _lock.Lock(); }
-		~Scoped() { _lock.Unlock(); }
-	};
-};
 
 
 //// Thread support
@@ -139,12 +113,12 @@ struct PcbPrimitive {
 
 
 // Save state on exception that may cause a thread switch.
-// The exception handler must be declared NAKED so it has no implicit
+// The exception handler must be declared __naked so it has no implicit
 // prologue-epilogue.
 // OFFSET is how much LR deviates from the return location:
 // 4 for IRQ/FIQ, 8 for Abort/Undef.
 #define SaveStateExc(OFFSET)									\
-	{	asm volatile(											\
+	{  asm volatile(											\
 			"str r1, [sp,#-4]!;"								\
 			"ldr r1, =__curpcb;"								\
 			"ldr r1, [r1];"										\
@@ -160,7 +134,7 @@ struct PcbPrimitive {
 
 // Load state - return from exception
 #define LoadStateReturnExc() 											\
-		{ asm volatile(													\
+	{   asm volatile(													\
 			"add sp, sp, #4; "											\
 			"ldr r0, =__curpcb;"										\
 			"ldr r0, [r0];"												\

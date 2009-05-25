@@ -1,6 +1,5 @@
 #include "enetkit.h"
 
-
 static MemStats memstats = { 0, 0, 0 };
 
 static __noreturn void OutOfMemory()
@@ -12,6 +11,7 @@ static __noreturn void OutOfMemory()
 
 void *xmalloc(uint size)
 {
+	AssertNotInterrupt();
 	++memstats.num_malloc;
 	void* tmp = malloc(size);
 	if (!tmp) OutOfMemory();
@@ -23,6 +23,7 @@ void *xmalloc(uint size)
 
 void *xrealloc(void *old, uint size)
 {
+	AssertNotInterrupt();
 	if (IsLiteral(old)) return xmalloc(size);
 
 	++memstats.num_realloc;
@@ -85,6 +86,7 @@ uchar* xmemtostr(const void* block, uint size)
 
 void xxfree(void* ptr)
 {
+	AssertNotInterrupt();
 	if (_malloc_region.IsInRegion(ptr)) {
 		_malloc_region.Validate(ptr);
 		++memstats.num_free;

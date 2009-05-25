@@ -20,4 +20,10 @@ void PanicStop(const uchar* msg) __noreturn;
 #define assert(EXPR)  0
 #endif
 
+#ifdef DEBUG
+inline void AssertNotInterrupt() { assert(InSystemMode()); }
+#else
+#define AssertNotInterrupt() 0
+#endif
+
 #endif // __ASSERT_H__

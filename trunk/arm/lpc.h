@@ -7,10 +7,12 @@
 #error "Unsupported LPC model"
 #endif
 
-#include "assert.h"
-
 // Generic ARM support
 #include "arm.h"
+
+#include "assert.h"
+
+#include "spinlock.h"
 
 // Wait for interrupt - enter idle mode
 __force_inline void  WaitForInterrupt() {

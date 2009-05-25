@@ -134,6 +134,8 @@ bool Thread::Suspend()
 
 void Thread::Join()
 {
+	AssertNotInterrupt();
+
 	do {
 		WaitFor(this);
 	} while (_state != STATE_STOP);
@@ -142,6 +144,8 @@ void Thread::Join()
 
 void Thread::Yield(Thread* other)
 {
+	AssertNotInterrupt();
+
 	_lock.Lock();
 
 	if (other->_state == STATE_STOP) {
@@ -349,6 +353,8 @@ void Thread::TimerInterrupt()
 
 void Thread::WaitFor(const void* ob)
 {
+	AssertNotInterrupt();
+
 	_lock.Lock();
 	_state = STATE_WAIT;
 	_waitob = ob;
@@ -361,6 +367,8 @@ void Thread::WaitFor(const void* ob)
 
 void Thread::WaitFor(const void* ob, Time until)
 {
+	AssertNotInterrupt();
+
 	if (until <= Time::Now()) return;
 
 	_lock.Lock();
@@ -377,6 +385,8 @@ void Thread::WaitFor(const void* ob, Time until)
 
 void Thread::Sleep(Time until)
 {
+	AssertNotInterrupt();
+
 	while (Time::Now() < until) {
 		_lock.Lock();
 		_state = STATE_TWAIT;

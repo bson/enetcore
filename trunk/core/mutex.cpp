@@ -5,6 +5,8 @@
 
 bool Mutex::TryLock() const 
 {
+	AssertNotInterrupt();
+
 	Spinlock::Scoped L(_lock);
 	if (_count) return false;
 		
@@ -16,6 +18,8 @@ bool Mutex::TryLock() const
 
 void Mutex::Lock() const
 {
+	AssertNotInterrupt();
+
 	Spinlock::Scoped L(_lock);
 	while (_count && _tid != &Self()) {
 		++_waiters;
@@ -34,6 +38,8 @@ void Mutex::Lock() const
 
 void Mutex::Unlock() const
 {
+	AssertNotInterrupt();
+
 	AssertLocked();
 
 	if (!--_count) _tid = 0;

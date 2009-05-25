@@ -1,19 +1,11 @@
 Add Toshiba LCD driver
 
-Heap should use Mutex, not Spinlock
-- Make sure no driver does dynamic allocation
-- Perhaps set a global flag when in IRQ, then assert on it in malloc (DEBUG only)
-  Make Mutex panic if used from interrupt context
-
 - Make feature set more configurable
   + I2C normal (100kHz)/fast mode (400kHz)
   + *ALL* networking support on/off
   + TCP on/off
   + SD card support on/off
   + FAT write support on/off
-
-Still a lot of GNUC specific inline assembly in core
-- Move thread exception stuff to lpc/
 
 Better instrumentation control
 - NDMSG to suppress debug messages
@@ -23,11 +15,6 @@ Better instrumentation control
 Add LCD panel text driver
 - Add graphics support
 - Custom text?
-
-Add EINT connect support
-- Signal EventObject on interrupt
-- Add support for timer capture-and-interrupt for precise event time capture
-- Factor base class that performs callback on interrupt
 
 Implement TCP
 

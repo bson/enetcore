@@ -23,6 +23,7 @@ void LpcUart::Write(const String& s)
 	_sendq.PushBack(s.CStr(), s.Size());
 
 	FillFifo();
+	_sendq.AutoCompact();
 }
 
 
@@ -30,10 +31,13 @@ void LpcUart::FillFifo()
 {
 	Spinlock::Scoped L(_lock);
 
+	_sendq.SetAutoResize(false);
+
 	while (!_sendq.Empty() && (_base[UART_LSR] & 0b100000)) {
 		_base[UART_THR] = _sendq.Front();
 		_sendq.PopFront();
 	}
+	_sendq.SetAutoResize(true);
 }
 
 
@@ -41,12 +45,15 @@ void LpcUart::SyncDrain()
 {
 	Spinlock::Scoped L(_lock);
 
+	_sendq.SetAutoResize(false);
+
 	while (!_sendq.Empty()) {
 		while (_base[UART_LSR] & 0b100000) {
 			_base[UART_THR] = _sendq.Front();
 			_sendq.PopFront();
 		}
 	}
+	_sendq.SetAutoResize(true);
 }
 
 
