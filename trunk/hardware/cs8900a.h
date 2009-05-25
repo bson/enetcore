@@ -3,6 +3,70 @@
 
 #include "mutex.h"
 
+// CS8900A registers
+enum { ETH_XD0 = 0,
+	   ETH_XD1 = 1,
+	   ETH_TxCMD = 2,
+	   ETH_TxLength = 3,
+	   ETH_ISQ = 4,
+	   ETH_PP = 5,
+	   ETH_PPDATA0 = 6,
+	   ETH_PPDATA1 = 7,
+
+	   // PacketPage offsets
+	   ETH_PP_PID = 0,
+	   ETH_PP_IOBASE = 0x20,
+	   ETH_PP_INTR = 0x22,
+	   ETH_PP_DMA_CH = 0x24,
+	   ETH_PP_DMA_SOF = 0x26,
+	   ETH_PP_DMA_FC = 0x28,
+	   ETH_PP_RxDMA_BC = 0x2a,
+	   ETH_PP_MemBase = 0x2c,
+	   ETH_PP_PROMBase = 0x30,
+	   ETH_PP_PROMMask = 0x34,
+	   ETH_PP_ISQ = 0x120,
+	   ETH_PP_RxCFG = 0x102,
+	   ETH_PP_RxEvent = 0x124,
+	   ETH_PP_RxCTL = 0x104,
+	   ETH_PP_TxEvent = 0x128,
+	   ETH_PP_TxCFG = 0x106,
+	   ETH_PP_BufCFG = 0x10a,
+	   ETH_PP_BusCTL = 0x116,
+	   ETH_PP_BufEvent = 0x12c,
+	   ETH_PP_RxMISS = 0x130,
+	   ETH_PP_TxCOL = 0x132,
+	   ETH_PP_LineCTL = 0x112,
+	   ETH_PP_LineST = 0x134,
+	   ETH_PP_SelfCTL = 0x114,
+	   ETH_PP_SelfST = 0x136,
+	   ETH_PP_BusST = 0x138,
+	   ETH_PP_TestCTL = 0x118,
+	   ETH_PP_TDR = 0x13c,
+	   ETH_PP_TxCMD = 0x144,
+	   ETH_PP_TxLength = 0x146,
+	   ETH_PP_LAF = 0x150,
+	   ETH_PP_IA = 0x158,
+
+	   // Register numbers
+	   ETH_R_ISQ = 0,
+	   ETH_R_RxCFG = 3,
+	   ETH_R_RxEvent = 4,
+	   ETH_R_RxCTL = 5,
+	   ETH_R_TxEvent = 8,
+	   ETH_R_TxCFG = 7,
+	   ETH_R_BufCFG = 0xb,
+	   ETH_R_BufEvent = 0xc,
+	   ETH_R_RxMISS = 0x10,
+	   ETH_R_TxCOL = 0x12,
+	   ETH_R_LineCTL = 0x13,
+	   ETH_R_LineST = 0x14,
+	   ETH_R_SelfCTL = 0x15,
+	   ETH_R_SelfST = 0x16,
+	   ETH_R_BusST = 0x18,
+	   ETH_R_TestCTL = 0x19,
+	   ETH_R_TDR = 0x1c
+};
+
 
 // Ethernet frame
 struct EthFrame {

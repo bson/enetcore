@@ -5,7 +5,7 @@ BOARD_SRCS = hardware.cpp
 # Peripherals found on this board
 HARDWARE_SRCS = cs8900a.cpp
 
-SOCDIR = lpc
+SOCDIR = arm
 
 VARIANT=LPC2294
 
