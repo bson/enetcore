@@ -12,26 +12,37 @@ void* _main_thread_stack;
 void* _intr_thread_stack;
 
 
-Gpio _gpio[2];
+Gpio _gpio[GPIO_NUM];
 
 PinNegOutput _led;
 PinNegOutput _ssel0;
 
+#if SPI_NUM >= 1
 SpiBus _spi0(SPI0_BASE);
+#endif
+#if SPI_NUM >= 2
 SpiBus _spi1(SPI1_BASE);
+#endif
 
 SpiDev _cardslot(_spi0);		// Card slot - on SPI bus 0
 SDCard _sd(_cardslot);			// Card block device - on card slot
 Fat _fat(_sd);					// Fat device - on SD block dev
 
+#if UART_NUM >= 1
 SerialPort _uart0(UART0_BASE, 115200);
+#endif
+#if UART_NUM >= 2
 SerialPort _uart1(UART1_BASE, 9600);
+#endif
+
 
 Clock _clock;
 
 I2cBus _i2c0(I2C_BASE);
 
 Ethernet _eth0(CS8900A_BASE);
+
+Vic _vic(VIC_BASE);
 
 
 void fault0(uint num)
@@ -56,62 +67,6 @@ void busy_wait()
 	while (!_busy_flag) continue;
 #endif
 	asm volatile ("mov pc, lr");
-}
-
-
-Vic _vic(VIC_BASE);
-
-
-void Vic::InstallHandler(uint channel, IRQHandler handler)
-{
-	Spinlock::Scoped L(_lock);
-
-	if (channel == (uint)-1) {
-		_base[VIC_DefVectAddr] = (uint32_t)handler;
-		return;
-	}
-
-	assert(channel < 32);
-
-	// There are only 16 slots
-	assert(_num_handlers < 16);
-
-	_base[VIC_IntSelect] &= ~(1 << channel); // Make channel IRQ
-
-	// Assign next available slot
-	_base[VIC_VectCntl0 + _num_handlers] = (1 << 5) + channel;
-	_base[VIC_VectAddr0 + _num_handlers] = (uint32_t)handler; // Vector
-	++_num_handlers;
-}
-
-
-void Vic::EnableChannel(uint channel)
-{
-	assert(channel < 32);
-
-	Spinlock::Scoped L(_lock);
-	_base[VIC_IntEnable] = 1 << channel;
-}
-
-
-void Vic::DisableChannel(uint channel)
-{
-	assert(channel < 32);
-
-	Spinlock::Scoped L(_lock);
-	_base[VIC_IntEnClr] = 1 << channel;
-}
-
-
-bool Vic::ChannelPending(uint channel)
-{
-	return (_base[VIC_IRQStatus] & (1 << channel)) != 0;
-}
-
-void Vic::ClearPending()
-{
-	// Clear pending interrupt by doing a dummy write to VICVectAddr
-	_base[VIC_VectAddr] = 0;
 }
 
 
@@ -277,6 +232,9 @@ void hwinit()
 				 : : "r"((uint8_t*)_intr_thread_stack + INTR_THREAD_STACK),
 				   "r"(fiq_stack + 16) : "cc", "r2", "memory");
 
+	// Install default IRQ handler
+	_vic.InstallHandler(NOT_FOUND, Unexpected_Interrupt);
+
 	// Install IRQ handlers
 	_vic.InstallHandler(INTCH_TIMER0, Clock::Interrupt);
 	_vic.EnableChannel(INTCH_TIMER0);
@@ -305,32 +263,6 @@ void hwinit()
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ, 0);
 
-	extern char _build_rev[], _build_user[], _build_date[];
-
-	_console.Write("Enetcore 0.1 (build #");
-	_console.Write(_build_rev);
-	_console.Write(" ");
-	_console.Write(_build_user);
-	_console.Write(") ");
-	_console.Write(_build_date);
-#ifdef DEBUG
-	extern char _build_url[], _build_config[];
-
-	_console.Write("\r\nsvn: ");
-	_console.Write(_build_url);
-	_console.Write("\r\nconfig: ");
-	_console.Write(_build_config);
-#endif
-	_console.Write("\r\nCopyright (c) 2009 Jan Brittenson\r\nAll Rights Reserved\r\n\n");
-//	_console.SyncDrain();
-
-	void *sp;
-	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
-	DMSG("Main thread stack at %p (sp=%p); interrupt thread stack at %p",
-		 _main_thread_stack, sp, _intr_thread_stack);
-
-	DMSG("Random uint: 0x%x", Util::Random<uint>());
-
 	_spi0.Init();
 	_cardslot.SetSSEL(&_ssel0);
 
@@ -358,6 +290,34 @@ void hwinit()
 	_vic.EnableChannel(16);
 
 	_sd.SetLock(&_led);
+
+	// XXX move the remainder to a coreinit() called from crt.s
+
+	extern char _build_rev[], _build_user[], _build_date[];
+
+	_console.Write("Enetcore 0.1 (build #");
+	_console.Write(_build_rev);
+	_console.Write(" ");
+	_console.Write(_build_user);
+	_console.Write(") ");
+	_console.Write(_build_date);
+#ifdef DEBUG
+	extern char _build_url[], _build_config[];
+
+	_console.Write("\r\nsvn: ");
+	_console.Write(_build_url);
+	_console.Write("\r\nconfig: ");
+	_console.Write(_build_config);
+#endif
+	_console.Write("\r\nCopyright (c) 2009 Jan Brittenson\r\nAll Rights Reserved\r\n\n");
+//	_console.SyncDrain();
+
+	void *sp;
+	asm volatile("mov %0, sp" : "=r" (sp) : : "memory");
+	DMSG("Main thread stack at %p (sp=%p); interrupt thread stack at %p",
+		 _main_thread_stack, sp, _intr_thread_stack);
+
+	DMSG("Random uint: 0x%x", Util::Random<uint>());
 
 //	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
 }

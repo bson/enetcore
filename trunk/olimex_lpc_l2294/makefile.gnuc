@@ -7,6 +7,8 @@ HARDWARE_SRCS = cs8900a.cpp
 
 SOCDIR = lpc
 
+VARIANT=LPC2294
+
 include $(SOCDIR)/makefile.$(TOOLSET)
 
 CC   = $(TOOLDIR)/arm-elf-g++-$(TOOLVER)
@@ -15,7 +17,7 @@ AR   = $(TOOLDIR)/arm-elf-ar
 AS   = $(TOOLDIR)/arm-elf-as
 SIZE = $(TOOLDIR)/arm-elf-size
 
-CFLAGS += -I$(BOARD) -Ihardware
+CFLAGS += -I$(BOARD) -Ihardware -D$(VARIANT)
 AFLAGS += -o $(ODIR)/crt.o
 LFLAGS  +=  -nostartfiles -T$(BOARD)/link.cmd --gc-sections
 LIBS    += $(TOOLDIR)/../lib/gcc/arm-elf/$(TOOLVER)/libgcc.a

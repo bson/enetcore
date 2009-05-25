@@ -3,6 +3,13 @@ Add Toshiba LCD driver
 Heap should use Mutex, not Spinlock
 - Make sure no driver does dynamic allocation
 - Perhaps set a global flag when in IRQ, then assert on it in malloc (DEBUG only)
+  Make Mutex panic if used from interrupt context
+
+Add coreinit() to be called from crt.s
+
+Rename crt.s to startup.s
+
+Make core automatically include board makefile
 
 - Make feature set more configurable
   + I2C normal (100kHz)/fast mode (400kHz)
