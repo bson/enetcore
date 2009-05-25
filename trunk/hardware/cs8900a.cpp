@@ -4,10 +4,11 @@
 
 
 // Broadcast address
-uint16_t MacCS8900a::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
+const uint16_t MacCS8900a::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
 
 
-MacCS8900a::MacCS8900a(uint32_t base)
+MacCS8900a::MacCS8900a(uint32_t base, Eintr& intr) :
+	_intr(intr)
 {
 	_base = (volatile uint16_t*)base;
 	_pp._base = _base;
@@ -155,16 +156,14 @@ void MacCS8900a::Send(IOBuffer* buf)
 }
 
 
-// * static __irq NAKED
+// * static __irq __naked
 void MacCS8900a::Interrupt()
 {
 	SaveStateExc(4);
 
-	if (_vic.ChannelPending(INTCH_EINT2)) {
+	if (_eth0._intr.Pending()) {
 		_eth0.HandleInterrupt();
-		_vic.DisableChannel(INTCH_EINT2);
-		EXTINT = 4;					// Clear EINT2 flag
-		_vic.EnableChannel(INTCH_EINT2);
+		_eth0._intr.ClearPending();
 	}
 
 	_vic.ClearPending();

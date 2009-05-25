@@ -33,12 +33,16 @@ SerialPort _uart0(UART0_BASE, 115200);
 SerialPort _uart1(UART1_BASE, 9600);
 #endif
 
+Eintr _eintr0(0);
+Eintr _eintr1(1);
+Eintr _eintr2(2, Eintr::EINTR_HIGH | Eintr::EINTR_WAKE);
+Eintr _eintr3(3);
 
 Clock _clock;
 
 I2cBus _i2c0(I2C_BASE);
 
-Ethernet _eth0(CS8900A_BASE);
+Ethernet _eth0(CS8900A_BASE, _eintr2);
 
 Vic _vic(VIC_BASE);
 
@@ -249,8 +253,6 @@ void hwinit()
 	_vic.InstallHandler(INTCH_I2C, I2cBus::Interrupt);
 	_vic.EnableChannel(INTCH_I2C);
 
-	_vic.InstallHandler(INTCH_EINT2, Ethernet::Interrupt);
-
 	// Enable interrupts
 	asm volatile ("mrs r12, cpsr; bic r12, #0x40|0x80; msr cpsr, r12" : : : "r12", "cc", "memory");
 
@@ -269,23 +271,13 @@ void hwinit()
 	_i2c0.Init();
 	_i2c0.SetSpeed(100000);		// 100k is std I2C; fast is 400k
 
-	_eth0.Initialize();
-
-	// Set up external interrupt pins - do this last so vectors are ready
-
 	// P0.15 = EINT2
 	PINSEL0 = (PINSEL0 & ~(0b11 << 30)) | (0b10 << 30);
-	EXTWAKE = 4;			   // EINT2 wakes from power-down
-	VPBDIV=0;				   // Workaround for EXTINT.1, EXTINT.2 errata
-	EXTPOLAR = 4;			   // Make EINT2 active high
-	VPBDIV=1;				   // CPU bug workaround
-	VPBDIV=0;				   // CPU bug workaround
-	EXTMODE = 0;			   // Make EINT2 level triggered
-	VPBDIV=1;				   // CPU bug workaround
-	VPBDIV=1;				   // CPU bug workaround
-	EXTINT = 4;				   // Clear any stray EINT2 flag
-	_vic.ClearPending();
-	_vic.EnableChannel(16);
+
+	// Set up external interrupt pins - do this last so vectors are ready
+	_eintr2.InstallHandler(Ethernet::Interrupt);
+	_eth0.Initialize();
+	_eintr2.Enable();
 
 	_sd.SetLock(&_led);
 }

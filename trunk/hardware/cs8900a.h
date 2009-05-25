@@ -84,6 +84,8 @@ class MacCS8900a {
 	Deque<IOBuffer*> _sendq;
 	Deque<IOBuffer*> _recvq;
 
+	Eintr& _intr;				// External interrupt source
+
 	// Transmitter state
 	enum TxState {
 		TX_IDLE = 0, 			// Not transmitting
@@ -95,7 +97,7 @@ class MacCS8900a {
 
 	uint32_t _pid;				// Product ID
 	uint8_t _macaddr[6];		// Our Mac address
-	static uint16_t _bcastaddr[3]; // Broadcast address
+	static const uint16_t _bcastaddr[3]; // Broadcast address
 
 	bool _link_status:1;		// Link status indicator
 	bool _10bt:1;				// 10BT transceiver, otherwise AUI (yeah, right :))
@@ -112,7 +114,7 @@ class MacCS8900a {
 	volatile PacketPage _pp;
 
 public:
-	MacCS8900a(uint32_t base);
+	MacCS8900a(uint32_t base, Eintr& intr);
 
 	void Initialize();
 	void Send(IOBuffer* buf);
@@ -197,6 +199,9 @@ private:
 
 	// Throw away send queue
 	void DiscardSendQ();
+
+protected:
+	MacCS8900a(const MacCS8900a&);
 };
 
 #endif // __MACCS8900A_H__

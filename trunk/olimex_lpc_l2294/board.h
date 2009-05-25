@@ -9,9 +9,11 @@
 #include "lpc_uart.h"
 #include "lpc_spi.h"
 #include "lpc_timer.h"
+#include "lpc_eintr.h"
 
 // SoC peripherals
 
+typedef LpcEintr Eintr;
 typedef LpcI2cBus I2cBus;
 typedef LpcI2cDev I2cDev;
 typedef LpcUart SerialPort;
@@ -26,6 +28,7 @@ extern I2cBus _i2c0;
 extern SerialPort _uart0, _uart1;
 extern SpiBus _spi0, _spi1;
 extern Gpio _gpio[2];
+extern Eintr _eintr0, _eintr1, _eintr2, _eintr3;
 
 // Board peripherals
 
