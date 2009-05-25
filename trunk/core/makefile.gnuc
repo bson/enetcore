@@ -3,7 +3,7 @@ include $(BOARD)/makefile.$(TOOLSET)
 
 CFLAGS += -Icore
 CFLAGS += -fno-exceptions -fno-rtti -ffreestanding -fno-threadsafe-statics	\
--ffunction-sections -Wno-invalid-offsetof -fshort-enums
+	-Wno-invalid-offsetof -fshort-enums
 
 CORE_SRCS = platform.cpp assert.cpp trace.cpp crc32.cpp crc16.cpp	\
 	mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp sha1.cpp		\

@@ -4,7 +4,6 @@ TOOLDIR ?= /opt/local/bin
 TOOLVER ?= 4.3.2
 ODIR ?= build
 
-#  -fno-common
 CFLAGS = -g -O0 -DTRACE -DDEBUG -DBUSY_WAIT -I. -I$(TOOLSET)
 # CFLAGS = -Os -DBUSY_WAIT -DTRACE -I. -I$(TOOLSET)
 
