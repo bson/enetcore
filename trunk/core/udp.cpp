@@ -24,6 +24,7 @@ UdpCoreSocket* Udp::Create()
 
 	Register(s);
 
+	return s;
 }
 
 
@@ -183,12 +184,14 @@ bool UdpCoreSocket::Connect(const NetAddr& dest)
 bool UdpCoreSocket::GetSockAddr(NetAddr& addr)
 {
 	addr = NetAddr(_id.saddr, Ntohs(_id.sport));
+	return true;
 }
 
 
 bool UdpCoreSocket::GetPeerAddr(NetAddr& addr)
 {
 	addr = NetAddr(_id.daddr, Ntohs(_id.dport));
+	return true;
 }
 
 
@@ -295,4 +298,5 @@ bool UdpCoreSocket::RecvFrom(void* data, uint& len, NetAddr& sender)
 bool UdpCoreSocket::Close()
 {
 	_udp0.Deregister(this);
+	return true;
 }

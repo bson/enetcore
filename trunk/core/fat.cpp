@@ -411,6 +411,7 @@ FatFile* Fat::Open(const String& path)
 bool FatFile::Seek(filepos_t new_pos)
 {
 	_pos = new_pos;
+	return true;
 }
 
 
@@ -420,16 +421,18 @@ uint FatFile::Read(void* buf, uint numbytes)
 
 	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
+	uint8_t* bufp = (uint8_t*)buf;
+
 	while (numbytes) {
 		if (!BufferSector(FileposToSector(_pos))) break;
 
 		const uint tocopy = min<uint>(512 - (_pos & 511), numbytes);
 		assert(tocopy);
 
-		memcpy(buf, _sector + (_pos & 511), tocopy);
+		memcpy(bufp, _sector + (_pos & 511), tocopy);
 
 		_pos += tocopy;
-		(uint8_t*&)buf += tocopy;
+		bufp += tocopy;
 		result += tocopy;
 		numbytes -= tocopy;
 	}

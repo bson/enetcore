@@ -144,7 +144,7 @@ void Ip::ReleasePendingARP()
 
 		for (int n = _routes.Size() - 1; n >= 0; --n) {
 			Route* rt = _routes[n];
-			if (rt->dest == dest & rt->netmask) {
+			if (rt->dest == (dest & rt->netmask)) {
 				if (rt->macvalid) {
 					if (is_icmp) {
 						// Throttle ICMP
@@ -263,7 +263,7 @@ Ip::Route* Ip::Send(IOBuffer* buf, in_addr_t dest, const Checksummer& tcsum,
 
 	for (int i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
-		if (rt->dest == dest & rt->netmask) {
+		if (rt->dest == (dest & rt->netmask)) {
 			if (is_icmp) {
 				// Throttle ICMP
 				if (Time::Now() < rt->lasticmp + Time::FromSec(1)) {
@@ -323,7 +323,8 @@ void Ip::Receive(IOBuffer* packet)
 {
 	Iph& iph = GetIph(packet);
 
-	if (_routes.Empty() || packet->Size() < 16 + Ntohs(iph.len) || !iph.ValidateCsum()) {
+	if (_routes.Empty() || packet->Size() < (uint)16 + Ntohs(iph.len) ||
+		!iph.ValidateCsum()) {
 		BufferPool::FreeBuffer(packet);
 		return;
 	}
@@ -338,7 +339,7 @@ void Ip::Receive(IOBuffer* packet)
 
 		for (int i = _routes.Size()-1; i >= 0; --i) {
 			Route* rt = _routes[i];
-			if (rt->dest == dest & rt->netmask) {
+			if (rt->dest == (dest & rt->netmask)) {
 				if (rt->type == Route::TYPE_HOSTRT) {
 					SatisfiedARP(rt, GetMacSource(packet)); // Glean ARP info
 					hostrt = rt;
@@ -406,7 +407,7 @@ void Ip::ArpReceive(IOBuffer* packet)
 
 	for (int i = _routes.Size()-1; i >= 0; --i) {
 		Route* rt = _routes[i];
-		if (rt->dest == arp_addr & rt->netmask) {
+		if (rt->dest == (arp_addr & rt->netmask)) {
 			memcpy(rt->macaddr, arp_macaddr, 6);
 			SetRouteTimer(rt, HOSTRT_EXPIRE);
 			ReleasePendingARP();
@@ -512,7 +513,7 @@ void Ip::IcmpReceive(IOBuffer* packet)
 	case Icmph::ICMP_ECHO_REQ:
 		IcmpSend(iph.dest, Icmph::ICMP_ECHO_REPLY, 0, packet);
 		break;
-	case Icmph::ICMP_DEST_UNREACH:
+	case Icmph::ICMP_DEST_UNREACH: {
 		Iph& iph2 = *(Iph*)icmph.GetEnclosed();
 
 		if (icmph.GetEnclosed() + sizeof iph2 >= &packet->Back() ||
@@ -539,6 +540,8 @@ void Ip::IcmpReceive(IOBuffer* packet)
 #endif
 			}
 		}
+	}
+	default: ;
 	}
 	
 	BufferPool::FreeBuffer(packet);

@@ -68,7 +68,7 @@ bool Dhcp::Receive(IOBuffer* buf)
 			SendRequest();
 			break;
 
-		case STATE_REQUEST:
+		case STATE_REQUEST: {
 			if (msg != DHCPACK) {
 				if (msg == DHCPNACK) {
 					DMSG("DHCP: Received DHCPNACK, resetting");
@@ -111,6 +111,9 @@ bool Dhcp::Receive(IOBuffer* buf)
 			_dns.SetNS(_ns);
 
 			break;
+		}
+		default:
+			;
 		}
 	}
 
@@ -341,6 +344,7 @@ void Dhcp::Extract(const uint8_t* options, uint len)
 			_renew = _first_request + Time::FromSec(Ntohl(secs));
 			break;
 		}
+		default: ;
 		}
 		p += len;
 	}
@@ -383,6 +387,7 @@ Dhcp::Type Dhcp::GetMsgType(IOBuffer* buf, in_addr_t& server)
 		case TAG_END:
 			p = options + len;
 			break;
+		default: ;
 		}
 		if (got_server && got_type) break;
 

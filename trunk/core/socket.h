@@ -20,7 +20,7 @@ public:
 		EVENT_ERROR = 16		// Connection error (get reason with GetError())
 	};
 
-	CoreSocket() : _error(NO_ERROR), _evmask(0), _event(0) { }
+	CoreSocket() : _evmask(0), _event(0), _error(NO_ERROR) { }
 	virtual ~CoreSocket() { }
 
 	virtual bool Listen(uint backlog) { _error = ERR_BAD_OP; return false; }

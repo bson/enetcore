@@ -147,6 +147,7 @@ void* NetThread(void*)
 			case ETHERTYPE_ARP:
 				_ip0.ArpReceive(packet);
 				break;
+			default: ;
 			}
 			BufferPool::FreeBuffer(packet);
 		}
@@ -156,4 +157,6 @@ void* NetThread(void*)
 		if (now >= dhcp_next) dhcp_next = _dhcp0.Service();
 		if (now >= ip_next)  ip_next = _ip0.Service();
 	}
+	// Notreached
+	return NULL;
 }

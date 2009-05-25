@@ -108,7 +108,7 @@ public:
 	PinOutput() { }
 	PinOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
 	PinOutput(const PinOutput& arg) : LpcGpio::Pin(arg) { }
-	PinOutput& operator=(const PinOutput& arg) { new (this) PinOutput(arg); }
+	PinOutput& operator=(const PinOutput& arg) { new (this) PinOutput(arg); return *this; }
 	void Raise() { Set(); }
 	void Lower() { Reset(); }
 };
@@ -120,7 +120,9 @@ public:
 	PinNegOutput() { }
 	PinNegOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
 	PinNegOutput(const PinNegOutput& arg) : LpcGpio::Pin(arg) { }
-	PinNegOutput& operator=(const PinNegOutput& arg) { new (this) PinNegOutput(arg); }
+	PinNegOutput& operator=(const PinNegOutput& arg) {
+		new (this) PinNegOutput(arg); return *this;
+	}
 	void Raise() { Reset(); }
 	void Lower() { Set(); }
 };

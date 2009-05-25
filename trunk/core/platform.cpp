@@ -50,7 +50,7 @@ void* Region::GetMem(int amount)
 
 void Region::SetReserve(uint reserve)
 {
-	assert(reserve <= _end - _start);
+	assert(reserve <= (uint)(_end - _start));
 	Spinlock::Scoped L(_lock);
 	_reserve = reserve;
 }
@@ -384,7 +384,7 @@ template <typename T> T strto(const char* __restrict s, char **__restrict endptr
 	for (;;) {
 		const char c = toupper(*s);
 
-		if (c >= '0' && c <= maxdigit || (base == 16 && c >= 'A' && c <= 'F')) {
+		if ((c >= '0' && c <= maxdigit) || (base == 16 && c >= 'A' && c <= 'F')) {
 			if (shiftbase)
 				result <<= shiftbase;
 			else
@@ -438,6 +438,7 @@ in_addr_t inet_addr(const char* a)
 		*ptr++ = octet;
 		a = end;
 	}
+	return ip;
 }
 
 
@@ -454,8 +455,9 @@ int __cxa_pure_virtual();
 
 int __cxa_atexit(void (*func) (void*), void* arg, void* dso_handle)
 {
+	return 0;
 }
 
-int __cxa_pure_virtual() { abort(); }
+int __cxa_pure_virtual() { abort(); return 0; }
 
 void*   __dso_handle = (void*) &__dso_handle;

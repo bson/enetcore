@@ -77,7 +77,7 @@ void LpcUart::HandleInterrupt()
 	switch (iir & 0b1111) {
 	case 0b0110: {
 		// Receiver line status
-		uint tmp = _base[UART_LSR];		// Clear by reading LSR
+		const uint tmp = _base[UART_LSR];		// Clear by reading LSR
 		// Fallthru - drain RBR while at it
 	}
 	case 0b0100:

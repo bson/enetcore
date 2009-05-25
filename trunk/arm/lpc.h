@@ -1,7 +1,7 @@
 #ifndef __LPC_H__
 #define __LPC_H__
 
-#if defined(LPC2294)
+#if LPC == 2294
 #include "lpc2294.h"
 #else
 #error "Unsupported LPC model"

@@ -27,7 +27,7 @@ void Arc4::Init(const uint8_t* key, uint key_len)
 		const uint8_t a = _S[i];
 		j += key[k] + a;
 		_S[i] = exch(_S[j], a);
-		if (++k >= key_len)  k = 0;
+		if ((uint)++k >= key_len)  k = 0;
 	}
 }
 

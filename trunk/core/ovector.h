@@ -89,7 +89,7 @@ public:
 		}
 
 		// Return first item GT
-		while (bisect < _v.Size() && !Order(_v + bisect, &arg))
+		while (bisect < (int)_v.Size() && !Order(_v + bisect, &arg))
 			++bisect;
 
 		return bisect;

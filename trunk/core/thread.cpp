@@ -209,6 +209,7 @@ void Thread::Rotate()
 				++numrun;
 			}
 			break;
+		default: ;
 		}
 	}
 
@@ -285,6 +286,7 @@ void Thread::WakeAll(const void* ob)
 				waiter = true;
 			}
 			break;
+		default: ;
 		}
 	}
 
@@ -315,6 +317,7 @@ void Thread::WakeSingle(const void* ob)
 			if (t->_waitob == ob && (!top || t->_prio > top->_prio))
 				top = t;
 			break;
+		default: ;
 		}
 	}
 	
