@@ -1,0 +1,55 @@
+CFLAGS += -Icore
+CFLAGS += -fno-exceptions -fno-rtti -ffreestanding -fno-threadsafe-statics	\
+-ffunction-sections -Wno-invalid-offsetof -fshort-enums
+
+CORE_SRCS = platform.cpp assert.cpp trace.cpp crc32.cpp crc16.cpp	\
+	mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp sha1.cpp		\
+	time.cpp lookup3.cpp pstring.cpp hashtable.cpp thread.cpp		\
+	mutex.cpp sdcard.cpp netaddr.cpp network.cpp dhcp.cpp ip.cpp	\
+	udp.cpp fat.cpp dns.cpp
+
+SRCS += $(addprefix core/,$(CORE_SRCS))
+
+TOUCH_ODIR=$(ODIR)/.touch
+
+OBJS=$(patsubst %.cpp,$(ODIR)/%.o,$(SRCS))
+DEPS = $(patsubst %.cpp, $(ODIR)/%.d, $(SRCS))
+
+OBJS += $(ODIR)/buildinfo.o
+
+ODIR_TREE += $(ODIR)/core
+
+all: $(ODIR)/image
+
+clean:
+	-rm -rf $(ODIR)
+
+$(ODIR)/image: $(ODIR)/crt.o $(OBJS) $(BOARD)/link.cmd 
+	$(LD) $(LFLAGS) -o $@ $(ODIR)/crt.o $(OBJS) $(LIBS)
+	$(SIZE) $@
+
+$(ODIR)/crt.o: $(BOARD)/crt.s $(TOUCH_ODIR)
+	$(AS) $(AFLAGS) $(BOARD)/crt.s > $(ODIR)/crt.lst
+
+$(ODIR)/buildinfo.cpp: .svn/entries
+	@echo Generating $@
+	@echo "char _build_rev[] = \""`svn info | grep '^Last Changed Rev:' | cut -d: -f2-99 | cut -c2-99`"\";" >$@
+	@echo "char _build_date[] = \""`date`"\";" >>$@
+	@echo "char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
+	@echo "#ifdef DEBUG" >>$@
+	@echo "char _build_config[] = \"COPT="${COPT}"\";" >>$@
+	@echo "char _build_url[] = \""`svn info | grep '^URL:' | cut -d: -f2-99 | cut -c2-99`"\";" >>$@
+	@echo "#endif // DEBUG" >>$@
+
+$(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cpp
+	$(CC) $(CFLAGS) -MD -o $@ -c $<
+
+$(ODIR)/%.o: %.cpp $(TOUCH_ODIR)
+	$(CC) $(CFLAGS) -MD -o $@ -c $<
+
+
+$(TOUCH_ODIR):
+	mkdir -p $(ODIR_TREE)
+	touch $(TOUCH_ODIR)
+
+-include $(DEPS)

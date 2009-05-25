@@ -1,5 +1,5 @@
-#ifndef __ETHERNET_H__
-#define __ETHERNET_H__
+#ifndef __MACCS8900A_H__
+#define __MACCS8900A_H__
 
 #include "mutex.h"
 
@@ -135,5 +135,4 @@ private:
 	void DiscardSendQ();
 };
 
-
-#endif // __ETHERNET_H__
+#endif // __MACCS8900A_H__

@@ -1,7 +1,9 @@
 #ifndef __COMPILER_H__
 #define __COMPILER_H__
 
-#if defined (__GNUC__)
+#ifndef __GNUC__
+#error "Wrong compiler"
+#endif
 
 #include <stdarg.h>
 #define NULL 0
@@ -57,11 +59,5 @@ typedef uint32_t in_addr_t;
 #define __section(SECT) __attribute__((section(SECT)))
 
 typedef uint32_t time_t;
-
-#else
-
-#error "Missing compiler support"
-
-#endif
 
 #endif // __COMPILER_H__

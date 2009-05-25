@@ -1,0 +1,29 @@
+TOOLDIR ?= /opt/local/bin
+
+BOARD_SRCS = hardware.cpp
+
+# Peripherals found on this board
+HARDWARE_SRCS = cs8900a.cpp
+
+SOCDIR = lpc
+
+include $(SOCDIR)/makefile.$(TOOLSET)
+
+CC   = $(TOOLDIR)/arm-elf-g++-$(TOOLVER)
+LD   = $(TOOLDIR)/arm-elf-ld
+AR   = $(TOOLDIR)/arm-elf-ar
+AS   = $(TOOLDIR)/arm-elf-as
+SIZE = $(TOOLDIR)/arm-elf-size
+
+CFLAGS += -I$(BOARD) -Ihardware
+AFLAGS += -o $(ODIR)/crt.o
+LFLAGS  +=  -nostartfiles -T$(BOARD)/link.cmd --gc-sections
+LIBS    += $(TOOLDIR)/../lib/gcc/arm-elf/$(TOOLVER)/libgcc.a
+CPFLAGS = -O binary
+HEXFLAGS = -O ihex
+ODFLAGS	= -x --syms
+
+SRCS += $(addprefix $(BOARD)/,$(BOARD_SRCS))
+SRCS += $(addprefix hardware/,$(HARDWARE_SRCS))
+
+ODIR_TREE += $(ODIR)/$(BOARD) $(ODIR)/hardware

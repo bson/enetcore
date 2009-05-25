@@ -1,31 +1,22 @@
-Add I2C support
-- Bus, device
-- LIS302DL use case
-
 Add Toshiba LCD driver
 
 Heap should use Mutex, not Spinlock
 - Make sure no driver does dynamic allocation
 - Perhaps set a global flag when in IRQ, then assert on it in malloc (DEBUG only)
 
-Abstraction
-- Move CS8900A into cs8900a.{h,cpp}, typedef driver to Ethernet
-- Use similar scheme for SerialPort: LpcSerialPort and typedef, lpcserial.{h,cpp}
-- Repeat for Timer: LpcTimer, lpctimer.{h,cpp}
-- Repeat for SPI, I2C
-- Move LPC files into lpc/ dir
-- Add board dir olimex-lpc-l2294/
 - Make feature set more configurable
   + I2C normal (100kHz)/fast mode (400kHz)
   + *ALL* networking support on/off
   + TCP on/off
   + SD card support on/off
   + FAT write support on/off
-  + #define _console _uart0
+
+Still a lot of GNUC specific inline assembly in core
+- Move thread exception stuff to lpc/
 
 Better instrumentation control
 - NDMSG to suppress debug messages
-- Break out assert into BoundsCheck() and Invariant().
+- Break out assert into BoundsCheck(), Invariant(), Precondition(), PointerCheck()
 - Add StackCheck()
 
 Add LCD panel text driver
@@ -35,6 +26,7 @@ Add LCD panel text driver
 Add EINT connect support
 - Signal EventObject on interrupt
 - Add support for timer capture-and-interrupt for precise event time capture
+- Factor base class that performs callback on interrupt
 
 Implement TCP
 
@@ -76,7 +68,3 @@ Implement Watchdog
 Assign an internal flash sector for non-volatile params, like the
 ethernet Mac address.  See if we can set aside a small internet
 flash sector in link.cmd.
-
-Move arm-specific stuff into arm.cpp, arm.h
-
-Eliminate dependency on lpc22xx.h
