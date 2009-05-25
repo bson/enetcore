@@ -4,8 +4,6 @@
 #include "util.h"
 #include "sdcard.h"
 #include "fat.h"
-#include "lpc_i2c.h"
-
 
 extern Thread* _main_thread;
 extern void* _main_thread_stack;
