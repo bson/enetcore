@@ -127,21 +127,7 @@ void Thread::SetPriority(uint8_t new_prio)
 
 bool Thread::Suspend()
 {
-	asm volatile (
-		"ldr r0, =__curpcb;"
-		"ldr r0, [r0];"
-		"add r0, r0, #4;"
-		"stm r0, {r1-r14};"
-		"mov r1, #0;"			// Return value after Resume
-		"str r1, [r0, #-4];"
-		"mrs r1, cpsr;"
-		"bic r1, r1, #0x80|0x40;"    // Resume with interrupts enabled
-		"str r1, [r0, #16*4-4];"
-		"str lr, [r0, #15*4-4];"// Save LR as PC so LoadState returns to our caller
-		"mov r0, #1;"			// Return value now
-		"mov pc, lr"			// Return
-		: : : "memory");
-
+	ThreadSuspendPrimitive();
 	return false;				// Bah.
 }
 
@@ -410,7 +396,6 @@ void Thread::SetTimer(uint usec)
 
 	if (usec < 20) usec = 20;
 	_systimer.SetTimer(min(usec, (uint)1024*1024*4));
-//	}
 }
 
 

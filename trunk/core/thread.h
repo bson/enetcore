@@ -22,13 +22,9 @@ private:
 	// Thread TLS area
 	TLS _tls;
 
-	struct Pcb {
-		uint32_t _regs[17];		// R0-R15, CPSR
-		uint32_t _flags;		// Flag word: bit = 0 do not save current thread on exception
-	};
-
+	typedef PcbPrimitive Pcb;
 	volatile Pcb _pcb;
-	static volatile struct Pcb* _curpcb asm("__curpcb"); // PCB of currently running thread
+	static volatile Pcb* _curpcb asm("__curpcb"); // PCB of currently running thread
 
 	// Run queue - because of the small number of threads we keep only a single table
 	static Vector<Thread*> _runq;
@@ -84,7 +80,7 @@ public:
 	// Can be used to check for stack overruns
 	void ValidateStack()  {
 #ifdef DEBUG
-		void* sp; asm volatile ("mov %0, sp" : "=r"(sp) : : "memory");
+		void* sp; GetSP(sp);
 		assert(sp < _estack);
 		assert(sp >= _stack);
 #endif
@@ -140,24 +136,13 @@ private:
 	//    // this thread has been resumed. If _lock is needed, it must be reacquired.
 	//
 	static bool Suspend() __naked;
-	static void Resume() {
-		_curthread->_state = STATE_RESUME;	// Keep other CPUs from racing to resume
-		_curpcb = &_curthread->_pcb;
-		_lock.Abandon();
-		asm volatile (
-			"mov  r0, %0;"		   // &_pcb
-			"ldr r1, [r0, #16*4];" // R1 = saved PSR
-			"msr cpsr, r1;"		   // CPSR = saved PSR
-			"ldm r0, {r0-r15};"	   // Load saved R0-R14,PC, CPSR=SPSR
-			: : "r"(_curpcb) : "memory", "cc");
-	}
+	static void Resume() { ThreadResumePrimitive(); }
 
 	// Change currently running thread's stack and start new frame chain
 	// Also set up stack limit.  end is lowest addr (i.e. start of region).
 	static void __force_inline SetStack(void* end, void* new_stack) {
 		_lock.AssertLocked();
-		asm volatile ("mov sp, %0; mov fp, #0"
-					  : : "r"(new_stack) : "memory");
+		SetThreadStackPrimitive(end, new_stack);
 	}
 
 	// Take snapshot of current thread state.
@@ -173,46 +158,6 @@ private:
 	}
 
 public:
-	// Save state on exception that may cause a thread switch.
-	// The exception handler must be declared NAKED so it has no implicit
-	// prologue-epilogue.
-	// OFFSET is how much LR deviates from the return location:
-	// 4 for IRQ/FIQ, 8 for Abort/Undef.
-#define SaveStateExc(OFFSET)									\
-	{	asm volatile(											\
-			"str r1, [sp,#-4]!;"								\
-			"ldr r1, =__curpcb;"								\
-			"ldr r1, [r1];"										\
-			"str r0, [r1], #4;"									\
-			"ldr r0, [sp];"										\
-			"str r0, [r1], #4;"									\
-			"stm r1, {r2-r14}^;"								\
-			"sub lr, lr, #" #OFFSET ";"							\
-			"str lr, [r1, #13*4]!;"  /* Save pre-exception PC as PC */ \
-			"mrs r0, spsr;"											\
-			"str r0, [r1, #4];" /* Save SPSR as CPSR */				\
-			: : : "memory"); }
-
-#if 0
-// XXX IRQs and exceptions don't disable FIQ
-			"mrs r0, cpsr;"											\
-			"bic r0, #0x40;" /* Enable FIQ */					\
-			"msr cpsr, r0;"											\ //
-#endif
-
-
-	// Load state - return from exception
-#define LoadStateReturnExc() 											\
-		{ asm volatile(													\
-			"add sp, sp, #4; "											\
-			"ldr r0, =__curpcb;"										\
-			"ldr r0, [r0];"												\
-			"ldr r1, [r0, #16*4];" /* R1 = saved PSR */					\
-			"msr spsr, r1;"		   /* SPSR = saved PSR */				\
-			"ldr lr, [r0,#15*4];"  /* LR_irq = saved PC */				\
-			"ldm r0, {r0-r14}^; "   /* Load saved user R0-R14 */		\
-			"movs pc, lr"			/* Return */						\
-			: : : "memory"); }
 
 	// Perform thread rotation.  This function does all except actually
 	// resume the updated _curthread.  The reason for this is that the
