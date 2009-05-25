@@ -120,5 +120,6 @@ public:
 	void ChainEvent(EventObject* eo) { _evob = eo; }
 };
 
+
 #endif	// __MUTEX_H__
 

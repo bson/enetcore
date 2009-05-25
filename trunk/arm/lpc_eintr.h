@@ -64,4 +64,18 @@ public:
 };
 
 
+
+// Interrupt event.
+// An Eintr handler that sets an EventObject.  This is a simple
+// way for a thread to wait for an interrupt.
+
+class EintrEventObject: public EventObject,
+						public LpcEintr {
+public:
+	EintrEventObject(uint intch, uint flags) : LpcEintr(intch, flags) { }
+
+	void HandleInterrupt() { Set(); }
+};
+
+
 #endif // __LPC_EINTR_H__
