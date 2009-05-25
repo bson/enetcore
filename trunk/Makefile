@@ -17,10 +17,6 @@ SRCS += hardware/lis302dl.cpp
 # Project components
 SRCS=main.cpp
 
-# Set up tools, add board peripherals and SOC components to build
-include $(BOARD)/makefile.$(TOOLSET)
-
-# Settings and rules to build the system
 include core/makefile.$(TOOLSET)
 
 # Default build target

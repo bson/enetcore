@@ -1,3 +1,6 @@
+# Set up tools, add board peripherals and SOC components to build
+include $(BOARD)/makefile.$(TOOLSET)
+
 CFLAGS += -Icore
 CFLAGS += -fno-exceptions -fno-rtti -ffreestanding -fno-threadsafe-statics	\
 -ffunction-sections -Wno-invalid-offsetof -fshort-enums
