@@ -114,7 +114,9 @@ _init:
 4:		
 				mov		fp, #0
 				bl		hwinit
-                b       main
-
+				bl		coreinit
+                bl      main
+				b		.		/* Wait for watchdog reset, if enabled */
+	
 .endfunc
 .end

@@ -2,10 +2,16 @@ BOARD ?= olimex_lpc_l2294
 TOOLSET ?= gnuc
 TOOLDIR ?= /opt/local/bin
 TOOLVER ?= 4.3.2
-ODIR ?= build
 
+CONFIG ?= debug
+
+ifeq ($(CONFIG),opt)
+CFLAGS = -Os -DBUSY_WAIT -DTRACE -I. -I$(TOOLSET)
+else
 CFLAGS = -g -O0 -DTRACE -DDEBUG -DBUSY_WAIT -I. -I$(TOOLSET)
-# CFLAGS = -Os -DBUSY_WAIT -DTRACE -I. -I$(TOOLSET)
+endif
+
+ODIR ?= build_$(CONFIG)
 
 AFLAGS=-ahls
 LFLAGS=-Map $(ODIR)/image.map

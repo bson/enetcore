@@ -18,7 +18,7 @@ AS   = $(TOOLDIR)/arm-elf-as
 SIZE = $(TOOLDIR)/arm-elf-size
 
 CFLAGS += -I$(BOARD) -Ihardware -D$(VARIANT)
-AFLAGS += -o $(ODIR)/crt.o
+AFLAGS += -o $(ODIR)/startup.o
 LFLAGS  +=  -nostartfiles -T$(BOARD)/link.cmd --gc-sections
 LIBS    += $(TOOLDIR)/../lib/gcc/arm-elf/$(TOOLVER)/libgcc.a
 CPFLAGS = -O binary

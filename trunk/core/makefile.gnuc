@@ -9,7 +9,7 @@ CORE_SRCS = platform.cpp assert.cpp trace.cpp crc32.cpp crc16.cpp	\
 	mem.cpp malloc.cpp freelist.cpp util.cpp arc4.cpp sha1.cpp		\
 	time.cpp lookup3.cpp pstring.cpp hashtable.cpp thread.cpp		\
 	mutex.cpp sdcard.cpp netaddr.cpp network.cpp dhcp.cpp ip.cpp	\
-	udp.cpp fat.cpp dns.cpp
+	udp.cpp fat.cpp dns.cpp init.cpp
 
 SRCS += $(addprefix core/,$(CORE_SRCS))
 
@@ -27,12 +27,12 @@ all: $(ODIR)/image
 clean:
 	-rm -rf $(ODIR)
 
-$(ODIR)/image: $(ODIR)/crt.o $(OBJS) $(BOARD)/link.cmd 
-	$(LD) $(LFLAGS) -o $@ $(ODIR)/crt.o $(OBJS) $(LIBS)
+$(ODIR)/image: $(ODIR)/startup.o $(OBJS) $(BOARD)/link.cmd 
+	$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS)
 	$(SIZE) $@
 
-$(ODIR)/crt.o: $(BOARD)/crt.s $(TOUCH_ODIR)
-	$(AS) $(AFLAGS) $(BOARD)/crt.s > $(ODIR)/crt.lst
+$(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
+	$(AS) $(AFLAGS) $(BOARD)/startup.s > $(ODIR)/startup.lst
 
 $(ODIR)/buildinfo.cpp: .svn/entries
 	@echo Generating $@
