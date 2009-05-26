@@ -1,10 +1,10 @@
 #ifndef __CLOSURE_H__
 #define __CLOSURE_H__
 
-// Simple closure abstraction for ARMv4 and up.
-// The function must not be virtual, but the class may have a vptr.
+// Simple closure abstraction.
+// The function must not be virtual, but the instance may have a vptr.
 //
-// This code is likely similar on other platforms.
+// Tested on: gcc4: ARM, i386, x86_64
 //
 // Canonical usage:
 //    class Driver {
@@ -25,7 +25,7 @@ class Closure {
 public:
 	template <typename T> Closure(const T& memberfunc, void* arg) {
 		assert(!(((uintptr_t*)&memberfunc)[1])); // 0: absolute ptr
-		_func = (Func)*(native_uint_t*)&memberfunc;
+		_func = (Func)*(uintptr_t*)&memberfunc;
 		_cx = arg;
 	}
 
