@@ -63,10 +63,10 @@ public:
 	// Initialize Thread system - must be called from main thread.  Returns its Thread.
 	static Thread& Initialize();
 
-	static __force_inline Thread& Self() { return *_curthread; }
+	static inline Thread& Self() __finline { return *_curthread; }
 
 	void Cancel() { _cancel = true; }
-	static __force_inline bool IsCanceled()  { return Self()._cancel; }
+	static inline bool IsCanceled() __finline { return Self()._cancel; }
 
 	void Join();
 
@@ -140,7 +140,7 @@ private:
 
 	// Change currently running thread's stack and start new frame chain
 	// Also set up stack limit.  end is lowest addr (i.e. start of region).
-	static void __force_inline SetStack(void* end, void* new_stack) {
+	static void inline SetStack(void* end, void* new_stack) __finline {
 		_lock.AssertLocked();
 		SetThreadStackPrimitive(end, new_stack);
 	}
@@ -175,7 +175,8 @@ public:
 	static void SetTimer(uint usec);	// usec from now
 };
 
-__force_inline Thread& Self() { return Thread::Self(); }
+Thread& Self() __finline;
+inline Thread& Self() { return Thread::Self(); }
 
 extern Thread* _main_thread;
 

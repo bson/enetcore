@@ -62,10 +62,10 @@ public:
 
 	// Set final flag - read/write is last is series and will be
 	// finished with Stop
-	__force_inline void Final() { _final = true; }
+	void Final() __finline { _final = true; }
 
 	// Indicate final transaction ends with ACK rather than the default NAK
-	__force_inline void FinalAck() { _final_nak = false; }
+	void FinalAck() __finline { _final_nak = false; }
 
 private:
 	// Master cycle (send/recv)
@@ -82,12 +82,12 @@ class LpcI2cDev {
 public:
 	LpcI2cDev(LpcI2cBus& bus, uint8_t slave);
 
-	__force_inline void AcquireBus() { _bus.Acquire(); }
-	__force_inline void ReleaseBus() { _bus.Release(); }
-	__force_inline void Final() { _bus.Final(); }
-	__force_inline void FinalAck() { _bus.FinalAck(); }
-	__force_inline void Write(const uint8_t* buf, uint len) { _bus.Write(_slave, buf, len); }
-	__force_inline uint Read(uint8_t* buf, uint len) { return _bus.Read(_slave, buf, len); }
+	void AcquireBus() __finline { _bus.Acquire(); }
+	void ReleaseBus() __finline { _bus.Release(); }
+	void Final() __finline { _bus.Final(); }
+	void FinalAck() __finline { _bus.FinalAck(); }
+	void Write(const uint8_t* buf, uint len) __finline { _bus.Write(_slave, buf, len); }
+	uint Read(uint8_t* buf, uint len) __finline { return _bus.Read(_slave, buf, len); }
 };
 
 #endif // __LPC_I2C_H__

@@ -26,13 +26,13 @@ struct __novtable FatDirEnt {
 	uint16_t cluslo;			// Cluster, low 16 bits
 	uint32_t size;				// File size in bytes
 
-	__force_inline uint32_t GetCluster() const { return (LE16(clushi) << 16) + LE16(cluslo); }
-	__force_inline bool IsUsed() const { return name[0] != 0xe5; }
-	__force_inline bool IsLFN() const { return (attrib & 0xf) == 0xf; }
-	__force_inline bool IsVolume() const { return (attrib & 8) != 0; }
-	__force_inline bool IsDir() const { return (attrib & 16) != 0; }
-	__force_inline bool IsRO() const { return (attrib & 1) != 0; }
-	__force_inline uint32_t GetFileSize() const { return LE32(size); }
+	uint32_t GetCluster() const __finline { return (LE16(clushi) << 16) + LE16(cluslo); }
+	bool IsUsed() const __finline { return name[0] != 0xe5; }
+	bool IsLFN() const __finline { return (attrib & 0xf) == 0xf; }
+	bool IsVolume() const __finline { return (attrib & 8) != 0; }
+	bool IsDir() const __finline { return (attrib & 16) != 0; }
+	bool IsRO() const __finline { return (attrib & 1) != 0; }
+	uint32_t GetFileSize() const __finline { return LE32(size); }
 };
 
 
@@ -128,23 +128,23 @@ protected:
 	};
 
 	// Simple numeric conversions
-	__force_inline uint32_t ClusterToSector(uint32_t cluster) const {
+	uint32_t ClusterToSector(uint32_t cluster) const __finline {
 		return cluster << _clus_bits;
 	}
-	__force_inline uint32_t SectorToCluster(uint32_t sector) const {
+	uint32_t SectorToCluster(uint32_t sector) const __finline {
 		return sector >> _clus_bits;
 	}
-	__force_inline bool IsValidCluster(uint32_t cluster) const {
+	bool IsValidCluster(uint32_t cluster) const __finline {
 		return ClusterToSector(cluster) < _size;
 	}
 
 	// Find LBA for first sector in data cluster
-	__force_inline uint32_t DataClusterToLBA(uint32_t cluster) const {
+	uint32_t DataClusterToLBA(uint32_t cluster) const __finline {
 		return ClusterToSector(cluster) + _cluster0;
 	}
 
 	// Test if position is in particular cluster
-	__force_inline bool IsInCluster(uint32_t cluster, filepos_t pos) {
+	bool IsInCluster(uint32_t cluster, filepos_t pos) __finline {
 		return SectorToCluster(pos / 512) == cluster;
 	}
 

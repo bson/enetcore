@@ -83,10 +83,10 @@ public:
 	void SetNS(in_addr_t ns);
 
 	// Return default search domain
-	__force_inline const String& GetDomain() { return _domain; }
+	const String& GetDomain() __finline { return _domain; }
 
 	// Set search domain
-	__force_inline void SetDomain(const String& arg) {
+	void SetDomain(const String& arg) __finline {
 		_domain = arg;
 		_change.Broadcast();
 	}

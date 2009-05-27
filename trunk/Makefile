@@ -1,7 +1,7 @@
 BOARD ?= olimex_lpc_l2294
 TOOLSET ?= gnuc
-TOOLDIR ?= /opt/local/bin
-TOOLVER ?= 4.3.2
+TOOLDIR ?= /opt/yagarto/bin
+TOOLVER ?= 4.3.3
 
 CONFIG ?= debug
 

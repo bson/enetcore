@@ -52,20 +52,20 @@ public:
 	LpcSpiDev(LpcSpiBus& bus);
 	
 	// Init is currently a no-op
-	__force_inline void Init() { }
-	__force_inline void SetSSEL(Output* ssel) { _ssel = ssel; }
+	void Init() __finline { }
+	void SetSSEL(Output* ssel) __finline { _ssel = ssel; }
 	void SetSpeed(uint hz);
 
 	void Select();
 	void Deselect();
 
 	// These are delegated from bus - see SPI declaration for comments
-	__force_inline uint8_t Send(const uint8_t* s, uint len) { return _bus.Send(s, len); }
-	__force_inline uint8_t Read(uint8_t code = 0xff) { return _bus.Read(code); }
-	__force_inline uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) {
+	uint8_t Send(const uint8_t* s, uint len) __finline { return _bus.Send(s, len); }
+	uint8_t Read(uint8_t code = 0xff) __finline { return _bus.Read(code); }
+	uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) __finline {
 		return _bus.ReadReply(interval, num_tries, code);
 	}
-	__force_inline bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL) {
+	bool ReadBuffer(void* buffer, uint len, Crc16* crc = NULL) __finline {
 		return _bus.ReadBuffer(buffer, len, crc);
 	}
 };

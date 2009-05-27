@@ -15,7 +15,8 @@
 #include "spinlock.h"
 
 // Wait for interrupt - enter idle mode
-__force_inline void  WaitForInterrupt() {
+void  WaitForInterrupt() __finline;
+inline void  WaitForInterrupt() {
 	PCON = 1;
 }
 

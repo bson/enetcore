@@ -24,7 +24,8 @@ typedef void (*IRQHandler)();
 
 
 #ifdef __GNUC__
-__force_inline uint DisableInterrupts() {
+uint DisableInterrupts() __finline;
+inline uint DisableInterrupts() {
 	uint prev;
 	asm volatile("mrs r12, cpsr\n"
 				 "mov %0, r12\n"
@@ -34,7 +35,8 @@ __force_inline uint DisableInterrupts() {
 	return prev;
 }
 
-__force_inline void EnableInterrupts(uint prev) {
+void EnableInterrupts(uint prev) __finline;
+inline void EnableInterrupts(uint prev) {
 	asm volatile("msr cpsr, %0" : : "r" (prev) : "cc", "memory");
 }
 

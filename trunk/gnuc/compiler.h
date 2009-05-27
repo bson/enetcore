@@ -49,7 +49,7 @@ typedef uint32_t in_addr_t;
 #define __destructor  __attribute__((destructor)) // Static destructor, called after exit
 #define __noalias  __attribute__((malloc)) // Return value is unalised pointer
 #define __noinline  __attribute__((noinline))	// Do not inline
-#define __force_inline inline __attribute__((always_inline))
+#define __finline  __attribute__((always_inline)) // Force inline
 #define __naked __attribute__((naked))
 #define __noinstrument __attribute__((no_instrument_function))
 
