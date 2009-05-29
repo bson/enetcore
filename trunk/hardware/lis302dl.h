@@ -99,7 +99,7 @@ public:
 	}
 
 	// Read status
-	__force_inline uint8_t GetStatus() { return Read<uint8_t>(REG_STATUS); }
+	uint8_t GetStatus() __finline { return Read<uint8_t>(REG_STATUS); }
 };
 
 

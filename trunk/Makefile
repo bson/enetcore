@@ -20,7 +20,7 @@ LFLAGS=-Map $(ODIR)/image.map
 SRCS += hardware/lis302dl.cpp
 
 # Project components
-SRCS=main.cpp
+SRCS += main.cpp
 
 include core/makefile.$(TOOLSET)
 
