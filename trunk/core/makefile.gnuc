@@ -3,7 +3,7 @@ include $(BOARD)/makefile.$(TOOLSET)
 
 CFLAGS += -Icore
 CFLAGS += -fno-exceptions -fno-rtti -ffreestanding -fno-threadsafe-statics	\
-	-fshort-enums -Wall -Wno-invalid-offsetof -Wno-unused
+	-fshort-enums -Wall -Wno-invalid-offsetof -Wno-unused -felide-constructors
 
 LFLAGS+=-nostartfiles --gc-sections
 
