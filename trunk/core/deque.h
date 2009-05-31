@@ -4,7 +4,7 @@
 // Functionally a deque, but doesn't adher to the STL's complexity contract
 // It's well suited for pushing at the back and popping from the front, while
 // poorly suited for pushing at the front and popping at the back.
-// Use for POD data only
+// Use for standard layout types only.
 
 template <typename T> class Deque {
 	Vector<T> _v;

@@ -2,9 +2,8 @@
 #define __SET_H__
 
 
-
-// Set: an ordered vector that guarantees uniqueness
-// Safe for POD only
+// Set: an ordered vector that guarantees uniqueness.
+// Use only with standard layout types.
 
 template <typename T, OrderFunc Order = T::Order> 
 class Set {

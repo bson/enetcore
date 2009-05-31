@@ -1,8 +1,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-// Simple vector
-// Safe for use with POD only
+// Simple vector for use with standard-layout types
 
 template <typename T> class Vector {
 	T* _mem;

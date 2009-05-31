@@ -10,7 +10,7 @@
 // Greater items insert towards the back, lesser items towards the front.
 // Equal items sort by insertion order.
 
-// Safe for POD only
+// Safe only for standard layout types.
 
 template <typename T, OrderFunc Order = T::Order> class ODeque {
 	OVector<T,Order> _v;

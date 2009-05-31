@@ -10,7 +10,7 @@
 // Greater items insert towards the back, lesser items towards the front.
 // Equal items sort by insertion order.
 
-// Safe for POD only
+// Safe for standard-layout types only.
 
 template <typename T, OrderFunc Order = T::Order> 
 class OVector {
