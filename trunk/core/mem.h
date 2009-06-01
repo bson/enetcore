@@ -1,12 +1,26 @@
 #ifndef __MEM_H__
 #define __MEM_H__
 
+#if defined(DEBUG) && !defined(NMEMDEBUG)
+#undef MEMDEBUG
+#define MEMDEBUG 1
+#endif
+
 void __noalias *xmalloc(uint size);
 void __noalias *xrealloc(void *old, uint size);
 void __noalias *xmemdup(const void* block, uint size);
 void xxfree(void* ptr);
 
+void xfree(void* ptr) __finline;
 inline void xfree(void* ptr) { xxfree(ptr); }
+
+// Locate malloc chunk give a pointer into block
+#ifdef MEMDEBUG
+void* findmblk(void* ptr);
+#else
+void* findmblk(void* ptr) FORCEINLINE;
+inline void* findmblk(void* ptr) { return ptr; }
+#endif
 
 #define STR(X)  ((const uchar*)(X))
 

@@ -3242,7 +3242,7 @@ int dlmallopt(int param_number, int value) {
 
 void dlmalloc_check_inuse(void* ptr)
 {
-#ifdef DEBUG
+#ifdef MEMDEBUG
 	if (!PREACTION(gm)) {
 		do_check_inuse_chunk(gm, mem2chunk(ptr));
 		POSTACTION(gm);

@@ -1,5 +1,9 @@
 #include "enetkit.h"
 
+#undef malloc
+#undef realloc
+#undef free
+
 static MemStats memstats = { 0, 0, 0 };
 
 static __noreturn void OutOfMemory()
@@ -9,14 +13,39 @@ static __noreturn void OutOfMemory()
 }
 
 
+#ifdef MEMDEBUG
+enum { MALLOC_MAGIC = 0xa0d00dad };
+
+// Prefix put in allocated memory block
+struct MemDebug {
+	uint32_t magic;
+	uint32_t size;				// Allocation size (including this debug area)
+
+	MemDebug(uint size) : magic(MALLOC_MAGIC), size(size) { }
+	void Validate(const void* ptr) const {
+		if (magic != MALLOC_MAGIC)  abort();
+		if ((const uint8_t*)ptr > (const uint8_t*)this + size) abort();
+	}
+};
+#endif
+
+
 void *xmalloc(uint size)
 {
 	AssertNotInterrupt();
+
 	++memstats.num_malloc;
+#ifdef MEMDEBUG
+	size += sizeof (MemDebug);
+#endif
 	void* tmp = malloc(size);
 	if (!tmp) OutOfMemory();
 	assert(!IsLiteral(tmp));
 	_malloc_region.Validate(tmp);
+#ifdef MEMDEBUG
+	new (tmp) MemDebug(size);
+	tmp = (uint8_t*)tmp + sizeof (MemDebug);
+#endif
 	return tmp;
 }
 
@@ -24,14 +53,26 @@ void *xmalloc(uint size)
 void *xrealloc(void *old, uint size)
 {
 	AssertNotInterrupt();
-	if (IsLiteral(old)) return xmalloc(size);
 
+	if (!old || IsLiteral(old)) return xmalloc(size);
+
+#ifdef MEMDEBUG
+	old = (uint8_t*)old - sizeof (MemDebug);
+	size += sizeof (MemDebug);
+#endif
 	++memstats.num_realloc;
-	if (old) _malloc_region.Validate(old);
+	_malloc_region.Validate(old);
+
 	void* tmp = realloc(old, size);
 	if (!tmp) OutOfMemory();
+
 	assert(!IsLiteral(tmp));
+
 	_malloc_region.Validate(tmp);
+#ifdef MEMDEBUG
+	new (tmp) MemDebug(size);
+	tmp = (uint8_t*)tmp + sizeof (MemDebug);
+#endif
 	return tmp;
 }
 
@@ -88,10 +129,28 @@ void xxfree(void* ptr)
 {
 	AssertNotInterrupt();
 	if (_malloc_region.IsInRegion(ptr)) {
-		_malloc_region.Validate(ptr);
+		VALIDATE_INUSE(ptr);
+#ifdef MEMDEBUG
+		ptr = (uint8_t*)ptr - sizeof (MemDebug);
+		((MemDebug*)ptr)->Validate(ptr);
+#endif
 		++memstats.num_free;
 		free(ptr);
 	}
 }
+
+
+#ifdef MEMDEBUG
+void* findmblk(void* ptr)
+{
+	uint32_t* u = (uint32_t*)ptr;
+	while (_malloc_region.IsInRegion(u) && *u != MALLOC_MAGIC)
+		--u;
+
+	const MemDebug& d = *(MemDebug*)u;
+	d.Validate(ptr);
+	return u;
+}
+#endif
 
 const MemStats& xmemstats() { return memstats; }
