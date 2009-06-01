@@ -1,7 +1,8 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-// Simple vector for use with standard-layout types
+// Simple vector
+// Safe for use with POD only
 
 template <typename T> class Vector {
 	T* _mem;
@@ -20,7 +21,7 @@ public:
 	Self& assign(const Self& arg) {
 		if (&arg == this)  return *this;
 
-		free(_mem);
+		xfree(_mem);
 
 		if (arg._alloc) {
 			_mem = (T*)xmemdup(arg._mem, sizeof (T) * arg._alloc);
@@ -36,7 +37,7 @@ public:
 	Vector(const Self& arg) { _mem = NULL; assign(arg); }
 	Self& operator=(const Self& arg) { return assign(arg); }
 
-	virtual ~Vector() { free(_mem); }
+	virtual ~Vector() { xfree(_mem); }
 
 	void SetAutoResize(bool flag) { _autoresize = flag; }
 
@@ -92,7 +93,7 @@ public:
 	uint Size() const { return _used; }
 	void Clear() {
 		if (_autoresize) {
-			free(exch<T*>(_mem, NULL));
+			xfree(exch<T*>(_mem, NULL));
 			_alloc = 0;
 		}
 		_used = 0;

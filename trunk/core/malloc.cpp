@@ -1721,7 +1721,7 @@ static void internal_malloc_stats(mstate m) {
       }
     }
 
-#ifdef ENETCORE
+#ifdef LACKS_STDIO_H
     console("max system bytes = %10lu\n", (unsigned long)(maxfp));
     console("system bytes     = %10lu\n", (unsigned long)(fp));
     console("in use bytes     = %10lu\n", (unsigned long)(used));
