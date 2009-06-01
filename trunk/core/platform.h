@@ -149,17 +149,19 @@ inline bool IsLiteral(const void*)  { return false; }
 
 // If pointer refers to malloc heap, validate
 inline void VALIDATE_INUSE(void* ptr)  {
-#ifdef DEBUG
+#ifdef MEMDEBUG
 	if (_malloc_region.IsInRegion(ptr)) {
 		_malloc_region.Validate(ptr);
-		malloc_check_inuse(ptr);
+		malloc_check_inuse(findmblk(ptr));
 	}
 #endif
 }
 
 inline void VALIDATE_FREE(void* ptr)  {
-#ifdef DEBUG
-	if (_malloc_region.IsInRegion(ptr))  malloc_check_free(ptr);
+#ifdef MEMDEBUG
+#if 0
+	if (_malloc_region.IsInRegion(ptr))  malloc_check_free((uint8_t*)ptr - 8);
+#endif
 #endif
 }
 
