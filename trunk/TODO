@@ -1,5 +1,13 @@
 Add Toshiba LCD driver
 
+Abstract PLL into _pll.
+Add PINSEL macros
+
+Run system clock fully off Timer1
+- Don't stop or reset TC, just interrupt on match
+- In handler, add TC to system clock and reload with new value
+- Increase default timer to 8 seconds
+
 - Make feature set more configurable
   + I2C normal (100kHz)/fast mode (400kHz)
   + *ALL* networking support on/off
@@ -21,11 +29,6 @@ Implement TCP
 Add Route::_pmtu, TCP PMTU
 
 Optimize IP checksumming
-
-Run system clock fully off Timer1
-- Don't stop or reset TC, just interrupt on match
-- In handler, add TC to system clock and reload with new value
-- Increase default timer to 8 seconds
 
 Add SD card detect
 
