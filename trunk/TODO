@@ -1,14 +1,23 @@
-Add Toshiba LCD driver
+Abstract PLL into _pll0.
 
-Abstract PLL into _pll.
-Add PINSEL macros
+Add PINSEL macros to create bit fields
+
+Rename _stack_region to _iram_region
+
+Add __coredata macro to hardware.h to control section for system data
+- Mark all system data as __coredata
+
+Add hardware.h macros to allocate:
+- Thread stack
+- Thread context
+- Network buffer
 
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value
 - Increase default timer to 8 seconds
 
-- Make feature set more configurable
+Make feature set more configurable
   + I2C normal (100kHz)/fast mode (400kHz)
   + *ALL* networking support on/off
   + TCP on/off
@@ -19,6 +28,18 @@ Better instrumentation control
 - NDMSG to suppress debug messages
 - Break out assert into BoundsCheck(), Invariant(), Precondition(), PointerCheck()
 - Add StackCheck()
+
+Port to STR711
+- Embest STR711 board
+- Memory layout
+
+Add Toshiba LCD driver
+- To hardware/
+
+Port to LPC2468
+- Ethernet
+- Memory layout
+- Olimex LPC-E2468
 
 Add LCD panel text driver
 - Add graphics support
@@ -56,6 +77,14 @@ Improve SPI ReadBuffer
 Implement Watchdog
 - Use hw watchdog
 
+Add support for writing flash
+
 Assign an internal flash sector for non-volatile params, like the
 ethernet Mac address.  See if we can set aside a small internet
 flash sector in link.cmd.
+- On LPC2468 there is nvram - use that instead
+- Provide abstraction to hide implementation and to provide a locking
+  interface and CRC-32.
+
+Permit disabling of Fat LFN so directories can be loaded and searched
+one sector at a time, for highly memory constrained boards.
