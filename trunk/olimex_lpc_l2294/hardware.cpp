@@ -10,6 +10,8 @@ extern void* _main_thread_stack;
 extern void* _intr_thread_stack;
 
 
+Pll _pll0(PLL_BASE);
+
 Gpio _gpio[GPIO_NUM];
 
 PinNegOutput _led;
@@ -72,32 +74,9 @@ void busy_wait()
 }
 
 
-#define PLOCK 0x400
-
 void hwinit()
 {
-	// Setting Multiplier and Divider values
-  	PLLCFG=0x23;
-	PLLFEED=0xaa;
-	PLLFEED=0x55;
-  
-	// Enabling the PLL
-	PLLCON=0x1;
-	PLLFEED=0xaa;
-	PLLFEED=0x55;
-  
-	// Wait for the PLL to lock to set frequency
-	while (!(PLLSTAT & PLOCK)) continue;
-  
-	// Connect the PLL as the clock source
-	PLLCON=0x3;
-	PLLFEED=0xaa;
-	PLLFEED=0x55;
-  
-	// Setting peripheral Clock (pclk) to System Clock (cclk)
-	VPBDIV=0x1;
-
-	// This is done in crt.s - it needs to be done before calling C code
+	// This is done in startup.s - it needs to be done before calling C code
 #if 0
 	// Enable use of external banks 0, 1
 	// P3.26: /CS1
@@ -120,6 +99,7 @@ void hwinit()
 	// can be used for this...
 	// Disable trace port.
 	//
+
 	// A2-A23 are used for address lines
 	//
 	// 0000 111 1 1 0 0 0 00 00 00 0 0 1 00 1 0 0 10 0 1 00
@@ -127,6 +107,10 @@ void hwinit()
 	PINSEL2 = 0xf800924;
 #endif
 
+#define BCFGVAL(IDCY, WST1, WST2, WP, BM, MW, RBLE)							\
+	(((MW) << 28) | ((BM) << 27) | ((WP) << 26) | ((WST2) << 11) | ((RBLE) << 10) | \
+	 ((WST1) << 5) | (IDCY) | (1 << 25))
+#if 0
 	// Map external 32-bit RAM at 0x8100 0000
 	//
 	// t_cyc = 1/(4*14745600) = ~17ns
@@ -140,11 +124,7 @@ void hwinit()
 	// WST1 = 1, WST2 = 1
 	// IDCY = 0 (no switch overhead)
 	//
-#define BCFGVAL(IDCY, WST1, WST2, WP, BM, MW, RBLE)							\
-	(((MW) << 28) | ((BM) << 27) | ((WP) << 26) | ((WST2) << 11) | ((RBLE) << 10) | \
-	 ((WST1) << 5) | (IDCY) | (1 << 25))
 
-#if 0
 	BCFG1 = BCFGVAL(0, 0, 0, 0, 0, 2, 1);
 
 	// Map external 16-bit flash at 0x8000 0000
@@ -160,6 +140,11 @@ void hwinit()
 	//
 	BCFG0 = BCFGVAL(0, 4, 4, 1, 0, 1, 1);
 #endif
+
+	// ^^^ The code above has been executed in startup.s ^^^
+
+	// Setup clock
+	_pll0.Init();
 
 	// Fully enable MAM
 	MAMCR = 0;

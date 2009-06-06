@@ -1,4 +1,4 @@
-Abstract PLL into _pll0.
+Check if BUSY_WAIT is needed with Flyswatter
 
 Add PINSEL macros to create bit fields
 
@@ -35,6 +35,8 @@ Port to STR711
 
 Add Toshiba LCD driver
 - To hardware/
+
+Add configure option for LpcGpio to use Fast GPIO
 
 Port to LPC2468
 - Ethernet

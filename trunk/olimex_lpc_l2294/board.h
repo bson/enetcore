@@ -4,6 +4,12 @@
 // This file maps SoC and board peripherals to canonical names and
 // provides external decls.
 
+enum { FOSC = 14745600 };			  // Crystal
+enum { CCLK_MAX = 72000000 };		  // Max CCLK
+enum { CCLK_MULT = CCLK_MAX / FOSC }; // Desired PLL multiplier
+
+#include "lpc_pll.h"
+
 #include "lpc_gpio.h"
 #include "lpc_i2c.h"
 #include "lpc_uart.h"
@@ -13,6 +19,7 @@
 
 // SoC peripherals
 
+typedef LpcPll Pll;
 typedef LpcEintr Eintr;
 typedef LpcI2cBus I2cBus;
 typedef LpcI2cDev I2cDev;
@@ -22,6 +29,7 @@ typedef LpcSpiDev SpiDev;
 typedef LpcTimer Timer;
 typedef LpcGpio Gpio;
 
+extern Pll _pll0;
 extern Vic _vic;
 
 extern I2cBus _i2c0;

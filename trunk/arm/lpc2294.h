@@ -13,7 +13,8 @@ enum { SPI0_BASE	= 0xe0020000,
 	   TIMER1_BASE	= 0xe0008000,
 	   GPIO0_BASE	= 0xe0028000,
 	   GPIO1_BASE	= 0xe0028010,
-	   I2C_BASE		= 0xe001c000
+	   I2C_BASE		= 0xe001c000,
+	   PLL_BASE		= 0xe01fc080
 };
 
 
@@ -34,12 +35,6 @@ enum { SPI0_BASE	= 0xe0020000,
 // Memory map control
 #define MEMMAP (*((volatile unsigned char*)0xe01fc040))
 
-// Phase Locked Loop (PLL)
-#define PLLCON (*((volatile unsigned char*)0xe01fc080))
-#define PLLCFG (*((volatile unsigned char*)0xe01fc084))
-#define PLLSTAT (*((volatile unsigned short*)0xe01fc088))
-#define PLLFEED (*((volatile unsigned char*)0xe01fc08c))
-
 // VPB Divider
 #define VPBDIV (*((volatile unsigned char*)0xe01fc100))
 
@@ -58,7 +53,6 @@ enum { SPI0_BASE	= 0xe0020000,
 #define WDTC (*((volatile unsigned long*)0xe0000004))
 #define WDFEED (*((volatile unsigned char*)0xe0000008))
 #define WDTV (*((volatile unsigned long*)0xe000000c))
-
 
 // EMC
 #define BCFG0 (*((volatile unsigned long*)0xffe00000))

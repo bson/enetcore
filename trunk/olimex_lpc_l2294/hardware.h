@@ -1,11 +1,6 @@
 #ifndef __HARDWARE_H__
 #define __HARDWARE_H__
 
-// CCLK, PLL, PCLK
-enum { CCLK = 14745600 };
-enum { PLL_MULT = 4 };
-enum { PCLK = CCLK * PLL_MULT };
-
 #include "lpc.h"
 
 // Main init function
