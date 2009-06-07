@@ -2,9 +2,6 @@ Check if BUSY_WAIT is needed with Flyswatter
 
 Add PINSEL macros to create bit fields
 
-Add __coredata macro to hardware.h to control section for system data
-- Mark all system data as __coredata
-
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value
