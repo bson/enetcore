@@ -3,7 +3,7 @@
 #include "udp.h"
 
 
-Dns _dns0(_udp0);
+Dns __coredata _dns0(_udp0);
 
 
 Dns::Dns(Udp& udp) :

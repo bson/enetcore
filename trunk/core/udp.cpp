@@ -3,7 +3,7 @@
 #include "ip.h"
 
 
-Udp _udp0(_ip0);
+Udp __coredata _udp0(_ip0);
 
 
 UdpCoreSocket* Udp::Create()

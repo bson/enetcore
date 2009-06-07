@@ -40,7 +40,8 @@ $(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
 
 $(ODIR)/buildinfo.cpp: .svn/entries
 	@echo Generating $@
-	@echo "char _build_rev[] = \""`svn info | grep '^Last Changed Rev:' | cut -d: -f2-99 | cut -c2-99`"\";" >$@
+	@echo "#include \"enetkit.h\"" >$@
+	@echo "char _build_rev[] = \""`svn info | grep '^Last Changed Rev:' | cut -d: -f2-99 | cut -c2-99`"\";" >>$@
 	@echo "char _build_date[] = \""`date`"\";" >>$@
 	@echo "char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
 	@echo "#ifdef DEBUG" >>$@

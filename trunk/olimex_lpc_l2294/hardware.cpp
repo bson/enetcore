@@ -10,43 +10,43 @@ extern void* _main_thread_stack;
 extern void* _intr_thread_stack;
 
 
-Pll _pll0(PLL_BASE);
+Pll __coredata _pll0(PLL_BASE);
 
-Gpio _gpio[GPIO_NUM];
+Gpio __coredata _gpio[GPIO_NUM];
 
-PinNegOutput _led;
-PinNegOutput _ssel0;
+PinNegOutput __coredata _led;
+PinNegOutput __coredata _ssel0;
 
 #if SPI_NUM >= 1
-SpiBus _spi0(SPI0_BASE);
+SpiBus __coredata _spi0(SPI0_BASE);
 #endif
 #if SPI_NUM >= 2
-SpiBus _spi1(SPI1_BASE);
+SpiBus __coredata _spi1(SPI1_BASE);
 #endif
 
-SpiDev _cardslot(_spi0);		// Card slot - on SPI bus 0
-SDCard _sd(_cardslot);			// Card block device - on card slot
-Fat _fat(_sd);					// Fat device - on SD block dev
+SpiDev __coredata _cardslot(_spi0);	// Card slot - on SPI bus 0
+SDCard __coredata _sd(_cardslot); // Card block device - on card slot
+Fat __coredata _fat(_sd);		  // Fat device - on SD block dev
 
 #if UART_NUM >= 1
-SerialPort _uart0(UART0_BASE, 115200);
+SerialPort __coredata _uart0(UART0_BASE, 115200);
 #endif
 #if UART_NUM >= 2
-SerialPort _uart1(UART1_BASE, 9600);
+SerialPort __coredata _uart1(UART1_BASE, 9600);
 #endif
 
-Eintr _eintr0(0);
-Eintr _eintr1(1);
-Eintr _eintr2(2, Eintr::EINTR_HIGH | Eintr::EINTR_WAKE);
-Eintr _eintr3(3);
+Eintr __coredata _eintr0(0);
+Eintr __coredata _eintr1(1);
+Eintr __coredata _eintr2(2, Eintr::EINTR_HIGH | Eintr::EINTR_WAKE);
+Eintr __coredata  _eintr3(3);
 
-Clock _clock;
+Clock __coredata _clock;
 
-I2cBus _i2c0(I2C_BASE);
+I2cBus __coredata _i2c0(I2C_BASE);
 
-Ethernet _eth0(CS8900A_BASE, _eintr2);
+Ethernet __coredata _eth0(CS8900A_BASE, _eintr2);
 
-Vic _vic(VIC_BASE);
+Vic __coredata _vic(VIC_BASE);
 
 
 void fault0(uint num)
@@ -63,7 +63,7 @@ void fault0(uint num)
 }
 
 
-volatile uint8_t _busy_flag;
+volatile __coredata uint8_t _busy_flag;
 
 void busy_wait()
 {

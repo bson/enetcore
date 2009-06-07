@@ -1,8 +1,8 @@
 #include "enetkit.h"
 
-Thread* _main_thread;
-void* _main_thread_stack;
-void* _intr_thread_stack;
+Thread* __coredata _main_thread;
+void* __coredata _main_thread_stack;
+void* __coredata _intr_thread_stack;
 
 extern "C" {
 void coreinit();

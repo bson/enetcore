@@ -6,7 +6,7 @@
 #include "dns.h"
 
 
-Dhcp _dhcp0(_eth0, _ip0, _dns0);
+Dhcp __coredata _dhcp0(_eth0, _ip0, _dns0);
 
 static const uint8_t dhcp_magic[] = { 0x63, 0x82, 0x53, 0x63 };
 

@@ -1,6 +1,10 @@
 #ifndef __HARDWARE_H__
 #define __HARDWARE_H__
 
+#define __coredata __section(".iram") // Locate core data in internal RAM
+#define __flash __section(".text")
+
+
 #include "lpc.h"
 
 // Main init function

@@ -10,7 +10,7 @@ Time Thread::_curtimer;
 
 Vector<Thread*> Thread::_runq(64);
 
-SysTimer _systimer;
+SysTimer __coredata _systimer;
 
 Time Thread::_qend;
 uint Thread::_rr;

@@ -3,7 +3,7 @@
 #include "udp.h"
 
 
-Ip _ip0(_udp0);
+Ip __coredata _ip0(_udp0);
 
 
 uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)

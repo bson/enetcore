@@ -14,11 +14,11 @@ public:
 	struct TLS { };
 
 private:
-	static Spinlock _lock;		// Global thread lock
-	static Thread* _curthread;	// Currently running thread
+	static Spinlock __coredata _lock; // Global thread lock
+	static Thread* __coredata _curthread; // Currently running thread
 
-	volatile bool _ready:1;		// Initialized
-	volatile bool _cancel:1;	// Cancel
+	bool _ready:1;				// Initialized
+	bool _cancel:1;				// Cancel
 
 	Start _func;				// Start function
 	void* _arg;					// Arg to start function
@@ -28,15 +28,15 @@ private:
 
 	typedef PcbPrimitive Pcb;
 	volatile Pcb _pcb;
-	static volatile Pcb* _curpcb asm("__curpcb"); // PCB of currently running thread
+	static volatile Pcb* __coredata _curpcb asm("__curpcb"); // PCB of currently running thread
 
 	// Run queue - because of the small number of threads we keep only a single table
-	static Vector<Thread*> _runq;
+	static Vector<Thread*> __coredata _runq;
 
-	static uint _rr;			// Round robin index
-	static Time _qend;			// End of current quantum
+	static uint __coredata _rr;	// Round robin index
+	static Time __coredata  _qend; // End of current quantum
 
-	enum { RRQUANTUM = 20*1024 };		// Round robin quantum, in usec
+	enum { RRQUANTUM = 20*1024 }; // Round robin quantum, in usec
 
 	// Thread execution state
 	enum State {
@@ -175,8 +175,8 @@ public:
 	static void Switch();
 
 	// Set timer
-	static Time _curtimer;				// Current timer setting
-	static void SetTimer(uint usec);	// usec from now
+	static Time __coredata _curtimer; // Current timer setting
+	static void SetTimer(uint usec);  // usec from now
 };
 
 Thread& Self() __finline;

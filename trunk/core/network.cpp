@@ -4,8 +4,8 @@
 #include "dhcp.h"
 
 
-EventObject _net_event;
-Thread* _net_thread;
+EventObject __coredata _net_event;
+Thread* __coredata _net_thread;
 
 
 namespace BufferPool {

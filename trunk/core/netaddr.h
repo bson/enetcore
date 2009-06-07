@@ -92,7 +92,7 @@ public:
 	// For ordering based on IP addr+port
 	static bool OrderWithPort(const void* a, const void* b);
 
-	static const NetAddr addr_any;
+	static const NetAddr __coredata addr_any;
 
 	// For HashTable<>.  Hashes address part only.
 	static void HashAddr(const void* va, uint32_t& hash1, uint32_t& hash2) {

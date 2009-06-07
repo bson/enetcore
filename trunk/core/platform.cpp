@@ -4,11 +4,11 @@
 
 namespace Platform {
 
-Region _malloc_region(MALLOC_REGION_SIZE, MALLOC_REGION_START);
-Region _data_region(DATA_REGION_SIZE, DATA_REGION_START);
-Region _iram_region(IRAM_REGION_SIZE, IRAM_REGION_START);
-Region _text_region(TEXT_REGION_SIZE, TEXT_REGION_START);
-Region _xflash_region(XFLASH_REGION_SIZE, XFLASH_REGION_START);
+Region __coredata _malloc_region(MALLOC_REGION_SIZE, MALLOC_REGION_START);
+Region __coredata _data_region(DATA_REGION_SIZE, DATA_REGION_START);
+Region __coredata _iram_region(IRAM_REGION_SIZE, IRAM_REGION_START);
+Region __coredata _text_region(TEXT_REGION_SIZE, TEXT_REGION_START);
+Region __coredata _xflash_region(XFLASH_REGION_SIZE, XFLASH_REGION_START);
 
 
 Region::Region() { }

@@ -10,7 +10,7 @@ IOBuffer* AllocNetworkBuffer();
 uint8_t* AllocNetworkData(uint size);
 
 
-extern EventObject _net_event;	// Event object for network thread
+extern EventObject _net_event; // Event object for network thread
 extern Thread* _net_thread;
 
 void* NetThread(void*);

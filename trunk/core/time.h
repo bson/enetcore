@@ -25,7 +25,7 @@ struct tm {
 class Time {
 	uint64_t _t;			// Time in usec
 
-	static Time _stepped;	// Tracks backwards time steps
+	static Time __coredata _stepped; // Tracks backwards time steps
 
 public:
 #ifdef POSIX
@@ -93,7 +93,7 @@ public:
 	void ToCalendar(struct tm& tm) const;
 #endif
 
-	static const Time InfTim;
+	static const Time __coredata InfTim;
 private:
 #ifndef POSIX
 	enum { SECS_PER_DAY = 24*60*60 };
