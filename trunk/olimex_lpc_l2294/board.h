@@ -4,8 +4,7 @@
 // This file maps SoC and board peripherals to canonical names and
 // provides external decls.
 
-enum { FOSC = 14745600 };			  // Crystal
-enum { CCLK_MAX = 72000000 };		  // Max CCLK
+enum { FOSC = 14745600 };			  // Crystal = 14.7456MHz
 enum { CCLK_MULT = CCLK_MAX / FOSC }; // Desired PLL multiplier
 
 #include "lpc_pll.h"

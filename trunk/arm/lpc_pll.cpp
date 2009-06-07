@@ -12,11 +12,9 @@ void LpcPll::Init()
 
 	// Find a power-of 2 CCO divider in the range [1..8]
 	// Begin at the smallest divider (i.e. max CCO)
-	enum { CCO_DIV = CCO_MAX/(FOSC * CCLK_MULT * 2) }; // Nominal divider
-	assert(CCO_DIV <= 8);
-	assert(CCO_DIV > 0);
-
-	int p = CCO_DIV;
+	int p = CCO_MAX/(FOSC * CCLK_MULT * 2); // Nominal CCO divider
+	assert(p <= 8);
+	assert(p >= 0);
 
 	// Bump divider upwards to next power of two (i.e. lower CCO)
 	int tmp = p & (p - 1);
@@ -25,6 +23,7 @@ void LpcPll::Init()
 		p <<= 1;
 	}
 	assert(p <= 8);
+	assert(p > 0);
 
 	const uint cco = FOSC * CCLK_MULT * p * m * 2;
 	assert(cco <= CCO_MAX);

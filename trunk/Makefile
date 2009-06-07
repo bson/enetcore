@@ -1,3 +1,6 @@
+# This should be the location of the enetcore source tree
+VPATH=.
+
 BOARD ?= olimex_lpc_l2294
 TOOLSET ?= gnuc
 TOOLDIR ?= /opt/yagarto/bin

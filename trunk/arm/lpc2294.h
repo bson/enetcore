@@ -1,6 +1,8 @@
 #ifndef __LPC2294_H__
 #define __LPC2294_H__
 
+// Max CCLK = 75MHz
+enum { CCLK_MAX = 75000000 };
 
 // On-chip LPC peripheral base addresses
 enum { SPI0_BASE	= 0xe0020000,
@@ -65,8 +67,8 @@ enum { SPI0_BASE	= 0xe0020000,
 #define ADDR (*((volatile unsigned long*)0xe0034004))
 
 // Pin Connect Block
-#define PINSEL0 (*((volatile unsigned long *)0xe002c000))
-#define PINSEL1 (*((volatile unsigned long *)0xe002c004))
-#define	PINSEL2 (*((volatile unsigned long *)0xe002c014))
+#define PINSEL0 (*((volatile unsigned long*)0xe002c000))
+#define PINSEL1 (*((volatile unsigned long*)0xe002c004))
+#define	PINSEL2 (*((volatile unsigned long*)0xe002c014))
 
 #endif // __LPC2294_H__
