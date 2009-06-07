@@ -26,17 +26,24 @@ OBJS += $(ODIR)/buildinfo.o
 
 ODIR_TREE += $(ODIR)/core
 
+LOG=$(ODIR)/image.log
+
 all: $(ODIR)/image
 
 clean:
 	-rm -rf $(ODIR)
 
 $(ODIR)/image: $(ODIR)/startup.o $(OBJS) $(BOARD)/link.cmd 
-	$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS)
-	$(SIZE) $@
+	@echo Linking $@
+	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) 2>&1 >>$(LOG)
+	@$(SIZE) $@ 2>&1 >>$(LOG)
+	@$(SIZE) $@
 
 $(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
-	$(AS) $(AFLAGS) $(BOARD)/startup.s > $(ODIR)/startup.lst
+	@echo $(BOARD)/startup.s
+	@echo $(AS) $(AFLAGS) $(BOARD)/startup.s > $(ODIR)/startup.lst >>$(LOG)
+	@$(AS) $(AFLAGS) $(BOARD)/startup.s > $(ODIR)/startup.lst 2>>$(LOG)
 
 $(ODIR)/buildinfo.cpp: .svn/entries
 	@echo Generating $@
@@ -50,11 +57,14 @@ $(ODIR)/buildinfo.cpp: .svn/entries
 	@echo "#endif // DEBUG" >>$@
 
 $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cpp
-	$(CC) $(CFLAGS) -MD -o $@ -c $<
+	@echo $<
+	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
+	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
 $(ODIR)/%.o: %.cpp $(TOUCH_ODIR)
-	$(CC) $(CFLAGS) -MD -o $@ -c $<
-
+	@echo $<
+	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
+	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
 $(TOUCH_ODIR):
 	mkdir -p $(ODIR_TREE)
