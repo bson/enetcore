@@ -97,8 +97,7 @@ namespace Platform {
 		inline uintptr_t RoundUpPage(uintptr_t addr) { return RoundUpAddr(addr, GetPageSize()); }
 	};
 
-
-	extern Region _malloc_region, _data_region, _stack_region,
+	extern Region _malloc_region, _data_region, _iram_region,
 		_text_region, _xflash_region;
 
 	// Print debug output regarding malloc stats
@@ -115,7 +114,7 @@ namespace Platform {
 }
 
 using Platform::_malloc_region;
-using Platform::_stack_region;
+using Platform::_iram_region;
 using Platform::_data_region;
 using Platform::_text_region;
 using Platform::_xflash_region;

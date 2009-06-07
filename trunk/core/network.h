@@ -5,6 +5,11 @@
 
 typedef Deque<uint8_t> IOBuffer;
 
+// These are implemented elsewhere
+IOBuffer* AllocNetworkBuffer();
+uint8_t* AllocNetworkData(uint size);
+
+
 extern EventObject _net_event;	// Event object for network thread
 extern Thread* _net_thread;
 

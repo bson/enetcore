@@ -3,7 +3,11 @@
 
 typedef class Thread* ThreadId;
 
-class Thread {	
+// These are implemented by board specific code to manage memory layout
+uint8_t* AllocThreadStack(uint size);
+Thread* AllocThreadContext();
+
+class Thread {
 public:
 	typedef void* (*Start)(void*);
 

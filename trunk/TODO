@@ -2,15 +2,8 @@ Check if BUSY_WAIT is needed with Flyswatter
 
 Add PINSEL macros to create bit fields
 
-Rename _stack_region to _iram_region
-
 Add __coredata macro to hardware.h to control section for system data
 - Mark all system data as __coredata
-
-Add hardware.h macros to allocate:
-- Thread stack
-- Thread context
-- Network buffer
 
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match

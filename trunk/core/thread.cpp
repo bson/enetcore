@@ -40,7 +40,7 @@ void Thread::Create(Start func, void* arg, uint stack_size, bool detached)
 	_lock.Lock();
 
 	if (!_stack) {
-		_stack = _stack_region.GetMem(stack_size);
+		_stack = AllocThreadStack(stack_size);
 		_estack = (uint8_t*)_stack + stack_size;
 	}
 
@@ -95,7 +95,7 @@ Thread& Thread::Initialize()
 	_lock.Lock();
 
 	assert(!_curthread);
-	_curthread = new Thread();
+	_curthread = AllocThreadContext();
 	_curpcb = &_curthread->_pcb;
 	_curthread->_state = STATE_RUN;
 	_rr = 0;

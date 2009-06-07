@@ -42,7 +42,8 @@ FIQ_Addr:       .word   Unexpected_Interrupt
 .arm
 
 _init:
-    			ldr   r0, =_estack
+				/* start main stack at top of internal RAM */
+    			ldr   r0, =_eiram
     			msr   CPSR_c, #MODE_UND|I_BIT|F_BIT
     			mov   sp, r0
     			msr   CPSR_c, #MODE_ABT|I_BIT|F_BIT

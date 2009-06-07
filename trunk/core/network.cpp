@@ -20,7 +20,9 @@ void Initialize(uint num, uint size)
 
 	_pool.Reserve(num);
 	for (uint i = 0; i < num; ++i) {
-		IOBuffer* buf = new IOBuffer(size);
+		IOBuffer* buf = AllocNetworkBuffer();
+		buf->SetMem(AllocNetworkData(size), size);
+		buf->SetSize(size);
 		buf->SetAutoCompact(false);
 		buf->SetAutoResize(false); // Trap on attempts to grow buffer
 		_pool.PushBack(buf);

@@ -50,7 +50,7 @@ public:
 		for (uint i = start; i < _used; ++i) { if (_mem[i]) _mem[i]->Delete(); }
 	}
 
-	void setmem(T* arg) { _mem = arg; }
+	void SetMem(T* arg) { _mem = arg; }
 	uint& used() { return _used; }
 	uint& alloc() { return _alloc; }
 

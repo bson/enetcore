@@ -36,5 +36,6 @@ void coreinit()
 
 	DMSG("Random uint: 0x%x", Util::Random<uint>());
 
-//	_net_thread = new Thread(NetThread, NULL, NET_THREAD_STACK);
+//	_net_thread = AllocThreadContext();
+//	new (_net_thread) Thread(NetThread, NULL, NET_THREAD_STACK);
 }

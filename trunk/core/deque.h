@@ -57,6 +57,9 @@ public:
 	void Clear() { _v.Clear(); _head = 0; }
 	bool Empty() const { return _head == _v.Size(); }
 
+	void SetMem(T* arg, uint alloc) {
+		_v.SetMem(arg); _v.alloc() = alloc; _head = 0; SetSize(0);
+	}
 	void SetSize(uint arg) { _v.SetSize(_head + arg); }
 
 	void SetHead(uint arg) { _head = arg; }

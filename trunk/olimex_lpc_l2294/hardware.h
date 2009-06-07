@@ -16,12 +16,10 @@ extern uint8_t _edata;
 extern uint8_t _bss_start;
 extern uint8_t _bss_end;
 extern uint8_t _etext;
-extern uint8_t _stack;
-extern uint8_t _estack;
+extern uint8_t _iram;
+extern uint8_t _eiram;
 extern uint8_t _xflash;
 extern uint8_t _exflash;
-extern uint8_t _stack;
-extern uint8_t _estack;
 };
 
 
@@ -43,8 +41,8 @@ enum { XRAM_SIZE = 1024*1024 };
 #define MALLOC_REGION_START  (&_bss_end)
 #define MALLOC_REGION_SIZE   ((&_data + XRAM_SIZE) - &_bss_end)
 
-#define STACK_REGION_START (&_stack)
-#define STACK_REGION_SIZE (&_estack - &_stack)
+#define IRAM_REGION_START (&_iram)
+#define IRAM_REGION_SIZE (&_eiram - &_iram)
 
 #define DATA_REGION_START (&_data)
 #define DATA_REGION_SIZE (&_edata - &_data)

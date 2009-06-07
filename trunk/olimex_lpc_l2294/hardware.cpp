@@ -74,6 +74,23 @@ void busy_wait()
 }
 
 
+// Olimex LPC-L2294 with 1MB 0ws 32-bit BSEL capable external SRAM
+// Allocation strategy:
+//   Main thread stack: Internal RAM
+//   Interrupt stack: Internal RAM
+//   Thread stack: Internal RAM
+//   Heap: External RAM
+//   Thread context: Heap
+//   Network I/O buffers: Heap
+//   Network buffer data: Heap
+//
+
+uint8_t* AllocThreadStack(uint size) { return (uint8_t*)_iram_region.GetMem(size); }
+Thread* AllocThreadContext() { return new Thread(); }
+IOBuffer* AllocNetworkBuffer() { return new IOBuffer(); }
+uint8_t* AllocNetworkData(uint size) { return (uint8_t*)xmalloc(size); }
+
+
 void hwinit()
 {
 	// This is done in startup.s - it needs to be done before calling C code
@@ -203,14 +220,14 @@ void hwinit()
 
 	// Allocate main thread stack - this is the one we're using now
 	// Since the region allocates low to high we do this by installing a reserve...
-	_stack_region.SetReserve(MAIN_THREAD_STACK);
-	_main_thread_stack = (uint8_t*)_stack_region.GetEnd() - MAIN_THREAD_STACK;
+	_iram_region.SetReserve(MAIN_THREAD_STACK);
+	_main_thread_stack = (uint8_t*)_iram_region.GetEnd() - MAIN_THREAD_STACK;
 
 	// Allocate interrupt thread stack and install it
 	// Allocate and install FIQ stack
-	_intr_thread_stack = _stack_region.GetMem(INTR_THREAD_STACK);
+	_intr_thread_stack = _iram_region.GetMem(INTR_THREAD_STACK);
 
-	uint8_t* fiq_stack = (uint8_t*)_stack_region.GetMem(16);
+	uint8_t* fiq_stack = (uint8_t*)_iram_region.GetMem(16);
 
 	asm volatile("mrs r2, cpsr; "
 				 "msr cpsr, #0x12|0x80|0x40; mov sp, %0;"
