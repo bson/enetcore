@@ -2,6 +2,8 @@ Check if BUSY_WAIT is needed with Flyswatter
 
 Add PINSEL macros to create bit fields
 
+Move Output from arm/lpc_gpio.h to someplace generic.
+
 Run system clock fully off Timer1
 - Don't stop or reset TC, just interrupt on match
 - In handler, add TC to system clock and reload with new value

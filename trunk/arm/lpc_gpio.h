@@ -2,6 +2,24 @@
 #define __LPC_GPIO_H__
 
 
+// GPIO and Output abstraction
+//
+//
+// Each GPIO port (or device, if you prefer) has an instance of this
+// class for it.  The port object can then return Pin objects, which
+// are simple proxies to perform operations.
+//
+// An Output is an abstraction that's basically used to turn things on
+// and off.  A typical example might be a LED, relay control, or a
+// peripheral device select.  But it could also be a pure software
+// control to, for example, signal an event object.  Its purpose is to
+// allow parameterization of control signals.  A PinOutput is an
+// implementation of Output that transmits the Output control to a
+// GPIO pin.  PinNegOutput is the same, except opposite polarity.
+//
+// XXX the simple Output base class should go somewhere generic
+
+
 class LpcGpio {
 	volatile uint32_t* _base;
 	uint8_t _portnum;

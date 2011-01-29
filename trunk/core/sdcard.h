@@ -20,18 +20,19 @@ public:
 	// Try initializing SD card.
 	// Will reset the card into SPI mode.
 	// Returns true if card was found and it could be initialized.
-	bool Init();
+	bool Init();                // * implements BlockDev::Init()
 	
 	// Specify device lock
 	void SetLock(Output* lock);
 
-	uint GetSectorSize() const { return 512; }
-	bool ReadSector(uint secnum, void* buf);
+	uint GetSectorSize() const { return 512; } // * implements BlockDev::GetSectorSize()
+	bool ReadSector(uint secnum, void* buf);   // * implements BlockDev::ReadSector()
+    // * implements BlockDev::WriteSector() - NYI
 	bool WriteSector(uint secnum, const void* buf) { abort(); }
 
 	// Prevent media removal
-	void Retain();
-	void Release();
+	void Retain();              // * implements BlockDev::Retain()
+	void Release();             // * implements BlockDev::Release()
 
 private:
 	// Send SD CMD

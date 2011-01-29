@@ -37,7 +37,7 @@ bool SDCard::Init()
 		value = SendCMD(0);
 
 	if (value != 1) {
-		abort();
+//		abort();
 		DMSG("SDCard: CMD0 failed - missing card?");
 		_spi.Deselect();
 		return false;
