@@ -26,4 +26,34 @@ inline void AssertNotInterrupt() { assert(InSystemMode()); }
 #define AssertNotInterrupt() 0
 #endif
 
+
+#ifndef CHECK_BOUNDS
+#  ifdef DEBUG
+#    define CHECK_BOUNDS 1
+#  else
+#    define CHECK_BOUNDS 0
+#  endif
+#endif
+
+#if CHECK_BOUNDS
+#define assert_bounds(EXPR)  ((EXPR) || (AssertFailed(#EXPR, __FILE__, __LINE__), 0))
+#else
+#define assert_bounds(EXPR)  0
+#endif
+
+
+#ifndef CHECK_ALLOC
+#  ifdef DEBUG
+#    define CHECK_ALLOC 1
+#  else
+#    define CHECK_ALLOC 0
+#  endif
+#endif
+
+#if CHECK_ALLOC
+#define assert_alloc(EXPR)  ((EXPR) || (AssertFailed(#EXPR, __FILE__, __LINE__), 0))
+#else
+#define assert_alloc(EXPR)  0
+#endif
+
 #endif // __ASSERT_H__

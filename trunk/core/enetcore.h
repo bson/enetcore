@@ -26,6 +26,7 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "trace.h"
 #include "ovector.h"
 #include "odeque.h"
+#include "ring.h"
 #include "set.h"
 #include "platform.h"
 #include "freelist.h"
