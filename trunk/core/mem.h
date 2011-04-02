@@ -18,7 +18,7 @@ inline void xfree(void* ptr) { xxfree(ptr); }
 #ifdef MEMDEBUG
 void* findmblk(void* ptr);
 #else
-void* findmblk(void* ptr) FORCEINLINE;
+void* findmblk(void* ptr) __finline;
 inline void* findmblk(void* ptr) { return ptr; }
 #endif
 

@@ -11,16 +11,18 @@ VARIANT=-DLPC=2294
 
 include $(SOCDIR)/makefile.$(TOOLSET)
 
-CC   = $(TOOLDIR)/arm-elf-g++
-LD   = $(TOOLDIR)/arm-elf-ld
-AR   = $(TOOLDIR)/arm-elf-ar
-AS   = $(TOOLDIR)/arm-elf-as
-SIZE = $(TOOLDIR)/arm-elf-size
+TARGET=arm-eabi
+
+CC   = $(TOOLDIR)/$(TARGET)-g++
+LD   = $(TOOLDIR)/$(TARGET)-ld
+AR   = $(TOOLDIR)/$(TARGET)-ar
+AS   = $(TOOLDIR)/$(TARGET)-as
+SIZE = $(TOOLDIR)/$(TARGET)-size
 
 CFLAGS += -I$(BOARD) -Ihardware $(VARIANT)
 AFLAGS += -o $(ODIR)/startup.o
 LFLAGS  +=  -T$(BOARD)/link.cmd
-LIBS    += $(TOOLDIR)/../lib/gcc/arm-elf/$(TOOLVER)/libgcc.a
+LIBS    += $(TOOLDIR)/../lib/gcc/$(TARGET)/$(TOOLVER)/libgcc.a
 CPFLAGS = -O binary
 HEXFLAGS = -O ihex
 ODFLAGS	= -x --syms

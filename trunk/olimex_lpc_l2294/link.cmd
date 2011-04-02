@@ -45,8 +45,19 @@ No need to keep dtors if main() never returns
 /* We don't use thumb mode, so no need for interwork glue 
 		*(.glue_7)
 		*(.glue_7t) */
-		_etext = .;					/* define a global symbol _etext just after the last code byte */
+
 	} >flash							/* put all the above into FLASH */
+
+     /* .ARM.exidx is sorted, so has to go in its own output section.
+*/
+    .ARM.exidx : {
+        __exidx_start = .;
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+        __exidx_end = .;
+
+		_etext = .;					/* define a global symbol _etext just after the last code byte */
+    } >flash
+
 
 	/* main thread stack is at top of internal RAM */
    .stack :

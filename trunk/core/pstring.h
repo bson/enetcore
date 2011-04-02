@@ -3,6 +3,8 @@
 
 #include "lookup3.h"
 
+#pragma GCC system_header
+
 
 // Dumb 0 terminated C string
 // POD safe

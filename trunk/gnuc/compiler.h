@@ -17,7 +17,7 @@ typedef short int16_t;
 typedef long int32_t;
 typedef long long int64_t;
 
-typedef uint32_t size_t;
+typedef unsigned int size_t;
 
 typedef unsigned int uint;
 #define uchar uint8_t
@@ -59,5 +59,7 @@ typedef uint32_t in_addr_t;
 #define __section(SECT) __attribute__((section(SECT)))
 
 typedef uint32_t time_t;
+
+#define offsetof(type, member)  __builtin_offsetof (type, member)
 
 #endif // __COMPILER_H__

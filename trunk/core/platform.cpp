@@ -69,7 +69,7 @@ struct mallinfo {
 	size_t keepcost; /* releasable (via malloc_trim) space */
 };
 
-extern "C" { extern struct mallinfo mallinfo(); }
+extern struct mallinfo mallinfo(void);
 
 void DebugMallocMsg()
 {
@@ -442,21 +442,29 @@ in_addr_t inet_addr(const char* a)
 }
 
 
+// ABI stuff (both ELF and EABI stubs, for simplicity, though only one is needed)
+
+extern "C" {
 #undef abort
 void abort() { panic("ABORT"); }
 
-
-// ABI stuff
-
-extern "C" {
 int __cxa_atexit(void (*func) (void*), void* arg, void* dso_handle);
 int __cxa_pure_virtual();
+int __aeabi_atexit (void *object, void (*destructor) (void *), void *dso_handle);
+
 }
 
 int __cxa_atexit(void (*func) (void*), void* arg, void* dso_handle)
 {
 	return 0;
 }
+
+
+int __aeabi_atexit (void *object, void (*destructor) (void *), void *dso_handle)
+{
+    return 0;
+}
+
 
 int __cxa_pure_virtual() { abort(); return 0; }
 

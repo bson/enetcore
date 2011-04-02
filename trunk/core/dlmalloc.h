@@ -809,7 +809,7 @@ size_t dlmalloc_max_footprint(void);
   be kept as longs, the reported values may wrap around zero and
   thus be inaccurate.
 */
-struct mallinfo dlmallinfo(void);
+extern "C" { struct mallinfo dlmallinfo(void); }
 #endif /* NO_MALLINFO */
 
 /*

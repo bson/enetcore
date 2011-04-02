@@ -55,8 +55,8 @@ private:
 // This makes it useable, for instance, as an object lock.
 
 class SecondLock {
-	mutable Mutex& _lock1;
-	mutable Mutex& _lock2;
+    Mutex& _lock1;
+	Mutex& _lock2;
 public:
 	SecondLock(const volatile Mutex& m1, const volatile Mutex& m2) :
 		_lock1(const_cast<Mutex&>(m1)),

@@ -50,13 +50,13 @@ String NetAddr::Printable(bool with_port) const
 {
 #ifdef POSIX
 	sockaddr_storage sa = GetSAStorage();
-#if defined(__APPLE__)
+#  if defined(__APPLE__)
 	if (sa.ss_len < sizeof (sockaddr_in)) return STR("");
-#elif defined(__linux__)
+#  elif defined(__linux__)
 	if (sa.ss_family != AF_INET && sa.ss_family != AF_INET6)  return STR("");
-#elif defined(__CYGWIN__)
+#  elif defined(__CYGWIN__)
 	if (sa.ss_family != AF_INET)  return STR("");
-#endif
+#  endif
 
 	sockaddr_in& sin = (sockaddr_in&)sa;
 
@@ -74,7 +74,7 @@ String NetAddr::Printable(bool with_port) const
 	} else {
 		return String::Format(STR("%u.%u.%u.%u"), a[0], a[1], a[2], a[3]);
 	}
-#elif
+#else
 #error "Implement this"
 #endif
 }

@@ -20,7 +20,7 @@ public:
 	void Abandon() { assert(_count == 1);  _count = 0; }
 
 	class Scoped {
-		mutable Spinlock& _lock;
+		Spinlock& _lock;
 	public:
 		Scoped(const Spinlock& lock) : _lock((Spinlock&)lock) { _lock.Lock(); }
 		~Scoped() { _lock.Unlock(); }

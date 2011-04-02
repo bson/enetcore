@@ -3,8 +3,11 @@ VPATH=.
 
 BOARD ?= olimex_lpc_l2294
 TOOLSET ?= gnuc
-TOOLDIR ?= /opt/yagarto/bin
-TOOLVER ?= 4.3.3
+#TOOLDIR ?= /opt/yagarto/bin
+#TOOLVER ?= 4.3.3
+
+TOOLDIR ?= /opt/armgcc-4.6.0/arm-eabi/bin
+TOOLVER ?= 4.6.0
 
 CONFIG ?= debug
 
