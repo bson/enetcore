@@ -12,7 +12,7 @@ uint Time::GetMonthSize(uint year, uint month)
 		31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 	};
 	
-	assert(month <= 11);
+	assert_bounds(month <= 11);
 	return month_size[(IsLeapYear(year)? 12 : 0) + month];
 }
 

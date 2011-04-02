@@ -3,8 +3,6 @@ VPATH=.
 
 BOARD ?= olimex_lpc_l2294
 TOOLSET ?= gnuc
-#TOOLDIR ?= /opt/yagarto/bin
-#TOOLVER ?= 4.3.3
 
 TOOLDIR ?= /opt/armgcc-4.6.0/arm-eabi/bin
 TOOLVER ?= 4.6.0
@@ -12,7 +10,8 @@ TOOLVER ?= 4.6.0
 CONFIG ?= debug
 
 ifeq ($(CONFIG),opt)
-CFLAGS = -Os -DBUSY_WAIT -DTRACE -I. -I$(TOOLSET)
+# Runtime bounds checking only adds a trivial amount of code
+CFLAGS = -Os -DBUSY_WAIT -DTRACE -I. -I$(TOOLSET) -DCHECK_BOUNDS=1
 else
 CFLAGS = -g -O0 -DTRACE -DDEBUG -DBUSY_WAIT -I. -I$(TOOLSET)
 endif

@@ -29,8 +29,8 @@ int ParseHexDigit(int c)
 
 void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits)
 {
-	assert(radix <= 16);
-	assert(digits <= 31);
+	assert_bounds(radix <= 16);
+	assert_bounds(digits <= 31);
 
 	if (!(flags & FMT_UNSIGNED) && val < 0) {
 		dest.PushBack((uchar)'-');

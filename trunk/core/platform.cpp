@@ -50,7 +50,7 @@ void* Region::GetMem(int amount)
 
 void Region::SetReserve(uint reserve)
 {
-	assert(reserve <= (uint)(_end - _start));
+	assert_bounds(reserve <= (uint)(_end - _start));
 	Spinlock::Scoped L(_lock);
 	_reserve = reserve;
 }

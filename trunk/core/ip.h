@@ -71,8 +71,8 @@ struct __novtable Iph {
 
 	// Set header length; also sets version to 4.
 	void SetHLen(uint hlen)  {
-		assert(hlen <= 15*4);
-		assert((hlen & 3) == 0);
+		assert_bounds(hlen <= 15*4);
+		assert_bounds((hlen & 3) == 0);
 		hl_v = 0x40 | ((hlen/4) & 0xf);
 	}
 
@@ -329,7 +329,7 @@ public:
 	// Get IP header from IOBuffer
 	static Iph& GetIph(IOBuffer* buf) {
 		buf->SetHead(0);
-		assert(buf->Size() >= 16 + sizeof (Iph));
+		assert_bounds(buf->Size() >= 16 + sizeof (Iph));
 		return *(Iph*)(*buf + 16);
 	}
 
@@ -411,7 +411,7 @@ private:
 	// Get ARP header from IOBuffer
 	Arph& GetArph(IOBuffer* buf) {
 		buf->SetHead(0);
-		assert(buf->Size() >= 16 + sizeof (Arph));
+		assert_bounds(buf->Size() >= 16 + sizeof (Arph));
 		return *(Arph*)(*buf + 16);
 	}
 

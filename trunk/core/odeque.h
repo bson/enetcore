@@ -47,8 +47,8 @@ public:
 	void Clear() { _v.Clear(); _head = 0; }
 	bool Empty() const { return !Size(); }
 
-	T& Front() { assert(_v.Size() > _head); return _v[_head]; }
-	const T& Front() const { assert(_v.Size() > _head); return _v[_head]; }
+	T& Front() { assert_bounds(_v.Size() > _head); return _v[_head]; }
+	const T& Front() const { assert_bounds(_v.Size() > _head); return _v[_head]; }
 	
 	T& Back() { return _v.Back(); }
 	const T& Back() const { return _v.Back(); }
@@ -77,7 +77,7 @@ public:
 	}
 
 	void Erase(uint pos, uint num = 1) {
-		if (!pos) { assert(_head + num <= _v.Size()); _head += num; }
+		if (!pos) { assert_bounds(_head + num <= _v.Size()); _head += num; }
 		else _v.Erase(_head + pos, num);
 	}
 

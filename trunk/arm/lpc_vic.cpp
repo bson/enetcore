@@ -13,7 +13,7 @@ void Vic::InstallHandler(uint channel, IRQHandler handler)
 	assert(channel < 32);
 
 	// There are only 16 slots
-	assert(_num_handlers < 16);
+	assert_bounds(_num_handlers < 16);
 
 	_base[VIC_IntSelect] &= ~(1 << channel); // Make channel IRQ
 
@@ -26,7 +26,7 @@ void Vic::InstallHandler(uint channel, IRQHandler handler)
 
 void Vic::EnableChannel(uint channel)
 {
-	assert(channel < 32);
+	assert_bounds(channel < 32);
 
 	Spinlock::Scoped L(_lock);
 	_base[VIC_IntEnable] = 1 << channel;
@@ -35,7 +35,7 @@ void Vic::EnableChannel(uint channel)
 
 void Vic::DisableChannel(uint channel)
 {
-	assert(channel < 32);
+	assert_bounds(channel < 32);
 
 	Spinlock::Scoped L(_lock);
 	_base[VIC_IntEnClr] = 1 << channel;

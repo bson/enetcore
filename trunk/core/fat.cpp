@@ -223,7 +223,7 @@ bool Fat::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
 {
 	Vector<String*> pathlist;
 	path.Split(pathlist, STR("/"));
-	assert(!pathlist.Empty());
+	assert_bounds(!pathlist.Empty());
 
 	bool ok = false;
 

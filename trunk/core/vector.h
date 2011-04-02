@@ -88,7 +88,7 @@ public:
 	}
 
 	uint Headroom() const { return _alloc - _used; }
-	void SetSize(uint arg) { assert(arg <= _alloc); _used = arg; }
+	void SetSize(uint arg) { assert_bounds(arg <= _alloc); _used = arg; }
 
 	uint Size() const { return _used; }
 	void Clear() {
@@ -100,23 +100,23 @@ public:
 	}
 	bool Empty() const { return _used == 0; }
 	
-	T& Front() { assert(_used); return _mem[0]; }
-	const T& Front() const { assert(_used); return _mem[0]; }
+	T& Front() { assert_bounds(_used); return _mem[0]; }
+	const T& Front() const { assert_bounds(_used); return _mem[0]; }
 	
-	T& Back() { assert(_used); return _mem[_used-1]; }
-	const T& Back() const { assert(_used); return _mem[_used-1]; }
+	T& Back() { assert_bounds(_used); return _mem[_used-1]; }
+	const T& Back() const { assert_bounds(_used); return _mem[_used-1]; }
 
-	T& operator[](uint arg) { assert(arg < _used); return _mem[arg]; }
+	T& operator[](uint arg) { assert_bounds(arg < _used); return _mem[arg]; }
 	const T& operator[](uint arg) const {
-		assert(arg < _used);
+		assert_bounds(arg < _used);
 		return _mem[arg];
 	}
 	
-	T* operator+(uint arg) { assert(arg < _used); return _mem + arg; }
-	const T* operator+(uint arg) const { assert(arg < _used); return _mem + arg; }
+	T* operator+(uint arg) { assert_bounds(arg < _used); return _mem + arg; }
+	const T* operator+(uint arg) const { assert_bounds(arg < _used); return _mem + arg; }
 
 	T& Insert(uint pos, uint num = 1) {
-		assert(pos <= _used);
+		assert_bounds(pos <= _used);
 
 		if (pos < _used) {
 			Grow(num);				// _used += num
@@ -156,7 +156,7 @@ public:
 	}
 
 	void Erase(uint pos, uint num = 1) {
-		assert(pos < _used);
+		assert_bounds(pos < _used);
 		num = min(num, _used - pos);
 		_used -= num;
 		if (pos > _used) return;

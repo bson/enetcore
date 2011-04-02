@@ -65,8 +65,8 @@ bool Lis302dl::Read(uint8_t reg, uint8_t* buf, uint numbytes)
 
 void Lis302dl::SetCtrl(uint8_t ctrlnum, uint8_t bits)
 {
-	assert(ctrlnum >= 1);
-	assert(ctrlnum <= 3);
+	assert_bounds(ctrlnum >= 1);
+	assert_bounds(ctrlnum <= 3);
 
 	--ctrlnum;
 	_ctrl[ctrlnum] |= bits;
@@ -76,8 +76,8 @@ void Lis302dl::SetCtrl(uint8_t ctrlnum, uint8_t bits)
 
 void Lis302dl::ClrCtrl(uint8_t ctrlnum, uint8_t bits)
 {
-	assert(ctrlnum >= 1);
-	assert(ctrlnum <= 3);
+	assert_bounds(ctrlnum >= 1);
+	assert_bounds(ctrlnum <= 3);
 
 	--ctrlnum;
 	_ctrl[ctrlnum] &= ~bits;

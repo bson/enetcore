@@ -22,7 +22,7 @@ public:
             _tail = arg._tail;
         }
     }
-                
+
     // Check that arg is valid index
     void BoundsCheck(uint arg) const { assert_bounds(arg < Size()); }
     void SpaceCheck(uint arg) const { assert_bounds(Headroom() >= arg); }
@@ -46,8 +46,7 @@ public:
         // Is there a way to do this in place, with one or two passes?  It would
         // be nice not to have to allocate a temporary buffer on the heap.  Not
         // to mention it can't be done in an interrupt context.
-        T* tmp = malloc(N * sizeof (T));
-        assert_alloc(tmp);
+        T* tmp = xmalloc(N * sizeof (T));
         memcpy(tmp, _v, N * sizeof (T));
         const uint h = N - _head;
         memcpy(_v, tmp + _head, h * sizeof (T));
