@@ -1,6 +1,8 @@
 #include "enetkit.h"
 #include "sha1.h"
 
+#undef VERBOSE
+
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
@@ -41,7 +43,7 @@ void Sha1::Transform(uint32_t state[5], const uint8_t buffer[64])
     block = (CHAR64LONG16*)buffer;
 #endif
 
-    /* Copy context->state[] to working vars */
+    /* Copy _state[] to working vars */
     a = state[0];
     b = state[1];
     c = state[2];
@@ -70,7 +72,7 @@ void Sha1::Transform(uint32_t state[5], const uint8_t buffer[64])
     R4(d,e,a,b,c,72); R4(c,d,e,a,b,73); R4(b,c,d,e,a,74); R4(a,b,c,d,e,75);
     R4(e,a,b,c,d,76); R4(d,e,a,b,c,77); R4(c,d,e,a,b,78); R4(b,c,d,e,a,79);
 
-    /* Add the working vars back into context.state[] */
+    /* Add the working vars back into _state[] */
     state[0] += a;
     state[1] += b;
     state[2] += c;

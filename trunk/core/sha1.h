@@ -22,6 +22,9 @@ public:
 private:
 	static void Transform(uint32_t state[5], const uint8_t buffer[64]);
 
+    // Used mainly to trace state to identify CPU-specific issues.
+    // Run it on a known good target and compare traces.  DMSG is a debug
+    // message macro in enetcore.
 	void Print(const uchar *msg) {
 		DMSG("%s (%d,%d) %x %x %x %x %x",
 			 msg, _count[0], _count[1], _state[0], _state[1],

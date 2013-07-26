@@ -1,3 +1,27 @@
+LPC2468 startup code
+
+Get it to start on LPC2468
+
+Add DRAM support based on Olimex LPC-E2468
+
+Put heap on DRAM
+
+Move Thread (context) to internal RAM
+
+Better instrumentation control
+- NDMSG to suppress debug messages
+- Break out assert into BoundsCheck(), Invariant(), Precondition(), PointerCheck()
+- Add StackCheck()
+
+Add LPC2468 DMA, ethernet, IOBuffer allocation
+
+Add support for enhanced 24xx peripherals
+
+Generalize ADC
+
+Generalize DAC
+
+---
 
 Check if BUSY_WAIT is needed with Flyswatter
 
@@ -16,11 +40,6 @@ Make feature set more configurable
   + TCP on/off
   + SD card support on/off
   + FAT write support on/off
-
-Better instrumentation control
-- NDMSG to suppress debug messages
-- Break out assert into BoundsCheck(), Invariant(), Precondition(), PointerCheck()
-- Add StackCheck()
 
 Port to STR711
 - Embest STR711 board

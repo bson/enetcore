@@ -14,8 +14,8 @@ Pll __coredata _pll0(PLL_BASE);
 
 Gpio __coredata _gpio[GPIO_NUM];
 
-PinNegOutput __coredata _led;
-PinNegOutput __coredata _ssel0;
+PinNegOutput<LpcGpio::Pin> __coredata _led;
+PinNegOutput<LpcGpio::Pin> __coredata _ssel0;
 
 #if SPI_NUM >= 1
 SpiBus __coredata _spi0(SPI0_BASE);

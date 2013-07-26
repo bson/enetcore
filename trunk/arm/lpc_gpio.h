@@ -112,38 +112,4 @@ public:
 };
 
 
-class Output {
-public:
-	virtual void Raise() = 0;
-	virtual void Lower() = 0;
-//	virtual ~Output() { }
-};
-
-
-class PinOutput: public LpcGpio::Pin,
-				 public Output {
-public:
-	PinOutput() { }
-	PinOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
-	PinOutput(const PinOutput& arg) : LpcGpio::Pin(arg) { }
-	PinOutput& operator=(const PinOutput& arg) { new (this) PinOutput(arg); return *this; }
-	void Raise() { Set(); }
-	void Lower() { Reset(); }
-};
-
-
-class PinNegOutput: public LpcGpio::Pin,
-					public Output {
-public:
-	PinNegOutput() { }
-	PinNegOutput(const LpcGpio::Pin& pin) : LpcGpio::Pin(pin) { }
-	PinNegOutput(const PinNegOutput& arg) : LpcGpio::Pin(arg) { }
-	PinNegOutput& operator=(const PinNegOutput& arg) {
-		new (this) PinNegOutput(arg); return *this;
-	}
-	void Raise() { Reset(); }
-	void Lower() { Set(); }
-};
-
-
 #endif // __LPC_GPIO_H__

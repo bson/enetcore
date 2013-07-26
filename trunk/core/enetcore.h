@@ -1,6 +1,8 @@
 #ifndef __ENETCORE_H__
 #define __ENETCORE_H__
 
+#include <new>
+
 #define ENETCORE 1
 
 #include "compiler.h"
@@ -8,6 +10,7 @@
 #define USE_LITERALS
 
 #include "hardware.h"
+#include "gpio.h"
 #include "spinlock.h"
 #include "config.h"
 #include "mem.h"

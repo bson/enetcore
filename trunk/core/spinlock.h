@@ -1,6 +1,10 @@
 #ifndef __SPINLOCK_H__
 #define __SPINLOCK_H__
 
+// XXX this is a uniprocessor version
+// SMP: needs to go in cpu-specific file.  Maybe rename this to up-spinlock.h
+// and include by CPU file if building for a non-SMP target.
+
 class Spinlock {
 	mutable uint32_t _cpsr;
 	mutable uint _count;
