@@ -58,7 +58,7 @@ TIMER, UART, SSP, I2C, PWM, ENET, USB device, GPIO, SYSTICK , NVIC, EEPROM, CRC,
 
 ### Other support
 
-SD cards, FAT16/32 file systems, UDP, DHCP, DNS, SSD1963 displays, HD44780, SSD1303, SSD1306, AD5667R DAC, ADS115
+SD cards, FAT16/32 file systems, UDP, DHCP, DNS, SSD1963 displays, HD44780, SSD1303, SSD1306, AD5667R DAC, ADS115.  Some of this can be pulled in from a very simple MSP430 library I have at https://github.com/bson/lib430.
 
 ### To do:
 
