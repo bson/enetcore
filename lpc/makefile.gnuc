@@ -1,0 +1,8 @@
+SOC_SRCS = lpc_ethernet.cxx lpc_i2c.cxx lpc_uart.cxx lpc_timer.cxx lpc_spi.cxx	\
+	lpc_eintr.cxx lpc_pll.cxx lpc_eeprom.cxx lpc_pwm.cxx lpc_usb_dev.cxx
+
+CFLAGS += -I$(LPCDIR)
+
+SRCS += $(addprefix $(SOCDIR)/,$(SOC_SRCS))
+
+ODIR_TREE += $(ODIR)/$(SOCDIR)

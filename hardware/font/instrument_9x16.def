@@ -1,0 +1,1490 @@
+NAME_SUFFIX ins_9x16
+
+ID INS_9x16_BLANK
+DIM 9 16
+CODE 32
+FLAGS NOKERN
+FILLER
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_A
+DIM 9 16
+CODE 65
+- - - X X X - - -
+- - - X X X - - -
+- - X X X X X - -
+- - X X - X X - -
+- X X - - - X X -
+- X X - - - X X -
+X X - - - - - X X
+X X X X X X X X X
+X X X X X X X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_B
+DIM 9 16
+X X X X X X X - -
+X X X X X X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - X X X
+X X X X X X X X -
+X X X X X X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - X X X
+X X X X X X X X -
+X X X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_C
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_D
+DIM 9 16
+X X X X X X X - -
+X X X X X X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - X X X
+X X X X X X X X -
+X X X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_E
+DIM 9 16
+X X X X X X X X X
+X X X X X X X X X
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X - -
+X X X X X X X - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_F
+DIM 9 16
+X X X X X X X X X
+X X X X X X X X X
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X - -
+X X X X X X X - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_G
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - - -
+X X - - - - - - -
+X X - - X X X X X
+X X - - X X X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_H
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X X X X X X X
+X X X X X X X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_I
+DIM 9 16
+- X X X X X X - -
+- X X X X X X - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- X X X X X X - -
+- X X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_J
+DIM 9 16
+- X X X X X X X X
+- X X X X X X X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_K
+DIM 9 16
+X X - - - - - X X
+X X - - - - X X X
+X X - - - X X X -
+X X - - X X X - -
+X X - X X X - - -
+X X X X X - - - -
+X X X X - - - - -
+X X X X - - - - -
+X X X X X - - - -
+X X - X X X - - -
+X X - - X X X - -
+X X - - - X X X -
+X X - - - - X X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_L
+DIM 9 16
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_M
+DIM 9 16
+X - - - - - - - X
+X X - - - - - X X
+X X X - - - X X X
+X X X X - X X X X
+X X X X X X X X X
+X X - X X X - X X
+X X - - X - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_N
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - - X X
+X X X X - - - X X
+X X X X X - - X X
+X X - X X X - X X
+X X - - X X X X X
+X X - - - X X X X
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_O
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_P
+DIM 9 16
+X X X X X X X - -
+X X X X X X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - X X X
+X X X X X X X X -
+X X X X X X X - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_Q
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - X X - - X X
+X X - X X X - X X
+X X - - X X X X -
+X X - - - X X X -
+- X X X X X X X X
+- - X X X - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_R
+DIM 9 16
+X X X X X X X - -
+X X X X X X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - X X X
+X X X X X X X X -
+X X X X X X - - -
+X X X X X X - - -
+X X - - X X X - -
+X X - - - X X X -
+X X - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_S
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X X - - - - - -
+- X X X X - - - -
+- - X X X X X - -
+- - - - X X X X -
+- - - - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_T
+DIM 9 16
+X X X X X X X X -
+X X X X X X X X -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_U
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+ID INS_9x16_V
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X -
+X X X - - - X X -
+- X X - - - X X -
+- X X - - - X X -
+- - X X - X X - -
+- - X X - X X - -
+- - - X X X - - -
+- - - X X X - - -
+- - - - X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_W
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - X - - X X
+X X - X X X - X X
+X X X X X X X X X
+X X X X - X X X X
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_X
+DIM 9 16
+X X - - - - - X X
+X X - - - - - X X
+- X X - - - X X -
+- X X - - - X X -
+- - X X - X X - -
+- - X X - X X - -
+- - - X X X - - -
+- - - X X X - - -
+- - X X - X X - -
+- - X X - X X - -
+- X X - - - X X -
+- X X - - - X X -
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_Y
+DIM 9 16
+X X - - - - X X -
+X X - - - - X X -
+X X - - - - X X -
+X X - - - - X X -
+X X X - - X X X -
+- X X X X X X - -
+- - X X X X - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_Z
+DIM 9 16
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - X X
+- - - - - - X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - X X X - - - -
+- X X X - - - - -
+X X X - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_DEG
+DIM 9 16
+CODE 20
+- - - - - - - - -
+- - - - X X X - -
+- - - X X X X X -
+- - X X X - X X X
+- - X X - - - X X
+- - X X X - X X X
+- - - X X X X X -
+- - - - X X X - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_PLUS
+DIM 9 16
+CODE 43
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- X X X X X X - -
+- X X X X X X - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_MINUS
+DIM 9 16
+CODE 45
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X X X X X - -
+- X X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_PERIOD
+DIM 9 16
+CODE 46
+FLAGS NOKERN
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X - - -
+- - - X X X - - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_COMMA
+DIM 9 16
+CODE 44
+FLAGS NOKERN
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - X X X - - -
+- - - X X - - - -
+
+ID INS_9x16_LBRACKET
+DIM 9 16
+CODE 91
+X X X X X X X X X
+X X X X X X X X X
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_RBRACKET
+DIM 9 16
+CODE 93
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_QMARK
+DIM 9 16
+CODE 63
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+- - - - - - X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_EX
+DIM 9 16
+CODE 33
+FLAGS NOKERN
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_RARROW
+DIM 9 16
+CODE 17
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X - - -
+- - - - X X X - -
+- - - - - X X X -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_LARROW
+DIM 9 16
+CODE 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X - - -
+- - X X X - - - -
+- X X X - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- X X X - - - - -
+- - X X X - - - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_UARROW
+DIM 9 16
+CODE 18
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - X X X X - - -
+- X X X X X X - -
+X X X X X X X X -
+X X - X X - X X -
+X - - X X - - X -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_DARROW
+DIM 9 16
+CODE 19
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+X - - X X - - X -
+X X - X X - X X -
+X X X X X X X X -
+- X X X X X X - -
+- - X X X X - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_PERCENT
+DIM 9 16
+CODE 37
+- - - - - - - - -
+X X X - - - - - -
+X X X - - - - X X
+X X X - - - X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - X X X - - - -
+- X X X - - - - -
+X X X - - - X X X
+X X - - - - X X X
+X - - - - - X X X
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_0
+DIM 9 16
+CODE 48
+- - - X X X - - -
+- - X X X X X - -
+- X X X - X X X -
+- X X - - - X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X - - - X X -
+- X X X - X X X -
+- - X X X X X - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_1
+DIM 9 16
+- - - X X X - - -
+- - X X X X - - -
+- X X X X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_2
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - X X X - - - -
+- X X X - - - - -
+X X X - - - - - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_3
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+- - - - - - - X X
+- - - - - - X X X
+- - - X X X X X -
+- - - X X X X X -
+- - - - - - X X X
+- - - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_4
+DIM 9 16
+- - - - - X X - -
+- - - - X X X - -
+- - - X X X X - -
+- - X X X X X - -
+- X X X - X X - -
+X X X - - X X - -
+X X - - - X X - -
+X X X X X X X X X
+X X X X X X X X X
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_5
+DIM 9 16
+X X X X X X X X -
+X X X X X X X X -
+X X - - - - - - -
+X X - - - - - - -
+X X - - - - - - -
+X X X X X X X - -
+X X X X X X X X -
+- - - - - - X X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - X X X
+X X X X X X X X -
+X X X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_6
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - - -
+X X - - - - - - -
+X X - X X X X - -
+X X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_7
+DIM 9 16
+X X X X X X X X X
+X X X X X X X X X
+- - - - - - - X X
+- - - - - - X X X
+- - - - - X X X -
+- - - - X X X - -
+- - - X X X - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_8
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- X X X - X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_9
+DIM 9 16
+- - X X X X X - -
+- X X X X X X X -
+X X X - - - X X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X X
+- - X X X X X X X
+- - - - - - - X X
+X X - - - - - X X
+X X X - - - X X X
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_a
+DIM 9 16
+CODE 97
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X X X -
+- - X X X X X X X
+- - - - - - - X X
+- - X X X X X X X
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X X X X X X
+- - X X X X - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_b
+DIM 9 16
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - X X X X -
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - X X X
+- X X X X X X X X
+- X X X X X X X -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_c
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X X X -
+- - X X X X X X X
+- X X X - - - X X
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X X - - - X X
+- - X X X X X X X
+- - - X X X X X -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_d
+DIM 9 16
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- - X X X X - X X
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X X X X X X
+- - X X X X X - X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_e
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X X X -
+- - X X X X X X X
+- - X X - - - X X
+- - X X - - - X X
+- - X X X X X X X
+- - X X X X X X -
+- - X X - - - - -
+- - X X X X X X X
+- - - X X X X X -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_f
+DIM 9 16
+- - - - - X X X -
+- - - - X X X X X
+- - - - X X - X X
+- - - - X X - - X
+- - - - X X - - -
+- - - - X X - - -
+- X X X X X X X X
+- X X X X X X X X
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_g
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X X X X
+- - X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- - X X X X X X X
+- - - X X X X X X
+- - - - - - - X X
+- X X - - - - X X
+- - X X X X X X -
+- - - X X X X - -
+
+ID INS_9x16_h
+DIM 9 16
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - X X X X -
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_i
+DIM 9 16
+FLAGS NOKERN
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - X - -
+- - - X X X X - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_j
+DIM 9 16
+- - - - - - - - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- - - - - X X - -
+- X - - - X X - -
+- X X - - X X - -
+- X X X X X X - -
+- - X X X X - - -
+
+ID INS_9x16_k
+DIM 9 16
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - X -
+- X X - - - X X -
+- X X - - X X - -
+- X X - X X - - -
+- X X X X - - - -
+- X X X X - - - -
+- X X - X X - - -
+- X X - - X X X -
+- X X - - - X X -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_l
+DIM 9 16
+FLAGS NOKERN
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - X - -
+- - - X X X x - -
+- - - X X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_m
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - - - X X -
+X X X X - X X X X
+X X X X X X X X X
+X X - X X X - X X
+X X - X X X - X X
+X X - - X - - X X
+X X - - X - - X X
+X X - - - - - X X
+X X - - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_n
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - X X X X -
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_o
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - X X X X - -
+- - X X X X X X -
+- X X X - - X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X - - X X X
+- - X X X X X X -
+- - - X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_p
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X X X X X X -
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X X X X X X
+- X X X X X X X -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+
+ID INS_9x16_q
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - X X X X X X X
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X X X X X X
+- - X X X X - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+
+ID INS_9x16_r
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - X X X X -
+- X X X X X X X X
+- X X - - - - X X
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- X X - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_s
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - X X X X X - -
+- X X X X X X X -
+- X X - - - - - -
+- X X X X X X - -
+- - X X X X X - -
+- - - - - - X X -
+- X X - - - X X -
+- X X X X X X X -
+- - X X X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_t
+DIM 9 16
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- X X X X X X X -
+- X X X X X X X -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - - - -
+- - - X X - X X -
+- - - X X X X X -
+- - - - X X X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_u
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - X X X
+- X X X X X X X X
+- - X X X X - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_v
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- - X X - - X X -
+- - X X - - X X -
+- - - X X X X - -
+- - - X X X X - -
+- - - - X X - - -
+- - - - X X - - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_w
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+X X - - - - - X X
+X X - - - - - X X
+X X - - - - - X X
+X X - - X - - X X
+X X - X X X - X X
+X X - X X X - X X
+X X X X X X X X X
+- X X X - X X X -
+- - X - - - X - -
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_x
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - - - - X X
+- X X - - - - X X
+- - X X - - X X -
+- - - X X X X - -
+- - - X X X X - -
+- - - X X X X - -
+- - X X - - X X -
+- X X - - - - X X
+- X X - - - - X X
+- - - - - - - - -
+- - - - - - - - -
+
+ID INS_9x16_y
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X - - - - X X
+- X X X X X X X X
+- - X X X X - X X
+- - - - - - - X X
+- - - - - - - X X
+- - - - - - - X X
+- X X X X X X X -
+- - X X X X X - -
+
+ID INS_9x16_z
+DIM 9 16
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - - - - - - - -
+- - X X X X X X -
+- - X X X X X X -
+- - - - - - X X -
+- - - - - X X - -
+- - - - X X - - -
+- - - X X - - - -
+- - X X - - - - -
+- - X X X X X X -
+- - X X X X X X -
+- - - - - - - - -
+- - - - - - - - -
+
+END

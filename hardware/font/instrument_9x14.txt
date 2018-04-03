@@ -1,0 +1,868 @@
+ID INS_9x14_BLANK
+DIM 9 14
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+
+ID INS_9x14_A
+DIM 9 14
+---XXX---
+---XXX---
+--XXXXX--
+--XX-XX--
+-XX---XX-
+-XX---XX-
+XX-----XX
+XXXXXXXXX
+XXXXXXXXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_B
+DIM 9 14
+XXXXXXX--
+XXXXXXXX-
+XX----XXX
+XX-----XX
+XX-----XX
+XX----XXX
+XXXXXXXX-
+XXXXXXXX-
+XX----XXX
+XX-----XX
+XX-----XX
+XX----XXX
+XXXXXXXX-
+XXXXXXX--
+
+ID INS_9x14_C
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_D
+DIM 9 14
+XXXXXXX--
+XXXXXXXX-
+XX----XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX----XXX
+XXXXXXXX-
+XXXXXXX--
+
+ID INS_9x14_E
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+XX-------
+XX-------
+XX-------
+XX-------
+XXXXXXX--
+XXXXXXX--
+XX-------
+XX-------
+XX-------
+XX-------
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_F
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+XX-------
+XX-------
+XX-------
+XX-------
+XXXXXXX--
+XXXXXXX--
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+
+ID INS_9x14_G
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-------
+XX-------
+XX--XXXXX
+XX--XXXXX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_H
+DIM 9 14
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XXXXXXXXX
+XXXXXXXXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_I
+DIM 9 14
+-XXXXXX--
+-XXXXXX--
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+-XXXXXX--
+-XXXXXX--
+
+ID INS_9x14_J
+DIM 9 14
+-XXXXXXXX
+-XXXXXXXX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_K
+DIM 9 14
+XX-----XX
+XX----XXX
+XX---XXX-
+XX--XXX--
+XX-XXX---
+XXXXX----
+XXXX-----
+XXXX-----
+XXXXX----
+XX-XXX---
+XX--XXX--
+XX---XXX-
+XX----XXX
+XX-----XX
+
+ID INS_9x14_L
+DIM 9 14
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_M
+DIM 9 14
+X-------X
+XX-----XX
+XXX---XXX
+XXXX-XXXX
+XXXXXXXXX
+XX-XXX-XX
+XX--X--XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_N
+DIM 9 14
+XX-----XX
+XX-----XX
+XX-----XX
+XXX----XX
+XXXX---XX
+XXXXX--XX
+XX-XXX-XX
+XX--XXXXX
+XX---XXXX
+XX----XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_O
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_P
+DIM 9 14
+XXXXXXX--
+XXXXXXXX-
+XX----XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX----XXX
+XXXXXXXX-
+XXXXXXX--
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+
+ID INS_9x14_Q
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-XX--XX
+XX-XXX-XX
+XX--XXXX-
+XX---XXX-
+-XXXXXXXX
+--XXX--XX
+
+ID INS_9x14_R
+DIM 9 14
+XXXXXXX--
+XXXXXXXX-
+XX----XXX
+XX-----XX
+XX-----XX
+XX----XXX
+XXXXXXXX-
+XXXXXX---
+XXXXXX---
+XX--XXX--
+XX---XXX-
+XX----XXX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_S
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XXX------
+-XXXX----
+--XXXXX--
+----XXXX-
+------XXX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_T
+DIM 9 14
+XXXXXXXX-
+XXXXXXXX-
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+
+ID INS_9x14_U
+DIM 9 14
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_V
+DIM 9 14
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XX---XX-
+-XX---XX-
+--XX-XX--
+--XX-XX--
+---XXX---
+---XXX---
+----X----
+
+ID INS_9x14_W
+DIM 9 14
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XX--X--XX
+XX-XXX-XX
+XXXXXXXXX
+XXXX-XXXX
+XXX---XXX
+XX-----XX
+XX-----XX
+
+ID INS_9x14_X
+DIM 9 14
+XX-----XX
+XX-----XX
+-XX---XX-
+-XX---XX-
+--XX-XX--
+--XX-XX--
+---XXX---
+---XXX---
+--XX-XX--
+--XX-XX--
+-XX---XX-
+-XX---XX-
+XX-----XX
+XX-----XX
+
+ID INS_9x14_Y
+DIM 9 14
+XX----XX-
+XX----XX-
+XX----XX-
+XX----XX-
+XXX--XXX-
+-XXXXXX--
+--XXXX---
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+
+ID INS_9x14_Z
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+-------XX
+------XXX
+-----XXX-
+----XXX--
+---XXX---
+--XXX----
+-XXX-----
+XXX------
+XX-------
+XX-------
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_DEG
+DIM 9 14
+---------
+----XXX--
+---XXXXX-
+--XXX-XXX
+--XX---XX
+--XXX-XXX
+---XXXXX-
+----XXX--
+---------
+---------
+---------
+---------
+---------
+---------
+
+ID INS_9x14_PLUS
+DIM 9 14
+---------
+---------
+---------
+---------
+---XX----
+---XX----
+-XXXXXX--
+-XXXXXX--
+---XX----
+---XX----
+---------
+---------
+---------
+---------
+
+ID INS_9x14_MINUS
+DIM 9 14
+---------
+---------
+---------
+---------
+---------
+---------
+-XXXXXX--
+-XXXXXX--
+---------
+---------
+---------
+---------
+---------
+---------
+
+ID INS_9x14_PERIOD
+DIM 9 14
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+-XXX-----
+-XXX-----
+-XXX-----
+
+ID INS_9x14_COMMA
+DIM 9 14
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+---------
+----XX---
+----XX---
+----XX---
+---XXX---
+---XX----
+
+ID INS_9x14_LBRACKET
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XX-------
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_RBRACKET
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+-------XX
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_QMARK
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+------XXX
+-----XXX-
+----XXX--
+---XXX---
+---XX----
+---XX----
+---------
+---------
+---XX----
+---XX----
+
+ID INS_9x14_EXCLAMATION
+DIM 9 14
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---------
+---------
+---XX----
+---XX----
+
+ID INS_9x14_RARROW
+DIM 9 14
+---------
+---------
+---------
+---XXX---
+----XXX--
+-----XXX-
+XXXXXXXXX
+XXXXXXXXX
+-----XXX-
+----XXX--
+---XXX---
+---------
+---------
+---------
+
+ID INS_9x14_LARROW
+DIM 9 14
+---------
+---------
+---------
+---XXX---
+--XXX----
+-XXX-----
+XXXXXXXXX
+XXXXXXXXX
+-XXX-----
+--XXX----
+---XXX---
+---------
+---------
+---------
+
+ID INS_9x14_UARROW
+DIM 9 14
+---------
+---------
+---XX----
+--XXXX---
+-XXXXXX--
+XXXXXXXX-
+XX-XX-XX-
+X--XX--X-
+---XX----
+---XX----
+---XX----
+---XX----
+---------
+---------
+
+ID INS_9x14_DARROW
+DIM 9 14
+---------
+---------
+---XX----
+---XX----
+---XX----
+---XX----
+X--XX--X-
+XX-XX-XX-
+XXXXXXXX-
+-XXXXXX--
+--XXXX---
+---XX----
+---------
+---------
+
+ID INS_9x14_PERCENT
+DIM 9 14
+---------
+XXX-----X
+XXX----XX
+XXX---XXX
+-----XXX-
+----XXX--
+---XXX---
+--XXX----
+-XXX-----
+XXX---XXX
+XX----XXX
+X-----XXX
+---------
+---------
+
+ID INS_9x14_0
+DIM 9 14
+---XXX---
+--XXXXX--
+-XXX-XXX-
+-XX---XX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XX---XX-
+-XXX-XXX-
+--XXXXX--
+---XXX---
+
+ID INS_9x14_1
+DIM 9 14
+---XXX---
+--XXXX---
+-XXXXX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+----XX---
+
+ID INS_9x14_2
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+------XXX
+-----XXX-
+----XXX--
+---XXX---
+--XXX----
+-XXX-----
+XXX------
+XXXXXXXXX
+XXXXXXXXX
+
+ID INS_9x14_3
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+-------XX
+------XXX
+---XXXXX-
+---XXXXX-
+------XXX
+-------XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_4
+DIM 9 14
+-----XX--
+----XXX--
+---XXXX--
+--XXXXX--
+-XXX-XX--
+XXX--XX--
+XX---XX--
+XXXXXXXXX
+XXXXXXXXX
+-----XX--
+-----XX--
+-----XX--
+-----XX--
+-----XX--
+
+ID INS_9x14_5
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+XX-------
+XX-------
+XX-------
+XXXXXXX--
+XXXXXXXX-
+------XXX
+-------XX
+-------XX
+-------XX
+------XXX
+XXXXXXXX-
+XXXXXXX--
+
+ID INS_9x14_6
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-------
+XX-------
+XX-XXXX--
+XXXXXXXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_7
+DIM 9 14
+XXXXXXXXX
+XXXXXXXXX
+-------XX
+------XXX
+-----XXX-
+----XXX--
+---XXX---
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+---XX----
+
+ID INS_9x14_8
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+-XXX-XXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+ID INS_9x14_9
+DIM 9 14
+--XXXXX--
+-XXXXXXX-
+XXX---XXX
+XX-----XX
+XX-----XX
+XX-----XX
+XXX---XXX
+-XXXXXXXX
+--XXXXXXX
+-------XX
+XX-----XX
+XXX---XXX
+-XXXXXXX-
+--XXXXX--
+
+END

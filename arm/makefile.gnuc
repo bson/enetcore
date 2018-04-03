@@ -1,0 +1,9 @@
+ARM_SRCS = nvic.cxx nvic_exc.s systick.cxx
+
+CFLAGS += -I$(ARMDIR)
+
+SRCS += $(addprefix $(ARMDIR)/,$(ARM_SRCS))
+
+ODIR_TREE += $(ODIR)/$(ARMDIR)
+
+include $(ARMDIR)/makefile.$(CPUID).$(TOOLSET)

@@ -1,0 +1,1070 @@
+NAME_SUFFIX 5x8
+
+ID 5x8_BLANK
+DIM 5 8
+CODE 32
+FILLER
+FLAGS NOKERN
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_A
+DIM 5 8
+CODE 65
+- X X X -
+X - - - X
+X - - - X
+X X X X X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_B
+DIM 5 8
+X X X X -
+X - - - X
+X - - - X
+X X X X -
+X - - - X
+X - - - X
+X X X X -
+- - - - -
+
+ID 5x8_C
+DIM 5 8
+- X X X X
+X - - - -
+X - - - -
+X - - - -
+X - - - -
+X - - - -
+- X X X X
+- - - - -
+
+ID 5x8_D
+DIM 5 8
+X X X X -
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X X X X -
+- - - - -
+
+ID 5x8_E
+DIM 5 8
+X X X X X
+X - - - -
+X - - - -
+X X X X -
+X - - - -
+X - - - -
+X X X X X
+- - - - -
+
+ID 5x8_F
+DIM 5 8
+X X X X X
+X - - - -
+X - - - -
+X X X X -
+X - - - -
+X - - - -
+X - - - -
+- - - - -
+
+ID 5x8_G
+DIM 5 8
+- X X X -
+X - - - X
+X - - - -
+X - - X X
+X - - - X
+X - - - X
+- X X X X
+- - - - -
+
+ID 5x8_H
+DIM 5 8
+X - - - X
+X - - - X
+X - - - X
+X X X X X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_I
+DIM 5 8
+FLAGS NOKERN
+- X X X -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- X X X -
+- - - - -
+
+ID 5x8_J
+DIM 5 8
+X X X X X
+- - - - X
+- - - - X
+- - - - X
+- - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_K
+DIM 5 8
+X - - - X
+X - - X -
+X - X - -
+X X - - -
+X - X - -
+X - - X -
+X - - - X
+- - - - -
+
+ID 5x8_L
+DIM 5 8
+X - - - -
+X - - - -
+X - - - -
+X - - - -
+X - - - -
+X - - - -
+X X X X X
+- - - - -
+
+ID 5x8_M
+DIM 5 8
+X - - - X
+X X - X X
+X - X - X
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_N
+DIM 5 8
+X - - - X
+X X - - X
+X - X - X
+X - - X X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_O
+DIM 5 8
+- X X X -
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_P
+DIM 5 8
+X X X X -
+X - - - X
+X - - - X
+X X X X -
+X - - - -
+X - - - -
+X - - - -
+- - - - -
+
+ID 5x8_Q
+DIM 5 8
+- X X X -
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X - X - X
+- X X X -
+- - - - X
+
+ID 5x8_R
+DIM 5 8
+X X X X -
+X - - - X
+X - - - X
+X X X X -
+X - X - -
+X - - X -
+X - - - X
+- - - - -
+
+ID 5x8_S
+DIM 5 8
+- X X X -
+X - - - X
+X - - - -
+- X X X -
+- - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_T
+DIM 5 8
+X X X X X
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_U
+DIM 5 8
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_V
+DIM 5 8
+X - - - X
+X - - - X
+X - - - X
+- X - X -
+- X - X -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_W
+DIM 5 8
+X - - - X
+X - - - X
+X - - - X
+X - X - X
+X - X - X
+X X - X X
+X - - - X
+- - - - -
+
+ID 5x8_X
+DIM 5 8
+X - - - X
+X - - - X
+- X - X -
+- - X - -
+- X - X -
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_Y
+DIM 5 8
+X - - - X
+X - - - X
+- X - X -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_Z
+DIM 5 8
+X X X X X
+- - - - X
+- - - X -
+- - X - -
+- X - - -
+X - - - -
+X X X X X
+- - - - -
+
+ID 5x8_EX
+DIM 5 8
+CODE 33
+FLAGS NOKERN
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+- - X - -
+- - - - -
+
+ID 5x8_DQUOTE
+DIM 5 8
+CODE 34
+- X - X -
+- X - X -
+- X - X -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_AT
+DIM 5 8
+CODE 64
+- X X X -
+X - - - X
+X - X X X
+X - X - X
+X - X - X
+X - - X -
+- X X X X
+- - - - -
+
+ID 5x8_HASH
+DIM 5 8
+CODE 35
+- X - X -
+- X - X -
+X X X X X
+- X - X -
+X X X X X
+- X - X -
+- X - X -
+- - - - -
+
+ID 5x8_DOLLAR
+DIM 5 8
+- - X - -
+- X X X X
+X - X - -
+X X X X X
+- - X - X
+X X X X -
+- - X - -
+- - - - -
+
+ID 5x8_PERCENT
+DIM 5 8
+- - - - -
+X X - - X
+X - - X -
+- - X - -
+- X - - X
+X - - X X
+- - - - -
+- - - - -
+
+ID 5x8_ET
+DIM 5 8
+- X X X -
+X X - - X
+- X X X -
+- X X - -
+X - X - X
+X - - X X
+- X X X X
+- - - - -
+
+ID 5x8_QUOTE
+DIM 5 8
+FLAGS NOKERN
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_LPAREN
+DIM 5 8
+- - - X -
+- - X - -
+- X - - -
+- X - - -
+- X - - -
+- - X - -
+- - - X -
+- - - - -
+
+ID 5x8_RPAREN
+DIM 5 8
+- X - - -
+- - X - -
+- - - X -
+- - - X -
+- - - X -
+- - X - -
+- X - - -
+- - - - -
+
+ID 5x8_STAR
+DIM 5 8
+- - - - -
+- X - X -
+- - X - -
+X X X X X
+- - X - -
+- X - X -
+- - - - -
+- - - - -
+
+ID 5x8_PLUS
+DIM 5 8
+- - - - -
+- - X - -
+- - X - -
+X X X X X
+- - X - -
+- - X - -
+- - - - -
+- - - - -
+
+ID 5x8_COMMA
+DIM 5 8
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - X - -
+- - X - -
+- X - - -
+
+ID 5x8_MINUS
+DIM 5 8
+- - - - -
+- - - - -
+- - - - -
+X X X X X
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_PERIOD
+DIM 5 8
+FLAGS NOKERN
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- X X - -
+- X X - -
+- - - - -
+
+ID 5x8_SLASH
+DIM 5 8
+- - - - -
+- - - - X
+- - - X -
+- - X - -
+- X - - -
+X - - - -
+- - - - -
+- - - - -
+
+ID 5x8_0
+DIM 5 8
+CODE 48
+- - X - -
+- X - X -
+X - - - X
+X - - - X
+X - - - X
+- X - X -
+- - X - -
+- - - - -
+
+ID 5x8_1
+DIM 5 8
+- - X - -
+- X X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_2
+DIM 5 8
+- X X X -
+X - - - X
+- - - - X
+- - X X -
+- X - - -
+X - - - -
+X X X X X
+- - - - -
+
+ID 5x8_3
+DIM 5 8
+- X X X -
+X - - - X
+- - - - X
+- X X X -
+- - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_4
+DIM 5 8
+- - - X -
+- - X X -
+- X - X -
+X - - X -
+X X X X X
+- - - X -
+- - - X -
+- - - - -
+
+ID 5x8_5
+DIM 5 8
+X X X X X
+X - - - -
+X - - - -
+- X X X -
+- - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_6
+DIM 5 8
+- X X X -
+X - - - X
+X - - - -
+X X X X -
+X - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_7
+DIM 5 8
+X X X X X
+- - - X -
+- - X - -
+- X - - -
+- X - - -
+- X - - -
+- X - - -
+- - - - -
+
+ID 5x8_8
+DIM 5 8
+- X X X -
+X - - - X
+X - - - X
+- X X X -
+X - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_9
+DIM 5 8
+- X X X -
+X - - - X
+X - - - X
+- X X X X
+- - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_COLON
+DIM 5 8
+CODE 58
+FLAGS NOKERN
+- - - - -
+- - - - -
+- - X - -
+- - - - -
+- - - - -
+- - X - -
+- - - - -
+- - - - -
+
+ID 5x8_SEMICOLON
+DIM 5 8
+- - - - -
+- - - - -
+- - X - -
+- - - - -
+- - - - -
+- - X - -
+- - X - -
+- X - - -
+
+ID 5x8_LTHAN
+DIM 5 8
+- - - - X
+- - - X -
+- - X - -
+- X - - -
+- - X - -
+- - - X -
+- - - - X
+- - - - -
+
+ID 5x8_EQUAL
+DIM 5 8
+- - - - -
+- - - - -
+X X X X X
+- - - - -
+X X X X X
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_GTHAN
+DIM 5 8
+- X - - -
+- - X - -
+- - - X -
+- - - - X
+- - - X -
+- - X - -
+- X - - -
+- - - - -
+
+ID 5x8_QMARK
+DIM 5 8
+- X X X -
+X - - - X
+X - - - X
+- - - X -
+- - X - -
+- - - - -
+- - X - -
+- - - - -
+
+ID 5x8_LBRACKET
+DIM 5 8
+CODE 91
+- X X X X
+- X - - -
+- X - - -
+- X - - -
+- X - - -
+- X - - -
+- X X X X
+- - - - -
+
+ID 5x8_BSLASH
+DIM 5 8
+- - - - -
+X - - - -
+- X - - -
+- - X - -
+- - - X -
+- - - - X
+- - - - -
+- - - - -
+
+ID 5x8_RBRACKET
+DIM 5 8
+- X X X X
+- - - - X
+- - - - X
+- - - - X
+- - - - X
+- - - - X
+- X X X X
+- - - - -
+
+ID 5x8_CARET
+DIM 5 8
+- - X - -
+- X - X -
+X - - - X
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_USCORE
+DIM 5 8
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+X X X X X
+- - - - -
+
+ID 5x8_BACKTICK
+DIM 5 8
+- - X - -
+- - X - -
+- - - X -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+ID 5x8_a
+DIM 5 8
+CODE 97
+- - - - -
+- - - - -
+- X X X -
+- - - - X
+- X X X X
+X - - - X
+- X X X X
+- - - - -
+
+ID 5x8_b
+DIM 5 8
+X - - - -
+X - - - -
+X X X X -
+X - - - X
+X - - - X
+X - - - X
+X X X X -
+- - - - -
+
+ID 5x8_c
+DIM 5 8
+- - - - -
+- - - - -
+- X X X X
+X - - - -
+X - - - -
+X - - - -
+- X X X X
+- - - - -
+
+ID 5x8_d
+DIM 5 8
+- - - - X
+- - - - X
+- X X X X
+X - - - X
+X - - - X
+X - - - X
+- X X X X
+- - - - -
+
+ID 5x8_e
+DIM 5 8
+- - - - -
+- - - - -
+- X X X -
+X - - - X
+X X X X -
+X - - - -
+- X X X X
+- - - - -
+
+ID 5x8_f
+DIM 5 8
+- - - X -
+- - X - X
+- - X - -
+- X X X -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_g
+DIM 5 8
+- - - - -
+- - - - -
+- X X X X
+X - - - X
+- X X X X
+- - - - X
+X - - - X
+- X X X -
+
+ID 5x8_h
+DIM 5 8
+X - - - -
+X - - - -
+X X X X -
+X - - - X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_i
+DIM 5 8
+FLAGS NOKERN
+- - - - -
+- - X - -
+- - - - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_j
+DIM 5 8
+- - - - -
+- - - X -
+- - - - -
+- - - X -
+- - - X -
+- - - X -
+- X - X -
+- - X - -
+
+ID 5x8_k
+DIM 5 8
+- X - - -
+- X - - -
+- X - - X
+- X - X -
+- X X - -
+- X - X -
+- X - - X
+- - - - -
+
+ID 5x8_l
+DIM 5 8
+FLAGS NOKERN
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X X -
+- - - - -
+
+ID 5x8_m
+DIM 5 8
+- - - - -
+- - - - -
+X X - X X
+X - X - X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_n
+DIM 5 8
+- - - - -
+- - - - -
+X - X X -
+X X - - X
+X - - - X
+X - - - X
+X - - - X
+- - - - -
+
+ID 5x8_o
+DIM 5 8
+- - - - -
+- - - - -
+- X X X -
+X - - - X
+X - - - X
+X - - - X
+- X X X -
+- - - - -
+
+ID 5x8_p
+DIM 5 8
+- - - - -
+- - - - -
+X X X X -
+X - - - X
+X - - - X
+X X X X -
+X - - - -
+X - - - -
+
+ID 5x8_q
+DIM 5 8
+- - - - -
+- - - - -
+- X X X X
+X - - - X
+X - - - X
+- X X X X
+- - - - X
+- - - - X
+
+ID 5x8_r
+DIM 5 8
+- - - - -
+- - - - -
+X - X X X
+X X - - -
+X - - - -
+X - - - -
+X - - - -
+- - - - -
+
+ID 5x8_s
+DIM 5 8
+- - - - -
+- - - - -
+- X X X X
+X - - - -
+- X X X -
+- - - - X
+X X X X -
+- - - - -
+
+ID 5x8_t
+DIM 5 8
+- - X - -
+- - X - -
+- - X - -
+- X X X -
+- - X - -
+- - X - -
+- - X X -
+- - - - -
+
+ID 5x8_u
+DIM 5 8
+- - - - -
+- - - - -
+X - - - X
+X - - - X
+X - - - X
+X - - X X
+- X X - X
+- - - - -
+
+ID 5x8_v
+DIM 5 8
+- - - - -
+- - - - -
+X - - - X
+X - - - X
+- X - X -
+- X - X -
+- - X - -
+- - - - -
+
+ID 5x8_w
+DIM 5 8
+- - - - -
+- - - - -
+X - - - X
+X - - - X
+X - X - X
+X - X - X
+- X - X -
+- - - - -
+
+ID 5x8_x
+DIM 5 8
+- - - - -
+- - - - -
+X - - - X
+- X - X -
+- - X - -
+- X - X -
+X - - - X
+- - - - -
+
+ID 5x8_y
+DIM 5 8
+- - - - -
+- - - - -
+X - - - X
+X - - - X
+- X X X X
+- - - - X
+X - - - X
+- X X X -
+
+ID 5x8_z
+DIM 5 8
+- - - - -
+- - - - -
+X X X X X
+- - - X -
+- - X - -
+- X - - -
+X X X X X
+- - - - -
+
+ID 5x8_LCURLY
+DIM 5 8
+CODE 123
+- - - X -
+- - X - -
+- - X - -
+- X - - -
+- - X - -
+- - X - -
+- - - X -
+- - - - -
+
+ID 5x8_VBAR
+DIM 5 8
+FLAGS NOKERN
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - X - -
+- - - - -
+
+ID 5x8_RCURLY
+DIM 5 8
+- X - - -
+- - X - -
+- - X - -
+- - - X -
+- - X - -
+- - X - -
+- X - - -
+- - - - -
+
+ID 5x8_TILDE
+DIM 5 8
+CODE 126
+- X X - X
+X - X X -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+- - - - -
+
+END

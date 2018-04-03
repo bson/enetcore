@@ -1,0 +1,18 @@
+// Copyright (c) 2018 Jan Brittenson
+// See LICENSE for details.
+
+# Set up tools, add board peripherals and SOC components to build
+include $(BOARD)/makefile.$(TOOLSET)
+
+CFLAGS += -Icore
+
+CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
+	mem.cxx malloc.cxx freelist.cxx util.cxx arc4.cxx sha1.cxx		\
+	time.cxx lookup3.cxx pstring.cxx hashtable.cxx thread.cxx		\
+	mutex.cxx init.cxx netaddr.cxx usbtmc.cxx                       \
+    network.cxx dhcp.cxx ip.cxx udp.cxx dns.cxx                     \
+    sdcard.cxx fat.cxx
+
+SRCS += $(addprefix core/,$(CORE_SRCS))
+
+ODIR_TREE += $(ODIR)/core
