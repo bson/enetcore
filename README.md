@@ -1,6 +1,6 @@
 # enetcore
 
-Emdedded networking core for ARM Cortex-M4 microcontrollers; NXP LPC4000 in particular.  This was refreshed from an old ARM7TDMI codebase... you may still find vestigial remnants of this.
+Emdedded networking core for ARM Cortex-M4 microcontrollers; NXP LPC4000 in particular.  The goal is for enetcore to host enetkit; a library to build Linux based dedicated network services for embedded platforms.  In many cases a complete Linux system isn't needed and with the proper support the same applications can be run on much smaller bare metal systems using minimal peripheral support.  Take a 100k embedded Linux application and compile it on top a 100k library, and assuming it's fine with 64k SRAM it can go right into a smaller controller without NAND flash, SDRAM, or a processor with L1/L2 cache.  Just a single chip with an RMII PHY and magjack if it needs ethernet.  MicroSD slot if it needs a SD card for config or other low speed uses.  This way the application can be developed on Linux and then incrementally retargeted.  Enetkit supports HTTP, JSON, JSON-RPC, XML, cipher, Mac/sign, etc and runs on top of a reactor pattern that uses epoll on linux (kevent on OS X).  Enetcore will provide a functionally identical reactor pattern (but with a very different implementation of course). 
 
 ## about
 
