@@ -66,4 +66,5 @@ ADC, DAC, GPDMA, I2S, improved I2C, Sleep modes, TCP
 
 ### Board support
 
-Sky Blue, to be open sourced with this software.
+Sky Blue, to be open sourced with this software.  Eventually.  I need to fix a few layout issues first.
+
