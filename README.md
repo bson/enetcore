@@ -1,6 +1,6 @@
 # enetcore
 
-Emdedded networking core for ARM Cortex-M4 microcontrollers; NXP LPC4000 in particular.  This was refreshed from an old ARM7TDMI codebase... you may still find vestigial remnants of this.
+Emdedded networking core for ARM Cortex-M4 microcontrollers; NXP LPC4000 in particular.  The goal is for enetcore to host enetkit; a library to build Linux based dedicated network services for embedded platforms.  In many cases a complete Linux system isn't needed and with the proper support the same applications can be run on much smaller bare metal systems using minimal peripheral support.  Take a 100k embedded Linux application and compile it on top of a 100k library, and assuming it's fine with 64k SRAM it can go right into a smaller controller without NAND flash, SDRAM, or a processor with L1/L2 cache.  Just a single chip with an RMII PHY and magjack if it needs ethernet.  MicroSD slot if it needs a SD card for config or other low speed uses.  Boot times and wake from sleep time would essentially disappear.  This way the application can be developed on Linux and then incrementally retargeted.  Enetkit supports HTTP, JSON, JSON-RPC, XML, cipher, Mac/sign, etc and runs on top of a reactor pattern that uses epoll on linux (kevent on OS X).  Enetcore will provide a functionally identical reactor pattern (but with a very different implementation of course). It's intended to be a software platform, not a hardware control RTOS, although its threading model is strictly priority based.  However, two threads of the same exact priority will round-robin.  It's heartbeat-less and while it uses a timer for timekeeping, it only interrupts when it rolls over (it keeps 64 bit time while the timers are 32 bit).  It uses SysTick for round robin scheduling.  A fork of openocd with RTOS support for enetcore can be found at https://github.com/bson/openocd.
 
 ## about
 
@@ -58,7 +58,7 @@ TIMER, UART, SSP, I2C, PWM, ENET, USB device, GPIO, SYSTICK , NVIC, EEPROM, CRC,
 
 ### Other support
 
-SD cards, FAT16/32 file systems, UDP, DHCP, DNS, SSD1963 displays, HD44780, SSD1303, SSD1306, AD5667R DAC, ADS115
+SD cards, FAT16/32 file systems, UDP, DHCP, DNS, SSD1963 displays, HD44780, SSD1303, SSD1306, AD5667R DAC, ADS115.  Some of this can be pulled in from a very simple MSP430 library I have at https://github.com/bson/lib430.
 
 ### To do:
 
@@ -66,4 +66,5 @@ ADC, DAC, GPDMA, I2S, improved I2C, Sleep modes, TCP
 
 ### Board support
 
-Sky Blue, to be open sourced with this software.
+Sky Blue, to be open sourced with this software.  Eventually.  I need to fix a few layout issues first.
+
