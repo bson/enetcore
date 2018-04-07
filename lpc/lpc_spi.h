@@ -1,3 +1,6 @@
+// Copyright (c) 2018 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __LPC_SPI_H__
 #define __LPC_SPI_H__
 
@@ -6,9 +9,7 @@
 
 // SPI bus
 class LpcSpiBus {
-	volatile uint32// Copyright (c) 2018 Jan Brittenson
-// See LICENSE for details.
-_t* _base;
+	volatile uint32_t* _base;
 
 
     enum {
