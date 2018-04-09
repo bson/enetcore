@@ -30,11 +30,13 @@ public:
     void BoundsCheck(uint arg) const { assert_bounds(arg < Size()); }
     void SpaceCheck(uint arg) const { assert_bounds(Headroom() >= arg); }
 
+    // Return amount of data in ring
     size_type Size() const {
-        return _tail > _head ? _tail - _head : N - _tail + _head;
+        return _tail >= _head ? _tail - _head : N - _head + _tail;
     }
 
-    size_type Headroom() const { return N - Size(); }
+    // Return unused space
+    size_type Headroom() const { return N - Size() - 1; }
 
     void Clear() { _head = _tail = 0; }
     bool Empty() const { return _head == _tail; }
@@ -44,11 +46,11 @@ public:
     void Flatten() {
         AssertNotInterrupt();
 
-        if (_head <= _tail) return;
+        if (_head <= _tail)
+            return;
 
-        // Is there a way to do this in place, with one or two passes?  It would
-        // be nice not to have to allocate a temporary buffer on the heap.  Not
-        // to mention it can't be done in an interrupt context.
+        // XXX do this in-place, with one or two memmoves.  We really
+        // don't want to allocate a temporary buffer on the heap.
         T* tmp = xmalloc(N * sizeof (T));
         memcpy(tmp, _v, N * sizeof (T));
         const uint h = N - _head;
@@ -81,14 +83,16 @@ public:
 
     void PushFront(const T* arg, uint len = -1) {
         if (len == (uint)-1) {
-            while (*arg)  PushFront(*arg++);
+            while (*arg)
+                PushFront(*arg++);
         } else {
             SpaceCheck(len);
-            while (len--) PushFront(*arg++);
+            while (len--)
+                PushFront(*arg++);
         }
     }
 
-    void PushBack(const T& arg) {
+    void PushBack(const T arg) {
         SpaceCheck(1);
         _tail = (_tail + 1) % N;
         _v[_tail] = arg;
@@ -96,10 +100,12 @@ public:
 
     void PushBack(const T* arg, uint len = -1) {
         if (len == (uint)-1) {
-            while (*arg)  PushBack(*arg++);
+            while (*arg)
+                PushBack(*arg++);
         } else {
             SpaceCheck(len);
-            while (len--) PushBack(*arg++);
+            while (len--)
+                PushBack(*arg++);
         }
     }
 
@@ -109,14 +115,17 @@ public:
     T* operator+(uint arg) { BoundsCheck(arg); return _v + ((_head + arg) % N); }
     const T* operator+(uint arg) const { BoundsCheck(arg); return _v + ((_head + arg) % N); }
 
-    void PopFront() {
+    T PopFront() {
         BoundsCheck(0);
         _head = (_head + 1) % N;
+        return _v[_head];
     }
 
-    void PopBack() {
+    T PopBack() {
         BoundsCheck(0);
+        T val = _v[_tail];
         _tail = (_tail - 1) % N;
+        return val;
     }
 
     uint Find(const T& arg) {

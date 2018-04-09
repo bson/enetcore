@@ -4,12 +4,17 @@
 #ifndef __LPC_UART_H__
 #define __LPC_UART_H__
 
+#include "ring.h"
+#include "mutex.h"
 
 class LpcUart {
+    enum { BUFSIZE = 128 };
+
 	volatile uint32_t* _base;
-	Deque<uchar> _sendq;		// Tx buffer
-	Deque<uchar> _recvq;		// Rx buffer
+	Ring<BUFSIZE> _sendq;		// Tx buffer
+	Ring<BUFSIZE> _recvq;		// Rx buffer
     uint8_t _irq;
+    Mutex _w_mutex;
 
     enum {
         REG_RBR = 0,
@@ -82,10 +87,13 @@ public:
 
 	void Init(uint speed, uint framing = FRAMING_8N1);
 
-	// Send string
+    // Write buffer
+    void Write(const uint8_t* data, uint len);
+
+	// Write string
 	void Write(const String& s);
 
-    // Send C string
+    // Write C string
     void WriteCStr(const char* s);
 
 	// Drain write buffer synchronously (= polled)

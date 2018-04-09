@@ -42,10 +42,7 @@ enum {
     IPL_SYSTICK  = 8*_IPL_EXC,       // SysTick - high priority
     IPL_CLOCK    = 8*(_IPL_MIN - 1), // Real-time clock
     IPL_SYSTIMER = 8*(_IPL_CRIT - 1), // Scheduler
-    IPL_UART0    = 8*(_IPL_COMM - 1), // UART 0
-    IPL_UART1    = 8*(_IPL_COMM - 1), // UART 1
-    IPL_UART2    = 8*(_IPL_COMM - 1), // UART 2
-    IPL_UART3    = 8*(_IPL_COMM - 1), // UART 3
+    IPL_UART     = 8*(_IPL_COMM - 1), // UART
     IPL_I2C0     = 8*(_IPL_COMM - 2), // I2C 0
     IPL_I2C1     = 8*(_IPL_COMM - 2), // I2C 1
     IPL_I2C2     = 8*(_IPL_COMM - 2), // I2C 2

@@ -3,6 +3,7 @@
 
 #include "enetkit.h"
 #include "thread.h"
+#include "ring.h"
 #include "lpc_uart.h"
 
 
@@ -14,7 +15,7 @@ void LpcUart::Init(uint speed, uint framing)
     // Actual speed
     const uint actual = PCLK / prescale / 16;
 
-    ScopedNoInt G;
+    IPL G(IPL_UART-1);
 
 	_base[REG_LCR] = 0x80 | framing; // Set framing and access divisor
 	_base[REG_DLL] = prescale & 0xff;
@@ -25,52 +26,46 @@ void LpcUart::Init(uint speed, uint framing)
 
     _base[REG_FDR] = 0x10;      // Don't use FDR
     _base[REG_TER] = BIT7;      // Enable transmitter
+}
 
-    _recvq.Reserve(256);
-    _recvq.SetAutoResize(false);
 
-    _sendq.Reserve(256);
-    _sendq.SetAutoResize(true);
+void LpcUart::Write(const uint8_t *data, uint len)
+{
+    Mutex::Scoped L(_w_mutex);
+
+    IPL G(IPL_UART-1);
+
+    for (const uint8_t *p = data; p < data + len; ) {
+        if (_sendq.Headroom()) {
+            while (_sendq.Headroom() && (p < data + len))
+                _sendq.PushBack(*p++);
+
+            FillTxFifo();
+        }
+        if (p < data + len)
+            Thread::WaitFor(this);
+    }
 }
 
 
 void LpcUart::Write(const String& s)
 {
-    ScopedNoInt G;
-
-    _sendq.PushBack(s.CStr(), s.Size());
-
-    FillTxFifo();
-
-    _sendq.AutoCompact();
+    Write(s.CStr(), s.Size());
 }
 
 
 void LpcUart::WriteCStr(const char* s) {
-    ScopedNoInt G;
-
-    _sendq.PushBack((const uint8_t*)s);
-
-    FillTxFifo();
-
-	_sendq.AutoCompact();
+    Write((const uint8_t*)s, strlen(s));
 }
     
 
-// Call wit interrupts disabled or interrupt handler
+// Call with interrupts disabled or interrupt handler
 void LpcUart::FillTxFifo()
 {
-    assert(!IntEnabled());
-
-	_sendq.SetAutoResize(false);
-
 	while (!_sendq.Empty() && (_base[REG_LSR] & LSR_THRE)) {
-		_base[REG_THR] = _sendq.Front();
-		_sendq.PopFront();
+		_base[REG_THR] = _sendq.PopFront();
 	}
-	_sendq.SetAutoResize(true);
 }
-
 
 void LpcUart::SyncDrain()
 {
@@ -80,9 +75,9 @@ void LpcUart::SyncDrain()
         FillTxFifo();
 }
 
-
 void LpcUart::HandleInterrupt()
 {
+    bool wake = false;
 	const uint32_t iir = _base[REG_IIR];
 
 	// Switch in order of priority - highest at top, then fall through and
@@ -96,24 +91,35 @@ void LpcUart::HandleInterrupt()
 	case 0b0100:
 		// Receiver - FIFO triggered - drain
 	case 0b1100: {
-        ScopedNoInt G;
-
         // Character timeout indicator - drain FIFO
 		while (_base[REG_LSR] & LSR_RDR) {
 			const uchar c = _base[REG_RBR];
-            if (_recvq.Headroom() > 0)
+            if (_recvq.Headroom() > 0) {
                 _recvq.PushBack(c);
+                wake = true;
+            }
 		}
 
 		// Fallthru - fill up Tx FIFO while we're here
 	}
 	case 0b0010: {
-		// THRE
-        ScopedNoInt G;
+        const bool above = _sendq.Size() >= BUFSIZE / 4;
 
+		// THRE
 		FillTxFifo();
+
+        // If we were above a 1/4 low water mark and went below it, wake
+        if (above && _sendq.Size() < BUFSIZE / 4)
+            wake = true;
+        // Or, if we just drained the buffer
+        else if (_sendq.Empty())
+            wake = true;
+            
 	}
 	}
+
+    if (wake)
+        Thread::WakeAll(this);
 }
 
 

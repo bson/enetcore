@@ -35,7 +35,7 @@ bool SDCard::Init()
 
 	_spi.Select();
 
-	uint8_t value = 0xff;
+	int value = -1;
 
 	for (uint i = 0; i < 100 && value != 1; ++i)
 		value = SendCMD(0);
@@ -47,7 +47,7 @@ bool SDCard::Init()
 	}
 	
 	value = SendCMD(8, 0, 1, 0xaa);
-	if (value == 0xff) {
+	if (value == -1) {
 		DMSG("SDCard: initialization failed");
 		_spi.Deselect();
 		return false;
@@ -64,7 +64,8 @@ bool SDCard::Init()
 	// care about the result - it mainly specifies operating voltages, and we have
 	// no control over those.
 	const uint64_t r3 = SendCMDR(5, 58);
-	if ((r3 >> 32) != 1)  return false; // Card should be initializing at this point
+	if ((r3 >> 32) != 1)
+        return false; // Card should be initializing at this point
 
 	const uint32_t ocr = (uint32_t)r3;
 
@@ -91,7 +92,8 @@ bool SDCard::Init()
 			_initialized = false; // R1 part of R3: should no longer be initializing
 
 		const uint32_t ocr = (uint32_t)r3;
-		if (ocr & 0x80000000)  _sdhc = (ocr & 0x40000000) != 0;
+		if (ocr & 0x80000000)
+            _sdhc = (ocr & 0x40000000) != 0;
 	}
 
 
@@ -120,7 +122,7 @@ int SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
                                uint8_t(a), b, c, uint8_t(cmd ? 0 : 0x95), 0xff };
 
 	_spi.Send(cmdbuf, sizeof cmdbuf);
-	return _spi.Read();
+    return _spi.Read();
 }
 
 

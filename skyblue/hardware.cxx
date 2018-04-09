@@ -509,16 +509,11 @@ void hwinit() {
 	NVic::InstallIRQHandler(CLOCK_IRQ, Clock::Interrupt, IPL_CLOCK, &_clock);
 	NVic::EnableIRQ(CLOCK_IRQ);
 
-	NVic::InstallIRQHandler(UART3_IRQ, SerialPort::Interrupt, IPL_UART3, &_uart3);
+	NVic::InstallIRQHandler(UART3_IRQ, SerialPort::Interrupt, IPL_UART, &_uart3);
 	NVic::EnableIRQ(UART3_IRQ);
     
     NVic::InstallIRQHandler(EEPROM_IRQ, Eeprom::Interrupt, IPL_EEPROM, &_eeprom);
     NVic::EnableIRQ(EEPROM_IRQ);
-
-	_uart3.Init(19200, SerialPort::FRAMING_8N1);
-	_uart3.SetInterrupts(true);
-    _uart3.Write("\r\nEnetcore booting up...\r\n");
-    _uart3.SyncDrain();
 
     // Turn on proper assert handling
     _assert_stop = false;
@@ -533,6 +528,9 @@ void hwinit() {
     NVic::EnableIRQ(ENET_IRQ);
     NVic::EnableIRQ(EINT0_IRQ);
 #endif
+	_uart3.Init(19200, SerialPort::FRAMING_8N1);
+	_uart3.SetInterrupts(true);
+
 	// Enable global interrupts by restoring to a non-disabled state :)
     RestoreInterrupts(0);
 
@@ -542,6 +540,9 @@ void hwinit() {
 	// Start clock
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ);
+
+    // First line of text
+    _uart3.Write("\r\nEnetcore booting up...\r\n");
 
     // Initialize EEPROM early so we can pull config from it
     _eeprom.Init();

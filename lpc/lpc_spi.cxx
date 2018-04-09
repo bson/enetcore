@@ -21,12 +21,12 @@ void LpcSpiBus::SetSpeed(uint freq) {
     assert(freq <= PCLK/12);
 
     const uint scaler = PCLK / freq;
-    uint prescaler = scaler & 0xff;
-    uint scr = scaler / 0x100;
+    uint prescaler = scaler;
+    uint scr = 1;
 
-    if (prescaler == 0xff){
-        --prescaler;
-        ++scr;
+    if (scaler > 254) {
+        prescaler = scaler / 2;
+        scr = scaler / 256 + 1;
     }
 
     assert(prescaler >= 2);
@@ -38,14 +38,14 @@ void LpcSpiBus::SetSpeed(uint freq) {
     _base[REG_CR1] = CR1_SSE | CR1_MASTER;
     _base[REG_CPSR] = prescaler;
 
-    DMSG("SpiBus: Prescaler = %u, scr = %u, clock = %ukHz",
-         prescaler, scr, PCLK/1000/prescaler/(scr+1));
+    DMSG("SpiBus: freq=%ukHz, prescaler = %u, scr = %u, clock = %ukHz",
+         freq/1000, prescaler, scr, PCLK/prescaler/scr/1000);
 }
 
 
 void LpcSpiBus::WaitIdle() {
     // Wait until idle
-    while (!(_base[REG_SR] & SR_BSY))
+    while (_base[REG_SR] & SR_BSY)
         ;
 
     // Wait for transmitter FIFO empty

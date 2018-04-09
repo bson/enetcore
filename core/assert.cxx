@@ -5,24 +5,13 @@
 
 
 [[noreturn]] void AssertFailed(const char* expr, const char* file, int linenum) {
-    DisableInterrupts();
-
     while (_assert_stop)
         ;
 
     // In case it faults again
     _assert_stop = true;
 
-	_console.SyncDrain();
-
-    if (InExceptionHandler()) {
-        // formatting uses memory allocation
-        _console.WriteCStr("\r\nAssert failed in ");
-        _console.WriteCStr(file);
-        _console.WriteCStr("\r\nAssert:   ");
-        _console.WriteCStr(expr);
-        _console.WriteCStr("\r\n");
-    } else {
+    if (!InExceptionHandler()) {
         console("Assert failed in %s line %u:", file, linenum);
         console("assert:    %s", (const uchar*)expr ? (const uchar*)expr :
                 STR("<no expression>"));
@@ -30,6 +19,7 @@
 
 	_console.SyncDrain();
 
+    DisableInterrupts();
 #ifdef DEBUG
 	WaitForDebugger();
 #else
@@ -41,24 +31,13 @@
 
 #ifdef DEBUG
 [[noreturn]] void PanicStop(const uchar* msg, const char* file, int linenum) {
-    DisableInterrupts();
-
     while (_assert_stop)
         ;
 
     // In case it faults again
     _assert_stop = true;
 
-	_console.SyncDrain();
-
-    if (InExceptionHandler()) {
-        // formatting uses memory allocation
-        _console.WriteCStr("\r\nPanic in file ");
-        _console.WriteCStr(file);
-        _console.WriteCStr("\r\nPanic:   ");
-        _console.WriteCStr((const char*)msg);
-        _console.WriteCStr("\r\n");
-    } else {
+    if (!InExceptionHandler()) {
         console("Panic: %s line %u:", file, linenum);
         console("Panic:    %s", msg ? msg : STR("No panic string"));
     }
@@ -70,20 +49,13 @@
 #else
 [[noreturn]] void PanicStop(const uchar* msg)
 {
-    DisableInterrupts();
-
     while (_assert_stop)
         ;
 
     // In case it faults again
     _assert_stop = true;
 
-    if (InExceptionHandler()) {
-        // formatting uses memory allocation
-        _console.WriteCStr("\r\nPanic:   ");
-        _console.WriteCStr((const char*)msg);
-        _console.WriteCStr("\r\n");
-    } else {
+    if (!InExceptionHandler()) {
         console("Panic:    %s", msg ? msg : STR(""));
     }
 
