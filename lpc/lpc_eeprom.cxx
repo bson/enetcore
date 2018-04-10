@@ -65,7 +65,7 @@ void LpcEeprom::Write(uint16_t addr, const void* block, uint16_t len) {
     _page   = addr;
 
     if (_remain) {
-        Thread::IPL G(IPL_EEPROM-1);
+        Thread::IPL G(IPL_EEPROM);
 
         _base[REG_ADDR] = _addr;
         _base[REG_CMD]  = CMD_WRITE_16;
@@ -95,7 +95,7 @@ void LpcEeprom::Read(uint16_t addr, void* block, uint16_t len) {
     else
         _base[REG_CMD] = CMD_READ_8;
 
-    Thread::IPL G(IPL_EEPROM-1);
+    Thread::IPL G(IPL_EEPROM);
 
     while (_state != State::READ_DONE)
         Thread::WaitFor(this);

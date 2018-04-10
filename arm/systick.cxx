@@ -6,7 +6,7 @@
 
 
 void SysTick::SetTimer(uint usec) {
-    Thread::IPL G(IPL_SYSTICK-1);
+    Thread::IPL G(IPL_SYSTICK);
 
     // 1000000/976 = 1024, which reduces the division to a bit shift. 
     // The max value here is 34932us = 34.9ms before the multiplication

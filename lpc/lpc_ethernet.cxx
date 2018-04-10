@@ -13,7 +13,7 @@ using namespace enet_phy;
 const uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
 
 void Ethernet::Reset() {
-    Thread::IPL G(IPL_ENET-1);
+    Thread::IPL G(IPL_ENET);
 
     _txdesc = NULL;
     _txstatus = NULL;
@@ -40,7 +40,7 @@ void Ethernet::Reset() {
 void Ethernet::Initialize(const uint8_t macaddr[6]) {
     memcpy(_macaddr, macaddr, sizeof _macaddr);
 
-    Thread::IPL G(IPL_ENET-1);
+    Thread::IPL G(IPL_ENET);
 
     EnetPHY::PreConf(*this);
 
@@ -215,7 +215,7 @@ void Ethernet::CreateDescriptors() {
 }
 
 IOBuffer* Ethernet::Receive(uint16_t& et) {
-    Thread::IPL G(IPL_ENET-1);
+    Thread::IPL G(IPL_ENET);
 
     const uint i = _base[REG_RXCONSUMEINDEX];
 
@@ -281,7 +281,7 @@ void Ethernet::RestockRx() {
 }
 
 bool Ethernet::Send(IOBuffer* buf) {
-    Thread::IPL G(IPL_ENET-1);
+    Thread::IPL G(IPL_ENET);
 
     const uint current = _base[REG_TXPRODUCEINDEX];
     const uint next = (current + 1) % TX_DESC_NUM;

@@ -333,9 +333,11 @@ void Thread::Idle()  {
     Rotate(false);
 
     while (_curthread->_state != State::RUN) {
+        const uint prev = SetIPL(0);
         EnableInterrupts();
         WaitForInterrupt();
         DisableInterrupts();
+        SetIPL(prev);
     }
 
     _curthread->ValidateStack();

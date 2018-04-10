@@ -153,7 +153,7 @@ public:
         uint32_t _save;
     public:
         IPL(uint32_t ipl)
-            : _save(SetIPL(ipl)) {
+            : _save(SetIPL(ipl - 1)) {
             __atomic_inc(&Thread::_ipl_count);
         }
         

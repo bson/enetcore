@@ -76,9 +76,8 @@ enum {
 
 // Software priorities
 enum {
-    // Network service code, one lower than than ENET so ethernet interrupts
-    // can preempt it.
-    IPL_NETWORK  = IPL_ENET+1,
+    // Network service code, locks out ethernet interrupts where needed
+    IPL_NETWORK  = IPL_ENET,
 };
 
 extern "C" {
