@@ -14,72 +14,71 @@
 // Note: lower values are higher priority.  (We reverse this purely for
 // calculation purposes.)
 enum {
-    // Priority bands
-    _IPL_MAX  = 1,               //  1 Max priority
-    _IPL_EXC  = 4,               //  3 Exceptions
-    _IPL_CRIT = 12,              //  8 Real-time critical functions
-    _IPL_SOFT = 17,              //  5 Soft real-time functions
-    _IPL_COMM = 27,              // 10 Various other communications
-    _IPL_MIN  = 31,              //  5 Low priority
+    IPL_QUANTUM  = 8,
 
-    IPL_MAX   = _IPL_MAX*8,
-    IPL_EXC   = _IPL_EXC*8,
-    IPL_CRIT  = _IPL_CRIT*8,
-    IPL_SOFT  = _IPL_SOFT*8,
-    IPL_COMM  = _IPL_COMM*8,
-    IPL_MIN   = _IPL_MIN*8,
+    // Priority bands
+    IPL_MAX      = 1,           //  1 Max priority
+    IPL_EXC      = 4,           //  3 Exceptions
+    IPL_CRIT     = 12,          //  8 Real-time critical functions
+    IPL_SOFT     = 17,          //  5 Soft real-time functions
+    IPL_COMM     = 27,          // 10 Various other communications
+    IPL_MIN      = 31,          //  5 Low priority
+    IPL_NUM       = 32,
 
     // Scheduler IPL.  This is the highest IPL that can make calls other
     // than Wake calls.
-    IPL_SCHED    = 8*(_IPL_CRIT+1),
+    IPL_SCHED    = IPL_CRIT+1,
 
     // Hardware
-    IPL_UNEXP    = 8*_IPL_MAX,   // Unexpected interrupt
-    IPL_NMI      = 8*_IPL_MAX,
-    IPL_HW_EXC   = 8*_IPL_MAX,  // Hardware exceptions: bus error, etc
-    IPL_SW_EXC   = 8*(_IPL_MIN - 2), // Software exceptions: SV call
-    IPL_CSW      = 8*(_IPL_MIN - 1),// Software context switch (PendSV)
-    IPL_SYSTICK  = 8*_IPL_EXC,       // SysTick - high priority
-    IPL_CLOCK    = 8*(_IPL_MIN - 1), // Real-time clock
-    IPL_SYSTIMER = 8*(_IPL_CRIT - 1), // Scheduler
-    IPL_UART     = 8*(_IPL_COMM - 5), // UART
-    IPL_I2C      = 8*(_IPL_COMM - 2), // I2C
-    IPL_SPI      = 8*(_IPL_COMM - 2), // SPI
-    IPL_USB      = 8*(_IPL_COMM - 7), // USB
-    IPL_ENET     = 8*(_IPL_COMM - 4), // Ethernet controller
-    IPL_MISR     = 8*(_IPL_MIN  - 5), // PHY MISR interrupt (link change, etc)
-    IPL_EEPROM   = 8*(_IPL_COMM - 1), // EEPROM read/write
+    IPL_UNEXP    = IPL_MAX,     // Unexpected interrupt
+    IPL_NMI      = IPL_MAX,
+    IPL_HW_EXC   = IPL_MAX,     // Hardware exceptions: bus error, etc
+    IPL_SW_EXC   = IPL_MIN - 2, // Software exceptions: SV call
+    IPL_CSW      = IPL_MIN - 1, // Software context switch (PendSV)
+    IPL_SYSTICK  = IPL_EXC,     // SysTick - high priority
+    IPL_CLOCK    = IPL_MIN - 1, // Real-time clock
+    IPL_SYSTIMER = IPL_CRIT - 1, // Scheduler
+    IPL_UART     = IPL_COMM - 5, // UART
+    IPL_I2C      = IPL_COMM - 2, // I2C
+    IPL_SPI      = IPL_COMM - 2, // SPI
+    IPL_USB      = IPL_COMM - 7, // USB
+    IPL_ENET     = IPL_COMM - 4, // Ethernet controller
+    IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
+    IPL_EEPROM   = IPL_COMM - 1, // EEPROM read/write
 };
 #else
 // Non-nested interrupt priorities.  Except HW faults.
 enum {
-    _IPL_SOFT = 17,
+    IPL_SOFT     = 17,
 
-    IPL_MIN = 8*63,
-    IPL_MAX = 8*1,
+    IPL_MIN      = 31,
+    IPL_MAX      = 1,
+    IPL_NUM      = 32,
 
     // Values to use
-    IPL_UNEXP    = 8*_IPL_SOFT,  // Unexpected interrupt
-    IPL_NMI      = 8*_IPL_SOFT,
-    IPL_HW_EXC   = 8*_IPL_SOFT-5, // Hardware exceptions: bus error, etc
-    IPL_SW_EXC   = 8*_IPL_SOFT,  // Software exceptions: SV call
-    IPL_CSW      = 8*_IPL_SOFT+1, // Software context switch (PendSV)
-    IPL_SYSTICK  = 8*_IPL_SOFT,  // SysTick
-    IPL_CLOCK    = 8*_IPL_SOFT,  // Real-time clock
-    IPL_SYSTIMER = 8*_IPL_SOFT,  // Scheduler
-    IPL_UART     = 8*_IPL_SOFT,  // UART
-    IPL_I2C      = 8*_IPL_SOFT,  // I2C
-    IPL_SPI      = 8*_IPL_SOFT,  // SPI
-    IPL_USB      = 8*_IPL_SOFT,  // USB
-    IPL_ENET     = 8*_IPL_SOFT,  // Ethernet controller
-    IPL_MISR     = 8*_IPL_SOFT,  // PHY MISR interrupt (link change, etc)
-    IPL_EEPROM   = 8*_IPL_SOFT,  // EEPROM read/write
+    IPL_UNEXP    = IPL_SOFT,  // Unexpected interrupt
+    IPL_NMI      = IPL_SOFT,
+    IPL_HW_EXC   = IPL_SOFT-5, // Hardware exceptions: bus error, etc
+    IPL_SW_EXC   = IPL_SOFT,  // Software exceptions: SV call
+    IPL_CSW      = IPL_SOFT+1, // Software context switch (PendSV)
+    IPL_SYSTICK  = IPL_SOFT,  // SysTick
+    IPL_CLOCK    = IPL_SOFT,  // Real-time clock
+    IPL_SYSTIMER = IPL_SOFT,  // Scheduler
+    IPL_UART     = IPL_SOFT,  // UART
+    IPL_I2C      = IPL_SOFT,  // I2C
+    IPL_SPI      = IPL_SOFT,  // SPI
+    IPL_USB      = IPL_SOFT,  // USB
+    IPL_ENET     = IPL_SOFT,  // Ethernet controller
+    IPL_MISR     = IPL_SOFT,  // PHY MISR interrupt (link change, etc)
+    IPL_EEPROM   = IPL_SOFT,  // EEPROM read/write
 };
 #endif
 
 // Software priorities
 enum {
-    IPL_NETWORK  = IPL_ENET + 8, // Network service code, one less than ENET
+    // Network service code, one lower than than ENET so ethernet interrupts
+    // can preempt it.
+    IPL_NETWORK  = IPL_ENET+1,
 };
 
 extern "C" {

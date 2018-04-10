@@ -21,7 +21,9 @@ extern void pendsv_handler();
 }
 
 void NVic::Init(IRQHandler handler, uint8_t prio) {
-    assert(prio && prio <= IPL_MIN);
+    assert(prio && prio < IPL_NUM);
+
+    prio *= IPL_QUANTUM;
 
     ScopedNoInt G;
 
@@ -53,7 +55,9 @@ void NVic::Init(IRQHandler handler, uint8_t prio) {
 void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* token,
                              bool fast) {
 	assert(irq < INT_NUM);
-    assert(prio && prio <= IPL_MIN);
+    assert(prio && prio < IPL_NUM);
+
+    prio *= IPL_QUANTUM;
 
     ScopedNoInt G;
 
@@ -72,7 +76,9 @@ void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* t
 
 void NVic::InstallSystemHandler(uint id, IRQHandler handler, uint8_t prio, bool fast) {
 	assert(id < 16);
-    assert(prio && prio <= IPL_MIN);
+    assert(prio && prio < IPL_NUM);
+
+    prio *= IPL_QUANTUM;
 
     ScopedNoInt G;
         
@@ -97,7 +103,9 @@ void NVic::InstallSystemHandler(uint id, IRQHandler handler, uint8_t prio, bool 
 
 void NVic::InstallCSWHandler(uint id, uint8_t prio) {
 	assert(id < 16);
-    assert(prio && prio <= IPL_MIN);
+    assert(prio && prio < IPL_NUM);
+
+    prio *= IPL_QUANTUM;
 
     ScopedNoInt G;
         
@@ -117,7 +125,9 @@ void NVic::InstallCSWHandler(uint id, uint8_t prio) {
 
 void NVic::SetIRQPriority(uint irq, uint8_t prio) {
 	assert(irq < INT_NUM);
-    assert(prio <= IPL_MIN);
+    assert(prio < IPL_NUM);
+
+    prio *= IPL_QUANTUM;
 
     const uint32_t mask = 0xff << (8 * (irq & 3));
     const uint32_t val  = prio << (8 * (irq & 3));
