@@ -13,7 +13,7 @@ using namespace enet_phy;
 const uint16_t Ethernet::_bcastaddr[3] = { 0xffff, 0xffff, 0xffff };
 
 void Ethernet::Reset() {
-    IPL G(IPL_ENET-1);
+    ScopedNoInt G;
 
     _txdesc = NULL;
     _txstatus = NULL;
@@ -39,8 +39,6 @@ void Ethernet::Reset() {
 
 void Ethernet::Initialize(const uint8_t macaddr[6]) {
     memcpy(_macaddr, macaddr, sizeof _macaddr);
-
-    IPL G(IPL_ENET-1);
 
     EnetPHY::PreConf(*this);
 
@@ -84,46 +82,50 @@ void Ethernet::Initialize(const uint8_t macaddr[6]) {
         return;
     }
 
-    EnetPHY::Configure(*this);
+    {
+        ScopedNoInt G;
 
-    // Enable RMII
-    _base[REG_COMMAND] = COMMAND_RMII;
+        EnetPHY::Configure(*this);
 
-    // Set station address
-    SetMacAddr();
+        // Enable RMII
+        _base[REG_COMMAND] = COMMAND_RMII;
 
-    // Initialize descriptors
-    CreateDescriptors();
+        // Set station address
+        SetMacAddr();
 
-    // Set up RX filtering for broadcast and perfect unicast 
-    _base[REG_RXFILTERCTRL] = RXFILTERCTRL_ABE | RXFILTERCTRL_APE;
+        // Initialize descriptors
+        CreateDescriptors();
+
+        // Set up RX filtering for broadcast and perfect unicast 
+        _base[REG_RXFILTERCTRL] = RXFILTERCTRL_ABE | RXFILTERCTRL_APE;
 
 #ifdef SOFT_PHY_ADDR
-    // AUE - for soft ADDR filtering
-    _base[REG_RXFILTERCTRL] |= RXFILTERCTRL_AUE;
+        // AUE - for soft ADDR filtering
+        _base[REG_RXFILTERCTRL] |= RXFILTERCTRL_AUE;
 #endif
 
-    // Enable FD, pad to 64 bytes, enable CRC generation
-    // Enable fast retransmit
-    _base[REG_MAC2] = MAC2_FULLDUPLEX | MAC2_CRCEN | MAC2_PADCRCEN | MAC2_VLANPADEN
-        | MAC2_NOBACKOFF;
+        // Enable FD, pad to 64 bytes, enable CRC generation
+        // Enable fast retransmit
+        _base[REG_MAC2] = MAC2_FULLDUPLEX | MAC2_CRCEN | MAC2_PADCRCEN | MAC2_VLANPADEN
+            | MAC2_NOBACKOFF;
     
-    // Enable interrupts except SOFTINTEN and WAKEUPINTEN
-    _base[REG_INTENABLE] = INTENABLE_RXOVERRUNINTEN | INTENABLE_RXERRORINTEN
-        | INTENABLE_RXFINISHEDINTEN | INTENABLE_RXDONEINTEN | INTENABLE_TXUNDERRUNINTEN
-        | INTENABLE_TXERRORINTEN | INTENABLE_TXFINISHEDINTEN | INTENABLE_TXDONEINTEN;
+        // Enable interrupts except SOFTINTEN and WAKEUPINTEN
+        _base[REG_INTENABLE] = INTENABLE_RXOVERRUNINTEN | INTENABLE_RXERRORINTEN
+            | INTENABLE_RXFINISHEDINTEN | INTENABLE_RXDONEINTEN | INTENABLE_TXUNDERRUNINTEN
+            | INTENABLE_TXERRORINTEN | INTENABLE_TXFINISHEDINTEN | INTENABLE_TXDONEINTEN;
 
-    // Start
-    _base[REG_MAC1] = MAC1_RXENABLE;
-    _base[REG_COMMAND] = COMMAND_RXENABLE | COMMAND_TXENABLE | COMMAND_RMII;
+        // Start
+        _base[REG_MAC1] = MAC1_RXENABLE;
+        _base[REG_COMMAND] = COMMAND_RXENABLE | COMMAND_TXENABLE | COMMAND_RMII;
 
-    EnetPHY::PostConf(*this);
+        EnetPHY::PostConf(*this);
 
-    // Clear all interrupts
-    _base[REG_INTCLEAR] = 0xffff;
+        // Clear all interrupts
+        _base[REG_INTCLEAR] = 0xffff;
 
-    _phy_status = ReadPHY(PhyReg::PHYSTS);
+        _phy_status = ReadPHY(PhyReg::PHYSTS);
 
+    }
     DMSG("ENET initialized");
 }
 
@@ -215,7 +217,7 @@ void Ethernet::CreateDescriptors() {
 }
 
 IOBuffer* Ethernet::Receive(uint16_t& et) {
-    IPL G(IPL_ENET-1);
+    ScopedNoInt G;
 
     const uint i = _base[REG_RXCONSUMEINDEX];
 
@@ -275,14 +277,13 @@ void Ethernet::RestockRx() {
 
             _base[REG_RXCONSUMEINDEX] = (i + 1) % RX_DESC_NUM;
         } else {
-            DMSG("Failed to allocate RX buffer");
             break;
         }
     } while (((i + 1) % RX_DESC_NUM) != _base[REG_RXPRODUCEINDEX]);
 }
 
 bool Ethernet::Send(IOBuffer* buf) {
-    IPL G(IPL_ENET-1);
+    ScopedNoInt G;
 
     const uint current = _base[REG_TXPRODUCEINDEX];
     const uint next = (current + 1) % TX_DESC_NUM;
@@ -308,7 +309,6 @@ bool Ethernet::Send(IOBuffer* buf) {
 
     // If there's an unprocessed packet, emergency reclaim it
     if (t->packet && _txbuffers[next]) {
-        DMSG("NOTE: Reclaiming unprocessed IOBuffer!");
         t->packet = NULL;
         BufferPool::FreeBuffer(_txbuffers[next]);
         ++_tx_packets;

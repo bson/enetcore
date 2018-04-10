@@ -15,7 +15,7 @@ void LpcUart::Init(uint speed, uint framing)
     // Actual speed
     const uint actual = PCLK / prescale / 16;
 
-    IPL G(IPL_UART-1);
+    ScopedNoInt G;
 
 	_base[REG_LCR] = 0x80 | framing; // Set framing and access divisor
 	_base[REG_DLL] = prescale & 0xff;
@@ -33,7 +33,7 @@ void LpcUart::Write(const uint8_t *data, uint len)
 {
     Mutex::Scoped L(_w_mutex);
 
-    IPL G(IPL_UART-1);
+    ScopedNoInt G;
 
     for (const uint8_t *p = data; p < data + len; ) {
         if (_sendq.Headroom()) {

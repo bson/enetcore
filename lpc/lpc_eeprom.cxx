@@ -193,8 +193,6 @@ void LpcEeprom::HandleInterrupt() {
 }
 
 void LpcEeprom::Interrupt(void* token) {
-    ScopedNoInt G;
-
     LpcEeprom* e = (LpcEeprom*)token;
     e->HandleInterrupt();
 }
