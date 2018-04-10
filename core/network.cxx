@@ -15,7 +15,7 @@ static Vector<IOBuffer*> _pool;
 
 void Initialize(uint num, uint size)
 {
-    ScopedNoInt G;
+    Thread::IPL G(IPL_NETWORK-1);
 
 	_pool.Reserve(num);
 	for (uint i = 0; i < num; ++i) {
@@ -47,7 +47,7 @@ static IOBuffer* Alloc()
 
 IOBuffer* AllocRx()
 {
-    ScopedNoInt G;
+    Thread::IPL G(IPL_NETWORK-1);
 
 	return Alloc();
 }
@@ -55,7 +55,7 @@ IOBuffer* AllocRx()
 
 IOBuffer* AllocTx()
 {
-    ScopedNoInt G;
+    Thread::IPL G(IPL_NETWORK-1);
 
 	if (_pool.Size() <= TX_MIN_POOL)
         return NULL;
@@ -66,7 +66,7 @@ IOBuffer* AllocTx()
 
 void FreeBuffer(IOBuffer* buf)
 {
-    ScopedNoInt G;
+    Thread::IPL G(IPL_NETWORK-1);
 
 	_pool.PushBack(buf);
 }

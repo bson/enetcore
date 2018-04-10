@@ -518,7 +518,7 @@ void hwinit() {
     // Turn on proper assert handling
     _assert_stop = false;
 
-	NVic::InstallIRQHandler(I2C2_IRQ, I2cBus::Interrupt, IPL_I2C2, &_i2c2);
+	NVic::InstallIRQHandler(I2C2_IRQ, I2cBus::Interrupt, IPL_I2C, &_i2c2);
 	NVic::EnableIRQ(I2C2_IRQ);
 
 #ifdef ENABLE_ENET

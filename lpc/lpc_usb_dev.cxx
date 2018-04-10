@@ -13,9 +13,10 @@ void LpcUsbDev::Init() {
 
     DMSG("USB: one-time init");
 
-    ScopedNoInt G;
+    Thread::IPL G(IPL_USB - 1);
 
-    PCONP |= PCUSB;
+    PCONP |= PCUSB;             // Power on USB
+    Thread::Delay(1000);        // Allow 1ms to power on
 
     _base[REG_CLKCTRL] = clkbits;
 
@@ -672,7 +673,7 @@ void LpcUsbDev::Service() {
             ServiceEPs();
 
             {
-                ScopedNoInt G;
+                Thread::IPL G(IPL_USB - 1);
                 if (!_wake)
                     Thread::WaitFor(this, Time::Now() + Time::FromMsec(1000));
 

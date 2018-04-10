@@ -17,7 +17,7 @@ void LpcTimer::RunTimerFreq(uint freq)
 	const uint prescale = PCLK / (1 << _resolution);
 	const uint match = (1 << _resolution) / freq;
 
-    ScopedNoInt G;
+    Thread::IPL G(IPL_CLOCK - 1);
 
     _base[REG_CCR] = 0;
     _base[REG_EMR] = 0;
@@ -39,7 +39,7 @@ void LpcTimer::RunTimer(uint count)
 {
 	const uint prescale = PCLK / (1 << _resolution);
 
-    ScopedNoInt G;
+    Thread::IPL G(IPL_CLOCK - 1);
 
     _base[REG_CCR] = 0;
     _base[REG_EMR] = 0;
@@ -58,9 +58,7 @@ void LpcTimer::RunTimer(uint count)
 
 
 void LpcTimer::Interrupt(void* token) {
-    LpcTimer* timer = (LpcTimer*)token;
-
-    timer->HandleInterrupt();
+    ((LpcTimer*)token)->HandleInterrupt();
 }
 
 
