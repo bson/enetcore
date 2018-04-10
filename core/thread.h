@@ -32,6 +32,7 @@ private:
 
 	enum { RRQUANTUM = 20*1024 }; // Round robin quantum, in usec
 
+private:
 	// Thread execution state
 	enum class State: uint8_t {
 		RUN = 0,			// Running
@@ -53,6 +54,12 @@ private:
 
 	void* _stack;				// Beginning of stack memory block (low address)
 	void* _estack;				// End of stack (high address - first address past the stack)
+
+protected:
+    friend class IPL;
+
+    static uint _ipl_count;     // IPL nesting count
+    static bool _pend_csw;    // need context switch that was blocked by IPL lockout
 
 public:
 	Thread();
@@ -127,6 +134,39 @@ public:
 
     // Timer interrupt 
     static void TimerInterrupt();
+
+public:
+    // IPL management.  This is an interruptible alternative to
+    // disabling interrupts.  It can be interrupted by any higher IPL.
+    // While any thread is running with an IPL restriction context
+    // switches are disabled, but interrupts generally remain enabled.
+    // Note that calling WaitFor() will automatically drop the IPL and
+    // enabled interrupts during the wait, then restore the IPL and
+    // interrupt enable mask on wake.  Hence, while a thread is
+    // blocked interrupts are wide open as are context switches.  If
+    // Rotate() is called and it decides a context switch is needed,
+    // with an elevated IPL it will set the flag _pend_csw instead
+    // of performing the switch.  When the thread holding the IPL
+    // lockout releases it, the flag is checked and any pending
+    // switch posted.
+    class IPL {
+        uint32_t _save;
+    public:
+        IPL(uint32_t ipl)
+            : _save(SetIPL(ipl)) {
+            __atomic_inc(&Thread::_ipl_count);
+        }
+        
+        ~IPL() {
+            SetIPL(_save);
+            if (!__atomic_dec(&Thread::_ipl_count) && Thread::_pend_csw)
+                ContextSwitch();
+        }
+
+    private:
+        IPL(const IPL&);
+        IPL& operator=(const IPL&);
+    };
 
 private:
     // Idle - wait to become runnable

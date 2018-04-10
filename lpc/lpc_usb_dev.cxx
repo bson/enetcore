@@ -53,7 +53,7 @@ void LpcUsbDev::Setup() {
 
     DMSG("USB: initializing");
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     _connected = false;
     _suspended = false;
@@ -95,7 +95,7 @@ void LpcUsbDev::Setup() {
 void LpcUsbDev::DefineEP(uint phyep, uint maxpkt, uint bufsize) {
     assert(!_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     _base[REG_REEP] |= BIT(phyep);
     _base[REG_EPIN] = phyep;
@@ -137,7 +137,7 @@ void LpcUsbDev::Unstall(uint phyep) {
 void LpcUsbDev::Write(uint phyep, const void* data, uint len, bool last) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     EP& ep = *_ep[phyep];
 
@@ -152,7 +152,7 @@ void LpcUsbDev::Write(uint phyep, const void* data, uint len, bool last) {
 void LpcUsbDev::WriteDone(uint phyep, bool zlp) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     EP& ep = *_ep[phyep];
 
@@ -175,7 +175,7 @@ void LpcUsbDev::WriteDone(uint phyep, bool zlp) {
 void LpcUsbDev::WriteHold(uint phyep, bool state) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     _ep[phyep]->hold = state;
     if (!state)
@@ -186,7 +186,7 @@ void LpcUsbDev::WriteHold(uint phyep, bool state) {
 void LpcUsbDev::EmitZLP(uint phyep) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     _base[REG_CTRL] = CTRL_WR_EN | CTRL_LOG_EP * (phyep/2);
     _base[REG_TXPLEN] = 0;
@@ -696,7 +696,7 @@ void* LpcUsbDev::Start(void* arg) {
 
 
 void LpcUsbDev::TellSIE(SIECommand cmd) {
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     _base[REG_DEVINTCLR] = CCEMPTY | CDFULL;
     _base[REG_CMDCODE]   = CMD_PHASE_CMD | (CMD_CODE_WDATA * (uint8_t)cmd);
@@ -709,7 +709,7 @@ void LpcUsbDev::TellSIE(SIECommand cmd) {
 
 
 void LpcUsbDev::TellSIE(SIECommand cmd, uint8_t arg) {
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     TellSIE(cmd);
 
@@ -725,7 +725,7 @@ void LpcUsbDev::TellSIE(SIECommand cmd, uint8_t arg) {
 uint16_t LpcUsbDev::AskSIE(SIECommand cmd, uint n) {
     assert_bounds(n == 1 || n == 2);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB - 1);
 
     TellSIE(cmd);
 
