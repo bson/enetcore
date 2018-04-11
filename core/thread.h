@@ -118,10 +118,12 @@ public:
     static void ContextSwitch() {
         if (!InExceptionHandler()) {
             assert(!IntEnabled());
+            _pend_csw = false;
             PostContextSwitch();
             EnableInterrupts(); // Permit the switch exception to happen
             DisableInterrupts();
         } else {
+            _pend_csw = false;
             PostContextSwitch();
         }
     }

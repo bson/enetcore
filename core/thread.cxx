@@ -262,13 +262,15 @@ void Thread::Rotate(bool in_csw)
 		SetTimer((next_timer - now).GetUsec());
 
 	if (next && next != _curthread) {
+        _pend_csw = false;
         if (in_csw) {
             SetCurThread(next);
         } else {
-            if (!_ipl_count)
+            if (!_ipl_count) {
                 PostContextSwitch();
-            else
+            } else {
                 _pend_csw = true;
+            }
         }
     } 
 }
@@ -335,6 +337,9 @@ void Thread::Idle()  {
     while (_curthread->_state != State::RUN) {
         const uint prev_ipl = SetIPL(0);
         const uint prev_count = exch<uint>(_ipl_count, 0);
+
+        if (_pend_csw)
+            ContextSwitch();
 
         EnableInterrupts();
         WaitForInterrupt();
