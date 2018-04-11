@@ -14,6 +14,17 @@ extern const char _build_branch[];
 extern Eeprom _eeprom;
 extern PinNegOutput<LpcGpio::Pin> _led8;
 
+// Output memory status
+static void memstats() {
+    const struct mallinfo mi = dlmallinfo();
+
+    const String s = String::Format(STR("arena=%u, free chunks=%u, alloc=%u, "
+                                        "free=%u"),
+                                    mi.arena, mi.ordblks, mi.uordblks, mi.fordblks);
+
+    _panel.Text(8, 272-8-6, font_5x8, s);
+}
+
 struct Config {
     uint32_t version;
 
@@ -119,9 +130,15 @@ int main() {
 
     _panel.SetRgb(255, 255, 0);
 
-    uint8_t duty = 1;
+    Time wake = Time::Now();
+    Time next_memstats = Time::Now();
     for (;;) {
-        uint val = _clock.GetTime();
+        if (Time::Now() >= next_memstats) {
+            memstats();
+            next_memstats += Time::FromSec(5);
+        }
+
+        const uint val = _clock.GetTime();
         
         const String s = String::Format(STR("%08x"), val);
         _panel.Text(320, 8, font_5x8, s, 1, false);
@@ -131,9 +148,11 @@ int main() {
         _panel.Text(200, 48, font_ins_25x40, s2, 3, false);
 
         _led8.Raise();
-        Thread::Sleep(Time::Now() + Time::FromMsec(500));
-        _led8.Lower();
-        Thread::Sleep(Time::Now() + Time::FromMsec(250));
+        wake += Time::FromMsec(500);
+        Thread::Sleep(wake);
 
+        _led8.Lower();
+        wake += Time::FromMsec(250);
+        Thread::Sleep(wake);
     }
 }
