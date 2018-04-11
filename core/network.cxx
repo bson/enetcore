@@ -170,6 +170,8 @@ void* NetThread(void*)
             if ((mac0 == 0xffff && mac1 == 0xffffffff) || 
                 (mac0 == _mac0 && mac1 == _mac1)) {
 #endif
+                // Note: the receive functions take ownership of the
+                // packet and free it if needed
                 switch (et) {
                 case ETHERTYPE_IP:
                     if (!_dhcp0.Receive(packet))
@@ -179,11 +181,12 @@ void* NetThread(void*)
                     _ip0.ArpReceive(packet);
                     break;
                 default: ;
+                    BufferPool::FreeBuffer(packet);
+                    break;
                 }
 #ifdef SOFT_PHY_ADDR
             }
 #endif
-			BufferPool::FreeBuffer(packet);
 		}
 
 		now = Time::Now();
