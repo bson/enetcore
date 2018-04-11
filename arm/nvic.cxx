@@ -57,8 +57,6 @@ void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* t
 	assert(irq < INT_NUM);
     assert(prio && prio < IPL_NUM);
 
-    prio *= IPL_QUANTUM;
-
     ScopedNoInt G;
 
     if (fast) {
