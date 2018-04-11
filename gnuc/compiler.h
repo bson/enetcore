@@ -37,4 +37,12 @@ typedef uint32_t time_t;
 
 #define offsetof(type, member)  __builtin_offsetof (type, member)
 
+// Atomic ops
+#define __atomic_inc(PTR)  \
+    __sync_add_and_fetch((PTR), 1)
+
+#define __atomic_dec(PTR)  \
+    __sync_sub_and_fetch((PTR), 1)
+
+
 #endif // __COMPILER_H__

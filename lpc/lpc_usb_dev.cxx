@@ -13,9 +13,10 @@ void LpcUsbDev::Init() {
 
     DMSG("USB: one-time init");
 
-    ScopedNoInt G;
+    Thread::IPL G(IPL_USB);
 
-    PCONP |= PCUSB;
+    PCONP |= PCUSB;             // Power on USB
+    Thread::Delay(1000);        // Allow 1ms to power on
 
     _base[REG_CLKCTRL] = clkbits;
 
@@ -53,7 +54,7 @@ void LpcUsbDev::Setup() {
 
     DMSG("USB: initializing");
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     _connected = false;
     _suspended = false;
@@ -95,7 +96,7 @@ void LpcUsbDev::Setup() {
 void LpcUsbDev::DefineEP(uint phyep, uint maxpkt, uint bufsize) {
     assert(!_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     _base[REG_REEP] |= BIT(phyep);
     _base[REG_EPIN] = phyep;
@@ -137,7 +138,7 @@ void LpcUsbDev::Unstall(uint phyep) {
 void LpcUsbDev::Write(uint phyep, const void* data, uint len, bool last) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     EP& ep = *_ep[phyep];
 
@@ -152,7 +153,7 @@ void LpcUsbDev::Write(uint phyep, const void* data, uint len, bool last) {
 void LpcUsbDev::WriteDone(uint phyep, bool zlp) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     EP& ep = *_ep[phyep];
 
@@ -175,7 +176,7 @@ void LpcUsbDev::WriteDone(uint phyep, bool zlp) {
 void LpcUsbDev::WriteHold(uint phyep, bool state) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     _ep[phyep]->hold = state;
     if (!state)
@@ -186,7 +187,7 @@ void LpcUsbDev::WriteHold(uint phyep, bool state) {
 void LpcUsbDev::EmitZLP(uint phyep) {
     assert(_ep[phyep]);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     _base[REG_CTRL] = CTRL_WR_EN | CTRL_LOG_EP * (phyep/2);
     _base[REG_TXPLEN] = 0;
@@ -579,7 +580,7 @@ void LpcUsbDev::ServiceEPs() {
 
         EP& ep = *_ep[phyep];
 
-        const uint prev_ipl = SetIPL(IPL_USB - 1);
+        const uint prev_ipl = SetIPL(IPL_USB);
 
         if (ep.service) {
             ep.service = false;
@@ -672,7 +673,7 @@ void LpcUsbDev::Service() {
             ServiceEPs();
 
             {
-                ScopedNoInt G;
+                Thread::IPL G(IPL_USB);
                 if (!_wake)
                     Thread::WaitFor(this, Time::Now() + Time::FromMsec(1000));
 
@@ -696,7 +697,7 @@ void* LpcUsbDev::Start(void* arg) {
 
 
 void LpcUsbDev::TellSIE(SIECommand cmd) {
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     _base[REG_DEVINTCLR] = CCEMPTY | CDFULL;
     _base[REG_CMDCODE]   = CMD_PHASE_CMD | (CMD_CODE_WDATA * (uint8_t)cmd);
@@ -709,7 +710,7 @@ void LpcUsbDev::TellSIE(SIECommand cmd) {
 
 
 void LpcUsbDev::TellSIE(SIECommand cmd, uint8_t arg) {
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     TellSIE(cmd);
 
@@ -725,7 +726,7 @@ void LpcUsbDev::TellSIE(SIECommand cmd, uint8_t arg) {
 uint16_t LpcUsbDev::AskSIE(SIECommand cmd, uint n) {
     assert_bounds(n == 1 || n == 2);
 
-    IPL G(IPL_USB - 1);
+    Thread::IPL G(IPL_USB);
 
     TellSIE(cmd);
 
@@ -753,8 +754,6 @@ uint16_t LpcUsbDev::AskSIE(SIECommand cmd, uint n) {
 void LpcUsbDev::HandleInterrupt() {
 #ifdef DEBUG
     ScopedNoInt G2;
-#else
-    IPL G(IPL_USB - 1);
 #endif
 
     const uint32_t epint = _base[REG_EPINTST];

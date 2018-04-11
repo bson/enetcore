@@ -93,7 +93,9 @@ static inline void WaitForInterrupt() {
 
 static inline uint32_t DisableInterrupts() {
 	uint32_t prev;
-	asm volatile("mrs %0, primask; movs r1, #1; msr primask, r1" : "=r"(prev) :  : "r1" );
+	asm volatile("mrs %0, primask; movs r1, #1; msr primask, r1"
+                 : "=r"(prev)
+                 :  : "r1" );
 	return prev & 1;
 }
 
@@ -112,7 +114,10 @@ static inline void RestoreInterrupts(uint prev) {
 // Set current IPL, returning previous
 static inline uint32_t SetIPL(uint32_t ipl) {
     uint32_t result;
-    asm volatile("mrs %0, basepri; msr basepri, %1" : "=r"(result) : "r"(ipl & 0xff) : );
+    asm volatile("mrs %0, basepri; msr basepri, %1"
+                 : "=r"(result)
+                 : "r"((ipl % 32) * 8)
+                 : );
     return result;
 }
 
@@ -141,19 +146,7 @@ static inline void PostContextSwitch() {
 #error "Unsupported compiler"
 #endif
 
-// RAII version of IPL control
-class IPL {
-    uint32_t _save;
-public:
-    IPL(uint32_t ipl) : _save(SetIPL(ipl)) { }
-    ~IPL() { SetIPL(_save); }
-
-private:
-    IPL(const IPL&);
-    IPL& operator=(const IPL&);
-};
-
-// RAII reentrant interrupt version
+// RAII reentrant version of interrupt masking
 class ScopedNoInt {
     uint32_t _save;
 public:

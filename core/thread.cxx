@@ -23,6 +23,9 @@ extern SysTimer _systimer;
 Time Thread::_qend;
 uint Thread::_rr;
 
+uint Thread::_ipl_count;
+bool Thread::_pend_csw;
+
 
 Thread::Thread() :
 	_state(State::SLEEP),
@@ -119,6 +122,7 @@ Thread& Thread::Bootstrap()
     assert(!IntEnabled());
     assert(!_curthread);
     assert(!_bootstrapped);
+    assert(!_ipl_count);
 
     _runq.Reserve(8);
 
@@ -179,6 +183,10 @@ void Thread::SetPriority(uint8_t new_prio)
 
 void Thread::Rotate(bool in_csw)
 {
+    // If we already have a pending context switch, ignore
+    if (!in_csw && _pend_csw)
+        return;
+
 	const Time now = Time::Now();
 
 	// Make a pass through runq, collecting the parameters we'll need
@@ -257,7 +265,10 @@ void Thread::Rotate(bool in_csw)
         if (in_csw) {
             SetCurThread(next);
         } else {
-            PostContextSwitch();
+            if (!_ipl_count)
+                PostContextSwitch();
+            else
+                _pend_csw = true;
         }
     } 
 }
@@ -322,9 +333,15 @@ void Thread::Idle()  {
     Rotate(false);
 
     while (_curthread->_state != State::RUN) {
+        const uint prev_ipl = SetIPL(0);
+        const uint prev_count = exch<uint>(_ipl_count, 0);
+
         EnableInterrupts();
         WaitForInterrupt();
         DisableInterrupts();
+
+        _ipl_count = prev_count;
+        SetIPL(prev_ipl);
     }
 
     _curthread->ValidateStack();
