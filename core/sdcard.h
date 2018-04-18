@@ -17,6 +17,12 @@ class SDCard: public BlockDev {
 	bool _version2:1;
 	bool _sdhc:1;				// High capacity
 
+    enum {
+        CMD0_TIMEOUT = 10000,   // How long we wait for CMD0 (usec)
+        CMD_TIMEOUT = 100,      // Limit for how long we wait for a command response (usec)
+        INIT_TIMEOUT = 1500,    // Initialization timeout (msec)
+    };
+
 public:
 	SDCard(SpiDev& spi);
 
@@ -39,7 +45,7 @@ public:
 
 private:
 	// Send SD CMD
-	int SendCMD(uint8_t cmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
+	int SendCMD(uint8_t cmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0, bool ssel = true);
 	int SendACMD(uint8_t acmd, uint16_t a = 0, uint8_t b = 0, uint8_t c = 0);
 
 	// Send SD CMD, expecting num bytes back (e.g. 5 bytes for an R4 response)

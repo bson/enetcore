@@ -472,7 +472,7 @@ void Ip::HandleARP(IOBuffer* packet)
 {
 	_lock.AssertLocked();
 
-	packet->SetHead(0);
+	packet->SetHead(2);         // XXX
 	Arph& arp = GetArph(packet);
 
 	if (packet->Size() < 16 + sizeof (Arph) ||
@@ -556,7 +556,7 @@ void Ip::IcmpSend(in_addr_t dest, Icmph::Type type, uint code, IOBuffer* packet)
 	IOBuffer* buf = BufferPool::AllocTx();
 	if (!buf) return;
 
-	buf->SetHead(0);
+	buf->SetHead(2);            // XXX
 
 	Iph& iph = *(Iph*)(*buf + 16);
 	Icmph& icmph = *(Icmph*)iph.GetTransport();

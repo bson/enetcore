@@ -18,12 +18,16 @@ bool Fat::Mount(uint partnum, bool rw)
 
 	_rw = rw;
 
+	if (!_dev.Init()) {
+        console("FAT: failed to mount device");
+        _dev.Release();
+        return false;
+    }
+
 	uint8_t* sector = (uint8_t*)xmalloc(514);
 	const PartEnt* part = (PartEnt*)(sector + 448);
 	bool ok = false;
 	uint8_t type;
-
-	_dev.Init();
 
 	// Read MBR
 	if (!_dev.ReadSector(0, sector + 2)) goto failed;

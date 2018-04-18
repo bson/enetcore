@@ -81,19 +81,19 @@ public:
 protected:
     friend class LpcSpiDev;
 
-	// Recomputes prescaler
-	void SetSpeed(uint freq);
+	// Recomputes prescaler.  Mode is SPI mode.
+	void Configure(uint mode, uint freq);
 
-	// Send byte sequence, returns byte received on last byte, or -1
-	int Send(const uint8_t* s, uint len);
+	// Send byte sequence
+	void Send(const uint8_t* s, uint len);
 
-	// Send byte, read reply; returns -1 if no reply received
-	int Read(uint8_t code = 0xff);
+	// Read byte; returns -1 if no nothing received
+	int Read();
 
 	// Send byte, repeating at interval, a given number of times until
 	// something is received; if so, return it.  Returns -1 if nothing
 	// was received.
-	int ReadReply(uint interval, uint num_tries, uint8_t code = 0xff);
+	int ReadReply(uint interval, uint num_tries);
 
 	// Read a given number of bytes, appending to buffer, computing CRC on the fly.
 	// Returns false if we had an error during the receive
@@ -115,6 +115,7 @@ class LpcSpiDev {
 	LpcSpiBus& _bus;
 	Output* _ssel;				// SSEL output for this device or NULL if none
 	uint _speed;				// Speed setting
+    uint8_t _mode;              // SPI mode to use for device (0-3)
 	bool _selected;				// Tracks whether currently selected
 public:
 	LpcSpiDev(LpcSpiBus& bus);
@@ -122,16 +123,16 @@ public:
 	// Init is currently a no-op
 	[[__finline]] void Init() { }
 	[[__finline]] void SetSSEL(Output* ssel) { _ssel = ssel; }
-	void SetSpeed(uint freq);
+	void Configure(uint mode, uint freq);
 
 	void Select();
 	void Deselect();
 
 	// These are delegated from bus - see SPI declaration for comments
-	[[__finline]] uint8_t Send(const uint8_t* s, uint len) { return _bus.Send(s, len); }
-	[[__finline]] uint8_t Read(uint8_t code = 0xff) { return _bus.Read(code); }
-	[[__finline]] uint8_t ReadReply(uint interval, uint num_tries, uint8_t code = 0xff) {
-		return _bus.ReadReply(interval, num_tries, code);
+	[[__finline]] void Send(const uint8_t* s, uint len) { _bus.Send(s, len); }
+	[[__finline]] int Read() { return _bus.Read(); }
+	[[__finline]] int ReadReply(uint interval, uint num_tries) {
+		return _bus.ReadReply(interval, num_tries);
 	}
 	[[__finline]] bool ReadBuffer(void* buffer, uint len, CrcCCITT* crc = NULL) {
 		return _bus.ReadBuffer(buffer, len, crc);

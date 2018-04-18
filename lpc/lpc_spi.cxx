@@ -17,7 +17,7 @@ void LpcSpiBus::Init() {
 }
 
 
-void LpcSpiBus::SetSpeed(uint freq) {
+void LpcSpiBus::Configure(uint mode, uint freq) {
     assert(freq <= PCLK/12);
 
     const uint scaler = PCLK / freq;
@@ -31,8 +31,11 @@ void LpcSpiBus::SetSpeed(uint freq) {
 
     assert(prescaler >= 2);
 
-    // 0x7 - 8 bit transfer, SPI, CLK H (idle L), leading edge clk
-    _base[REG_CR0] = (7 * CR0_DSS_FLD) | CR0_FRF_SPI | CR0_CPOL_H | CR0_CPHA_LE 
+    // 0x7 - 8 bit transfer, SPI, CPOLA and CPHA according to SPI mode
+    const uint8_t cpol = (mode & 2) ? CR0_CPOL_L : CR0_CPOL_H;
+    const uint8_t cpha = (mode & 1) ? CR0_CPHA_TE : CR0_CPHA_LE;
+
+    _base[REG_CR0] = (7 * CR0_DSS_FLD) | CR0_FRF_SPI | cpol | cpha 
         | ((scr - 1) * CR0_SCR_FLD);
     
     _base[REG_CR1] = CR1_SSE | CR1_MASTER;
@@ -58,11 +61,11 @@ void LpcSpiBus::WaitIdle() {
 }
 
 
-int LpcSpiBus::Read(uint8_t code) {
+int LpcSpiBus::Read() {
     WaitIdle();
 
-    // Clock out code to facilitate read
-    _base[REG_DR] = code;
+    // Clock out 0xff to facilitate read
+    _base[REG_DR] = 0xff;
 
     // Wait for TX to finish
     while (!(_base[REG_SR] & SR_TFE))
@@ -76,18 +79,24 @@ int LpcSpiBus::Read(uint8_t code) {
 }
 
 
-int LpcSpiBus::Send(const uint8_t* s, uint len) {
-    int tmp = 0;
-    while (len--)
-        tmp = Read(*s++);
+void LpcSpiBus::Send(const uint8_t* s, uint len) {
+    // Drain any remaining data the device is trying to send
+    while (Read() != -1)
+        ;
 
-    return tmp;
+    while (len--) {
+        _base[REG_DR] = *s++;
+
+        // Wait for TX to finish
+        while (!(_base[REG_SR] & SR_TFE))
+            ;
+    }
 }
 
 
-int LpcSpiBus::ReadReply(uint interval, uint num_tries, uint8_t code) {
+int LpcSpiBus::ReadReply(uint interval, uint num_tries) {
     while (num_tries--) {
-        const int tmp = Read(code);
+        const int tmp = Read();
         if (tmp != -1) 
             return tmp;
 
@@ -105,8 +114,6 @@ bool LpcSpiBus::ReadBuffer(void* buffer, uint len, CrcCCITT* crc) {
 
     uint8_t* p = (uint8_t*)buffer;
     bool ok = true;
-
-    WaitIdle();
 
     _base[REG_DR] = 0xff;
 
@@ -140,7 +147,7 @@ LpcSpiDev::LpcSpiDev(LpcSpiBus& bus) :
 
 void LpcSpiDev::Select() {
     if (!_selected)  {
-        _bus.SetSpeed(_speed);
+        _bus.Configure(_mode, _speed);
 
         if (_ssel)
             _ssel->Raise();
@@ -160,9 +167,10 @@ void LpcSpiDev::Deselect() {
 }
 
 
-void LpcSpiDev::SetSpeed(uint freq) {
+void LpcSpiDev::Configure(uint mode, uint freq) {
+    _mode = mode;
     _speed = freq;
 
     if (_selected)
-        _bus.SetSpeed(_speed);
+        _bus.Configure(_mode, _speed);
 }

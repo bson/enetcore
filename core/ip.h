@@ -341,7 +341,7 @@ public:
 
 	// Get IP header from IOBuffer
 	static Iph& GetIph(IOBuffer* buf) {
-		buf->SetHead(0);
+		buf->SetHead(2);        // XXX
 		assert_bounds(buf->Size() >= 16 + sizeof (Iph));
 		return *(Iph*)(*buf + 16);
 	}
@@ -423,7 +423,7 @@ private:
 
 	// Get ARP header from IOBuffer
 	Arph& GetArph(IOBuffer* buf) {
-		buf->SetHead(0);
+		buf->SetHead(2);  // XXX
 		assert_bounds(buf->Size() >= 16 + sizeof (Arph));
 		return *(Arph*)(*buf + 16);
 	}

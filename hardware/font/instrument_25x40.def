@@ -1,10 +1,8 @@
-NAME_SUFFIX ins_25x40
+NAME_SUFFIX ins_25x37
 
-ID DIGIT0
-DIM 25 40
+ID 0
+DIM 25 37
 CODE 48
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
 - - - - - - - - X X X X X X X X X - - - - - - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - X X X X X X X X X X X X X X X X X X X - - -
@@ -42,13 +40,11 @@ X X X X X X - - - - - - - - - - - - - X X X X X X
 - - - X X X X X X X X X X X X X X X X X X X - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - - - - - - X X X X X X X X X - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
 
-ID DIGIT1
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - X X X X - - - - - - - - - -
+ID 1
+DIM 25 37
+FLAGS NOKERN
+- - - - - - - - - - - X X X X X - - - - - - - - -
 - - - - - - - - - - X X X X X X - - - - - - - - -
 - - - - - - - - - X X X X X X X - - - - - - - - -
 - - - - - - - - X X X X X X X X - - - - - - - - -
@@ -56,7 +52,6 @@ DIM 25 40
 - - - - - - X X X X X X X X X X - - - - - - - - -
 - - - - - X X X X X X X X X X X - - - - - - - - -
 - - - - X X X X X X X X X X X X - - - - - - - - -
-- - - - - - - - - - X X X X X X - - - - - - - - -
 - - - - - - - - - - - X X X X X - - - - - - - - -
 - - - - - - - - - - - X X X X X - - - - - - - - -
 - - - - - - - - - - - X X X X X - - - - - - - - -
@@ -81,16 +76,14 @@ DIM 25 40
 - - - - - - - - - - - X X X X X - - - - - - - - -
 - - - - - - - - - - - X X X X X - - - - - - - - -
 - - - - - - - - - - - X X X X X - - - - - - - - -
-- - - - - - - - - - X X X X X X X - - - - - - - -
-- - - - - - - - X X X X X X X X X X X - - - - - -
-- - - - - - X X X X X X X X X X X X X X X - - - -
-- - - - - X X X X X X X X X X X X X X X X - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - X X X X X - - - - - - - - -
+- - - - - - - - - - - X X X X X - - - - - - - - -
+- - - - - - - - - - - X X X X X - - - - - - - - -
+- - - - - - - - - - - X X X X X - - - - - - - - -
+- - - - - - - - - - - X X X X X - - - - - - - - -
 
-ID DIGIT2
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+ID 2
+DIM 25 37
 - - - - - - - - X X X X X X X X X - - - - - - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - X X X X X X X X X X X X X X X X X X X - - -
@@ -102,7 +95,7 @@ X X X X X X - - - - - - - - - - - - X X X X X X -
 X X X X X - - - - - - - - - - - - - - X X X X X X
 X X X X X - - - - - - - - - - - - - - X X X X X X
 X X X X X - - - - - - - - - - - - - - X X X X X X
-- X X X - - - - - - - - - - - - - - - X X X X X X
+X X X X X - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - X X X X X X -
 - - - - - - - - - - - - - - - - - - X X X X X X -
@@ -123,22 +116,20 @@ X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X X - - - - - - - - - - - - - - - - - - -
-X X X X X X X X X X X X X X X X X X X X X X X - -
 X X X X X X X X X X X X X X X X X X X X X X X X -
 X X X X X X X X X X X X X X X X X X X X X X X X -
 X X X X X X X X X X X X X X X X X X X X X X X X -
-- X X X X X X X X X X X X X X X X X X X X X X - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+X X X X X X X X X X X X X X X X X X X X X X X X -
+- X X X X X X X X X X X X X X X X X X X X X X X -
 
-ID DIGIT3
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- X X X X X X X X X X X X X X X X X X X X X X X -
+
+ID 3
+DIM 25 37
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
-- X X X X X X X X X X X X X X X X X X X X X X X -
+X X X X X X X X X X X X X X X X X X X X X X X X X
+X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - - - - - - - - - - X X X X X X -
 - - - - - - - - - - - - - - - - - X X X X X X - -
 - - - - - - - - - - - - - - - - X X X X X X - - -
@@ -159,25 +150,22 @@ X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - - - - - - - - - X X X X X X X -
 - - - - - - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
-- - - - - - - - - - - - - - - - - - - - - X X X X
-- - - - - - - - - - - - - - - - - - - - - X X X X
-X X X X - - - - - - - - - - - - - - - - - X X X X
-X X X X - - - - - - - - - - - - - - - - - X X X X
+- - - - - - - - - - - - - - - - - - - - X X X X X
+- - - - - - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - - X X X X X
-X X X X X - - - - - - - - - - - - - - X X X X X -
-- X X X X X - - - - - - - - - - - - X X X X X X -
+X X X X X - - - - - - - - - - - - - - - X X X X X
+X X X X X X - - - - - - - - - - - - - - X X X X X
+X X X X X X - - - - - - - - - - - - - X X X X X -
+- X X X X X X - - - - - - - - - - - X X X X X X -
 - - X X X X X X X X X X X X X X X X X X X X X - -
 - - X X X X X X X X X X X X X X X X X X X X X - -
 - - - X X X X X X X X X X X X X X X X X X X - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - - - - - - X X X X X X X X X - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
 
-ID DIGIT4
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - X X X X X X X - - - -
+ID 4
+DIM 25 37
+- - - - - - - - - - - - - X X X X X X X X X - - -
 - - - - - - - - - - - - X X X X X X X X X X - - -
 - - - - - - - - - - - X X X X X X X X X X X - - -
 - - - - - - - - - - - X X X X X X X X X X X - - -
@@ -199,11 +187,11 @@ DIM 25 40
 - - - X X X X X X - - - - - - - - X X X X X - - -
 - - X X X X X X - - - - - - - - - X X X X X - - -
 - - X X X X X X - - - - - - - - - X X X X X - - -
-- X X X X X X X X X X X X X X X X X X X X X X X -
+- X X X X X X X X X X X X X X X X X X X X X X X X
 - X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
-- X X X X X X X X X X X X X X X X X X X X X X X -
+X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - - - - - - - - - X X X X X - - -
 - - - - - - - - - - - - - - - - - X X X X X - - -
 - - - - - - - - - - - - - - - - - X X X X X - - -
@@ -212,20 +200,16 @@ X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - - - - - - - - - X X X X X - - -
 - - - - - - - - - - - - - - - - - X X X X X - - -
 - - - - - - - - - - - - - - - - - X X X X X - - -
-- - - - - - - - - - - - - - - X X X X X X X X X -
-- - - - - - - - - - - - - - - X X X X X X X X X -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - X X X X X - - -
+- - - - - - - - - - - - - - - - - X X X X X - - -
 
-ID DIGIT5
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- X X X X X X X X X X X X X X X X X X X X X X X -
-X X X X X X X X X X X X X X X X X X X X X X X X X
-X X X X X X X X X X X X X X X X X X X X X X X X X
-X X X X X X X X X X X X X X X X X X X X X X X X X
+ID 5
+DIM 25 37
 X X X X X X X X X X X X X X X X X X X X X X X X -
-X X X X X X - - - - - - - - - - - - - - - - - - -
+X X X X X X X X X X X X X X X X X X X X X X X X -
+X X X X X X X X X X X X X X X X X X X X X X X X -
+X X X X X X X X X X X X X X X X X X X X X X X X -
+X X X X X X X X X X X X X X X X X X X X X X X X -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
@@ -233,19 +217,20 @@ X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X - - - - - - - - - - - - - - - - - - - -
-X X X X X X - - - - - - - - - - - - - - - - - - -
+X X X X X - - - - - - - - - - - - - - - - - - - -
+X X X X X - - - - - - - - - - - - - - - - - - - -
 X X X X X X X X X X X X X X X X X X X - - - - - -
 X X X X X X X X X X X X X X X X X X X X X - - - -
 X X X X X X X X X X X X X X X X X X X X X X - - -
 X X X X X X X X X X X X X X X X X X X X X X X - -
-- X X X X X X X X X X X X X X X X X X X X X X - -
+X X X X X X X X X X X X X X X X X X X X X X X - -
 - - - - - - - - - - - - - - - - - X X X X X X X -
 - - - - - - - - - - - - - - - - - - X X X X X X -
 - - - - - - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
-- X X X - - - - - - - - - - - - - - - - X X X X X
+- - - - - - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - X X X X X X
@@ -259,10 +244,8 @@ X X X X X X - - - - - - - - - - - - - X X X X X X
 - - - - - - - - X X X X X X X X X - - - - - - - -
 - - - - - - - - - - - - - - - - - - - - - - - - -
 
-ID DIGIT6
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+ID 6
+DIM 25 37
 - - - - - - - X X X X X X X X X X X X X - - - - -
 - - - - - X X X X X X X X X X X X X X X X X - - -
 - - - - X X X X X X X X X X X X X X X X X X X - -
@@ -271,19 +254,19 @@ DIM 25 40
 - - X X X X X X X - - - - - - - - - X X X X X X -
 - - X X X X X X - - - - - - - - - - - X X X X X -
 - X X X X X X X - - - - - - - - - - - X X X X X -
-- X X X X X X - - - - - - - - - - - - - X X X - -
+- X X X X X X - - - - - - - - - - - - X X X X X -
 - X X X X X X - - - - - - - - - - - - - - - - - -
 X X X X X X X - - - - - - - - - - - - - - - - - -
 X X X X X X - - - - - - - - - - - - - - - - - - -
 X X X X X X - - - - - - - - - - - - - - - - - - -
 X X X X X X - - - - - - - - - - - - - - - - - - -
-X X X X X X X - - - - - - - - - - - - - - - - - -
+X X X X X X - - - - - - - - - - - - - - - - - - -
 X X X X X X X X X X X X X X X X X X X X - - - - -
 X X X X X X X X X X X X X X X X X X X X X X - - -
 X X X X X X X X X X X X X X X X X X X X X X X - -
 X X X X X X X X X X X X X X X X X X X X X X X - -
 X X X X X X X X X X X X X X X X X X X X X X X X -
-X X X X X X X - - - - - - - - - - - X X X X X X -
+X X X X X X - - - - - - - - - - - - X X X X X X -
 X X X X X X - - - - - - - - - - - - - X X X X X X
 X X X X X X - - - - - - - - - - - - - - X X X X X
 X X X X X X - - - - - - - - - - - - - - X X X X X
@@ -300,19 +283,16 @@ X X X X X X - - - - - - - - - - - - - X X X X X X
 - - - X X X X X X X X X X X X X X X X X X X - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - - - - - - X X X X X X X X X - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-ID DIGIT7
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- X X X X X X X X X X X X X X X X X X X X X X X -
+ID 7
+DIM 25 37
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
 X X X X X X X X X X X X X X X X X X X X X X X X X
-- X X X X X X X X X X X X X X X X X X X X X X X X
+X X X X X X X X X X X X X X X X X X X X X X X X X
+X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - - - - - - - - - X X X X X X X X
 - - - - - - - - - - - - - - - - X X X X X X X X -
 - - - - - - - - - - - - - - - X X X X X X X X - -
@@ -343,13 +323,10 @@ X X X X X X X X X X X X X X X X X X X X X X X X X
 - - - - - - - - - X X X X X X - - - - - - - - - -
 - - - - - - - - - X X X X X X - - - - - - - - - -
 - - - - - - - - - X X X X X X - - - - - - - - - -
-- - - - - - - - - - X X X X - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
 
-ID DIGIT8
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+ID 8
+DIM 25 37
 - - - - - - - - X X X X X X X X X - - - - - - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - X X X X X X X X X X X X X X X X X X X - - -
@@ -387,17 +364,14 @@ X X X X X X - - - - - - - - - - - - - X X X X X X
 - - - X X X X X X X X X X X X X X X X X X X - - -
 - - - - - X X X X X X X X X X X X X X X - - - - -
 - - - - - - - - X X X X X X X X X - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
 
-ID DIGIT9
-DIM 25 40
-- - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+ID 9
+DIM 25 37
 - - - - - - X X X X X X X X X X X X X X - - - - -
 - - - - X X X X X X X X X X X X X X X X X X - - -
-- - - X X X X X X X X X X X X X X X X X X X X X -
+- - - X X X X X X X X X X X X X X X X X X X X - -
 - - X X X X X X X X X X X X X X X X X X X X X X -
-- - X X X X X X X X X X X X X X X X X X X X X X X
+- - X X X X X X X X X X X X X X X X X X X X X X -
 - X X X X X X X - - - - - - - - - - X X X X X X X
 - X X X X X X - - - - - - - - - - - - X X X X X X
 X X X X X X - - - - - - - - - - - - - - X X X X X
@@ -409,31 +383,30 @@ X X X X X - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - - X X X X X
 X X X X X - - - - - - - - - - - - - - - X X X X X
 X X X X X X - - - - - - - - - - - - - - X X X X X
-- X X X X X X - - - - - - - - - - - - X X X X X X
+- X X X X X X - - - - - - - - - - - - - X X X X X
 - X X X X X X X X X X X X X X X X X X X X X X X X
 - - X X X X X X X X X X X X X X X X X X X X X X X
 - - X X X X X X X X X X X X X X X X X X X X X X X
 - - - X X X X X X X X X X X X X X X X X X X X X X
 - - - - - X X X X X X X X X X X X X X X X X X X X
-- - - - - - - - - - - - - - - - - - - X X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
 - - - - - - - - - - - - - - - - - - - - X X X X X
-- - X X X - - - - - - - - - - - - - - - X X X X X
+- - - - - - - - - - - - - - - - - - - - X X X X X
+- X X X X X - - - - - - - - - - - - - - X X X X X
 - X X X X X - - - - - - - - - - - - - X X X X X X
-- X X X X X - - - - - - - - - - - - X X X X X X X
+- X X X X X X - - - - - - - - - - - X X X X X X X
 - X X X X X X X X X X X X X X X X X X X X X X X -
 - X X X X X X X X X X X X X X X X X X X X X X X -
 - X X X X X X X X X X X X X X X X X X X X X X - -
 - - X X X X X X X X X X X X X X X X X X X X - - -
-- - - - X X X X X X X X X X X X X X X X X - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - X X X X X X X X X X X X X X X X - - - - -
 
 ID BLANK
-DIM 25 40
+DIM 25 37
 FILLER
 CODE 32
 FLAGS NOKERN
@@ -474,8 +447,89 @@ FLAGS NOKERN
 - - - - - - - - - - - - - - - - - - - - - - - - -
 - - - - - - - - - - - - - - - - - - - - - - - - -
 - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ID PERIOD
+DIM 25 37
+CODE 46
+FLAGS NOKERN
 - - - - - - - - - - - - - - - - - - - - - - - - -
 - - - - - - - - - - - - - - - - - - - - - - - - -
 - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - X X X X X - - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - - - X X X X X - - - - - - - - - - -
+
+ID COMMA
+DIM 25 37
+CODE 44
+FLAGS NOKERN
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
+- - - - - - - - - X X X X X X - - - - - - - - - -
+- - - - - - - - X X X X X X X - - - - - - - - - -
+- - - - - - - X X X X X X X - - - - - - - - - - -
+- - - - - - X X X X X X X - - - - - - - - - - - -
+- - - - - - X X X X X - - - - - - - - - - - - - -
 
 END

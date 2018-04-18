@@ -30,12 +30,21 @@ bool SDCard::Init()
 	if (_initialized)
         return true;
 
-	_spi.Init();
-	_spi.SetSpeed(100000);
-
 	_spi.Select();
 
+	_spi.Init();
+	_spi.Configure(0, 100000);  // Mode 0, 100kHz
+
 	int value = -1;
+
+    _spi.Deselect();
+
+    // Send 10 frames - 80 clocks to initialize card
+    const uint8_t ff = 0xff;
+    for (uint i = 0; i < 10; ++i)
+        _spi.Send(&ff, 1);
+
+	_spi.Select();
 
 	for (uint i = 0; i < 100 && value != 1; ++i)
 		value = SendCMD(0);
@@ -46,6 +55,8 @@ bool SDCard::Init()
 		return false;
 	}
 	
+    _spi.Deselect();
+
 	value = SendCMD(8, 0, 1, 0xaa);
 	if (value == -1) {
 		DMSG("SDCard: initialization failed");
@@ -71,15 +82,13 @@ bool SDCard::Init()
 
 	DMSG("SD card OCR=0x%x", ocr);
 
-	const Time deadline = Time::Now() + Time::FromMsec(1500); // 1.5sec limit is somewhat arbitrary
+	const Time deadline = Time::Now() + Time::FromMsec(INIT_TIMEOUT);
 	while (!_initialized && Time::Now() < deadline) {
-		const int r1 = SendACMD(41, 0x4000); // 0x40000000 = host supports high capacity
-		const int r2 = _spi.Read(); // Some devices aren't quick enough to respond immediately
-		const uint8_t response = (r1 != -1 ? r1 : r2);
+		const int r = SendACMD(41, 0x4000); // 0x40000000 = host supports high capacity
 
-		if (response != 0xff && (response & ~1)) {
-			DMSG("SD Card: command error %x", response);
-		} else if (!response) {
+		if (r != -1 && (r & ~1)) {
+			DMSG("SD Card: command error %x", r);
+		} else if (!r) {
 			_initialized = true;
 		} else {
             Thread::Delay(25);
@@ -92,18 +101,17 @@ bool SDCard::Init()
 			_initialized = false; // R1 part of R3: should no longer be initializing
 
 		const uint32_t ocr = (uint32_t)r3;
-		if (ocr & 0x80000000)
-            _sdhc = (ocr & 0x40000000) != 0;
+		if (ocr & BIT15)
+            _sdhc = (ocr & BIT15) != 0;
 	}
 
 
-	if (!_sdhc) {
-		value = SendCMD(16, 0, 2, 0); // SET_BLOCKLEN(512)
-	}
+	if (!_sdhc)
+		SendCMD(16, 0, 2, 0);   // SET_BLOCKLEN(512)
 
 	if (_initialized) {
-		_spi.SetSpeed(24000000);
-		console("Version %u SD%s Card in slot", _version2 + 1, _sdhc ? "HC" : "");
+		_spi.Configure(0, 24000000); // Mode 0, 24MHz
+		console("Version %u SD%s Card in slot", _version2 + 1, _sdhc ? "HC/XC" : "");
 	} else {
 		console("SDCard: initialization failed - card not ready");
 	}
@@ -114,22 +122,37 @@ bool SDCard::Init()
 }
 
 
-int SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
+int SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c, bool ssel)
 {
 	_lock.AssertLocked();
 
-	const uint8_t cmdbuf[] = { 0xff, uint8_t(0x40 | cmd), uint8_t(a >> 8),
-                               uint8_t(a), b, c, uint8_t(cmd ? 0 : 0x95), 0xff };
+	const uint8_t cmdbuf[] = { uint8_t(0x40 | cmd), uint8_t(a >> 8),
+                               uint8_t(a), b, c, uint8_t(cmd ? 0 : 0x95) };
+
+    if (ssel)
+        _spi.Select();
 
 	_spi.Send(cmdbuf, sizeof cmdbuf);
-    return _spi.Read();
+
+    const Time deadline = Time::Now() + Time::FromUsec(cmd ? CMD_TIMEOUT : CMD0_TIMEOUT);
+    int result;
+    do {
+        result = _spi.Read();
+    } while (result == -1 && Time::Now() < deadline);
+
+    if (ssel)
+        _spi.Deselect();
+
+    return result;
 }
 
 
 uint64_t SDCard::SendCMDR(uint8_t num, uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 {
 	assert(num);
-    const int r = SendCMD(cmd, a, b, c);
+
+    _spi.Select();
+    const int r = SendCMD(cmd, a, b, c, false);
     uint64_t result = (r & 0xff);
 
 	while (--num) {
@@ -137,18 +160,30 @@ uint64_t SDCard::SendCMDR(uint8_t num, uint8_t cmd, uint16_t a, uint8_t b, uint8
         result = (result << 8) | (tmp != -1 ? tmp : 0xff);
     }
     
+    _spi.Deselect();
+
 	return result;
 }
 
 
 int SDCard::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 {
-	uint8_t result = SendCMD(55);
+    _spi.Select();
+
+	int result = SendCMD(55,0,0,0,false);
 	if (result != 1) {
 		DMSG("SDCard: CMD55 failed");
 		return -1;
 	}
-	return SendCMD(cmd, a, b, c);
+    _spi.Deselect();
+
+    _spi.Select();
+
+	const int v = SendCMD(cmd, a, b, c);
+
+    _spi.Deselect();
+
+    return v;
 }
 
 
@@ -163,27 +198,24 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 	do {
 		const Time rdstart = Time::Now();
 
-		int result = SendCMD(17, pos >> 16, pos >> 8, pos);
-		for (uint i = 0; i < 10; ++i) {
-			if (result != -1)
-                break;
-            
-			result = _spi.Read();
-		}
-
+        _spi.Select();
+		const int result = SendCMD(17, pos >> 16, pos >> 8, pos, false);
 		if (result == -1) {
 			DMSG("SD: no response to read command");
+            _spi.Deselect();
 			return false;
 		}
 
 		// Wait up to 100 msec for a reply, retrying in 250usec
 		// intervals (400 times 250 usec)
 		const int b1 = _spi.ReadReply(250, 400);
+
 		if (result || b1 != 0xfe) {
 			DMSG("SD: Read Command failed: %x, %x", result, b1);
+            _spi.Deselect();
 			return false;
 		}
-		DMSG("SD read: %u usec", (uint)(Time::Now() - rdstart).GetUsec());
+		DMSG("SD sector read: %u usec", (uint)(Time::Now() - rdstart).GetUsec());
 
 		const Time txstart = Time::Now();
 		CrcCCITT crc16(0);
@@ -192,6 +224,9 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 		DMSG("SD sector transfer: %u usec", (uint)(Time::Now() - txstart).GetUsec());
 
 		const uint16_t crc_sent = (_spi.Read() << 8) | _spi.Read();
+
+        _spi.Deselect();
+
 		crcok = (uint16_t)crc16.GetValue() == crc_sent;
 		if (!crcok)
             DMSG("SD: CRC error, sector 0x%x, expected 0x%x, got 0x%x",

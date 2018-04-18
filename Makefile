@@ -67,7 +67,7 @@ $(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
 
 $(ODIR)/buildinfo.cxx:
 	@echo Generating $@
-	@echo "extern const char _build_branch[] = \"`git branch | cut -c3-99`\";" >>$@
+	@echo "extern const char _build_branch[] = \"`git rev-parse --abbrev-ref HEAD`\";" >>$@
 	@echo "extern const char _build_commit[] = \""`git rev-parse HEAD | cut -c-8`"\";" >>$@
 	@echo "extern const char _build_date[] = \""`date '+%Y-%m-%d %T%z'`"\";" >>$@
 	@echo "extern const char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
