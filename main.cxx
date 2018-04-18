@@ -145,7 +145,7 @@ int main() {
         _panel.Text(320, 20, font_ins_9x16, s, 1, false);
 
         const String s2 = String::Format(STR("%08d"), val);
-        _panel.Text(200, 48, font_ins_25x40, s2, 3, false);
+        _panel.Text(200, 48, font_ins_25x37, s2, 3, false);
 
         _led8.Raise();
         wake += Time::FromMsec(500);
