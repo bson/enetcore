@@ -10,7 +10,8 @@
 // SPI bus
 class LpcSpiBus {
 	volatile uint32_t* _base;
-
+    uint _speed;                // Current bus speed
+    uint8_t _mode;              // Current SPI mode
 
     enum {
         // (RW) Control Register 0. Selects the serial clock rate, bus

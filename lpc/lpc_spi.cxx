@@ -8,8 +8,10 @@
 #include "mutex.h"
 
 
-LpcSpiBus::LpcSpiBus(uintptr_t base) {
-    _base = (volatile uint32_t*)base;
+LpcSpiBus::LpcSpiBus(uintptr_t base)
+    : _base((volatile uint32_t*)base),
+      _speed(0),
+      _mode(0) {
 }
 
 
@@ -18,6 +20,10 @@ void LpcSpiBus::Init() {
 
 
 void LpcSpiBus::Configure(uint mode, uint freq) {
+    // Ignore if already configured correctly
+    if (mode == _mode && freq == _speed)
+        return;
+
     assert(freq <= PCLK/12);
 
     const uint scaler = PCLK / freq;
@@ -43,6 +49,9 @@ void LpcSpiBus::Configure(uint mode, uint freq) {
 
     DMSG("SpiBus: freq=%ukHz, prescaler = %u, scr = %u, clock = %ukHz",
          freq/1000, prescaler, scr, PCLK/prescaler/scr/1000);
+
+    _mode = mode;
+    _speed = freq;
 }
 
 
