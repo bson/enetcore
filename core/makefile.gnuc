@@ -1,9 +1,6 @@
 # Copyright (c) 2018 Jan Brittenson
 # See LICENSE for details.
 
-# Set up tools, add board peripherals and SOC components to build
-include $(BOARD)/makefile.$(TOOLSET)
-
 CFLAGS += -Icore
 
 CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\

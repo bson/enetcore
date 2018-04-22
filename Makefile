@@ -28,7 +28,9 @@ SRCS +=
 # Project components
 SRCS += main.cxx buildinfo.cxx usb.cxx
 
+include $(BOARD)/makefile.$(TOOLSET)
 include core/makefile.$(TOOLSET)
+include ui/makefile.$(TOOLSET)
 
 LOG=$(ODIR)/image.log
 #LOG=/dev/stderr

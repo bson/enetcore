@@ -1,0 +1,13 @@
+# Copyright (c) 2018 Jan Brittenson
+# See LICENSE for details.
+
+# Set up tools, add board peripherals and SOC components to build
+#include $(BOARD)/makefile.$(TOOLSET)
+
+CFLAGS += -Iui
+
+UI_SRCS =
+
+SRCS += $(addprefix ui/,$(UI_SRCS))
+
+ODIR_TREE += $(ODIR)/ui
