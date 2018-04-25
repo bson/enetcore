@@ -63,6 +63,8 @@ Usb _usb(USB_BASE);
 
 #ifdef ENABLE_PANEL
 Panel _panel;
+PinNegOutput<LpcGpio::Pin> _panel_reset; // Panel RESET#
+PinNegOutput<LpcGpio::Pin> _t_cs; // Touch controller SPI CS#
 #endif
 
 #ifdef ENABLE_ENET
@@ -207,6 +209,10 @@ void ConfigurePins() {
     _led5.Raise();
     _led7.Raise();
 
+#ifdef ENABLE_PANEL
+    _t_cs = _gpio0.GetPin(22);
+#endif
+
     // P1.0  - ENET_TXD0
     // P1.1  - ENET_TXD1
     // P1.4  - ENET_TX_EN
@@ -276,6 +282,9 @@ void ConfigurePins() {
     _led8 = _gpio1.GetPin(22);
     _sd_led = _gpio1.GetPin(26);
     _sd_cs = _gpio1.GetPin(29);
+#ifdef ENABLE_PANEL
+    _panel_reset = _gpio4.GetPin(28);
+#endif
     
     _led6.Raise();
     _led8.Raise();
@@ -454,10 +463,13 @@ void hwinit() {
 #endif
 
 #ifdef ENABLE_PANEL
-    // P0.22 = RESET#; P0.15-18 CS/WR/RD/RS
+    // P4.28 = RESET#; P0.15-18 CS/WR/RD/RS
+    // P0.22 = T_CS#
     _gpio0.MakeOutputs(BIT22 | BIT15 | BIT16 | BIT17 | BIT18);
     _gpio0.Set(BIT22 | BIT15 | BIT16 | BIT17 | BIT18);
-    _gpio0.Clear(BIT22);
+
+    _panel_reset.Raise();
+    _t_cs.Lower();
 #endif
 
     // Initialize peripheral memory region
@@ -569,7 +581,7 @@ void hwinit() {
 
 #ifdef ENABLE_PANEL
     // Release from reset
-    _gpio0.Set(BIT22);
+    _panel_reset.Lower();
 #endif
 
     DMSG("RSID: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
