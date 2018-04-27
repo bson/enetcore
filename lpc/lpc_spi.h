@@ -88,8 +88,14 @@ protected:
 	// Send byte sequence
 	void Send(const uint8_t* s, uint len);
 
+	// Send byte
+	void Send(uint8_t code);
+
 	// Read byte; returns -1 if no nothing received
 	int Read();
+
+	// Read byte; returns -1 if no nothing received
+	int SendRead(uint8_t code);
 
 	// Send byte, repeating at interval, a given number of times until
 	// something is received; if so, return it.  Returns -1 if nothing
@@ -131,7 +137,9 @@ public:
 
 	// These are delegated from bus - see SPI declaration for comments
 	[[__finline]] void Send(const uint8_t* s, uint len) { _bus.Send(s, len); }
+	[[__finline]] void Send(const uint8_t code) { _bus.Send(code); }
 	[[__finline]] int Read() { return _bus.Read(); }
+	[[__finline]] int SendRead(uint8_t code) { return _bus.SendRead(code); }
 	[[__finline]] int ReadReply(uint interval, uint num_tries) {
 		return _bus.ReadReply(interval, num_tries);
 	}

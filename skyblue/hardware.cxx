@@ -171,7 +171,7 @@ void ConfigurePins() {
     // P0.16 - GPIO Out J7.10
     // P0.17 - GPIO Out J7.8
     // P0.18 - GPIO Out J7.7
-    // P0.22 - GPIO Out J7.6
+    // P0.22 - GPIO In J7.6
     // P0.25 - ADC0_IN2 J8.1
     // P0.26 - DAC_OUT  J8.2
     // P0.29 - USB D+
@@ -201,17 +201,13 @@ void ConfigurePins() {
 
     PinConf(IOCON_P0, p0);
 
-    _gpio0.MakeOutputs(BIT2 | BIT3 | BIT15 | BIT16 | BIT17 | BIT18 | BIT22);
+    _gpio0.MakeOutputs(BIT2 | BIT3 | BIT15 | BIT16 | BIT17 | BIT18);
 
     _led5 = _gpio0.GetPin(2);
     _led7 = _gpio0.GetPin(3);
 
     _led5.Raise();
     _led7.Raise();
-
-#ifdef ENABLE_PANEL
-    _t_cs = _gpio0.GetPin(22);
-#endif
 
     // P1.0  - ENET_TXD0
     // P1.1  - ENET_TXD1
@@ -278,14 +274,11 @@ void ConfigurePins() {
     _gpio1.MakeOutputs(BIT19 | BIT22 | BIT26 | BIT29);
 #endif
 
-    _led6 = _gpio1.GetPin(19);
-    _led8 = _gpio1.GetPin(22);
+    _led6   = _gpio1.GetPin(19);
+    _led8   = _gpio1.GetPin(22);
     _sd_led = _gpio1.GetPin(26);
-    _sd_cs = _gpio1.GetPin(29);
-#ifdef ENABLE_PANEL
-    _panel_reset = _gpio4.GetPin(28);
-#endif
-    
+    _sd_cs  = _gpio1.GetPin(29);
+
     _led6.Raise();
     _led8.Raise();
     _sd_led.Raise();
@@ -333,7 +326,16 @@ void ConfigurePins() {
 
     PinConf(IOCON_P4, p4);
     
-    _gpio4.MakeOutputs(BIT28 | BIT29);
+    _gpio4.MakeOutputs(BIT29);
+
+#ifdef ENABLE_PANEL
+    _panel_reset = _gpio4.GetPin(28);
+    _t_cs        = _gpio1.GetPin(28);
+
+    _gpio4.MakeOutputs(BIT28);
+    _gpio1.MakeOutputs(BIT28);
+    _gpio0.MakeInputs(BIT22);
+#endif
 }
 
 static uint8_t _reset_reason;
@@ -463,10 +465,15 @@ void hwinit() {
 #endif
 
 #ifdef ENABLE_PANEL
-    // P4.28 = RESET#; P0.15-18 CS/WR/RD/RS
-    // P0.22 = T_CS#
-    _gpio0.MakeOutputs(BIT22 | BIT15 | BIT16 | BIT17 | BIT18);
-    _gpio0.Set(BIT22 | BIT15 | BIT16 | BIT17 | BIT18);
+    // P4.28 = RESET#
+    // P0.15-18 CS#/WR#/RD#/RS
+    // P0.22 = T_IRQ#
+    // P1.28 = T_CS#
+    _gpio0.MakeOutputs(BIT15 | BIT16 | BIT17 | BIT18);
+    _gpio0.Set(BIT15 | BIT16 | BIT17 | BIT18);
+
+    _gpio1.MakeOutputs(BIT28);
+    _gpio0.MakeInputs(BIT22);
 
     _panel_reset.Raise();
     _t_cs.Lower();

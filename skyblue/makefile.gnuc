@@ -5,7 +5,7 @@ BOARD_SRCS = hardware.cxx
 
 # Peripherals found on this board
 # SSD1963 is inlined in hardware.cxx
-HARDWARE_SRCS = tlk110.cxx
+HARDWARE_SRCS = tlk110.cxx tsc2046.cxx
 
 SOCDIR=lpc
 ARMDIR=arm

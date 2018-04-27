@@ -70,11 +70,11 @@ void LpcSpiBus::WaitIdle() {
 }
 
 
-int LpcSpiBus::Read() {
+inline int LpcSpiBus::SendRead(uint8_t code) {
     WaitIdle();
 
     // Clock out 0xff to facilitate read
-    _base[REG_DR] = 0xff;
+    _base[REG_DR] = code;
 
     // Wait for TX to finish
     while (!(_base[REG_SR] & SR_TFE))
@@ -88,7 +88,12 @@ int LpcSpiBus::Read() {
 }
 
 
-void LpcSpiBus::Send(const uint8_t* s, uint len) {
+int LpcSpiBus::Read() {
+    return SendRead(0xff);
+}
+
+
+inline void LpcSpiBus::Send(const uint8_t* s, uint len) {
     // Drain any remaining data the device is trying to send
     while (Read() != -1)
         ;
@@ -100,6 +105,10 @@ void LpcSpiBus::Send(const uint8_t* s, uint len) {
         while (!(_base[REG_SR] & SR_TFE))
             ;
     }
+}
+
+void LpcSpiBus::Send(uint8_t s) {
+    Send(&s, 1);
 }
 
 

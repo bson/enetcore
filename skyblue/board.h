@@ -93,7 +93,11 @@ extern Ethernet _eth0;
 
 // Board peripherals
 
+#ifdef ENABLE_PANEL
 #include "ssd1963.h"
+#include "tsc2046.h"
+#endif
+
 #include "sdcard.h"
 #include "fat.h"
 
@@ -103,6 +107,8 @@ extern Ethernet _eth0;
 typedef ssd1963::Panel<_gpio2, _gpio0, BIT18, BIT15, BIT17, BIT16> Panel;
 extern Panel _panel;
 template class ssd1963::Panel<_gpio2, _gpio0, BIT18, BIT15, BIT17, BIT16>;
+using namespace tsc2046;
+extern TouchController _touch;
 #endif
 
 extern SpiDev _cardslot;
