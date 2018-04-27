@@ -11,8 +11,7 @@
 #if 1
 
 // Interrupt priority plan.  Values are 8 bits with the low 3 bits unused.
-// Note: lower values are higher priority.  (We reverse this purely for
-// calculation purposes.)
+// Note: lower values are higher priority.
 enum {
     IPL_QUANTUM  = 8,
 
@@ -23,7 +22,7 @@ enum {
     IPL_SOFT     = 17,          //  5 Soft real-time functions
     IPL_COMM     = 27,          // 10 Various other communications
     IPL_MIN      = 31,          //  5 Low priority
-    IPL_NUM       = 32,
+    IPL_NUM      = 32,
 
     // Scheduler IPL.  This is the highest IPL that can make calls other
     // than Wake calls.
@@ -42,6 +41,7 @@ enum {
     IPL_I2C      = IPL_COMM - 2, // I2C
     IPL_SPI      = IPL_COMM - 2, // SPI
     IPL_USB      = IPL_COMM - 7, // USB
+    IPL_GPIO     = IPL_MIN - 5,  // Pin interrupts
     IPL_ENET     = IPL_COMM - 4, // Ethernet controller
     IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
     IPL_EEPROM   = IPL_COMM - 1, // EEPROM read/write
@@ -68,6 +68,7 @@ enum {
     IPL_I2C      = IPL_SOFT,  // I2C
     IPL_SPI      = IPL_SOFT,  // SPI
     IPL_USB      = IPL_SOFT,  // USB
+    IPL_GPIO     = IPL_SOFT,  // Pin interrupts
     IPL_ENET     = IPL_SOFT,  // Ethernet controller
     IPL_MISR     = IPL_SOFT,  // PHY MISR interrupt (link change, etc)
     IPL_EEPROM   = IPL_SOFT,  // EEPROM read/write

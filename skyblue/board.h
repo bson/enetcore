@@ -67,6 +67,7 @@ typedef LpcSpiBus SpiBus;
 typedef LpcSpiDev SpiDev;
 typedef LpcTimer Timer;
 typedef LpcGpio Gpio;
+typedef LpcGpioIntr GpioIntr;
 typedef LpcEeprom Eeprom;
 typedef LpcPwm Pwm;
 typedef LpcUsbDev Usb;
@@ -83,6 +84,8 @@ extern Gpio _gpio0;
 extern Gpio _gpio1;
 extern Gpio _gpio2;
 extern Gpio _gpio4;
+extern GpioIntr _gpio0_intr;
+extern GpioIntr _gpio2_intr;
 
 #ifdef ENABLE_USB
 extern Usb _usb;

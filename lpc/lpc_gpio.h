@@ -112,4 +112,59 @@ public:
 };
 
 
+// GPIO interrupts
+
+class LpcGpioIntr {
+    volatile uint32_t* _base;
+
+    enum {
+        STATR  = 0x00/4,        // Rising edge status
+        STATF  = 0x04/4,        // Falling edge status
+        CLR    = 0x08/4,        // Clear status
+        ENR    = 0x0c/4,        // Enable rising edge
+        ENF    = 0x10/4,        // Enable falling edge
+    };
+
+public:
+    LpcGpioIntr(uintptr_t base)
+        : _base((volatile uint32_t*)base) {
+    }
+
+    // Clear status
+    [[__finline]] void Clear(uint32_t mask) {
+        _base[CLR] = mask;
+    }
+
+    // Check for rising interrupt
+    [[__finline]] bool PendingR(uint32_t mask) {
+        return _base[STATR] & mask;
+    }
+
+    // Check for falling interrupt
+    [[__finline]] bool PendingF(uint32_t mask) {
+        return _base[STATF] & mask;
+    }
+
+    // Enable rising edge interrupts
+    [[__finline]] void EnableR(uint32_t mask) {
+        _base[ENR] |= mask;
+    }
+
+    // Enable falling edge interrupts
+    [[__finline]] void EnableF(uint32_t mask) {
+        _base[ENF] |= mask;
+    }
+
+    // Disable rising edge interrupts
+    [[__finline]] void DisableR(uint32_t mask) {
+        _base[ENR] &= ~mask;
+    }
+
+    // Disable falling edge interrupts
+    [[__finline]] void DisableF(uint32_t mask) {
+        _base[ENF] &= ~mask;
+    }
+
+};
+
 #endif // __LPC_GPIO_H__

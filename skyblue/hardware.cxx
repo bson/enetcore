@@ -33,6 +33,9 @@ Gpio _gpio1(GPIO1_BASE);
 Gpio _gpio2(GPIO2_BASE);
 Gpio _gpio4(GPIO4_BASE);
 
+GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
+GpioIntr _gpio2_intr(GPIO2_INTR_BASE);
+
 PinNegOutput<LpcGpio::Pin> _led5; // Green
 PinNegOutput<LpcGpio::Pin> _led7; // Green
 PinNegOutput<LpcGpio::Pin> _led6; // Red
@@ -65,6 +68,7 @@ Usb _usb(USB_BASE);
 Panel _panel;
 PinNegOutput<LpcGpio::Pin> _panel_reset; // Panel RESET#
 PinNegOutput<LpcGpio::Pin> _t_cs; // Touch controller SPI CS#
+EventObject _panel_tap;
 #endif
 
 #ifdef ENABLE_ENET
@@ -338,6 +342,20 @@ void ConfigurePins() {
 #endif
 }
 
+// GPIO0 pin interrupt handler
+static void gpio_intr(void*) {
+#ifdef ENABLE_PANEL
+    if (_gpio0_intr.PendingF(BIT22)) {
+        _panel_tap.Set(1);      // Set to 1 to indicate push
+    }
+    if (_gpio0_intr.PendingR(BIT22)) {
+        _panel_tap.Set(2);      // Set to 2 to indicate release
+    }
+#endif
+    _gpio0_intr.Clear(~0UL);
+    _gpio2_intr.Clear(~0UL);
+}
+
 static uint8_t _reset_reason;
 static uint32_t _wwdt_mod;
 
@@ -547,6 +565,14 @@ void hwinit() {
     NVic::EnableIRQ(ENET_IRQ);
     NVic::EnableIRQ(EINT0_IRQ);
 #endif
+    NVic::InstallIRQHandler(GPIO_IRQ, gpio_intr, IPL_GPIO, NULL);
+
+#ifdef ENABLE_PANEL
+    _gpio0_intr.EnableR(BIT22);      // Enable P0.22 Rising edge interrupts
+    _gpio0_intr.EnableF(BIT22);      // Enable P0.22 Falling edge interrupts
+    _gpio0_intr.Clear(BIT22);
+#endif
+
 	_uart3.Init(19200, SerialPort::FRAMING_8N1);
 	_uart3.SetInterrupts(true);
 
