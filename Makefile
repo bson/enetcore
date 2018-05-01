@@ -26,7 +26,7 @@ LFLAGS=-Map $(ODIR)/image.map
 SRCS += 
 
 # Project components
-SRCS += main.cxx buildinfo.cxx usb.cxx
+SRCS += main.cxx buildinfo.cxx usb.cxx ui.cxx
 
 include $(BOARD)/makefile.$(TOOLSET)
 include core/makefile.$(TOOLSET)

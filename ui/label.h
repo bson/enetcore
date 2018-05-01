@@ -2,10 +2,6 @@
 // See LICENSE for details.
 
 class Label: public Element {
-    const Config* _config;
-    Position _pos;
-    String _value;
-
 public:
     struct Config {
         Size _size;
@@ -14,6 +10,12 @@ public:
         const Font* _font;
     };
 
+private:
+    const Config* _config;
+    Position _pos;
+    String _value;
+
+public:
     // * implements Element::Initialize
     virtual void Initialize(const void* config, const Position& pos) {
         _config = (const Config*)config;
@@ -29,7 +31,7 @@ public:
         p.Fill(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
 
         SetColor(_config->_fg_color, _config->_bg_color);
-        p.Text(_pos._x, _pos,_y, *_config->_font, _value, 1, true);
+        p.Text(_pos._x, _pos._y, *_config->_font, _value, 1, true);
     }
 
     // Update value

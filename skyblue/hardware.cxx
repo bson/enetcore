@@ -10,6 +10,11 @@
 #include "platform.h"
 #include "arm.h"
 
+extern const char _build_commit[];
+extern const char _build_user[];
+extern const char _build_date[];
+extern const char _build_branch[];
+
 #define BOARD_REV 3
 
 // Define to use P1.25 as clock output
@@ -68,7 +73,10 @@ Usb _usb(USB_BASE);
 Panel _panel;
 PinNegOutput<LpcGpio::Pin> _panel_reset; // Panel RESET#
 PinNegOutput<LpcGpio::Pin> _t_cs; // Touch controller SPI CS#
-EventObject _panel_tap;
+
+EventObject _panel_tap(0, EventObject::MANUAL_RESET);
+SpiDev _touch_dev(_spi0);
+TouchController _touch(_touch_dev);
 #endif
 
 #ifdef ENABLE_ENET
@@ -619,6 +627,16 @@ void hwinit() {
 
     DMSG("RSID: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
     DMSG("CCLK: %d  PCLK: %d", CCLK, PCLK);
+
+    _malloc_region.SetReserve(64);
+
+    console("\r\nSky Blue Rev 3 [%s:%s %s %s]",
+            _build_branch, _build_commit, _build_user, _build_date);
+
+    console("Copyright (c) 2018 Jan Brittenson");
+    console("All Rights Reserved\r\n");
+
+    DMSG("Random uint: 0x%x", Util::Random<uint>());
 }
 
 

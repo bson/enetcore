@@ -4,26 +4,10 @@
 #include "enetkit.h"
 #include "util.h"
 
-extern const char _build_commit[];
-extern const char _build_user[];
-extern const char _build_date[];
-extern const char _build_branch[];
-
 #include "font/runes.inc"
 
 extern Eeprom _eeprom;
 extern PinNegOutput<LpcGpio::Pin> _led8;
-
-// Output memory status
-static void memstats() {
-    const struct mallinfo mi = dlmallinfo();
-
-    const String s = String::Format(STR("arena=%u, free chunks=%u, alloc=%u, "
-                                        "free=%u"),
-                                    mi.arena, mi.ordblks, mi.uordblks, mi.fordblks);
-
-    _panel.Text(8, 272-8-6, font_5x8, s);
-}
 
 struct Config {
     uint32_t version;
@@ -61,20 +45,12 @@ Config _config;
 enum { CONFIG_ADDR = 0x100 };       // EEPROM address for config
 
 Thread* _net_thread;
+Thread* _ui_thread;
 
 extern void UsbInit();
+extern void* UIThread(void*);
 
 int main() {
-    _malloc_region.SetReserve(64);
-
-    console("\r\nSky Blue Rev 3 [%s:%s %s %s]",
-            _build_branch, _build_commit, _build_user, _build_date);
-
-    console("Copyright (c) 2018 Jan Brittenson");
-    console("All Rights Reserved\r\n");
-
-    DMSG("Random uint: 0x%x", Util::Random<uint>());
-
     if (!_config.Load(CONFIG_ADDR)) {
         console("NOTE: No valid config, initializing");
 
@@ -94,22 +70,9 @@ int main() {
 #endif
 
 #ifdef ENABLE_PANEL
-    _panel.SetBackground(64, 64, 80);
-    _panel.Init();
-
-#if 1
-    _panel.TestPattern();
+    _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 
-    _panel.SetRgb(255, 255, 0);
-    _panel.Text(120, 8, font_ins_9x16, STR("Hello, world!"));
-
-    _panel.SetRgb(255, 255, 255);
-    _panel.Text(10, 200, font_ins_9x16, 
-                STR("The quick brown fox jump.s ov,er the lazy dog!"));
-    _panel.Text(10, 220, font_5x8, 
-                STR("The quick; brown; fox... 'jumps' over: the \"lazy\" dog?! <=>[\\]{|}"));
-#endif
     _fat.Mount(0, false);
 
     File* file = _fat.Open("issue");
@@ -128,25 +91,8 @@ int main() {
 
     DMSG("Main: blinking lights");
 
-    _panel.SetRgb(255, 255, 0);
-
     Time wake = Time::Now();
-    Time next_memstats = Time::Now();
     for (;;) {
-        if (Time::Now() >= next_memstats) {
-            memstats();
-            next_memstats += Time::FromSec(5);
-        }
-
-        const uint val = _clock.GetTime();
-        
-        const String s = String::Format(STR("%08x"), val);
-        _panel.Text(320, 8, font_5x8, s, 1, false);
-        _panel.Text(320, 20, font_ins_9x16, s, 1, false);
-
-        const String s2 = String::Format(STR("%08d"), val);
-        _panel.Text(200, 48, font_ins_25x37, s2, 3, false);
-
         _led8.Raise();
         wake += Time::FromMsec(500);
         Thread::Sleep(wake);

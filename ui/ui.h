@@ -12,21 +12,20 @@ namespace ui {
 enum { NCOLORS = 8 };
 
 // These are expencted to be found elsewhere
-extern class Panel& GetPanel();
+extern Panel& GetPanel();
 extern uint32_t _palette[NCOLORS];
-
-[[__finline]] uint32_t GetColor(uint n) { return _palette[n % NCOLORS]; }
-[[__finline]] void SetBGColor(uint n) {
+inline uint32_t GetColor(uint n) { return _palette[n % NCOLORS]; }
+inline void SetBGColor(uint n) {
     const uint32_t rgb = GetColor(n);
     GetPanel().SetBackground(rgb >> 24, rgb >> 16, rgb);
 }
 
-[[__finline]] void SetFGColor(uint n) {
+inline void SetFGColor(uint n) {
     const uint32_t rgb = GetColor(n);
-    GetPanel().SetRGB(rgb >> 24, rgb >> 16, rgb);
+    GetPanel().SetRgb(rgb >> 24, rgb >> 16, rgb);
 }
 
-[[__finline]] void SetColor(uint fg, uint bg) {
+inline void SetColor(uint fg, uint bg) {
     SetFGColor(fg);
     SetBGColor(bg);
 }

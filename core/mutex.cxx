@@ -157,5 +157,5 @@ bool EventObject::Wait(Time delay)
 uint8_t EventObject::GetState() const
 {
     ScopedNoInt G;
-	return _mode;
+	return _state;
 }

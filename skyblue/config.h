@@ -77,6 +77,9 @@ enum { NET_THREAD_PRIORITY = 200 };	  // Network thread priority
 enum { USB_THREAD_STACK = 1024 };
 enum { USB_THREAD_PRIORITY = 210 };
 
+enum { UI_THREAD_STACK = 1024 };
+enum { UI_THREAD_PRIORITY = 205 };
+
 enum { THREAD_DEFAULT_STACK = 1024 }; // Default thread stack size
 enum { THREAD_DEFAULT_PRIORITY = 50 }; // Default thread priority
 
@@ -107,5 +110,6 @@ static_assert((NET_THREAD_STACK & 3) == 0);
 static_assert((MAIN_THREAD_STACK & 3) == 0);
 static_assert((INTR_THREAD_STACK & 3) == 0);
 static_assert((USB_THREAD_STACK & 3) == 0);
+static_assert((UI_THREAD_STACK & 3) == 0);
 
 #endif // _CONFIG_H_
