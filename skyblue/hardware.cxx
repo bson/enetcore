@@ -243,7 +243,7 @@ void ConfigurePins() {
     // P1.25 - GPIO Out (/TEN with CH341T)
 #endif
     // P1.26 - GPIO (LED D9 SD card activity) Out
-    // P1.28 - SSP0_SSEL
+    // P1.28 - GPIO (Touch controller SPI CS#)
     // P1.29 - GPIO Out  SD Card CS#
     // P1.30 - USB_VBUS
     // P1.31 - ADC0_IN5  J8.3
@@ -269,7 +269,7 @@ void ConfigurePins() {
         25, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
 #endif
         26, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        28, D_IOCON_FUNC(5),
+        28, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
         29, D_IOCON_GPIO(IOCON_MODE_PULLUP, 0, 0, 1, 0),
         30, A_IOCON_FUNC(2),
         31, A_IOCON_ADC(3),
@@ -573,6 +573,7 @@ void hwinit() {
     NVic::EnableIRQ(ENET_IRQ);
     NVic::EnableIRQ(EINT0_IRQ);
 #endif
+    // Generic GPIO pin interrupt handler
     NVic::InstallIRQHandler(GPIO_IRQ, gpio_intr, IPL_GPIO, NULL);
 
 #ifdef ENABLE_PANEL
@@ -580,6 +581,7 @@ void hwinit() {
     _gpio0_intr.EnableF(BIT22);      // Enable P0.22 Falling edge interrupts
     _gpio0_intr.Clear(BIT22);
 #endif
+    NVic::EnableIRQ(GPIO_IRQ);
 
 	_uart3.Init(19200, SerialPort::FRAMING_8N1);
 	_uart3.SetInterrupts(true);
@@ -623,6 +625,7 @@ void hwinit() {
 #ifdef ENABLE_PANEL
     // Release from reset
     _panel_reset.Lower();
+    _touch_dev.SetSSEL(&_t_cs);
 #endif
 
     DMSG("RSID: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);

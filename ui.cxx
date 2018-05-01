@@ -48,18 +48,21 @@ void* UIThread(void*) {
     for (;;) {
         _panel_tap.Wait(Time::FromMsec(1000));
         switch (_panel_tap.GetState()) {
-        case 1:                 // Press
-            DMSG("Pressed pad");
-            break;
-        case 2:                 // Release
-            DMSG("Released pad");
+        case 1: {               // Press
+            uint16_t x, y;
+
+            _touch.ReadPosition(x, y);
+            DMSG("Press @ %d, %d", x, y);
             break;
         }
+        case 2: {               // Release
+            uint16_t x, y;
 
-        uint16_t x, y;
-
-        _touch.ReadPosition(x, y);
-        DMSG("Pos: %d, %d", x, y);
+            _touch.ReadPosition(x, y);
+            DMSG("Release @ %d, %d", x, y);
+            break;
+        }
+        }
 
         _panel_tap.Reset();
 
