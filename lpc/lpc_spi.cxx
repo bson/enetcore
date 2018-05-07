@@ -6,12 +6,15 @@
 #include "enetcore.h"
 #include "thread.h"
 #include "mutex.h"
+#include "thread.h"
 
 
 LpcSpiBus::LpcSpiBus(uintptr_t base)
     : _base((volatile uint32_t*)base),
       _speed(0),
-      _mode(0) {
+      _mode(0),
+      _dev_count(0),
+      _dev(NULL) {
 }
 
 
@@ -70,7 +73,7 @@ void LpcSpiBus::WaitIdle() {
 }
 
 
-inline int LpcSpiBus::SendRead(uint8_t code) {
+int LpcSpiBus::SendRead(uint8_t code) {
     WaitIdle();
 
     // Clock out 0xff to facilitate read
@@ -93,7 +96,7 @@ int LpcSpiBus::Read() {
 }
 
 
-inline void LpcSpiBus::Send(const uint8_t* s, uint len) {
+void LpcSpiBus::Send(const uint8_t* s, uint len) {
     // Drain any remaining data the device is trying to send
     while (Read() != -1)
         ;
@@ -153,6 +156,26 @@ bool LpcSpiBus::ReadBuffer(void* buffer, uint len, CrcCCITT* crc) {
     }
 
     return ok;
+}
+
+
+void LpcSpiBus::Acquire(LpcSpiDev* dev) {
+    Thread::IPL G(IPL_SPI-1);
+    
+    while (_dev_count && _dev != dev)
+        Thread::WaitFor(this);
+
+    ++_dev_count;
+}
+
+
+void LpcSpiBus::Release(LpcSpiDev *dev) {
+    Thread::IPL G(IPL_SPI-1);
+
+    assert(_dev == dev);
+    
+    if (!--_dev_count)
+        Thread::WakeSingle(this);
 }
 
 

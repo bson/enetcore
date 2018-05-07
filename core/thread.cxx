@@ -400,7 +400,13 @@ void Thread::Sleep(Time until)
 
 
 void Thread::Delay(uint usec) {
-    Sleep(Time::Now() + Time::FromUsec(usec)); 
+    const Time end = Time::Now() + Time::FromUsec(usec);
+    if (usec < 25) {
+        while (Time::Now() < end)
+            ;
+    } else {
+        Sleep(end);
+    }
 }
 
 

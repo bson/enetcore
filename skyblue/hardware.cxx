@@ -602,16 +602,12 @@ void hwinit() {
     // Initialize EEPROM early so we can pull config from it
     _eeprom.Init();
 
-    assert(IntEnabled());
-
     // Turn off LEDs
     _led5.Lower();
     _led6.Lower();
     _led7.Lower();
     _led8.Lower();
     _sd_led.Lower();
-
-    assert(IntEnabled());
 
 	_spi0.Init();
 	_cardslot.SetSSEL(&_sd_cs);

@@ -1,3 +1,6 @@
+Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
+set up pendsv_handler as a fast exception handler.
+
 Refactor chip support
 - Move LPC in under nxp/lpc407x and nxp/lpc (common)
 - Move stuff under arm into arm/cm4, cm0, cm7, etc

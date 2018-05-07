@@ -12,6 +12,8 @@ class LpcSpiBus {
 	volatile uint32_t* _base;
     uint _speed;                // Current bus speed
     uint8_t _mode;              // Current SPI mode
+    uint _dev_count;            // Device acquisition counter
+    class LpcSpiDev* _dev;      // Device holding the bus
 
     enum {
         // (RW) Control Register 0. Selects the serial clock rate, bus
@@ -108,6 +110,12 @@ protected:
 
     // Wait until idle
     void WaitIdle();
+
+    // Acquire bus
+    void Acquire(class LpcSpiDev* dev);
+
+    // Release bus
+    void Release(class LpcSpiDev* dev);
 };
 
 
@@ -128,24 +136,40 @@ public:
 	LpcSpiDev(LpcSpiBus& bus);
 	
 	// Init is currently a no-op
-	[[__finline]] void Init() { }
-	[[__finline]] void SetSSEL(Output* ssel) { _ssel = ssel; }
+    void Init() { }
+    void SetSSEL(Output* ssel) { _ssel = ssel; }
 	void Configure(uint mode, uint freq);
+
+    void Acquire() { _bus.Acquire(this); }
+    void Release() { _bus.Release(this); }
 
 	void Select();
 	void Deselect();
 
 	// These are delegated from bus - see SPI declaration for comments
-	[[__finline]] void Send(const uint8_t* s, uint len) { _bus.Send(s, len); }
-	[[__finline]] void Send(const uint8_t code) { _bus.Send(code); }
-	[[__finline]] int Read() { return _bus.Read(); }
-	[[__finline]] int SendRead(uint8_t code) { return _bus.SendRead(code); }
-	[[__finline]] int ReadReply(uint interval, uint num_tries) {
+    void Send(const uint8_t* s, uint len) { _bus.Send(s, len); }
+    void Send(const uint8_t code) { _bus.Send(code); }
+    int Read() { return _bus.Read(); }
+    int SendRead(uint8_t code) { return _bus.SendRead(code); }
+    int ReadReply(uint interval, uint num_tries) {
 		return _bus.ReadReply(interval, num_tries);
 	}
-	[[__finline]] bool ReadBuffer(void* buffer, uint len, CrcCCITT* crc = NULL) {
+    bool ReadBuffer(void* buffer, uint len, CrcCCITT* crc = NULL) {
 		return _bus.ReadBuffer(buffer, len, crc);
 	}
+
+    class AcquireBus {
+        LpcSpiDev& _dev;
+    public:
+        AcquireBus(LpcSpiDev& dev)
+            : _dev(dev) {
+            dev.Acquire();
+        }
+
+        ~AcquireBus() {
+            _dev.Release();
+        }
+    };
 };
 
 
