@@ -12,7 +12,17 @@ class TouchController {
     SpiDev& _spi;
     mutable Mutex _lock;
 
+    const uint _height;
+    const uint _width;
+
     enum { BUS_SPEED = 1000000 }; // 1MHz
+
+    enum {
+        MAX_X = 1780,
+        MIN_X = 135,
+        MAX_Y = 1540,
+        MIN_Y = 195,
+    };
 
     enum {
         START = BIT7,
@@ -32,8 +42,10 @@ class TouchController {
     };
 
 public:
-    TouchController(SpiDev& spi)
-        : _spi(spi) {
+    TouchController(SpiDev& spi, uint w, uint h)
+        : _spi(spi),
+          _width(w),
+          _height(h) {
     }
 
     void Init();

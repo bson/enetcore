@@ -48,6 +48,8 @@ void Configure(Ethernet& eth) {
         // Check that PHY is configured to RMII
     if (!(eth.ReadPHY(PhyReg::RCSR) & BIT5)) {
         console("ERROR: PHY is not operating in RMII mode");
+        // XXX is it worth hard disabling it? should tell the controller code though,
+        //     maybe through eth.Error() or such.
         return;
     }
 

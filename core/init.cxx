@@ -15,8 +15,6 @@ void init_array() {
     for (i = 0; i < count; i++)
         __preinit_array_start[i]();
     
-    //_init();
-    
     count = __init_array_end - __init_array_start;
     for (i = 0; i < count; i++)
         __init_array_start[i]();

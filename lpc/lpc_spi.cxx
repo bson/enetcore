@@ -59,6 +59,8 @@ void LpcSpiBus::Configure(uint mode, uint freq) {
 
 
 void LpcSpiBus::WaitIdle() {
+
+#if 0
     // Wait until idle
     while (_base[REG_SR] & SR_BSY)
         ;
@@ -66,6 +68,7 @@ void LpcSpiBus::WaitIdle() {
     // Wait for transmitter FIFO empty
     while (!(_base[REG_SR] & SR_TFE))
         ;
+#endif
 
     // Drain RX FIFO if it has data
     while (_base[REG_SR] & SR_RNE)
@@ -83,10 +86,17 @@ int LpcSpiBus::SendRead(uint8_t code) {
     while (!(_base[REG_SR] & SR_TFE))
         ;
 
+    // Wait for MISO byte to arrive
+    while (!(_base[REG_SR] & SR_RNE))
+        ;
+
+#if 0
     // Check if something arrived in RX
+    // XXX RNE doesn't seem to ever get set?
     if (!(_base[REG_SR] & SR_RNE))
         return -1;
-
+#endif
+    
     return _base[REG_DR];
 }
 
@@ -97,10 +107,6 @@ int LpcSpiBus::Read() {
 
 
 void LpcSpiBus::Send(const uint8_t* s, uint len) {
-    // Drain any remaining data the device is trying to send
-    while (Read() != -1)
-        ;
-
     while (len--) {
         _base[REG_DR] = *s++;
 
@@ -111,7 +117,7 @@ void LpcSpiBus::Send(const uint8_t* s, uint len) {
 }
 
 void LpcSpiBus::Send(uint8_t s) {
-    Send(&s, 1);
+    SendRead(s);
 }
 
 
@@ -166,6 +172,7 @@ void LpcSpiBus::Acquire(LpcSpiDev* dev) {
         Thread::WaitFor(this);
 
     ++_dev_count;
+    _dev = dev;
 }
 
 
@@ -174,8 +181,10 @@ void LpcSpiBus::Release(LpcSpiDev *dev) {
 
     assert(_dev == dev);
     
-    if (!--_dev_count)
+    if (!--_dev_count) {
         Thread::WakeSingle(this);
+        _dev = NULL;
+    }
 }
 
 

@@ -18,7 +18,39 @@ static void memstats() {
     _panel.Text(8, 272-8-6, font_5x8, s);
 }
 
+
+enum class TapState: bool {
+    PRESSED = 0,
+    RELEASED = !PRESSED
+};
+
+static TapState _panel_state = TapState::RELEASED;
+
+// Called to handle tap on panel.  'press' is true if it's a press,
+// otherwise false on release.
+void HandleTap(TapState state) {
+    if (state != _panel_state) {
+        uint16_t x = 0, y = 0;
+
+        for (int i = 0; i < 4; i++) {
+            uint16_t xsample, ysample;
+            
+            _touch.ReadPosition(xsample, ysample);
+            x += xsample;
+            y += ysample;
+        }
+
+        x /= 4;
+        y /= 4;
+                
+        DMSG("%s @ %d, %d", state == TapState::PRESSED ? "Press" : "Release", x, y);
+    }
+}
+
+
 void* UIThread(void*) {
+    enum { DEGLITCH = 25 };
+
     Thread::SetPriority(UI_THREAD_PRIORITY);
 
     DMSG("Starting UI");
@@ -44,26 +76,17 @@ void* UIThread(void*) {
     _panel.SetRgb(255, 255, 0);
 
     Time next_memstats = Time::Now();
+    Time rearm = Time::Now();
 
     for (;;) {
         _panel_tap.Wait(Time::FromMsec(1000));
-        switch (_panel_tap.GetState()) {
-        case 1: {               // Press
-            uint16_t x, y;
-
-            _touch.ReadPosition(x, y);
-            DMSG("Press @ %d, %d", x, y);
-            break;
+        const uint state = _panel_tap.GetState();
+        if (state && state <= 2) {
+            if (Time::Now() >= rearm) {
+                rearm = Time::Now() + Time::FromMsec(DEGLITCH);
+                HandleTap(state == 1 ? TapState::PRESSED : TapState::RELEASED);
+            }
         }
-        case 2: {               // Release
-            uint16_t x, y;
-
-            _touch.ReadPosition(x, y);
-            DMSG("Release @ %d, %d", x, y);
-            break;
-        }
-        }
-
         _panel_tap.Reset();
 
         if (Time::Now() >= next_memstats) {

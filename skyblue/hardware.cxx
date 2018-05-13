@@ -76,7 +76,7 @@ PinNegOutput<LpcGpio::Pin> _t_cs; // Touch controller SPI CS#
 
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 SpiDev _touch_dev(_spi0);
-TouchController _touch(_touch_dev);
+TouchController _touch(_touch_dev, 480, 272);
 #endif
 
 #ifdef ENABLE_ENET
