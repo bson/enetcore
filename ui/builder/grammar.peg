@@ -1,0 +1,38 @@
+grammar uigrammar
+
+input        <- statement*
+
+definition   <- labeldef / hlinedef / vlinedef / indicatordef / integerdef / windowdef
+statement    <- comment / color_alias / font_alias / palette / definition / " "+ / "\n"+
+
+palette      <- "PALETTE" SP (rgb SP)+ ";" %set_palette
+
+color_alias  <- "COLOR" SP identifier EQUALS integer SP ";" %make_color_alias
+font_alias   <- "FONT" SP identifier EQUALS string SP ";" %make_font_alias
+
+color        <- integer / identifier
+
+labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA font:identifier COMMA fg:color COMMA bg:color SP ";" %make_label
+hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:integer COMMA fg:color SP ";" %make_hline
+vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:integer COMMA fg:color SP ";" %make_vline
+indicatordef <- "INDICATOR" SP (id:identifier EQUALS)? font:identifier COMMA fg:color COMMA bg:color COMMA true:integer COMMA false:integer SP ";" %make_indicator
+integerdef   <- "INTEGER" SP (id:identifier EQUALS)? font:identifier COMMA size:integer COMMA fg:color COMMA bg:color COMMA fmt:string SP ";" %make_integer
+
+windowdef    <- "WINDOW" SP (id:identifier EQUALS)? width:integer "x" height:integer COMMA fg:color COMMA bg:color "\n" children:windowitem* SP ";" %make_window
+
+windowitem   <- AT x:integer COMMA y:integer COLON child:( (SP value:definition) / (id:identifier SP ";")) "\n"
+
+integer      <- [0-9]+
+identifier   <- [a-zA-Z_] [a-zA-Z0-9_.]*
+
+string       <- "\"" [^"]* "\""
+ 
+COMMA        <- SP "," SP
+COLON        <- SP ":" SP
+EQUALS       <- SP "=" SP
+AT           <- SP "@" SP
+SP           <- " "*
+
+comment      <- "#" [^\n]* "\n"
+
+rgb          <- integer "/" integer "/" integer
