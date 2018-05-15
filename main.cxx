@@ -73,7 +73,6 @@ int main() {
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 
-
     _fat.Mount(0, false);
 
     File* file = _fat.Open("issue");

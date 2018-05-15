@@ -353,11 +353,16 @@ void ConfigurePins() {
 // GPIO0 pin interrupt handler
 static void gpio_intr(void*) {
 #ifdef ENABLE_PANEL
+    // Disable interrupts - they will be reenabled on a debounce timer
     if (_gpio0_intr.PendingF(BIT22)) {
-        _panel_tap.Set(1);      // Set to 1 to indicate push
+        _gpio0_intr.DisableR(BIT22);
+        _gpio0_intr.DisableF(BIT22);
+        _panel_tap.Set(1);      // Set to 1 to signal press
     }
     if (_gpio0_intr.PendingR(BIT22)) {
-        _panel_tap.Set(2);      // Set to 2 to indicate release
+        _gpio0_intr.DisableR(BIT22);
+        _gpio0_intr.DisableF(BIT22);
+        _panel_tap.Set(2);      // Set to 2 to signal release
     }
 #endif
     _gpio0_intr.Clear(~0UL);

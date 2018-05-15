@@ -6,6 +6,7 @@
 #include "font/runes.inc"
 
 extern EventObject _panel_tap;
+extern GpioIntr _gpio0_intr;
 
 // Output memory status
 static void memstats() {
@@ -18,6 +19,13 @@ static void memstats() {
     _panel.Text(8, 272-8-6, font_5x8, s);
 }
 
+
+// Enable panel tap interrupts
+static void EnableTapIntr() {
+    _gpio0_intr.Clear(BIT22);
+    _gpio0_intr.EnableR(BIT22);
+    _gpio0_intr.EnableF(BIT22);
+}
 
 enum class TapState: bool {
     PRESSED = 0,
@@ -49,7 +57,7 @@ void HandleTap(TapState state) {
 
 
 void* UIThread(void*) {
-    enum { DEGLITCH = 25 };
+    enum { DEBOUNCE_MSEC = 25 };
 
     Thread::SetPriority(UI_THREAD_PRIORITY);
 
@@ -76,31 +84,45 @@ void* UIThread(void*) {
     _panel.SetRgb(255, 255, 0);
 
     Time next_memstats = Time::Now();
-    Time rearm = Time::Now();
+    Time rearm_tap = Time::Now();
+    Time display = Time::Now();
+
+    EnableTapIntr();
 
     for (;;) {
-        _panel_tap.Wait(Time::FromMsec(1000));
-        const uint state = _panel_tap.GetState();
-        if (state && state <= 2) {
-            if (Time::Now() >= rearm) {
-                rearm = Time::Now() + Time::FromMsec(DEGLITCH);
-                HandleTap(state == 1 ? TapState::PRESSED : TapState::RELEASED);
-            }
-        }
-        _panel_tap.Reset();
+        const Time next_wake = min<Time>(next_memstats, min<Time>(rearm_tap, display));
 
-        if (Time::Now() >= next_memstats) {
+        if (next_wake > Time::Now())
+            _panel_tap.Wait(next_wake);
+
+        const Time now = Time::Now();
+
+        if (now >= rearm_tap)
+            EnableTapIntr();
+
+        const uint state = _panel_tap.GetState();
+        if (state) {
+            rearm_tap = now + Time::FromMsec(DEBOUNCE_MSEC);
+            HandleTap(state == 1 ? TapState::PRESSED : TapState::RELEASED);
+            _panel_tap.Reset();
+        }
+
+        if (now >= next_memstats) {
             memstats();
             next_memstats += Time::FromSec(5);
         }
 
-        const uint val = _clock.GetTime();
+        if (now >= display) {
+            const uint val = _clock.GetTime();
         
-        const String s = String::Format(STR("%08x"), val);
-        _panel.Text(320, 8, font_5x8, s, 1, false);
-        _panel.Text(320, 20, font_ins_9x16, s, 1, false);
+            const String s = String::Format(STR("%08x"), val);
+            _panel.Text(320, 8, font_5x8, s, 1, false);
+            _panel.Text(320, 20, font_ins_9x16, s, 1, false);
 
-        const String s2 = String::Format(STR("%08d"), val);
-        _panel.Text(200, 48, font_ins_25x37, s2, 3, false);
+            const String s2 = String::Format(STR("%08d"), val);
+            _panel.Text(200, 48, font_ins_25x37, s2, 3, false);
+
+            display += Time::FromMsec(100);
+        }
     }
 }
