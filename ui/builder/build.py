@@ -1,3 +1,6 @@
+# Copyright (c) 2018 Jan Brittenson
+# See LICENSE for details.
+
 import sys
 import grammar, nodes, cppemitter
 

@@ -1,3 +1,6 @@
+# Copyright (c) 2018 Jan Brittenson
+# See LICENSE for details.
+
 class Nodes(object):
 
     def __init__(self):
