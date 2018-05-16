@@ -11,7 +11,7 @@
 
 @@@ Nesting NVIC exception handlers
 @@@
-@@@ On an exception, the following has been pushed onto the stack:
+@@@ On an context swich, the following is pushed onto the stack:
 @@@    0x1c - PSR
 @@@    0x18 - PC
 @@@    0x14 - LR
@@ -20,18 +20,8 @@
 @@@    0x08 - R2
 @@@    0x04 - R1
 @@@    SP+0 - R0
-@@@ LR contains a special EXC_RETURN value (0xffffffX)
-@@@ 
-@@@ If the FPU is enabled it also stores all 16 FPU registers on the stack.
-@@@ The value in LR indicates whether this is the case.  No exception handler
-@@@ should touch the D registers without saving them first.
-@@@
-@@@ For IRQs (IDs >= 16) a global table, __token_table contains
-@@@ parameters to pass to the handler.  For system exceptions (ID < 16),
-@@@ NULL is provided.  The purpose of the token is for the handler to map
-@@@ to an instance.
 
-    .align
+.align
 	
 .func exc_handler
 .global exc_handler
@@ -39,7 +29,7 @@
 exc_handler:
     ldr    r1, =__handler_table
     mrs    r2, ipsr
-    and    r2, r2, #0xff           @ Only ff rather than 1ff
+    and    r2, r2, #0xff           @ Only ff rather than 1ff; no Cortex-M needs the latter
     ldr    r1, [r1, +r2, lsl#2]    @ R1 = handler 
     cmp    r2, #16
     subge  r2, r2, #16
@@ -58,7 +48,7 @@ exc_handler:
 .func pendsv_handler
 .global pendsv_handler
 
-	.align
+.align
 pendsv_handler:
 
 @@@ Save thread state 

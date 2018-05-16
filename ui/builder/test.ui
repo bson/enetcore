@@ -12,8 +12,8 @@ FONT indicators = "sym_16x16";  # Indicators are font based
 
 # Main window
 WINDOW main_readout = 480x272, fg, bg
-       @ 240, 10: LABEL "ADC Reading", small, fg, bg;
-       @ 240, 20: INTEGER voltage = large, 40, fg, bg, "%d";
+       @ 240, 10: LABEL "ADC Reading", small, fg, bg, 120x40;
+       @ 240, 20: INTEGER voltage = large, 120x40, fg, bg, "%d";
        @ 10, 240: INDICATOR mode_ccv = indicators, fg, bg, 0, 1;
        @ 10, 200: INDICATOR mode_ovp = indicators, fg, bg, 2, 3;
 ;

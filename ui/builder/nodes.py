@@ -31,7 +31,10 @@ class Nodes(object):
             return self.font_aliases[font]
         print "Undefined font %s" % font
         return font
-    
+
+    def size(self, sizestr):
+        return map(int, sizestr.split("x"))
+
     def to_rgb(self, s):
         rgb = s.split('/');
         return (int(rgb[0]) << 16) + (int(rgb[1]) << 8) + int(rgb[2])
@@ -56,6 +59,7 @@ class Nodes(object):
                  'font': self.font(elements[5].text),
                  'fg': self.color(elements[7].text),
                  'bg': self.color(elements[9].text),
+                 'size': self.size(elements[11].text),
                  'id': identifier }
         self.nodes[identifier] = node;
         return node;
@@ -63,7 +67,7 @@ class Nodes(object):
     def make_hline(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
         node = { 'type': 'hline',
-                 'size': int(elements[3].text),
+                 'size': self.size(elements[3].text),
                  'fg': self.color(elements[5].text),
                  'id': identifier }
         self.nodes[identifier] = node;
@@ -72,7 +76,7 @@ class Nodes(object):
     def make_vline(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
         node = { 'type': 'vline',
-                 'size': int(elements[3].text),
+                 'size': self.size(elements[3].text),
                  'fg': self.color(elements[5].text),
                  'id': identifier }
         self.nodes[identifier] = node;
@@ -92,9 +96,9 @@ class Nodes(object):
         
     def make_integer(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
-        node = { 'type': 'indicator',
+        node = { 'type': 'integer',
                  'font': self.font(elements[3].text),
-                 'size': int(elements[5].text),
+                 'size': self.size(elements[5].text),
                  'fg': self.color(elements[7].text),
                  'bg': self.color(elements[9].text),
                  'fmt': elements[11].text,
@@ -118,7 +122,7 @@ class Nodes(object):
     def make_window(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
         children = map(self.child_map, elements[11])
-        node = { 'type': 'indicator',
+        node = { 'type': 'window',
                  'width': int(elements[3].text),
                  'height': int(elements[5].text),
                  'fg': self.color(elements[7].text),
@@ -154,3 +158,4 @@ class Nodes(object):
             if 'bg' in v:
                 if v['bg'] >= len(self.palette):
                     print "Undefined color %s in %s %s" % (v['bg'], v['type'], v['id'])
+    

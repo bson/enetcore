@@ -12,11 +12,11 @@ font_alias   <- "FONT" SP identifier EQUALS string SP ";" %make_font_alias
 
 color        <- integer / identifier
 
-labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA font:identifier COMMA fg:color COMMA bg:color SP ";" %make_label
-hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:integer COMMA fg:color SP ";" %make_hline
-vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:integer COMMA fg:color SP ";" %make_vline
+labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA font:identifier COMMA fg:color COMMA bg:color COMMA size:SIZE SP ";" %make_label
+hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:SIZE COMMA fg:color SP ";" %make_hline
+vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:SIZE COMMA fg:color SP ";" %make_vline
 indicatordef <- "INDICATOR" SP (id:identifier EQUALS)? font:identifier COMMA fg:color COMMA bg:color COMMA true:integer COMMA false:integer SP ";" %make_indicator
-integerdef   <- "INTEGER" SP (id:identifier EQUALS)? font:identifier COMMA size:integer COMMA fg:color COMMA bg:color COMMA fmt:string SP ";" %make_integer
+integerdef   <- "INTEGER" SP (id:identifier EQUALS)? font:identifier COMMA size:SIZE COMMA fg:color COMMA bg:color COMMA fmt:string SP ";" %make_integer
 
 windowdef    <- "WINDOW" SP (id:identifier EQUALS)? width:integer "x" height:integer COMMA fg:color COMMA bg:color "\n" children:windowitem* SP ";" %make_window
 
@@ -36,3 +36,5 @@ SP           <- " "*
 comment      <- "#" [^\n]* "\n"
 
 rgb          <- integer "/" integer "/" integer
+
+SIZE         <- integer "x" integer
