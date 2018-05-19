@@ -1,27 +1,57 @@
+# Grammar for uibuilder definition files
 grammar uigrammar
 
 input        <- statement*
 
-definition   <- labeldef / hlinedef / vlinedef / indicatordef / integerdef / windowdef
-statement    <- comment / color_alias / font_alias / const_alias / palette / definition / " "+ / "\n"+
+definition   <- labeldef / hlinedef / vlinedef /
+                indicatordef / integerdef / windowdef
+
+statement    <- comment / color_alias / font_alias / const_alias /
+                palette / definition / " "+ / "\n"+
 
 palette      <- "PALETTE" SP (rgb SP)+ ";" %set_palette
 
-color_alias  <- "COLOR" SP identifier EQUALS integer SP ";" %make_color_alias
-font_alias   <- "FONT" SP identifier EQUALS string SP ";" %make_font_alias
-const_alias  <- "CONST" SP identifier EQUALS integer SP ";" %make_const
+color_alias  <- "COLOR" SP identifier EQUALS integer SP ";"
+                %make_color_alias
+
+font_alias   <- "FONT" SP identifier EQUALS string SP ";"
+                %make_font_alias
+
+const_alias  <- "CONST" SP identifier EQUALS integer SP ";"
+                %make_const
 
 color        <- integer / identifier
 
-labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA font:identifier COMMA fg:color COMMA bg:color COMMA size:SIZE COMMA tap:FUNC SP ";" %make_label
-hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:SIZE COMMA fg:color SP ";" %make_hline
-vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:SIZE COMMA fg:color SP ";" %make_vline
-indicatordef <- "INDICATOR" SP (id:identifier EQUALS)? font:identifier COMMA fg:color COMMA bg:color COMMA true:integer COMMA false:integer COMMA tap:FUNC SP ";" %make_indicator
-integerdef   <- "INTEGER" SP (id:identifier EQUALS)? font:identifier COMMA size:SIZE COMMA fg:color COMMA bg:color COMMA fmt:string COMMA tap:FUNC SP ";" %make_integer
+labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA
+                font:identifier COMMA fg:color COMMA bg:color COMMA
+                size:SIZE COMMA tap:FUNC SP ";"
+                %make_label
 
-windowdef    <- "WINDOW" SP (id:identifier EQUALS)? width:integer "x" height:integer COMMA fg:color COMMA bg:color "\n" children:windowitem* SP ";" %make_window
+hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:SIZE COMMA
+                 fg:color SP ";"
+                 %make_hline
 
-windowitem   <- AT x:integer COMMA y:integer COLON child:( (SP value:definition) / (id:identifier SP ";")) "\n"
+vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:SIZE COMMA
+                fg:color SP ";"
+                %make_vline
+
+indicatordef <- "INDICATOR" SP (id:identifier EQUALS)? font:identifier COMMA
+                fg:color COMMA bg:color COMMA true:integer COMMA false:integer COMMA
+                tap:FUNC SP ";"
+                %make_indicator
+
+integerdef   <- "INTEGER" SP (id:identifier EQUALS)? font:identifier COMMA
+                size:SIZE COMMA fg:color COMMA bg:color COMMA fmt:string COMMA
+                tap:FUNC SP ";"
+                %make_integer
+
+windowdef    <- "WINDOW" SP (id:identifier EQUALS)? width:integer "x"
+                height:integer COMMA fg:color COMMA bg:color "\n"
+                children:windowitem* SP ";"
+                %make_window
+
+windowitem   <- AT x:integer COMMA y:integer COLON
+                child:( (SP value:definition) / (id:identifier SP ";")) "\n"
 
 integer      <- [0-9]+
 identifier   <- [a-zA-Z_] [a-zA-Z0-9_.]*
