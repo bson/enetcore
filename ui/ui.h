@@ -40,7 +40,7 @@ struct Size {
 struct Position {
     uint16_t _x, _y;
 
-    Position(uint16_t x, uint16_t y) : _x(x), _y(y) { }
+    explicit Position(uint16_t x, uint16_t y) : _x(x), _y(y) { }
 
     bool Inside(const Position& pos, const Size& size) const {
         return _x >= pos._x && _x < pos._x + size._w
