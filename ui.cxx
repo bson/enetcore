@@ -2,6 +2,7 @@
 #include "board.h"
 #include "mutex.h"
 #include "ui.h"
+#include "uibuilder.h"
 
 #include "font/runes.inc"
 
@@ -56,12 +57,22 @@ void HandleTap(TapState state) {
 }
 
 
+// Initialize UI widget hierarchy
+void Initialize() {
+    static const Position topleft = { 0, 0 };
+
+    DMSG("UI init");
+
+    ui::Initialize(&main_readout_conf, topleft);
+}
+
+
 void* UIThread(void*) {
     enum { DEBOUNCE_MSEC = 25 };
 
     Thread::SetPriority(UI_THREAD_PRIORITY);
 
-    DMSG("Starting UI");
+    DMSG("UI start");
 
     _panel.SetBackground(64, 64, 80);
     _panel.Init();

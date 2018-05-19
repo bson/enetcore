@@ -8,6 +8,8 @@ public:
         uint8_t _bg_color;
         uint8_t _fg_color;
         const Font* _font;
+        TapFunc _tap;
+        uint32_t _tap_param;
     };
 
 private:
@@ -32,6 +34,16 @@ public:
 
         SetColor(_config->_fg_color, _config->_bg_color);
         p.Text(_pos._x, _pos._y, *_config->_font, _value, 1, true);
+    }
+
+    // * implements Element::Tap
+    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+        if (!pos.Inside(_pos, _config->_size))
+            return false;
+
+        f = _config->_tap;
+        a = _config->_tap_param;
+        return true;
     }
 
     // Update value

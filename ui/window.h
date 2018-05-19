@@ -12,7 +12,7 @@ public:
     };
 
 private:
-    const struct Config* _config;
+    const Config* _config;
     Position _pos;
 public:
 
@@ -41,5 +41,15 @@ public:
             ElementPlacement* child = const_cast<ElementPlacement*>(_config->_children + i);
             child->_element->Redraw();
         }
+    }
+
+    // * implements Element::Tap
+    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+        for (uint i = 0; i < _config->_nchildren; ++i) {
+            ElementPlacement* child = const_cast<ElementPlacement*>(_config->_children + i);
+            if (child->_element->Tap(pos, f, a))
+                return true;
+        }
+        return false;
     }
 };

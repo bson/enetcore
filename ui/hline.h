@@ -26,4 +26,9 @@ public:
         SetFGColor(_config->_fg_color);
         p.HLine(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
     }
+
+    // * implements Element::Tap
+    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+        return false;
+    }
 };

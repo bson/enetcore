@@ -31,12 +31,29 @@ inline void SetColor(uint fg, uint bg) {
 }
 
 
-struct Position {
-    uint16_t _x, _y;
-};
+typedef void (*TapFunc)(uint32_t);
 
 struct Size {
     uint16_t _w, _h;
+};
+
+struct Position {
+    uint16_t _x, _y;
+
+    Position(uint16_t x, uint16_t y) : _x(x), _y(y) { }
+
+    bool Inside(const Position& pos, const Size& size) const {
+        return _x >= pos._x && _x < pos._x + size._w
+               && _y >= pos._y && _y < pos._y + size._h;
+    }
+
+    Position operator+(const Position& rhs) const {
+        return Position(_x + rhs._x, _y + rhs._y);
+    }
+
+    Position operator-(const Position& rhs) const {
+        return Position(_x - rhs._x, _y - rhs._y);
+    }
 };
 
 struct Dimension {
@@ -48,6 +65,7 @@ class Element {
 public:
     virtual void Initialize(const void* config, const Position& pos) = 0;
     virtual void Redraw() = 0;
+    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) = 0;
 };
 
 struct ElementPlacement {

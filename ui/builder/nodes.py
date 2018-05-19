@@ -9,6 +9,7 @@ class Nodes(object):
         self.id_count = 0
         self.nodes = { }
         self.palette = [ ]
+        self.consts = { }
         
     def new_identifier(self):
         ++self.id_count
@@ -55,6 +56,10 @@ class Nodes(object):
         self.font_aliases[elements[2].text] = elements[4].text[1:-1]
         return None
 
+    def make_const(self, input, start, end, elements):
+        self.consts[elements[2].text] = int(elements[4].text)
+        return None
+    
     def make_label(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
         node = { 'type': 'label',
