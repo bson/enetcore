@@ -2,3 +2,4 @@ build_*
 TAGS
 *.log
 *~
+*.pyc

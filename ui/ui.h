@@ -40,6 +40,8 @@ struct Size {
 struct Position {
     uint16_t _x, _y;
 
+    // Some handy methods.  This is still pod.
+
     explicit Position(uint16_t x, uint16_t y) : _x(x), _y(y) { }
 
     bool Inside(const Position& pos, const Size& size) const {
@@ -47,19 +49,56 @@ struct Position {
                && _y >= pos._y && _y < pos._y + size._h;
     }
 
+    // Simple vector arithmetic, to flatten relative positions into absolute
     Position operator+(const Position& rhs) const {
         return Position(_x + rhs._x, _y + rhs._y);
     }
 
+    // Simple vector arithmetic, to deflatten absolute positions into relative
     Position operator-(const Position& rhs) const {
         return Position(_x - rhs._x, _y - rhs._y);
     }
+
+    // Ordering: if above, or to the left if at the same height, then
+    // a position is "less than" another one.  This is somewhat
+    // arbitrary and its purpose is only for container use and to
+    // support algorithms related to containers, e.g. to find an
+    // enclosing widget through bisection.
+    bool LessThan(const Position& arg) const {
+        return _y < arg._y || (_y == arg._y && _x < arg._x);
+    }
+
+    bool operator<(const Position& rhs) const { return LessThan(rhs); }
+
+    // Strict equality
+    bool Equals(const Position& arg) const { return _x == arg._x && _y == arg._y; }
+    bool operator=(const Position& rhs) const { return Equals(rhs); }
 };
 
-struct Dimension {
+struct Rectangle {
     Position _pos;
     Size _size;
+
+    explicit Rectangle(const Position& pos, const Size& size)
+        : _pos(pos), _size(size) {
+    }
+
+    bool Contains(const Position& pos) const { return pos.Inside(_pos. _size); }
+
+    // The four corners
+    Position TopLeft() const { return _pos; }
+    Position TopRight() const { return _pos + Position(_size._w, 0); }
+    Position BotLeft() const { return _pos + Position(0, _size._h); }
+    Position BotRight() const { return _pos + Position(_size._w, _size._h); }
+
+    // True if two rectangles intersect
+    bool Intersects(const Rectangle& other) const {
+        return Contains(other.TopLeft()) || Contains(other.TopRight())
+            || Contains(other.BotLeft()) || Contains(other.BotRight());
+    }
 };
+
+typedef Rectangle Dimension;
 
 class Element {
 public:
