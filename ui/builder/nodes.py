@@ -46,7 +46,7 @@ class Nodes(object):
             self.funcs["NoTap"] = True
             return [ "NoTap", 0 ]
 
-        f = element.identifier.text
+        f = element.cidentifier.text
         arg = element.arg.text
         if arg == "":
             arg = 0

@@ -55,6 +55,7 @@ windowitem   <- AT x:integer COMMA y:integer COLON
 
 integer      <- [0-9]+
 identifier   <- [a-zA-Z_] [a-zA-Z0-9_.]*
+cidentifier  <- ("::"? identifier)+
 
 string       <- "\"" [^"]* "\""
  
@@ -70,4 +71,4 @@ rgb          <- integer "/" integer "/" integer
 
 SIZE         <- integer "x" integer
 
-FUNC         <- (identifier "(" arg:(integer / identifier / SP) ")") / "*"
+FUNC         <- (cidentifier "(" arg:(integer / identifier / SP) ")") / "*"

@@ -18,6 +18,6 @@ CONST CMD_ONOFF = 1;
 WINDOW main_readout = 480x272, fg, bg
        @ 240, 10: LABEL "ADC Reading", small, fg, bg, 120x40, *;
        @ 240, 20: INTEGER voltage = large, 120x40, fg, bg, "%d", *;
-       @ 10, 240: INDICATOR mode_ccv = indicators, fg, bg, 0, 1, TapCcv();
-       @ 10, 200: INDICATOR mode_ovp = indicators, fg, bg, 2, 3, TapOvp();
+       @ 10, 240: INDICATOR mode_ccv = indicators, fg, bg, 0, 1, ::TapCcv();
+       @ 10, 200: INDICATOR mode_ovp = indicators, fg, bg, 2, 3, ::TapOvp();
 ;
