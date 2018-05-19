@@ -22,7 +22,9 @@ grammar.parse(body, actions=n)
 
 n.validate()
 
-emitter = cppemitter.CppEmitter(n.get_nodes(), n.get_palette(), n.get_fonts(), n.get_colors())
+emitter = cppemitter.CppEmitter(n)
+
+emitter.debug()
 
 if emit_decls:
     emitter.output_decls()

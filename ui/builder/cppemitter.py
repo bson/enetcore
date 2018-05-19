@@ -4,11 +4,13 @@
 import pprint
 
 class CppEmitter:
-    def __init__(self, nodes, palette, fonts, colors):
-        self.nodes = nodes
-        self.palette = palette
-        self.fonts = fonts
-        self.colors = colors
+    def __init__(self, nodes):
+        self.nodes = nodes.get_nodes()
+        self.palette = nodes.get_palette()
+        self.fonts = nodes.get_fonts()
+        self.colors = nodes.get_colors()
+        self.consts = nodes.get_consts()
+        self.funcs = nodes.get_funcs()
 
     def def_palette(self):
         print "\nconst uint32_t _palette[%d] = {" % len(self.palette)
@@ -18,11 +20,21 @@ class CppEmitter:
     def decl_palette(self):
         print "extern const uint32_t _palette[%d];" % len(self.palette)
 
+    def decl_consts(self):
+        print "enum {"
+        for const in self.consts:
+            print "    %s = %s," % (const, self.consts[const])
+        print "};"
+
+    def decl_funcs(self):
+        for f in self.funcs:
+            print "extern void %s(uint32_t);" % f
+
     def decl_node(self, node):
         print "extern ui::%s %s;" % (node['type'].capitalize(), node['id'])
 
     def labelconf(self, node):
-        return "{%s, %s}, %s, %s, &_font_%s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'])
+        return "{%s, %s}, %s, %s, &_font_%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
 
     def hlineconf(self, node):
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
@@ -31,10 +43,10 @@ class CppEmitter:
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
 
     def indicatorconf(self, node):
-        return "%s, %s, &_font_%s, %s, %s" % (node['bg'], node['fg'], node['font'], node['true'], node['false'])
+        return "%s, %s, &_font_%s, %s, %s, %s, %s" % (node['bg'], node['fg'], node['font'], node['true'], node['false'], node['tap'][0], node['tap'][1])
 
     def integerconf(self, node):
-        return "{%s, %s}, %s, %s, &_font_%s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['fmt'])
+        return "{%s, %s}, %s, %s, &_font_%s, %s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['fmt'], node['tap'][0], node['tap'][1])
 
     def windowconf(self, node):
         children = node['children']
@@ -94,7 +106,11 @@ class CppEmitter:
 
         self.decl_palette()
         print
+        self.decl_consts()
+        print
         self.decl_nodes()
+        print
+        self.decl_funcs()
 
         print "}; // namespace uibuilder"
 

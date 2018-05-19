@@ -74,6 +74,8 @@ void* UIThread(void*) {
 
     DMSG("UI start");
 
+    void Initialize();
+
     _panel.SetBackground(64, 64, 80);
     _panel.Init();
 

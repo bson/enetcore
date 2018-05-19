@@ -10,6 +10,7 @@ class Nodes(object):
         self.nodes = { }
         self.palette = [ ]
         self.consts = { }
+        self.funcs = { }
         
     def new_identifier(self):
         ++self.id_count
@@ -38,6 +39,19 @@ class Nodes(object):
 
     def size(self, sizestr):
         return map(int, sizestr.split("x"))
+
+    def func(self, element):
+        s = element.text
+        if s == "*" or s == "":
+            self.funcs["NoTap"] = True
+            return [ "NoTap", 0 ]
+
+        f = element.identifier.text
+        arg = element.arg.text
+        if arg == "":
+            arg = 0
+        self.funcs[f] = True
+        return [ f, arg ]
 
     def to_rgb(self, s):
         rgb = s.split('/');
@@ -68,6 +82,7 @@ class Nodes(object):
                  'fg': self.color(elements[7].text),
                  'bg': self.color(elements[9].text),
                  'size': self.size(elements[11].text),
+                 'tap': self.func(elements[13]),
                  'id': identifier }
         self.nodes[identifier] = node;
         return node;
@@ -98,6 +113,7 @@ class Nodes(object):
                  'bg': self.color(elements[7].text),
                  'true': int(elements[9].text),
                  'false': int(elements[11].text),
+                 'tap': self.func(elements[13]),
                  'id': identifier }
         self.nodes[identifier] = node;
         return node;
@@ -110,6 +126,7 @@ class Nodes(object):
                  'fg': self.color(elements[7].text),
                  'bg': self.color(elements[9].text),
                  'fmt': elements[11].text,
+                 'tap': self.func(elements[13]),
                  'id': identifier }
         self.nodes[identifier] = node;
         return node;
@@ -152,6 +169,12 @@ class Nodes(object):
     def get_palette(self):
         return self.palette
     
+    def get_consts(self):
+        return self.consts
+
+    def get_funcs(self):
+        return self.funcs
+
     # Run checks to make sure things look alright
     def validate(self):
         for k in self.color_aliases:
