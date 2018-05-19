@@ -24,7 +24,7 @@ n.validate()
 
 emitter = cppemitter.CppEmitter(n)
 
-emitter.debug()
+#emitter.debug()
 
 if emit_decls:
     emitter.output_decls()

@@ -28,7 +28,7 @@ class CppEmitter:
 
     def decl_funcs(self):
         for f in self.funcs:
-            print "extern void %s(uint32_t);" % f
+            print "void %s(uint32_t);" % f
 
     def decl_node(self, node):
         print "extern ui::%s %s;" % (node['type'].capitalize(), node['id'])
@@ -109,10 +109,11 @@ class CppEmitter:
         self.decl_consts()
         print
         self.decl_nodes()
-        print
-        self.decl_funcs()
 
         print "}; // namespace uibuilder"
+
+        print
+        self.decl_funcs()
 
     def output_defs(self):
         print "#include <stdint.h>"
