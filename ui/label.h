@@ -18,6 +18,8 @@ private:
     String _value;
 
 public:
+    Label() { }
+
     // * implements Element::Initialize
     virtual void Initialize(const void* config, const Position& pos) {
         _config = (const Config*)config;
@@ -54,4 +56,7 @@ public:
         _value = s;
         Redraw();
     }
+private:
+    Label(const Label&);
+    Label& operator=(const Label&);
 };

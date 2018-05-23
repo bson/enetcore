@@ -7,25 +7,28 @@
 #include "enetcore.h"
 #include "font.h"
 
+namespace uibuilder {
+extern uint32_t GetColor(uint n);
+};
+
+// This one is expencted to be found elsewhere
+extern Panel& GetPanel();
+
 namespace ui {
 
 enum { NCOLORS = 8 };
 
-// These are expencted to be found elsewhere
-extern Panel& GetPanel();
-extern uint32_t _palette[NCOLORS];
-inline uint32_t GetColor(uint n) { return _palette[n % NCOLORS]; }
-inline void SetBGColor(uint n) {
-    const uint32_t rgb = GetColor(n);
+static void SetBGColor(uint n) {
+    const uint32_t rgb = uibuilder::GetColor(n);
     GetPanel().SetBackground(rgb >> 24, rgb >> 16, rgb);
 }
 
-inline void SetFGColor(uint n) {
-    const uint32_t rgb = GetColor(n);
+static void SetFGColor(uint n) {
+    const uint32_t rgb = uibuilder::GetColor(n);
     GetPanel().SetRgb(rgb >> 24, rgb >> 16, rgb);
 }
 
-inline void SetColor(uint fg, uint bg) {
+static void SetColor(uint fg, uint bg) {
     SetFGColor(fg);
     SetBGColor(bg);
 }
@@ -42,7 +45,7 @@ struct Position {
 
     // Some handy methods.  This is still pod.
 
-    explicit Position(uint16_t x, uint16_t y) : _x(x), _y(y) { }
+    explicit Position(uint16_t x = 0, uint16_t y = 0) : _x(x), _y(y) { }
 
     bool Inside(const Position& pos, const Size& size) const {
         return _x >= pos._x && _x < pos._x + size._w
@@ -108,9 +111,10 @@ public:
 };
 
 struct ElementPlacement {
-    Position _pos;
+    uint16_t _pos_x;
+    uint16_t _pos_y;
     Element* _element;
-    void* _config;
+    const void* _config;
 };
 
 // Set by the Tap() Element lookup call chain.  Making this state
@@ -119,9 +123,9 @@ struct ElementPlacement {
 // from making this state global.
 namespace tap {
 
-Element* _element;
-TapFunc  _func;
-uint32_t _parm;
+extern Element* _element;
+extern TapFunc  _func;
+extern uint32_t _parm;
 
 static void SetTarget(Element* e, TapFunc f, uint32_t p) {
     _element = e;

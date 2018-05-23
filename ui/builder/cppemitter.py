@@ -36,7 +36,7 @@ class CppEmitter:
 
     def decl_fonts(self):
         for f in self.fonts:
-            print "extern Font font_%s;" % f
+            print "extern const Font font_%s;" % self.fonts[f]
 
     def labelconf(self, node):
         return "{%s, %s}, %s, %s, &font_%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
@@ -48,10 +48,10 @@ class CppEmitter:
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
 
     def indicatorconf(self, node):
-        return "%s, %s, &_font_%s, %s, %s, %s, %s" % (node['bg'], node['fg'], node['font'], node['true'], node['false'], node['tap'][0], node['tap'][1])
+        return "%s, %s, &font_%s, %s, %s, %s, %s" % (node['bg'], node['fg'], node['font'], node['true'], node['false'], node['tap'][0], node['tap'][1])
 
     def integerconf(self, node):
-        return "{%s, %s}, %s, %s, &_font_%s, %s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['fmt'], node['tap'][0], node['tap'][1])
+        return "{%s, %s}, %s, %s, &font_%s, (const uchar*)%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['fmt'], node['tap'][0], node['tap'][1])
 
     def windowconf(self, node):
         children = node['children']
@@ -67,9 +67,9 @@ class CppEmitter:
             if c != "":
                 c += ",\n     "
             else:
-                c += "    ["
-            c += "{ %s, %s, &%s, &%s_ro }" % (child['x'], child['y'], child['id'], child['id'])
-        s += "\n" + c + "]\n"
+                c += "    {"
+            c += "{%s, %s, &%s, &%s_ro }" % (child['x'], child['y'], child['id'], child['id'])
+        s += "\n" + c + "}\n"
         return s
 
     CONF_FUNCS = {
@@ -108,10 +108,11 @@ class CppEmitter:
         print "#include <stdint.h>"
         print "#include \"ui.h\""
         print "#include \"font.h\""
-        print "\nnamespace uibuilder {"
 
+        print
         self.decl_fonts()
         print
+        print "\nnamespace uibuilder {"
         self.decl_palette()
         print
         self.decl_consts()
@@ -126,10 +127,15 @@ class CppEmitter:
     def output_defs(self):
         print "#include <stdint.h>"
         print "#include \"ui.h\""
+        # XXX this dependency is bad
+        print "#include \"uidecls.h\""
         print "\nnamespace uibuilder {"
 
         self.def_palette()
         self.def_nodes()
+        
+        print
+        print "uint32_t GetColor(uint n) { return _palette[n]; }"
 
         print
         print "}; // namespace uibuilder"

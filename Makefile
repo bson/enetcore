@@ -26,7 +26,7 @@ LFLAGS=-Map $(ODIR)/image.map
 SRCS += main.cxx buildinfo.cxx usb.cxx ui.cxx
 
 # UI
-UI_SRCS += uidefs.cxx
+SRCS += uidefs.cxx
 
 include $(BOARD)/makefile.$(TOOLSET)
 include core/makefile.$(TOOLSET)
@@ -37,7 +37,6 @@ LOG=$(ODIR)/image.log
 
 TOUCH_ODIR=$(ODIR)/.touch
 
-SRCS += $(UI_SRCS)
 CFLAGS += -I$(ODIR)
 
 OBJS=$(patsubst %.s,$(ODIR)/%.o,$(patsubst %.cxx,$(ODIR)/%.o,$(SRCS)))
@@ -51,12 +50,12 @@ etags: TAGS
 TAGS:
 	(find . -name '*.h' ; find . -name '*.cxx') | etags --language=c++ --declarations -
 
-.phony: etags
+.phony: etags clean
 
 clean:
 	-rm -rf $(ODIR)
 
-$(ODIR)/image: $(ODIR)/uidecls.h $(ODIR)/uidefs.o $(ODIR)/startup.o $(OBJS) $(BOARD)/link.cmd 
+$(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) $(BOARD)/link.cmd 
 	@echo Linking $@
 	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) >>$(LOG)
 	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) 2>&1 >>$(LOG)

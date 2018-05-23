@@ -6,7 +6,7 @@
 
 CFLAGS += -Iui
 
-UI_SRCS =
+UI_SRCS = ui.cxx
 
 SRCS += $(addprefix ui/,$(UI_SRCS))
 

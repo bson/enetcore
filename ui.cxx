@@ -9,6 +9,8 @@
 extern EventObject _panel_tap;
 extern GpioIntr _gpio0_intr;
 
+Panel& GetPanel() { return _panel; }
+
 // Output memory status
 static void memstats() {
     const struct mallinfo mi = dlmallinfo();
@@ -83,6 +85,17 @@ void Initialize() {
     DMSG("UI init");
 
     uibuilder::main_readout.Initialize(&uibuilder::main_readout_conf, topleft);
+}
+
+
+void NoTap(ui::Element*, uint32_t) { }
+
+void TapCcv(ui::Element*, uint32_t) {
+    DMSG("Tapped CCV");
+}
+
+void TapOvp(ui::Element*, uint32_t) {
+    DMSG("Tapped OVP");
 }
 
 

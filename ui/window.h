@@ -28,7 +28,7 @@ public:
 
         for (uint i = 0; i < _config->_nchildren; ++i) {
             ElementPlacement* child = Child(i);
-            const Position childpos(_pos._x + child->_pos._x, _pos._y + child->_pos._y);
+            const Position childpos(_pos._x + child->_pos_x, _pos._y + child->_pos_y);
             
             child->_element->Initialize(child->_config, childpos);
         }

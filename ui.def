@@ -7,8 +7,9 @@ COLOR fg = 1;
 
 # Font aliases
 FONT small = "5x8";
-FONT large = "25x40";
-FONT indicators = "sym_16x16";  # Indicators are font based
+FONT large = "ins_25x37";
+#FONT indicators = "sym_16x16";  # Indicators are font based
+FONT indicators = "ins_25x37";  # Indicators are font based
 
 # Constants
 CONST CMD_RESET = 0;
