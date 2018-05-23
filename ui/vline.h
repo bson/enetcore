@@ -28,7 +28,7 @@ public:
     }
 
     // * implements Element::Tap
-    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+    virtual bool Tap(const Position& pos) {
         return false;
     }
 };

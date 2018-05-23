@@ -2,7 +2,7 @@
 #include "board.h"
 #include "mutex.h"
 #include "ui.h"
-#include "uibuilder.h"
+#include "uidecls.h"
 
 #include "font/runes.inc"
 
@@ -29,19 +29,27 @@ static void EnableTapIntr() {
 }
 
 enum class TapState: bool {
-    PRESSED = 0,
-    RELEASED = !PRESSED
+    PRESSED = false,
+    RELEASED = true
+};
+
+enum {
+    POS_BOXCAR_AVG = 4,
+    TAP_HIGHLIGHT_MSEC = 100,
+    TAP_DEBOUNCE_MSEC = 25
 };
 
 static TapState _panel_state = TapState::RELEASED;
 
 // Called to handle tap on panel.  'press' is true if it's a press,
 // otherwise false on release.
-void HandleTap(TapState state) {
+static  void HandleTap(TapState state) {
     if (state != _panel_state) {
+        _panel_state = state;
+
         uint16_t x = 0, y = 0;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < POS_BOXCAR_AVG; i++) {
             uint16_t xsample, ysample;
             
             _touch.ReadPosition(xsample, ysample);
@@ -49,27 +57,36 @@ void HandleTap(TapState state) {
             y += ysample;
         }
 
-        x /= 4;
-        y /= 4;
+        x /= POS_BOXCAR_AVG;
+        y /= POS_BOXCAR_AVG;
                 
         DMSG("%s @ %d, %d", state == TapState::PRESSED ? "Press" : "Release", x, y);
+
+        if ((bool)state) {
+            ui::tap::Clear();
+            if (uibuilder::main_readout.Tap(ui::Position(x, y))) {
+                // ui::tap::_element->Highlight();
+                // Thread::Sleep(Time::Now() + Time::FromMsec(TAP_HIGHLIGHT_MSEC));
+                // ui::tap::_element->Normal();
+
+                ui::tap::Dispatch();
+            }
+        }
     }
 }
 
 
 // Initialize UI widget hierarchy
 void Initialize() {
-    static const Position topleft = { 0, 0 };
+    static const ui::Position topleft(0, 0);
 
     DMSG("UI init");
 
-    ui::Initialize(&main_readout_conf, topleft);
+    uibuilder::main_readout.Initialize(&uibuilder::main_readout_conf, topleft);
 }
 
 
 void* UIThread(void*) {
-    enum { DEBOUNCE_MSEC = 25 };
-
     Thread::SetPriority(UI_THREAD_PRIORITY);
 
     DMSG("UI start");
@@ -115,7 +132,7 @@ void* UIThread(void*) {
 
         const uint state = _panel_tap.GetState();
         if (state) {
-            rearm_tap = now + Time::FromMsec(DEBOUNCE_MSEC);
+            rearm_tap = now + Time::FromMsec(TAP_DEBOUNCE_MSEC);
             HandleTap(state == 1 ? TapState::PRESSED : TapState::RELEASED);
             _panel_tap.Reset();
         }

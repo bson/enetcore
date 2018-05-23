@@ -15,6 +15,11 @@ private:
     const Config* _config;
     Position _pos;
 public:
+    // Return the nth child
+    ElementPlacement* Child(uint n) {
+        assert_bounds(n < _config->_nchildren);
+        return const_cast<ElementPlacement*>(_config->_children + n);
+    }
 
     // * implements Element::Initialize
     virtual void Initialize(const void* config, const Position& pos) {
@@ -22,9 +27,8 @@ public:
         _pos = pos;
 
         for (uint i = 0; i < _config->_nchildren; ++i) {
-            ElementPlacement* child = const_cast<ElementPlacement*>(_config->_children + i);
-            const Position childpos = { uint16_t(_pos._x + child->_pos._x),
-                                        uint16_t(_pos._y + child->_pos._y) };
+            ElementPlacement* child = Child(i);
+            const Position childpos(_pos._x + child->_pos._x, _pos._y + child->_pos._y);
             
             child->_element->Initialize(child->_config, childpos);
         }
@@ -37,19 +41,17 @@ public:
         SetFGColor(_config->_bg_color);
         p.Fill(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
 
-        for (uint i = 0; i < _config->_nchildren; ++i) {
-            ElementPlacement* child = const_cast<ElementPlacement*>(_config->_children + i);
-            child->_element->Redraw();
-        }
+        for (uint i = 0; i < _config->_nchildren; ++i)
+            Child(i)->_element->Redraw();
     }
 
     // * implements Element::Tap
-    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+    virtual bool Tap(const Position& pos) {
         for (uint i = 0; i < _config->_nchildren; ++i) {
-            ElementPlacement* child = const_cast<ElementPlacement*>(_config->_children + i);
-            if (child->_element->Tap(pos, f, a))
+            if (Child(i)->_element->Tap(pos))
                 return true;
         }
+
         return false;
     }
 };

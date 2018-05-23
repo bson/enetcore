@@ -31,7 +31,7 @@ inline void SetColor(uint fg, uint bg) {
 }
 
 
-typedef void (*TapFunc)(uint32_t);
+typedef void (*TapFunc)(class Element*, uint32_t);
 
 struct Size {
     uint16_t _w, _h;
@@ -83,7 +83,7 @@ struct Rectangle {
         : _pos(pos), _size(size) {
     }
 
-    bool Contains(const Position& pos) const { return pos.Inside(_pos. _size); }
+    bool Contains(const Position& pos) const { return pos.Inside(_pos, _size); }
 
     // The four corners
     Position TopLeft() const { return _pos; }
@@ -104,7 +104,7 @@ class Element {
 public:
     virtual void Initialize(const void* config, const Position& pos) = 0;
     virtual void Redraw() = 0;
-    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) = 0;
+    virtual bool Tap(const Position& pos) = 0;
 };
 
 struct ElementPlacement {
@@ -113,11 +113,41 @@ struct ElementPlacement {
     void* _config;
 };
 
+// Set by the Tap() Element lookup call chain.  Making this state
+// global prevents multiple concurrent taps.  Since that's not a
+// functional requirement we take the code size and stack reduction
+// from making this state global.
+namespace tap {
+
+Element* _element;
+TapFunc  _func;
+uint32_t _parm;
+
+static void SetTarget(Element* e, TapFunc f, uint32_t p) {
+    _element = e;
+    _func    = f;
+    _parm    = p;
+}
+
+static void Clear() {
+    SetTarget(NULL, NULL, 0);
+}
+
+static void Dispatch() {
+    if (_element && _func)
+        _func(_element, _parm);
+
+    Clear();
+}
+
+};
+
 #include "window.h"
 #include "label.h"
 #include "vline.h"
 #include "hline.h"
 #include "integer.h"
+#include "indicator.h"
 
 };  // ns ui
 

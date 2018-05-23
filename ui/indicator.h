@@ -2,11 +2,6 @@
 // See LICENSE for details.
 
 class Indicator: public Element {
-    const Config* _config;
-    Position _pos;
-    bool _state;
-    uchar _c[2];
-
 public:
     struct Config {
         uint8_t _bg_color;
@@ -17,7 +12,14 @@ public:
         TapFunc _tap;
         uint32_t _tap_param;
     };
+    
+private:
+    const struct Config* _config;
+    Position _pos;
+    bool _state;
+    uchar _c[2];
 
+public:
     // * implements Element::Initialize
     virtual void Initialize(const void* config, const Position& pos) {
         _config = (const Config*)config;
@@ -33,7 +35,7 @@ public:
         _c[0] = _state ? _config->_true : _config->_false;
 
         SetColor(_config->_fg_color, _config->_bg_color);
-        p.Text(_pos._x, _pos,_y, *_config->_font, _c, 0, false);
+        p.Text(_pos._x, _pos._y, *_config->_font, _c, 0, false);
     }
 
     // * implements Element::Tap
@@ -43,7 +45,7 @@ public:
         if (!pos.Inside(_pos, size))
             return false;
 
-        _config->_tap(_config->_tap_param);
+        ui::tap::SetTarget(this, _config->_tap, _config->_tap_param);
         return true;
     }
 

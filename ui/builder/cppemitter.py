@@ -28,13 +28,18 @@ class CppEmitter:
 
     def decl_funcs(self):
         for f in self.funcs:
-            print "void %s(uint32_t);" % f
+            print "void %s(ui::Element*, uint32_t);" % f
 
     def decl_node(self, node):
         print "extern ui::%s %s;" % (node['type'].capitalize(), node['id'])
+        print "extern const ui::%s::Config %s_conf;" % (node['type'].capitalize(), node['id'])
+
+    def decl_fonts(self):
+        for f in self.fonts:
+            print "extern Font font_%s;" % f
 
     def labelconf(self, node):
-        return "{%s, %s}, %s, %s, &_font_%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
+        return "{%s, %s}, %s, %s, &font_%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
 
     def hlineconf(self, node):
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
@@ -82,7 +87,7 @@ class CppEmitter:
             return
 
         func = self.CONF_FUNCS[node['type']]
-        print "\nstatic const struct ui::%s::Config %s_ro = {%s};" % (node['type'].capitalize(), node['id'], func(self, node))
+        print "\nconst struct ui::%s::Config %s_ro = {%s};" % (node['type'].capitalize(), node['id'], func(self, node))
 
         print "ui::%s %s;" % (node['type'].capitalize(), node['id'])
         node['emitted'] = True
@@ -102,8 +107,11 @@ class CppEmitter:
     def output_decls(self):
         print "#include <stdint.h>"
         print "#include \"ui.h\""
+        print "#include \"font.h\""
         print "\nnamespace uibuilder {"
 
+        self.decl_fonts()
+        print
         self.decl_palette()
         print
         self.decl_consts()

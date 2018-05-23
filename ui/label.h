@@ -37,12 +37,11 @@ public:
     }
 
     // * implements Element::Tap
-    virtual bool Tap(const Position& pos, TapFunc& f, uint32_t& a) {
+    virtual bool Tap(const Position& pos) {
         if (!pos.Inside(_pos, _config->_size))
             return false;
 
-        f = _config->_tap;
-        a = _config->_tap_param;
+        ui::tap::SetTarget(this, _config->_tap, _config->_tap_param);
         return true;
     }
 

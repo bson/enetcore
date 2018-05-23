@@ -22,11 +22,11 @@ ODIR ?= build_$(CONFIG)
 AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map
 
-# Product components
-SRCS += 
-
 # Project components
 SRCS += main.cxx buildinfo.cxx usb.cxx ui.cxx
+
+# UI
+UI_SRCS += uidefs.cxx
 
 include $(BOARD)/makefile.$(TOOLSET)
 include core/makefile.$(TOOLSET)
@@ -36,6 +36,9 @@ LOG=$(ODIR)/image.log
 #LOG=/dev/stderr
 
 TOUCH_ODIR=$(ODIR)/.touch
+
+SRCS += $(UI_SRCS)
+CFLAGS += -I$(ODIR)
 
 OBJS=$(patsubst %.s,$(ODIR)/%.o,$(patsubst %.cxx,$(ODIR)/%.o,$(SRCS)))
 DEPS=$(patsubst %.s,$(ODIR)/%.d, $(patsubst %.cxx, $(ODIR)/%.d, $(SRCS)))
@@ -53,7 +56,7 @@ TAGS:
 clean:
 	-rm -rf $(ODIR)
 
-$(ODIR)/image: $(ODIR)/startup.o $(OBJS) $(BOARD)/link.cmd 
+$(ODIR)/image: $(ODIR)/uidecls.h $(ODIR)/uidefs.o $(ODIR)/startup.o $(OBJS) $(BOARD)/link.cmd 
 	@echo Linking $@
 	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) >>$(LOG)
 	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) 2>&1 >>$(LOG)
@@ -75,6 +78,19 @@ $(ODIR)/buildinfo.cxx:
 	@echo "extern const char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
 
 $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
+	@echo $<
+	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
+	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
+
+$(ODIR)/uidecls.h: ui.def
+	@echo Generating $@
+	@python ui/builder/build.py --decls $< >$@ 2>>$(LOG)
+
+$(ODIR)/uidefs.cxx: ui.def
+	@echo Generating $@
+	@python ui/builder/build.py --defs $< >$@ 2>>$(LOG)
+
+$(ODIR)/uidefs.o: $(ODIR)/uidefs.cxx
 	@echo $<
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
