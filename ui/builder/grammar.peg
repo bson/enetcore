@@ -4,7 +4,8 @@ grammar uigrammar
 input        <- statement*
 
 definition   <- labeldef / hlinedef / vlinedef /
-                indicatordef / integerdef / windowdef
+                indicatordef / integerdef / windowdef /
+                buttondef
 
 statement    <- comment / color_alias / font_alias / const_alias /
                 palette / definition / " "+ / "\n"+
@@ -26,6 +27,11 @@ labeldef     <- "LABEL" SP (id:identifier EQUALS)? text:string COMMA
                 font:identifier COMMA fg:color COMMA bg:color COMMA
                 size:SIZE COMMA tap:FUNC SP ";"
                 %make_label
+
+buttondef    <- "BUTTON" SP (id:identifier EQUALS)? text:string COMMA
+                font:identifier COMMA fg:color COMMA bg:color COMMA
+                size:SIZE COMMA indent:const COMMA tap:FUNC SP ";"
+                %make_button
 
 hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:SIZE COMMA
                  fg:color SP ";"
@@ -72,3 +78,5 @@ rgb          <- integer "/" integer "/" integer
 SIZE         <- integer "x" integer
 
 FUNC         <- (cidentifier "(" arg:(integer / identifier / SP) ")") / "*"
+
+const        <- integer / identifier

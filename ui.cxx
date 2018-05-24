@@ -67,9 +67,9 @@ static  void HandleTap(TapState state) {
         if ((bool)state) {
             ui::tap::Clear();
             if (uibuilder::main_readout.Tap(ui::Position(x, y))) {
-                // ui::tap::_element->Highlight();
-                // Thread::Sleep(Time::Now() + Time::FromMsec(TAP_HIGHLIGHT_MSEC));
-                // ui::tap::_element->Normal();
+                ui::tap::_element->Highlight();
+                Thread::Sleep(Time::Now() + Time::FromMsec(TAP_HIGHLIGHT_MSEC));
+                ui::tap::_element->Normal();
 
                 ui::tap::Dispatch();
             }
@@ -90,12 +90,19 @@ void Initialize() {
 
 void NoTap(ui::Element*, uint32_t) { }
 
+
 void TapCcv(ui::Element*, uint32_t) {
     DMSG("Tapped CCV");
 }
 
+
 void TapOvp(ui::Element*, uint32_t) {
     DMSG("Tapped OVP");
+}
+
+
+void MainCommand(ui::Element*, uint32_t cmd) {
+    DMSG("Command: %d", cmd);
 }
 
 

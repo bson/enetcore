@@ -108,6 +108,8 @@ public:
     virtual void Initialize(const void* config, const Position& pos) = 0;
     virtual void Redraw() = 0;
     virtual bool Tap(const Position& pos) = 0;
+    virtual void Highlight() { }
+    virtual void Normal() { }
 };
 
 struct ElementPlacement {
@@ -152,6 +154,7 @@ static void Dispatch() {
 #include "hline.h"
 #include "integer.h"
 #include "indicator.h"
+#include "button.h"
 
 };  // ns ui
 

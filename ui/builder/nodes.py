@@ -13,7 +13,7 @@ class Nodes(object):
         self.funcs = { }
         
     def new_identifier(self):
-        ++self.id_count
+        self.id_count = self.id_count + 1
         return "_ui_%s" % self.id_count
 
     def get_identifier(self, element):
@@ -53,6 +53,13 @@ class Nodes(object):
         self.funcs[f] = True
         return [ f, arg ]
 
+    def const(self, element):
+        s = element.text
+        if s in self.consts:
+            return s
+
+        return int(s)
+
     def to_rgb(self, s):
         rgb = s.split('/');
         return (int(rgb[0]) << 16) + (int(rgb[1]) << 8) + int(rgb[2])
@@ -83,6 +90,20 @@ class Nodes(object):
                  'bg': self.color(elements[9].text),
                  'size': self.size(elements[11].text),
                  'tap': self.func(elements[13]),
+                 'id': identifier }
+        self.nodes[identifier] = node;
+        return node;
+
+    def make_button(self, input, start, end, elements):
+        identifier = self.get_identifier(elements[2])
+        node = { 'type': 'button',
+                 'text': elements[3].text[1:-1],
+                 'font': self.font(elements[5].text),
+                 'fg': self.color(elements[7].text),
+                 'bg': self.color(elements[9].text),
+                 'size': self.size(elements[11].text),
+                 'indent': self.const(elements[13]),
+                 'tap': self.func(elements[15]),
                  'id': identifier }
         self.nodes[identifier] = node;
         return node;

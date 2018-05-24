@@ -41,6 +41,9 @@ class CppEmitter:
     def labelconf(self, node):
         return "{%s, %s}, %s, %s, &font_%s, %s, %s" % (node['size'][0], node['size'][1], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
 
+    def buttonconf(self, node):
+        return "{%s, %s}, %s, %s, %s, &font_%s, %s, %s" % (node['size'][0], node['size'][1], node['indent'], node['bg'], node['fg'], node['font'], node['tap'][0], node['tap'][1])
+
     def hlineconf(self, node):
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
 
@@ -78,7 +81,8 @@ class CppEmitter:
         'indicator': indicatorconf,
         'vline': vlineconf,
         'hline': hlineconf,
-        'label': labelconf
+        'label': labelconf,
+        'button': buttonconf
     }
 
     def def_node(self, node):
