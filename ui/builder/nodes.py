@@ -188,6 +188,19 @@ class Nodes(object):
         self.nodes[identifier] = node;
         return node;
         
+    def make_view(self, input, start, end, elements):
+        identifier = self.get_identifier(elements[2])
+        children = map(self.child_map, elements[11])
+        node = { 'type': 'view',
+                 'width': int(elements[3].text),
+                 'height': int(elements[5].text),
+                 'fg': self.color(elements[7].text),
+                 'bg': self.color(elements[9].text),
+                 'children': children,
+                 'id': identifier }
+        self.nodes[identifier] = node;
+        return node;
+        
     def get_nodes(self):
         return self.nodes
 

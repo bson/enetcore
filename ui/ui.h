@@ -148,6 +148,7 @@ static void Dispatch() {
 
 };
 
+#include "view.h"
 #include "window.h"
 #include "label.h"
 #include "hline.h"

@@ -78,7 +78,27 @@ class CppEmitter:
         s += "\n" + c + "}\n"
         return s
 
+    def viewconf(self, node):
+        children = node['children']
+        # Make sure all child references are emitted first
+        for child in children:
+            child_node = self.nodes[child['id']]
+            if not 'emitted' in child_node:
+                self.def_node(child_node)
+
+        s = "{%s, %s}, %s, %s, %s," % (node['width'], node['height'], node['bg'], node['fg'], len(node['children']))
+        c = ""
+        for child in children:
+            if c != "":
+                c += ",\n     "
+            else:
+                c += "    {"
+            c += "{%s, %s, &%s, &%s_ro }" % (child['x'], child['y'], child['id'], child['id'])
+        s += "\n" + c + "}\n"
+        return s
+
     CONF_FUNCS = {
+        'view': viewconf,
         'window': windowconf,
         'integer': integerconf,
         'indicator': indicatorconf,

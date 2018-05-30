@@ -4,7 +4,7 @@ grammar uigrammar
 input        <- statement*
 
 definition   <- labeldef / hlinedef / vlinedef / framedef /
-                indicatordef / integerdef / windowdef /
+                indicatordef / integerdef / windowdef / viewdef /
                 buttondef
 
 statement    <- comment / color_alias / font_alias / const_alias /
@@ -59,6 +59,11 @@ windowdef    <- "WINDOW" SP (id:identifier EQUALS)? width:integer "x"
                 height:integer COMMA fg:color COMMA bg:color "\n"
                 children:windowitem* SP ";"
                 %make_window
+
+viewdef     <- "VIEW" SP (id:identifier EQUALS)? width:integer "x"
+                height:integer COMMA fg:color COMMA bg:color "\n"
+                children:windowitem* SP ";"
+                %make_view
 
 windowitem   <- AT x:integer COMMA y:integer COLON
                 child:( (SP value:definition) / (id:identifier SP ";")) "\n"

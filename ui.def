@@ -18,8 +18,9 @@ CONST CMD_ONOFF = 1;
 CONST CMD_OK = 2;
 CONST CMD_CANCEL = 3;
 
-# Main window
-WINDOW main_readout = 480x272, fg, bg
+# Main view
+VIEW main_view = 480x272, fg, bg
+  @ 0, 0: WINDOW main_readout = 480x272, fg, bg
        @ 0, 0: FRAME 480x272, 1, fg;
        @ 240, 10: LABEL "ADC Reading", small, fg, bg, 120x40, *;
        @ 240, 20: INTEGER voltage = large, 120x40, fg, bg, "%d", *;
@@ -27,4 +28,5 @@ WINDOW main_readout = 480x272, fg, bg
        @ 10, 200: INDICATOR mode_ovp = indicators, fg, bg, 2, 3, TapOvp();
        @  4, 10:  BUTTON "Ok", buttonfont, fg, bg, 40x40, 2, MainCommand(CMD_OK);
        @ 48, 10:  BUTTON "Cancel", buttonfont, fg, bg, 80x40, 2, MainCommand(CMD_CANCEL);
+  ;
 ;

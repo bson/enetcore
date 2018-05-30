@@ -66,7 +66,7 @@ static  void HandleTap(TapState state) {
 
         if ((bool)state) {
             ui::tap::Clear();
-            if (uibuilder::main_readout.Tap(ui::Position(x, y))) {
+            if (uibuilder::main_view.Tap(ui::Position(x, y))) {
                 ui::tap::_element->Highlight();
                 Thread::Sleep(Time::Now() + Time::FromMsec(TAP_HIGHLIGHT_MSEC));
                 ui::tap::_element->Normal();
@@ -84,7 +84,7 @@ void Initialize() {
 
     DMSG("UI init");
 
-    uibuilder::main_readout.Initialize(&uibuilder::main_readout_conf, topleft);
+    uibuilder::main_view.Initialize(&uibuilder::main_view_conf, topleft);
 }
 
 
