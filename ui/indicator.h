@@ -18,7 +18,6 @@ private:
     Position _pos;
     uchar _c[2];
     bool _state;
-    bool _covered;
 
 public:
     // * implements Element::Initialize
@@ -31,6 +30,9 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
+        if (Element::IsCovered())
+            return;
+
         Panel& p = GetPanel();
 
         _c[0] = _state ? _config->_true : _config->_false;
@@ -48,11 +50,6 @@ public:
 
         ui::tap::SetTarget(this, _config->_tap, _config->_tap_param);
         return true;
-    }
-
-    // * implements Element::SetCovered
-    virtual void SetCovered(bool covered) {
-        _covered = covered;
     }
 
     // Update value

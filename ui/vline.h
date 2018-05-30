@@ -11,7 +11,6 @@ public:
 private:
     const Config* _config;
     Position _pos;
-    bool _covered;
 
 public:
     // * implements Element::Initialize
@@ -22,22 +21,12 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
-        if (_covered)
+        if (Element::IsCovered())
             return;
 
         Panel& p = GetPanel();
 
         SetFGColor(_config->_fg_color);
         p.VLine(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
-    }
-
-    // * implement Element::SetCovered
-    virtual void SetCovered(bool covered) {
-        _covered = covered;
-    }
-
-    // * implements Element::Tap
-    virtual bool Tap(const Position& pos) {
-        return false;
     }
 };

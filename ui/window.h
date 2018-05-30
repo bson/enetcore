@@ -14,7 +14,6 @@ public:
 private:
     const Config* _config;
     Position _pos;
-    bool _covered;
 
 public:
     // Return the nth child
@@ -38,7 +37,7 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
-        if (_covered)
+        if (Element::IsCovered())
             return;
 
         Panel& p = GetPanel();
@@ -52,7 +51,7 @@ public:
 
     // * implements Element::SetCovered
     virtual void SetCovered(bool covered) {
-        _covered = covered;
+        Element::_covered = covered;
 
         for (uint i = 0; i < _config->_nchildren; ++i)
             Child(i)->_element->SetCovered(covered);

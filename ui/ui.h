@@ -104,13 +104,19 @@ struct Rectangle {
 typedef Rectangle Dimension;
 
 class Element {
+protected:
+    bool _covered;
+
 public:
     virtual void Initialize(const void* config, const Position& pos) = 0;
     virtual void Redraw() = 0;
-    virtual bool Tap(const Position& pos) = 0;
+    virtual bool Tap(const Position& pos) { return false; }
     virtual void Highlight() { }
     virtual void Normal() { }
-    virtual void SetCovered(bool covered) { }
+    virtual void SetCovered(bool covered) {
+        _covered = covered;
+    }
+    bool IsCovered() const { return _covered; }
 };
 
 struct ElementPlacement {
