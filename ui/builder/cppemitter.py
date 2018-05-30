@@ -50,6 +50,9 @@ class CppEmitter:
     def vlineconf(self, node):
         return "{%s, %s}, %s" % (node['size'][0], node['size'][1], node['fg'])
 
+    def frameconf(self, node):
+        return "{%s, %s}, %s, %s" % (node['size'][0], node['size'][1], node['width'], node['fg'])
+
     def indicatorconf(self, node):
         return "%s, %s, &font_%s, %s, %s, %s, %s" % (node['bg'], node['fg'], node['font'], node['true'], node['false'], node['tap'][0], node['tap'][1])
 
@@ -81,6 +84,7 @@ class CppEmitter:
         'indicator': indicatorconf,
         'vline': vlineconf,
         'hline': hlineconf,
+        'frame': frameconf,
         'label': labelconf,
         'button': buttonconf
     }

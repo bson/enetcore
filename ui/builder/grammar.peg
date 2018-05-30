@@ -3,7 +3,7 @@ grammar uigrammar
 
 input        <- statement*
 
-definition   <- labeldef / hlinedef / vlinedef /
+definition   <- labeldef / hlinedef / vlinedef / framedef /
                 indicatordef / integerdef / windowdef /
                 buttondef
 
@@ -40,6 +40,10 @@ hlinedef     <- "HLINE" SP (id:identifier EQUALS)? size:SIZE COMMA
 vlinedef     <- "VLINE" SP (id:identifier EQUALS )? size:SIZE COMMA
                 fg:color SP ";"
                 %make_vline
+
+framedef     <- "FRAME" SP (id:identifier EQUALS )? size:SIZE COMMA
+                width:const COMMA fg:color SP ";"
+                %make_frame
 
 indicatordef <- "INDICATOR" SP (id:identifier EQUALS)? font:identifier COMMA
                 fg:color COMMA bg:color COMMA true:integer COMMA false:integer COMMA

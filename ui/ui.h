@@ -150,8 +150,9 @@ static void Dispatch() {
 
 #include "window.h"
 #include "label.h"
-#include "vline.h"
 #include "hline.h"
+#include "vline.h"
+#include "frame.h"
 #include "integer.h"
 #include "indicator.h"
 #include "button.h"

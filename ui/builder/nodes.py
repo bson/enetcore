@@ -126,6 +126,16 @@ class Nodes(object):
         self.nodes[identifier] = node;
         return node;
 
+    def make_frame(self, input, start, end, elements):
+        identifier = self.get_identifier(elements[2])
+        node = { 'type': 'frame',
+                 'size': self.size(elements[3].text),
+                 'width': self.const(elements[5]),
+                 'fg': self.color(elements[7].text),
+                 'id': identifier }
+        self.nodes[identifier] = node;
+        return node;
+
     def make_indicator(self, input, start, end, elements):
         identifier = self.get_identifier(elements[2])
         node = { 'type': 'indicator',
