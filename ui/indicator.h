@@ -16,8 +16,9 @@ public:
 private:
     const struct Config* _config;
     Position _pos;
-    bool _state;
     uchar _c[2];
+    bool _state;
+    bool _covered;
 
 public:
     // * implements Element::Initialize
@@ -47,6 +48,11 @@ public:
 
         ui::tap::SetTarget(this, _config->_tap, _config->_tap_param);
         return true;
+    }
+
+    // * implements Element::SetCovered
+    virtual void SetCovered(bool covered) {
+        _covered = covered;
     }
 
     // Update value

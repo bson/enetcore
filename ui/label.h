@@ -16,6 +16,7 @@ private:
     const Config* _config;
     Position _pos;
     String _value;
+    bool _covered;
 
 public:
     Label() { }
@@ -29,6 +30,9 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
+        if (_covered)
+            return;
+
         Panel& p = GetPanel();
 
         SetFGColor(_config->_bg_color);
@@ -45,6 +49,11 @@ public:
 
         ui::tap::SetTarget(this, _config->_tap, _config->_tap_param);
         return true;
+    }
+
+    // * implements Element::SetCovered
+    virtual void SetCovered(bool covered) {
+        _covered = covered;
     }
 
     // Update value

@@ -110,6 +110,7 @@ public:
     virtual bool Tap(const Position& pos) = 0;
     virtual void Highlight() { }
     virtual void Normal() { }
+    virtual void SetCovered(bool covered) { }
 };
 
 struct ElementPlacement {

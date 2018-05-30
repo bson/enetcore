@@ -14,6 +14,8 @@ public:
 private:
     const Config* _config;
     Position _pos;
+    bool _covered;
+
 public:
     // Return the nth child
     ElementPlacement* Child(uint n) {
@@ -36,6 +38,9 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
+        if (_covered)
+            return;
+
         Panel& p = GetPanel();
 
         SetFGColor(_config->_bg_color);
@@ -43,6 +48,14 @@ public:
 
         for (uint i = 0; i < _config->_nchildren; ++i)
             Child(i)->_element->Redraw();
+    }
+
+    // * implements Element::SetCovered
+    virtual void SetCovered(bool covered) {
+        _covered = covered;
+
+        for (uint i = 0; i < _config->_nchildren; ++i)
+            Child(i)->_element->SetCovered(covered);
     }
 
     // * implements Element::Tap

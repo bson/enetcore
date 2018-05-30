@@ -15,6 +15,7 @@ private:
     const Config* _config;
     Position _pos;
     uint8_t _active;            // Currently active child, default to 0
+    bool _covered;
 public:
     // Return the nth child
     ElementPlacement* Child(uint n) {
@@ -37,6 +38,9 @@ public:
 
     // * implements Element::Redraw
     virtual void Redraw() {
+        if (_covered)
+            return;
+
         SetFGColor(_config->_bg_color);
         GetPanel().Fill(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
         Child(_active)->_element->Redraw();
@@ -45,6 +49,13 @@ public:
     // * implements Element::Tap
     virtual bool Tap(const Position& pos) {
         return Child(_active)->_element->Tap(pos);
+    }
+
+    // * implement Element::SetCovered
+    virtual void SetCovered(bool covered) {
+        _covered = covered;
+        for (uint i = 0; i < _config->_nchildren; ++i)
+            Child(i)->_element->SetCovered(covered);
     }
 
     // Select a child
