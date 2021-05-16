@@ -133,7 +133,7 @@ namespace Platform {
 	// Get a MAC address
     // XXX should come out of EEPROM
 	inline bool GetMacAddr(uint8_t macaddr[6]) {
-		memcpy(macaddr, "deaddd", 6);
+		memcpy(macaddr, "\0eaddd", 6);
 		return true;
 	}
 }
