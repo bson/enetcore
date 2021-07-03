@@ -36,7 +36,17 @@ template <typename T> inline T exch(T& a, const T& b) { const T tmp = a; a = b; 
 #define Ntohs Htons
 #define Ntohl Htonl
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__arm__)
+inline uin32_t Swap32(uint32_t val) {
+    asm volatile ("rev %0, %0" : : "+r" (val) : );
+    return val;
+}
+inline uint16_t Swap16(uint32_t val) {
+    asm volatile ("rev16 %0, %0" : : "+r" (val) : );
+    return val;
+}
+
+#elif defined(__i386__) || defined(__x86_64__)
 inline uint32_t Swap32(uint32_t val)
 {
 	asm volatile ("bswapl %0" : "=r" (val) : "0" (val) : );

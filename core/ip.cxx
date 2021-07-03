@@ -8,6 +8,32 @@
 
 Ip _ip0(_udp0);
 
+#ifdef __arm__
+// Checksum: add to running checksum.
+uint16_t ipcksum(const uint16_t*__restrict block, uint len, uint32_t sum)
+{
+    asm volatile("and r2, %2, #1;"
+                 "mov %2, %2, lsr#1;"
+                 "1: subs %2, %2, #1;"
+                 "ldrhge r3, [%1], #2;"  // word
+                 "rev16 r3, r3;"         // in network byte order
+                 "addge %0, %0, r3;"
+                 "bne 1b;"
+                 "cmp r2, #0;"
+                 "beq 2f;"
+                 // odd trailing byte
+                 "ldrb r3, [%1];"
+                 "rev16 r3, r3;"   // in network byte order
+                 "add %0, r3;"
+                 // fold carries
+                 "3: and %0, %0, #0xffff;"
+                 "add %0, %0, r2;"
+                 "2: movs r2, %0, lsr#16;"
+                 "bne 3b;"
+                 : : "+&r" (sum), "r" (block), "r" (len) : "r2", "cc");
+    return sum;
+}
+#else
 // Checksum: add to running checksum.
 uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)
 {
@@ -26,6 +52,7 @@ uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum)
 
 	return sum;
 }
+#endif
 
 void Ip::Initialize()
 {

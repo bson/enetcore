@@ -4,8 +4,8 @@ VPATH=.
 BOARD ?= skyblue
 TOOLSET ?= gnuc
 
-TOOLDIR ?= /Users/bson/gcc-arm-none-eabi-6-2017-q2-update/bin
-TOOLVER ?= 6.3.1
+TOOLDIR ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major/bin
+TOOLVER ?= 10.2.1
 
 CONFIG ?= debug
 
