@@ -4,10 +4,12 @@ VPATH=.
 BOARD ?= skyblue
 TOOLSET ?= gnuc
 
-TOOLDIR ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major/bin
+TOOLCHAIN ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major
 TOOLVER ?= 10.2.1
 
 CONFIG ?= debug
+
+TOOLDIR=$(TOOLCHAIN)/bin
 
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
