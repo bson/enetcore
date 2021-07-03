@@ -8,7 +8,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#ifndef NULL
 #define NULL 0
+#endif
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
@@ -35,7 +37,9 @@ typedef uint32_t in_addr_t;
 
 typedef uint32_t time_t;
 
+#ifndef offsetof
 #define offsetof(type, member)  __builtin_offsetof (type, member)
+#endif
 
 // Atomic ops
 #define __atomic_inc(PTR)  \

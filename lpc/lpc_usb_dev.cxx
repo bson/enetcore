@@ -693,6 +693,7 @@ void LpcUsbDev::Service() {
 
 void* LpcUsbDev::Start(void* arg) {
     ((LpcUsbDev*)arg)->Service();
+    return NULL;
 }
 
 

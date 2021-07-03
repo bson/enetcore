@@ -8,7 +8,7 @@
 
 Ip _ip0(_udp0);
 
-#ifdef __arm__
+#if defined(__arm__)
 // Checksum: add to running checksum.
 uint16_t ipcksum(const uint16_t*__restrict block, uint len, uint32_t sum)
 {
@@ -26,11 +26,12 @@ uint16_t ipcksum(const uint16_t*__restrict block, uint len, uint32_t sum)
                  "rev16 r3, r3;"   // in network byte order
                  "add %0, r3;"
                  // fold carries
-                 "3: and %0, %0, #0xffff;"
+                 "ldr r3, =#0xffff;"
+                 "3: and %0, %0, r3;"
                  "add %0, %0, r2;"
                  "2: movs r2, %0, lsr#16;"
                  "bne 3b;"
-                 : : "+&r" (sum), "r" (block), "r" (len) : "r2", "cc");
+                 : "+&r" (sum) : "r" (block), "r" (len) : "r2", "cc");
     return sum;
 }
 #else

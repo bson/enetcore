@@ -18,7 +18,7 @@ public:
 
     // Process SETUP.  Called at USB_IPL. Returns true if setup was
     // processed
-    virtual bool UsbDevProcessSetup(const struct SetupRequest* setup) { }
+    virtual bool UsbDevProcessSetup(const struct SetupRequest* setup) { return true; }
 
     // Process IN to host
     virtual void UsbDevProcessIN(uint phyep) { }

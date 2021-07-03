@@ -132,7 +132,7 @@ static inline bool IntEnabled() {
 static inline bool InExceptionHandler() {
     uint32_t ipsr;
     asm volatile("mrs %0, ipsr" : "=r"(ipsr) : : );
-    return (ipsr & 0xff) != NULL;
+    return (ipsr & 0xff) != 0;
 }
 
 // Post PendSV - this vectors to Thread::ContextSwitch() and can be used

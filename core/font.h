@@ -24,7 +24,7 @@ struct Font {
     uint8_t GetHeight() const { return _height; }
 
     // Get number of pixels in each rune
-    uint GetSize() const {  _width * _height; }
+    uint GetSize() const { return _width * _height; }
 
     // Get number of bytes in each rune
     uint GetBytes() const { return _size; }

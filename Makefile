@@ -71,22 +71,26 @@ $(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
 
 $(ODIR)/buildinfo.cxx:
 	@echo Generating $@
+	@mkdir -p $(ODIR_TREE)
 	@echo "extern const char _build_branch[] = \"`git rev-parse --abbrev-ref HEAD`\";" >>$@
 	@echo "extern const char _build_commit[] = \""`git rev-parse HEAD | cut -c-8`"\";" >>$@
 	@echo "extern const char _build_date[] = \""`date '+%Y-%m-%d %T%z'`"\";" >>$@
 	@echo "extern const char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
 
 $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
+	@mkdir -p $(ODIR_TREE)
 	@echo $<
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
 $(ODIR)/uidecls.h: ui.def
 	@echo Generating $@
+	@mkdir -p $(ODIR_TREE)
 	@python ui/builder/build.py --decls $< >$@ 2>>$(LOG)
 
 $(ODIR)/uidefs.cxx: ui.def
 	@echo Generating $@
+	@mkdir -p $(ODIR_TREE)
 	@python ui/builder/build.py --defs $< >$@ 2>>$(LOG)
 
 $(ODIR)/uidefs.o: $(ODIR)/uidefs.cxx
