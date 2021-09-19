@@ -1,7 +1,7 @@
 # This should be the location of the enetcore source tree
 VPATH=.
 
-BOARD ?= skyblue
+BOARD ?= con2
 TOOLSET ?= gnuc
 
 TOOLCHAIN ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major
@@ -25,10 +25,13 @@ AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map
 
 # Project components
-SRCS += main.cxx buildinfo.cxx usb.cxx ui.cxx
+#SRCS += main.cxx usb.cxx ui.cxx
+SRCS += main.cxx
+
+SRCS += buildinfo.cxx
 
 # UI
-SRCS += uidefs.cxx
+#SRCS += uidefs.cxx
 
 include $(BOARD)/makefile.$(TOOLSET)
 include core/makefile.$(TOOLSET)

@@ -1,0 +1,47 @@
+# -*- Makefile -*-
+BOARD_SRCS = hardware.cxx
+
+# Peripherals found on this board
+# SSD1963 is inlined in hardware.cxx
+HARDWARE_SRCS = tsc2046.cxx
+
+SOCDIR=stm
+ARMDIR=arm
+
+VARIANT=-DSTMF=1 -DSTM=405
+CPUID=cm4
+
+include $(ARMDIR)/makefile.$(TOOLSET)
+include $(SOCDIR)/makefile.$(TOOLSET)
+
+TARGET=arm-none-eabi
+
+CC   = $(TOOLDIR)/$(TARGET)-g++
+LD   = $(TOOLDIR)/$(TARGET)-ld
+AR   = $(TOOLDIR)/$(TARGET)-ar
+AS   = $(TOOLDIR)/$(TARGET)-as
+SIZE = $(TOOLDIR)/$(TARGET)-size
+
+#CHECKSUM = /usr/local/bin/lpcpatchelf -c 7 -f 
+CHECKSUM = true
+
+CFLAGS += -I$(BOARD) -I$(SOCDIR) -I$(ARMDIR)  -Ihardware $(VARIANT)  \
+    -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
+    -ffreestanding -fno-rtti -fno-exceptions -fno-threadsafe-statics \
+    -fshort-enums -I$(BOARD)
+
+# Add a startup delay for debug
+ifeq ($(CONFIG),debug)
+AFLAGS += --defsym DELAY=2000000
+endif
+
+LFLAGS  += -nostdlib --gc-sections -T$(BOARD)/link.cmd
+
+CPFLAGS = -O binary
+HEXFLAGS = -O ihex
+ODFLAGS	= -x --syms
+
+SRCS += $(addprefix $(BOARD)/,$(BOARD_SRCS))
+SRCS += $(addprefix hardware/,$(HARDWARE_SRCS))
+
+ODIR_TREE += $(ODIR)/$(BOARD) $(ODIR)/hardware
