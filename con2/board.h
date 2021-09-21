@@ -16,20 +16,8 @@
 
 enum { 
     FOSC = 12000000,            // Crystal = 12MHz
+    CLOCK_TICK = 42000000,      // System clock (TIM5) tick: 42MHz
 };
-
-#ifdef ENABLE_PLL_CLK
-enum {
-    CCLK = 120000000,           // CCLK = 120MHz
-    PCLK = CCLK/4,              // PCLK when run off pll_clk, must be CCLK / 1-4
-};
-#else
-// Simplified clocking for JTAG use.  Run CLK = FOSC; PCLK=CCLK/2, disable PLL0
-enum { 
-    CCLK = FOSC,
-    PCLK = CCLK/2
-};
-#endif
 
 enum {
     I2C_BUS_SPEED = 100000,
@@ -42,37 +30,35 @@ enum {
 
 #include "nvic.h"
 #include "systick.h"
-//#include "stm_crc.h"
-//#include "stm_pll.h"
-#include "stm_gpio.h"
-//#include "stm_i2c.h"
-//#include "stm_uart.h"
-//#include "stm_spi.h"
-//#include "stm_timer.h"
-//#include "stm_eeprom.h"
-//#include "stm_eintr.h"
-//#include "stm_pwm.h"
+#include "stm32_power.h"
+#include "stm32_clocktree.h"
+//#include "stm32_crc.h"
+//#include "stm32_gpio.h"
+//#include "stm32_i2c.h"
+//#include "stm32_uart.h"
+//#include "stm32_spi.h"
+//#include "stm32_timer.h"
+//#include "stm32_eintr.h"
+//#include "stm32_pwm.h"
 
-// SoC peripherals
+// SoC peripherals used on CON2
 
-//typedef StmPll Pll;
-//typedef StmEintr Eintr;
-//typedef StmI2cBus I2cBus;
-//typedef StmI2cDev I2cDev;
-//typedef StmUart SerialPort;
-//typedef StmSpiBus SpiBus;
-//typedef StmSpiDev SpiDev;
-//typedef StmTimer Timer;
-typedef StmGpio Gpio;
-typedef StmGpioIntr GpioIntr;
-//typedef StmEeprom Eeprom;
-//typedef StmPwm Pwm;
+typedef Stm32Power Power;
+typedef Stm32ClockTree ClockTree;
+//typedef Stm32Eintr Eintr;
+//typedef Stm32I2cBus I2cBus;
+//typedef Stm32I2cDev I2cDev;
+//typedef Stm32Uart SerialPort;
+//typedef Stm32SpiBus SpiBus;
+//typedef Stm32SpiDev SpiDev;
+//typedef Stm32Timer Timer;
+//typedef Stm32Gpio Gpio;
+//typedef Stm32GpioIntr GpioIntr;
+//typedef Stm32Pwm Pwm;
 
-extern Pll _pll0;
-extern Pll _pll1;
+extern ClockTree _clocktree;
 extern NVic _nvic;
 
-//extern Eeprom _eeprom;
 //extern I2cBus _i2c2;
 //extern SerialPort _uart3;
 //extern SpiBus _spi0;
@@ -100,7 +86,5 @@ template class ssd1963::Panel<_gpio2, _gpio0, BIT18, BIT15, BIT17, BIT16>;
 using namespace tsc2046;
 extern TouchController _touch;
 #endif
-
-extern SpiDev _cardslot;
 
 #endif // __BOARD_H__

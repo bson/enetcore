@@ -27,17 +27,14 @@ void* _intr_thread_stack;
 
 NVic _nvic;
 
-Pll _pll0(PLL0_BASE); // Main PLL
-Pll _pll1(PLL1_BASE); // Alt PLL - used for USB
-
 Gpio _gpio_a(GPIOA_BASE);
 Gpio _gpio_b(GPIOB_BASE);
 Gpio _gpio_c(GPIOC_BASE);
 Gpio _gpio_d(GPIOD_BASE);
 Gpio _gpio_e(GPIOE_BASE);
 
-GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
-GpioIntr _gpio2_intr(GPIO2_INTR_BASE);
+//GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
+//GpioIntr _gpio2_intr(GPIO2_INTR_BASE);
 
 PinNegOutput<Gpio::Pin> _led; // Blue
 

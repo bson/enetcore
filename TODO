@@ -1,6 +1,9 @@
+----- DONE
 
 Add StmPower to manage system power settings
   Specify VOS
+
+----- TODO
 
 Add StmClockTree to configure system clock tree
   Source selection:
@@ -55,7 +58,7 @@ Add StmClockTree to configure system clock tree
   SYSCLK = VCO/PLLP
   Periph_clock = VCO/PLLQ
   VCO: 192-432MHz
-  Peiph_clk = 48MHz
+  Periph_clk = 48MHz
 
   SYSTICK can use either HCLK/8 or the core Cortex clock (effectively HCLK?)
 
@@ -78,6 +81,10 @@ Implement StmGpio
 - enums for ports, e.g. PORT_A = 0, PORT_B = 1, etc
 
 Implement StmSerial
+
+Implement Stm32Timer (16 bit timer)
+
+Implement Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
 
 Add mapping for battery-backed SRAM 
 

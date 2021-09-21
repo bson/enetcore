@@ -27,6 +27,8 @@ public:
     void SetTimer(uint usec);
 };
 
+#if !defined(STM)
 typedef SysTick SysTimer;
+#endif
 
 #endif  // _SYSTICK_H_
