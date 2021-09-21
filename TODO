@@ -1,3 +1,113 @@
+
+Add StmPower to manage system power settings
+  Specify VOS
+
+Add StmClockTree to configure system clock tree
+  Source selection:
+    HSI (16MHz)
+    HSE - specify crystal frequency
+  PLL enable:
+    Select output multiplier (ratio?)
+  SYSCLK becomes HSI/HSE/PLL
+  HCLK (AHB) prescaler (enum) max 168MHz
+  APB1 domain prescaler (enum) relative to HCLK max 42MHz
+  APB2 domain prescaler (enum) relative to HCLK max 84MHz
+  RTC clock source (enum)
+    LSI
+    LSE
+    OFF
+
+  Configure structure:
+     source, xtal_freq,
+     use_pll,
+       pll_vco_mult (9 bits),
+       pll_vco_div (6 bits),
+       pll_sysclk_div (2,4,6,8),
+       pll_periph_div (4 bits, 2-15)
+     HCLK_prescaler (1,2,4,8,16,32,64,128,256,511),
+     APB1_prescaler (1,2,4,8,16),
+     APB2_prescaler (1,2,4,8,16),
+     rtc_clock_source
+
+  Methods:
+    Init(const Configure&)
+    Return SYSCLK freq
+    Return HCLK freq (AHB, core, memory, DMA)
+    Return APBx peripheral freq
+    Return APBx timer freq
+    (Maybe return as a const Clocks&)
+    Peripheral clock enable: AHB1, AHB2, AHB3, APB1, APB2
+       Define mask values, e.g. AHB2_xxx, APB1_xxx
+       Always enable AHB1 memory clock
+    Peripheral clock enable for low power mode (Sleep)
+    Output source clock on MCO1/MC02
+       HSI, HSE, LSE, PLL, OFF
+       Prescaler (2,3,4,5)
+    Return reset cause (RCC_CSR)
+    TBD: calibrate HSI using LSE (via TIM5 ch 4)
+
+  SYSCLK = HSI,HSE, or PLL
+  HCLK = SYSCLK/HCLK_prescaler
+  APBx_periph = HCLK/APBx_prescaler
+  APBx_timer = HCLK*(APBx_prescaler == 1 ? 1 : 2)
+
+  VCO = source_freq/PLLM*PLLN  (source_freq/pll_div*pll_mult)
+  SYSCLK = VCO/PLLP
+  Periph_clock = VCO/PLLQ
+  VCO: 192-432MHz
+  Peiph_clk = 48MHz
+
+  SYSTICK can use either HCLK/8 or the core Cortex clock (effectively HCLK?)
+
+  1. Enable osc
+  2. Wait for it
+  3. Select as source - it can't be selected if not available
+
+  When changing from HSE, stop it
+  RTC source can't be changed once set without a power domain reset
+
+  PLL needs to be enabled for RNG, SDIO
+  Always enable PLL, "use_pll" means use it as SYSCLK instead of source
+  Setup up RNG, USB OTG FS, SDIO for 48MHz (PLL PLLQ); USB requires 48MHz
+  
+
+Add StmFlash to configure flash subsystem
+
+Implement StmGpio
+- StmGpio::Config for pin config
+- enums for ports, e.g. PORT_A = 0, PORT_B = 1, etc
+
+Implement StmSerial
+
+Add mapping for battery-backed SRAM 
+
+Implement StmRandom
+
+Implement StmCrc
+
+Implement StmSpi
+
+Implement StmI2c (TBD - no use case, need test board)
+
+Implement StmPwm - use to control panel backlight
+
+Implement StmRtc
+
+Implement StmWdt
+
+Implement StmEthernet (TBD - no use case, need test board)
+
+Implement StmUsbDev (TBD - no use case, need test board)
+
+Implement StmI2s (TBD - no use case, need test board)
+
+Implement Reset (to use CM4 core software reset)
+
+Implement StmFsmc
+
+Move application out of enetcore tree
+Make enetcore a submodule of application
+
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.
 
@@ -8,7 +118,5 @@ Refactor chip support
 - Make more hardware support optional (e.g. SD, FAT)
 - Make DHCP support a compile time option
 
-- Move application out of enetcore tree
-- Make enetcore a submodule of application
 
 Clean up genfont.py and call it something else
