@@ -1,6 +1,8 @@
 #ifndef __STM32_CLOCK_TREE__
 #define __STM32_CLOCK_TREE__
 
+#include "bits.h"
+
 class Stm32ClockTree {
     // Register byte offsets
     enum {
@@ -72,15 +74,22 @@ class Stm32ClockTree {
 
 public:
     // Clock sources
-    enum ClkSource {
+    enum SysClkSource {
         HSI = 0,
-        HSE = 1
+        HSE = 1,
+        PLL = 2
     };
 
-    // RTC clock source
+    enum PllClkSource {
+        HSI = 0,
+        HSE,
+        OFF
+    };
+
     enum RtcClkSource {
         LSI = 0,
-        LSE = 1,
+        LSE,
+        HSE,
         OFF
     };
 
@@ -94,34 +103,24 @@ public:
 
     // HCLK prescaler
     enum HclkPrescale {
-        DIV1 = 0,
-        DIV2,
-        DIV4,
-        DIV8,
-        DIV16,
-        DIV32,
-        DIV64,
-        DIV128,
-        DIV256,
-        DIV511
+        DIV1   = 0,
+        DIV2   = 8,
+        DIV4   = 9,
+        DIV8   = 10,
+        DIV16  = 11,
+        DIV64  = 12,
+        DIV128 = 13,
+        DIV256 = 14,
+        DIV511 = 15
     };
 
-    // APB1 prescaler
+    // APB1,2 prescalers
     enum Apb1Prescale {
-        DIV1 = 0,
-        DIV2,
-        DIV4,
-        DIV8,
-        DIV16
-    };
-
-    // APB2 prescaler
-    enum Apb2Prescale {
-        DIV1 = 0,
-        DIV2,
-        DIV4,
-        DIV8,
-        DIV16
+        DIV1  = 0,
+        DIV2  = 4,
+        DIV4  = 5,
+        DIV8  = 6,
+        DIV16 = 7
     };
 
     enum I2sSource {
@@ -137,18 +136,18 @@ public:
     };
 
     struct Config {
-        ClkSource clk_source;
-        uint32_t xtal_freq;
-        boolean pll_enable;
+        PllClkSource pll_clk_source;
         uint16_t pll_vco_mult:9;
         uint16_t pll_vco_div:6;
         PllSysClkDiv pll_sysclk_div;
+        SysClkSrc sys_clk_source;
         uint16_t pll_periph_div:4;  // 2-15
         HclkPrescale hclk_prescale;
-        Apb1Prescale apb1_prescale;
-        Apb2Prescale apb2_prescale;
+        ApbPrescale apb1_prescale;
+        ApbPrescale apb2_prescale;
         RtcClkSource rtc_clk_source;
         I2sSource i2s_source;
+        uint32_t xtal_freq;
     };
 
     enum Mco2Output {
@@ -184,11 +183,42 @@ public:
 #define REG(offset) (*((uint32_t*)(RCC_BASE+(offset))))
 #define VREG(offset) (*((volatile uint32_t*)(RCC_BASE+(offset))))
 
-
     static void Init(const Config& config) {
-        
+        // Start HSE if used as source
+        if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE) {
+            VREG(RCC_CR) |= BIT(HSEON);
+            while ((VREG(RCC_CR) & BIT(HSERDY)) == 0)
+                ;
+        }
 
+        // Start the main PLL if wanted
+        if (config.pll_clk_source != PllClkSource::OFF) {
+            VREG(RCC_PLLCFGR) = (config.pll_periph_div << PLLQ)
+                | (config.pll_sysclk_div << PLLP)
+                | (config.pll_vco_mult << PLLN)
+                | (config.pll_vco_div << PLLM)
+                | ((uint32_t)config.pll_clk_source << PLLSRC);
+            VREG(RCC_CR) |= BIT(PLLON);
+            while ((VREG(RCC_CR) & BIT(PLLRDY)) == 0)
+                ;
+        }
 
+        // Set prescalers for AHB, APB1, APB2
+        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(0b1111 << HPRE) & ~(0b111 << PPRE1) & ~(0b111 << PPRE2))
+            | ((uint32_t)hclk_prescale << HPRE)
+            | ((uint32_t)apb1_prescale << PPRE1)
+            | ((uint32_t)apb2_prescale << PPRE2);
+
+        // Set the system clock source
+        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << SW))
+            | ((uin32_t)config.sys_clk_source << SW);
+        while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
+            ;
+
+        // Stop HSI if unused
+        if (config.pll_clk_source != PllClkSource::HSI && config.sys_clk_source != SysClkSource::HSI) {
+            VREG(RCC_CR) &= ~BIT(HSION);
+        }
     }
 
 };
