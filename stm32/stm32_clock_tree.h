@@ -2,7 +2,6 @@
 #define __STM32_CLOCK_TREE__
 
 #include "bits.h"
-#include "stm32_power.h"
 
 class Stm32ClockTree {
     // Register byte offsets
@@ -74,7 +73,10 @@ class Stm32ClockTree {
 
         // RCC_CSR
         LSIRDY = 1,
-        LSION = 0
+        LSION = 0,
+
+        // PWR_CR
+        DBP = 8
     };
     
     // Various constants
@@ -229,7 +231,7 @@ public:
 
         // Start LSE is desired
         if (config.rtc_clk_source != RtcClkSource::OFF) {
-            Stm32Power::EnableRtcAccess();
+            RtcAccess _ra();
 
             switch (config.rtc_clk_source) {
             case RtcClkSource::LSE:
@@ -250,7 +252,6 @@ public:
             VREG(RCC_BDCR) = (REG(RCC_BDCR) & ~(3 << RTCSEL))
                 | ((uint32_t)config.rtc_clk_source << RTCSEL);
             VREG(RCC_BDCR) |= BIT(RTCEN);
-            Stm32Power::DisableRtcAccess();
         }
 
         // Stop HSI if unused
@@ -300,6 +301,12 @@ public:
 
     // Reset cause word
     static uint32_t ResetCause() { return REG(RCC_CSR) & ~3; }
+
+    class RtcAccess {
+    public:
+        RtcAccess() { VREG(BASE_PWR) |= BIT(DBP); }
+        ~RtcAccess() { VREG(BASE_PWR) &= ~BIT(DBP); }
+    }
 };
 
 #undef REG
