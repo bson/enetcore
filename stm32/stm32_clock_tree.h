@@ -2,6 +2,7 @@
 #define __STM32_CLOCK_TREE__
 
 #include "bits.h"
+#include "stm32_power.h"
 
 class Stm32ClockTree {
     // Register byte offsets
@@ -31,7 +32,6 @@ class Stm32ClockTree {
         RCC_PLLI2SCFGR = 0x84
     };
 
-    
     // Register bits
     enum {
         // RCC_CR
@@ -62,8 +62,19 @@ class Stm32ClockTree {
         PPRE1 = 10,
         HPRE = 4,
         SWS = 2,
-        SW = 0
+        SW = 0,
 
+        // RCC_BDCR
+        BDRST = 16,
+        RTCEN = 15,
+        RTCSEL = 8,
+        LSEBYP = 2,
+        LSERDY = 1,
+        LSEON = 0,
+
+        // RCC_CSR
+        LSIRDY = 1,
+        LSION = 0
     };
     
     // Various constants
@@ -82,16 +93,21 @@ public:
 
     enum PllClkSource {
         HSI = 0,
-        HSE,
+        HSE = 1,
         OFF
     };
 
     enum RtcClkSource {
-        LSI = 0,
-        LSE,
-        HSE,
-        OFF
+        OFF = 0,
+        LSI = 1,
+        LSE = 2,
+        HSE = 3
     };
+
+    // Prescaler when using HSE
+    enum RtcPrescaler {
+    }
+
 
     // PLL prescaler
     enum PllPrescale {
@@ -137,17 +153,17 @@ public:
 
     struct Config {
         PllClkSource pll_clk_source;
-        uint16_t pll_vco_mult:9;
-        uint16_t pll_vco_div:6;
+        uint16_t     pll_vco_mult:9;
+        uint8_t      pll_vco_div:6;
+        uint8_t      pll_periph_div:4;  // 2-15
         PllSysClkDiv pll_sysclk_div;
-        SysClkSrc sys_clk_source;
-        uint16_t pll_periph_div:4;  // 2-15
+        SysClkSrc    sys_clk_source;
         HclkPrescale hclk_prescale;
-        ApbPrescale apb1_prescale;
-        ApbPrescale apb2_prescale;
+        ApbPrescale  apb1_prescale;
+        ApbPrescale  apb2_prescale;
         RtcClkSource rtc_clk_source;
-        I2sSource i2s_source;
-        uint32_t xtal_freq;
+        uint8_t      rtc_clk_div:5; // 2-31
+        I2sSource    i2s_source;
     };
 
     enum Mco2Output {
@@ -164,7 +180,7 @@ public:
         PLL
     };
 
-    enum Mco2Prescaler {
+    enum McoPrescaler {
         DIV1 = 0,
         DIV2 = 4,
         DIV3 = 5,
@@ -172,20 +188,16 @@ public:
         DIV5 = 7
     };
 
-    enum Mco1Prescaler {
-        DIV1 = 0,
-        DIV2 = 4,
-        DIV3 = 5,
-        DIV4 = 6,
-        DIV5 = 7
-    };
 
 #define REG(offset) (*((uint32_t*)(RCC_BASE+(offset))))
 #define VREG(offset) (*((volatile uint32_t*)(RCC_BASE+(offset))))
 
+    // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
+    // LSE may be running.
     static void Init(const Config& config) {
         // Start HSE if used as source
-        if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE) {
+        if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE
+            || config.rtc_clk_source == RtcClkSource::HSE) {
             VREG(RCC_CR) |= BIT(HSEON);
             while ((VREG(RCC_CR) & BIT(HSERDY)) == 0)
                 ;
@@ -215,12 +227,79 @@ public:
         while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
             ;
 
+        // Start LSE is desired
+        if (config.rtc_clk_source != RtcClkSource::OFF) {
+            Stm32Power::EnableRtcAccess();
+
+            switch (config.rtc_clk_source) {
+            case RtcClkSource::LSE:
+                VREG(RCC_BDCR) |= BIT(LSEON);
+                while ((VREG(RCC_BDCR) & BIT(LSERDY)) == 0)
+                    ;
+                break;
+            case RtcClkSource::HSE:
+                VREG(RCC_CFGR)= (REG(RCC_CFGR) & ~(31 << RTCPRE))
+                    | (config.rtc_clk_div << RTCPRE);
+                break;
+            case RtcClkSource::LSI:
+                VREG(RCC_CSR) |= BIT(LSION);
+                while ((VREG(RCC_CSR) & BIT(LSIRDY)) == 0)
+                    ;
+                break;
+            }
+            VREG(RCC_BDCR) = (REG(RCC_BDCR) & ~(3 << RTCSEL))
+                | ((uint32_t)config.rtc_clk_source << RTCSEL);
+            VREG(RCC_BDCR) |= BIT(RTCEN);
+            Stm32Power::DisableRtcAccess();
+        }
+
         // Stop HSI if unused
-        if (config.pll_clk_source != PllClkSource::HSI && config.sys_clk_source != SysClkSource::HSI) {
+        if (config.pll_clk_source != PllClkSource::HSI
+            && config.sys_clk_source != SysClkSource::HSI) {
             VREG(RCC_CR) &= ~BIT(HSION);
         }
     }
 
+    // Output clock on MCO1, MCO2, with given divider
+    static void EnableMCO1(Mco1Output clk, McoPrescaler div) {
+        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO1) & ~(7 << MCO1PRE))
+            | ((uint32_t)clk << MCO1)
+            | ((uint32_t)div << MCO1PRE);
+    }
+    static void EnableMCO2(Mco2Output clk, McoPrescaler div) {
+        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO2) & ~(7 << MCO2PRE))
+            | ((uint32_t)clk << MCO2)
+            | ((uint32_t)div << MCO2PRE);
+    }
+
+    // Enable/disable peripheral clocks
+    static void EnableAHB1(uint32_t flags) { VREG(RCC_AHB1ENR) |= flags; }
+    static void EnableAHB2(uint32_t flags) { VREG(RCC_AHB2ENR) |= flags; }
+    static void EnableAHB3(uint32_t flags) { VREG(RCC_AHB3ENR) |= flags; }
+    static void EnableAPB1(uint32_t flags) { VREG(RCC_APB1ENR) |= flags; }
+    static void EnableAPB2(uint32_t flags) { VREG(RCC_APB2ENR) |= flags; }
+
+    static void DisableAHB1(uint32_t flags) { VREG(RCC_AHB1ENR) &= ~flags; }
+    static void DisableAHB2(uint32_t flags) { VREG(RCC_AHB2ENR) &= ~flags; }
+    static void DisableAHB3(uint32_t flags) { VREG(RCC_AHB3ENR) &= ~flags; }
+    static void DisableAPB1(uint32_t flags) { VREG(RCC_APB1ENR) &= ~flags; }
+    static void DisableAPB2(uint32_t flags) { VREG(RCC_APB2ENR) &= ~flags; }
+
+    // Peripheral enable/disable, low power
+    static void EnableAHB1LP(uint32_t flags) { VREG(RCC_AHB1LPENR) |= flags; }
+    static void EnableAHB2LP(uint32_t flags) { VREG(RCC_AHB2LPENR) |= flags; }
+    static void EnableAHB3LP(uint32_t flags) { VREG(RCC_AHB3LPENR) |= flags; }
+    static void EnableAPB1LP(uint32_t flags) { VREG(RCC_APB1LPENR) |= flags; }
+    static void EnableAPB2LP(uint32_t flags) { VREG(RCC_APB2LPENR) |= flags; }
+
+    static void DisableAHB1LP(uint32_t flags) { VREG(RCC_AHB1LPENR) &= ~flags; }
+    static void DisableAHB2LP(uint32_t flags) { VREG(RCC_AHB2LPENR) &= ~flags; }
+    static void DisableAHB3LP(uint32_t flags) { VREG(RCC_AHB3LPENR) &= ~flags; }
+    static void DisableAPB1LP(uint32_t flags) { VREG(RCC_APB1LPENR) &= ~flags; }
+    static void DisableAPB2LP(uint32_t flags) { VREG(RCC_APB2LPENR) &= ~flags; }
+
+    // Reset cause word
+    static uint32_t ResetCause() { return REG(RCC_CSR) & ~3; }
 };
 
 #undef REG

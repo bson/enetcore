@@ -3,17 +3,27 @@
 
 class Stm32Power {
     enum {
-        PWR_CR_VOS = (1 << 14)
+        VOS = (1 << 14),
+        DBP = (1 << 8)
     };
 
+public:
     // Not thread or interrupt safe.
     static void EnableVos() {
-        *(volatile uint32*)BASE_PWR |= PWR_CR_VOS;
+        *(volatile uint32_t*)BASE_PWR |= VOS;
     }
 
     // Not thread or interrupt safe.
     static void DisableVos() {
-        *(volatile uint32*)BASE_PWR &= ~PWR_CR_VOS;
+        *(volatile uint32_t*)BASE_PWR &= ~VOS;
+    }
+
+    static void EnableRtcAccess() {
+        *(volatile uint32_t*)BASE_PWR |= DBP;
+    }
+
+    static void DisableRtcAccess() {
+        *(volatile uint32_t*)BASE_PWR &= ~DBP;
     }
 };
 

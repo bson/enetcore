@@ -18,6 +18,7 @@ Add StmClockTree to configure system clock tree
   RTC clock source (enum)
     LSI
     LSE
+    HSE
     OFF
 
   Configure structure:
