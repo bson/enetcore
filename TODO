@@ -3,8 +3,6 @@
 Add StmPower to manage system power settings
   Specify VOS
 
------ TODO
-
 Add StmClockTree to configure system clock tree
   Source selection:
     HSI (16MHz)
@@ -74,8 +72,9 @@ Add StmClockTree to configure system clock tree
   Always enable PLL, "use_pll" means use it as SYSCLK instead of source
   Setup up RNG, USB OTG FS, SDIO for 48MHz (PLL PLLQ); USB requires 48MHz
   
-
 Add StmFlash to configure flash subsystem
+
+----- TODO
 
 Implement StmGpio
 - StmGpio::Config for pin config

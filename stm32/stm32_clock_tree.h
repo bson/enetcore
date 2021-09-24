@@ -229,7 +229,7 @@ public:
         while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
             ;
 
-        // Start LSE is desired
+        // Maybe enable RTC
         if (config.rtc_clk_source != RtcClkSource::OFF) {
             RtcAccess _ra();
 
@@ -262,12 +262,12 @@ public:
     }
 
     // Output clock on MCO1, MCO2, with given divider
-    static void EnableMCO1(Mco1Output clk, McoPrescaler div) {
+    static void EnableMCO(Mco1Output clk, McoPrescaler div) {
         VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO1) & ~(7 << MCO1PRE))
             | ((uint32_t)clk << MCO1)
             | ((uint32_t)div << MCO1PRE);
     }
-    static void EnableMCO2(Mco2Output clk, McoPrescaler div) {
+    static void EnableMCO(Mco2Output clk, McoPrescaler div) {
         VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO2) & ~(7 << MCO2PRE))
             | ((uint32_t)clk << MCO2)
             | ((uint32_t)div << MCO2PRE);
