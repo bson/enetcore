@@ -1,8 +1,9 @@
-#ifndef __STM32_FLASH__
-#define __STM32_FLASH__
+#ifndef __STM32_FLASH_H__
+#define __STM32_FLASH_H__
 
 #include "bits.h"
 
+// Basic flash support.  No erase or write support.
 class Stm32Flash {
     enum Register {
         FLASH_ACR = 0x00
@@ -21,7 +22,7 @@ public:
 
 private:
     template typename <T>
-    [[_finline]] static T& reg(const Register r) { return *((T*)(FLASH_BASE+(uint32_t)r)); }
+    [[_finline]] static T& reg(const Register r) { return *((T*)(BASE_FLASH+(uint32_t)r)); }
 
 public:
     static void Init(uint32_t latency) {
@@ -31,4 +32,4 @@ public:
     }
 };
 
-#endif // __STM32_FLASH__
+#endif // __STM32_FLASH_H__

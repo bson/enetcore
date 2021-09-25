@@ -1,5 +1,5 @@
-#ifndef __STM32_CLOCK_TREE__
-#define __STM32_CLOCK_TREE__
+#ifndef __STM32_CLOCK_TREE_H__
+#define __STM32_CLOCK_TREE_H__
 
 #include "bits.h"
 
@@ -191,8 +191,8 @@ public:
     };
 
 
-#define REG(offset) (*((uint32_t*)(RCC_BASE+(offset))))
-#define VREG(offset) (*((volatile uint32_t*)(RCC_BASE+(offset))))
+#define REG(offset) (*((uint32_t*)(BASE_RCC+(offset))))
+#define VREG(offset) (*((volatile uint32_t*)(BASE_RCC+(offset))))
 
     // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
     // LSE may be running.
@@ -312,4 +312,4 @@ public:
 #undef REG
 #undef VREG
 
-#endif // __STM32_CLOCK_TREE__
+#endif // __STM32_CLOCK_TREE_H__

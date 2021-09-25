@@ -74,6 +74,9 @@ Add StmClockTree to configure system clock tree
   
 Add StmFlash to configure flash subsystem
 
+Implement StmSysCfg
+- IO compensation cell enable/disable
+
 ----- TODO
 
 Implement StmGpio
