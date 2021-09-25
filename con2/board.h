@@ -17,6 +17,7 @@
 enum { 
     FOSC = 12000000,            // Crystal = 12MHz
     CLOCK_TICK = 42000000,      // System clock (TIM5) tick: 42MHz
+    HCLK = 168000000            // Core clock
 };
 
 enum {
@@ -26,14 +27,17 @@ enum {
 
 #define PACKAGE_PINS 100
 
-#include "stm32f405.h"
+#include "stm32.h"
 
 #include "nvic.h"
 #include "systick.h"
 #include "stm32_power.h"
 #include "stm32_clocktree.h"
+#include "stm32_flash.h"
+#include "stm32_syscfg.h"
+#include "stm32_gpio.h"
+
 //#include "stm32_crc.h"
-//#include "stm32_gpio.h"
 //#include "stm32_i2c.h"
 //#include "stm32_uart.h"
 //#include "stm32_spi.h"
@@ -45,6 +49,10 @@ enum {
 
 typedef Stm32Power Power;
 typedef Stm32ClockTree ClockTree;
+typedef Stm32Flash Flash;
+typedef Stm32SysCfg SysCfg;
+typedef Stm32GpioPort Gpio;
+
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;
 //typedef Stm32I2cDev I2cDev;
@@ -52,7 +60,6 @@ typedef Stm32ClockTree ClockTree;
 //typedef Stm32SpiBus SpiBus;
 //typedef Stm32SpiDev SpiDev;
 //typedef Stm32Timer Timer;
-//typedef Stm32Gpio Gpio;
 //typedef Stm32GpioIntr GpioIntr;
 //typedef Stm32Pwm Pwm;
 

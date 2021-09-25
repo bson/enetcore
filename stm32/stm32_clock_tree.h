@@ -133,7 +133,7 @@ public:
     };
 
     // APB1,2 prescalers
-    enum Apb1Prescale {
+    enum ApbPrescale {
         DIV1  = 0,
         DIV2  = 4,
         DIV4  = 5,
@@ -196,7 +196,7 @@ public:
 
     // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
     // LSE may be running.
-    static void Init(const Config& config) {
+    static void Configure(const Config& config) {
         // Start HSE if used as source
         if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE
             || config.rtc_clk_source == RtcClkSource::HSE) {

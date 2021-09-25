@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
 #include "enetkit.h"
@@ -14,8 +14,8 @@ extern const char _build_branch[];
 
 #define BOARD_REV 1
 
-// Define to use P1.25 as clock output
-//#define CLKOUTPIN
+// Define to use MCO1 as clock output
+#define CLKOUTPIN
 
 #define MAYBE_STOP \
     while(!Thread::Bootstrapped()) \
@@ -27,28 +27,27 @@ void* _intr_thread_stack;
 
 NVic _nvic;
 
-Gpio _gpio_a(GPIOA_BASE);
-Gpio _gpio_b(GPIOB_BASE);
-Gpio _gpio_c(GPIOC_BASE);
-Gpio _gpio_d(GPIOD_BASE);
-Gpio _gpio_e(GPIOE_BASE);
+Gpio _gpio_a(Gpio::Port::A);
+Gpio _gpio_b(Gpio::Port::B);
+Gpio _gpio_c(Gpio::Port::C);
+Gpio _gpio_d(Gpio::Port::D);
+Gpio _gpio_e(Gpio::Port::E);
 
 //GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
 //GpioIntr _gpio2_intr(GPIO2_INTR_BASE);
 
-PinNegOutput<Gpio::Pin> _led; // Blue
+PinOutput<Gpio::Pin> _led; // Green LED
 
-//SpiBus _spi0(SSP0_BASE);
-//I2cBus _i2c2(I2C2_BASE, I2C2_IRQ);
+//SpiBus _spi1(BASE_SPI1);
+//SpiBus _spi2(BASE_SPI2);
 
-//SerialPort _uart3(UART3_BASE, UART3_IRQ);
 Clock _clock;
 SysTimer _systimer;
-//Eeprom _eeprom(EEPROM_BASE, EEPROM_IRQ);
+
+//SerialPort _uart3(UART3_BASE, UART3_IRQ);
 
 #ifdef ENABLE_PANEL
 Panel _panel;
-PinNegOutput<Gpio::Pin> _panel_reset; // Panel RESET#
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
 
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
@@ -84,212 +83,126 @@ Thread* AllocThreadContext() {
     return new Thread();
 }
 
-enum { PIN_END = 0x1000 };
-
-// Install a pin conf table
-static void PinConf(volatile uint32_t* iocon, const uint32_t* table) {
-    while (*table != PIN_END) {
-        iocon[table[0]] = table[1];
-        table += 2;
-    }
-}
-
 void ConfigurePins() {
-    // Default all GPIO ports to all input, masked
-    _gpio_a.MakeInputs(~0);
-    _gpio_b.MakeInputs(~0);
-    _gpio_c.MakeInputs(~0);
-    _gpio_d.MakeInputs(~0);
-    _gpio_e.MakeInputs(~0);
-
-    _gpio_a.Mask(~0);
-    _gpio_b.Mask(~0);
-    _gpio_c.Mask(~0);
-    _gpio_d.Mask(~0);
-    _gpio_e.Mask(~0);
-
-#if 0
     //////// Pin plan ////////
+    // On reset all pins are GPIO inputs, floating
+    //
+    // 13 PH1   OSC_OUT     Pin function follows HSE
+    // 12 PH0   OSC_IN
+    //
+    // 9 PC15   OSC32_OUT   Pin function follows LSE
+    // 8 PC14   OSC32_IN
+    //
+    // 47 PB10  AF7   USART3_TX      TXD       3.3V serial
+    // 48 PB11  AF7   USART3_RX      RXD
+    //
+    // 24 PA1   AF8   UART4_RX       ESP_TX       ESP12E
+    // 23 PA0   AF8   UART4_TX       ESP_RX
+    // 34 PC5   out                  ESP_BOOT_SEL
+    // 33 PC4   out                  ESP_RST#
+    // 24 PA2   in                   ESP_INT
+    // 31 PA6   AF5   SPI1_MISO      ESP_MISO
+    // 32 PA7   AF5   SPI1_MOSI      ESP_MOSI
+    // 30 PA5   AF5   SPI1_SCK       ESP_SCLK
+    // 26 PA3   out                  ESP_SPI_CS0#
+    //
+    // 58 PD11  AF12  FSMC_A16       LCD_RS    Panel 8080 bus
+    // 88 PD7   AF12  FSMC_CE2#      LCD_CS#
+    // 86 PD5   AF12  FSMC_WE#       LCD_WR#
+    // 85 PD4   AF12  FSMC_OE#       LCD_RD#
+    // 57 PD10  AF12  FSMC_D15       LCD_D15
+    // 56 PD9   AF12  FSMC_D14       LCD_D14
+    // 55 PD8   AF12  FSMC_D13       LCD_D13
+    // 46 PE15  AF12  FSMC_D12       LCD_D12
+    // 45 PE14  AF12  FSMC_D11       LCD_D11
+    // 44 PE13  AF12  FSMC_D10       LCD_D10
+    // 43 PE12  AF12  FSMC_D9        LCD_D9
+    // 42 PE11  AF12  FSMC_D8        LCD_D8
+    // 41 PE10  AF12  FSMC_D7        LCD_D7
+    // 40 PE9   AF12  FSMC_D6        LCD_D6
+    // 39 PE8   AF12  FSMC_D5        LCD_D5
+    // 38 PE7   AF12  FSMC_D4        LCD_D4
+    // 82 PD1   AF12  FSMC_D3        LCD_D3
+    // 81 PD0   AF12  FSMC_D2        LCD_D2
+    // 62 PD15  AF12  FSMC_D1        LCD_D1
+    // 61 PD14  AF12  FSMC_D0        LCD_D0
+    //
+    // #96 PB9  AF2   TIM4_CH4                 Panel backlight
+    // #96 PB9  AF3   TIM11_CH1
+    // 96 PB9   out
+    //
+    // 71 PA12  in                  T_IRQ#     Touch controller INTR
+    // 53 PB14  AF5   SPI2_MISO     T_DO       Touch controller
+    // 54 PB15  AF5   SPI2_MOSI     T_DIN      Touch controller
+    // 51 PB12  AF5   SPI2_SS#      T_CS#      Touch controller CS#
+    // 52 PB13  AF5   SPI2_SCK      T_CLK      Touch controller clk
+    //
+    // 35 PB0   an    ADC12_IN8     THSENSE    Thermal sense voltage
+    //
+    // 93 PB7   out                 LED        LED light when high
+    //
+    // 29 PA4   an    DAC_OUT1      SOUND      Speaker
+    // 67 PA8   AF0   MCO1          CLKOUT     MCO1 clock output
+    // 15 PC0   out                 SWITCH     SSR switch
+    //
 
-    // P0.0  - U3_TXD
-    // P0.1  - U3_RXD
-    // P0.2  - GPIO (LED D5) Output
-    // P0.3  - GPIO (LED D7) Output
-    // P0.6  - I2S_RX_SDA
-    // P0.7  - I2S_TX_SCK 
-    // P0.8  - I2S_TX_WS
-    // P0.9  - I2S_TX_SDA
-    // P0.10 - I2C2_SDA
-    // P0.11 - I2C2_SCL
-    // P0.15 - GPIO Out J7.9
-    // P0.16 - GPIO Out J7.10
-    // P0.17 - GPIO Out J7.8
-    // P0.18 - GPIO Out J7.7
-    // P0.22 - GPIO In J7.6
-    // P0.25 - ADC0_IN2 J8.1
-    // P0.26 - DAC_OUT  J8.2
-    // P0.29 - USB D+
-    // P0.30 - USB D-
-    static const uint32_t p0[] = {
-        0, D_IOCON_FUNC(2),
-        1, D_IOCON_FUNC(2),
-        2, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        3, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        6, D_IOCON_FUNC(1),
-        7, W_IOCON_FUNC(1),
-        8, W_IOCON_FUNC(1),
-        9, W_IOCON_FUNC(1),
-        10, D_IOCON_FUNC(1),
-        11, D_IOCON_FUNC(1),
-        15, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        16, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        17, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        18, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        22, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        25, A_IOCON_ADC(1),
-        26, A_IOCON_DAC(2),
-        29, U_IOCON_FUNC(1),
-        30, U_IOCON_FUNC(1),
-        PIN_END, PIN_END
-    };
+#define PINCONF(PORT, PIN, MODE, AF, TYPE, SPEED) \
+    { Stm32Gpio::Port::PORT, PIN, Stm32Gpio::Mode::MODE, AF, Stm32Gpio::Type::TYPE, Stm32Gpio::Speed::SPEED }
 
-    PinConf(IOCON_P0, p0);
-
-    _gpio0.MakeOutputs(BIT2 | BIT3 | BIT15 | BIT16 | BIT17 | BIT18);
-
-    _led5 = _gpio0.GetPin(2);
-    _led7 = _gpio0.GetPin(3);
-
-    _led5.Raise();
-    _led7.Raise();
-
-    // P1.0  - ENET_TXD0
-    // P1.1  - ENET_TXD1
-    // P1.4  - ENET_TX_EN
-    // P1.8  - ENET_CRS_DV
-    // P1.9  - ENET_RXD0
-    // P1.10 - ENET_RXD1
-    // P1.14 - ENET_RX_ER
-    // P1.15 - ENET_REF_CLK
-    // P1.18 - USB_UP_LED1 (XXX this is only used in host mode?  If
-    //         so, make it GPIO for LED)
-    // P1.19 - GPIO (LED D6) Out
-    // P1.20 - SSP0_SCK
-    // P1.22 - GPIO (LED D8) Out
-    // P1.23 - SSP0_MISO
-    // P1.24 - SSP0_MOSI
+    static const Stm32Gpio::PinConf pinconf[] = {
+        PINCONF(B, 10,  AF,  7, NONE, SLOW),
+        PINCONF(B, 11,  AF,  7, NONE, SLOW),
+        PINCONF(A,  1,  AF,  8, NONE, SLOW),
+        PINCONF(A,  0,  AF,  8, NONE, SLOW),
+        PINCONF(C,  5, OUT,  0, NONE, MEDIUM),
+        PINCONF(C,  4, OUT,  0, NONE, MEDIUM),
+        PINCONF(A,  2,  IN,  0,  PDR, MEDIUM),
+        PINCONF(A,  6,  AF,  5, NONE, MEDIUM),
+        PINCONF(A,  7,  AF,  5, NONE, MEDIUM),
+        PINCONF(A,  5,  AF,  5, NONE, MEDIUM),
+        PINCONF(A,  3, OUT,  0, NONE, MEDIUM),
+        PINCONF(D, 11,  AF, 12, NONE, FAST),
+        PINCONF(D,  7,  AF, 12, NONE, FAST),
+        PINCONF(D,  5,  AF, 12, NONE, FAST),
+        PINCONF(D,  4,  AF, 12, NONE, FAST),
+        PINCONF(D, 10,  AF, 12, NONE, FAST),
+        PINCONF(D,  9,  AF, 12, NONE, FAST),
+        PINCONF(D,  8,  AF, 12, NONE, FAST),
+        PINCONF(E, 15,  AF, 12, NONE, FAST),
+        PINCONF(E, 14,  AF, 12, NONE, FAST),
+        PINCONF(E, 13,  AF, 12, NONE, FAST),
+        PINCONF(E, 12,  AF, 12, NONE, FAST),
+        PINCONF(E, 11,  AF, 12, NONE, FAST),
+        PINCONF(E, 10,  AF, 12, NONE, FAST),
+        PINCONF(E,  9,  AF, 12, NONE, FAST),
+        PINCONF(E,  8,  AF, 12, NONE, FAST),
+        PINCONF(E,  7,  AF, 12, NONE, FAST),
+        PINCONF(D,  1,  AF, 12, NONE, FAST),
+        PINCONF(D,  0,  AF, 12, NONE, FAST),
+        PINCONF(D, 15,  AF, 12, NONE, FAST),
+        PINCONF(D, 14,  AF, 12, NONE, FAST),
+        PINCONF(B,  9, OUT,  0, NONE, MEDIUM),
+        PINCONF(A, 12,  IN,  0,  PUR, MEDIUM),
+        PINCONF(B, 14,  AF,  5, NONE, MEDIUM),
+        PINCONF(B, 15,  AF,  5, NONE, MEDIUM),
+        PINCONF(B, 12,  AF,  5, NONE, MEDIUM),
+        PINCONF(B, 13,  AF,  5, NONE, MEDIUM),
+        PINCONF(B,  0, ANALOG,0,NONE, SLOW),
+        PINCONF(B,  7, OUT,  0, NONE, SLOW),
+        PINCONF(A,  4, ANALOG,0,NONE, SLOW),
 #ifdef CLKOUTPIN
-    // P1.25 - CLKOUT
-#else
-    // P1.25 - GPIO In (unused with CP2102N)
-    // P1.25 - GPIO Out (/TEN with CH341T)
+        PINCONF(A,  8,  AF,  0, NONE, FAST),
 #endif
-    // P1.26 - GPIO (LED D9 SD card activity) Out
-    // P1.28 - GPIO (Touch controller SPI CS#)
-    // P1.29 - GPIO Out  SD Card CS#
-    // P1.30 - USB_VBUS
-    // P1.31 - ADC0_IN5  J8.3
-
-    static const uint32_t p1[] = {
-        0, D_IOCON_FUNC(1),
-        1, D_IOCON_FUNC(1),
-        4, D_IOCON_FUNC(1),
-        8, D_IOCON_FUNC(1),
-        9, D_IOCON_FUNC(1),
-        10, D_IOCON_FUNC(1),
-        14, W_IOCON_FUNC(1),
-        15, D_IOCON_FUNC(1),
-        18, D_IOCON_FUNC(1),
-        19, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        20, D_IOCON_FUNC(5),
-        22, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        23, D_IOCON_FUNC(5),
-        24, D_IOCON_FUNC(5),
-#ifdef CLKOUTPIN
-        25, D_IOCON_FUNC(5),    // CLKOUT
-#else
-        25, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-#endif
-        26, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        28, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        29, D_IOCON_GPIO(IOCON_MODE_PULLUP, 0, 0, 1, 0),
-        30, A_IOCON_FUNC(2),
-        31, A_IOCON_ADC(3),
-        PIN_END, PIN_END
+        PINCONF(C,  0, OUT,  0, NONE, SLOW),
+        PINCONF(END,0,  IN,  0, NONE, SLOW)
     };
+#undef PINCONF    
 
-    PinConf(IOCON_P1, p1);
-
-#if BOARD_REV==1
-    _gpio1.MakeOutputs(BIT19 | BIT22 | BIT26 | BIT29 | BIT25);
-    _ten = _gpio1.GetPin(25);
-    _ten.Raise();
-#else
-    _gpio1.MakeOutputs(BIT19 | BIT22 | BIT26 | BIT29);
-#endif
-
-    _led6   = _gpio1.GetPin(19);
-    _led8   = _gpio1.GetPin(22);
-    _sd_led = _gpio1.GetPin(26);
-    _sd_cs  = _gpio1.GetPin(29);
-
-    _led6.Raise();
-    _led8.Raise();
-    _sd_led.Raise();
-    _sd_cs.Lower();
-
-    // P2.0  - GPIO Out J7.18
-    // P2.1  - GPIO Out J7.17
-    // P2.2  - GPIO Out J7.16
-    // P2.3  - GPIO Out J7.15
-    // P2.4  - GPIO Out J7.14
-    // P2.5  - GPIO Out J7.13
-    // P2.6  - GPIO Out J7.12
-    // P2.7  - GPIO Out J7.11
-    // P2.8  - ENET_MDC
-    // P2.9  - ENET_MDIO
-    // P2.10 - EINT0#   Ethernet MISR Interrupt  J7.5
-
-    static const uint32_t p2[] = {
-        0, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        1, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        2, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        3, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        4, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        5, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        6, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        7, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        8, D_IOCON_FUNC(4),
-        9, D_IOCON_FUNC(4),
-        10, D_IOCON_FUNC(1),
-        PIN_END, PIN_END
-    };
-
-    PinConf(IOCON_P2, p2);
-
-    _gpio2.MakeOutputs(0xff);
-
-    // P4.28 - GPIO Out J7.19
-    // P4.29 - GPIO Out J7.20
-
-    static const uint32_t p4[] = {
-        28, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        29, D_IOCON_GPIO(IOCON_MODE_NONE, 0, 0, 1, 0),
-        PIN_END, PIN_END
-    };
-
-    PinConf(IOCON_P4, p4);
-    
-    _gpio4.MakeOutputs(BIT29);
-#endif // 0
+    Stm32Gpio::PortConfig(&pinconf);
+    _led = _gpio_b(Gpio::Port::B).GetPin(7);
 
 #ifdef ENABLE_PANEL
-    _panel_reset = _gpio4.GetPin(28);
-    _t_cs        = _gpio1.GetPin(28);
-
-    _gpio4.MakeOutputs(BIT28);
-    _gpio1.MakeOutputs(BIT28);
-    _gpio0.MakeInputs(BIT22);
+    _t_cs        = _gpio_b.GetPin(12);
 #endif
 }
 
@@ -321,23 +234,7 @@ void hwinit0() {
     MPU_CTRL &= ~BIT0;
 
     _assert_stop = true;
-
-    // 16 - Set ROM latency bit for operation > 60MHz
-    // Prioitize D bus (prio 3) over I bus (prio 1) in AHB matrix
-    // XXX set priority for SYS, ENET and USB?
-//    MATRIXARB = BIT16 | 0x31;
-
-    // Set flash to 6 cycles
-//    FLASHCFG = 5 << 12;
-
-    // The boot ROM seems to sometimes start up in weird states... so explicitly
-    // reset here.
-//    CLKSRCSEL = 0;              // Use IRC OSC for pllclk and sysclk
-//    CCLKSEL   = 1;              // Use sysclk for CPU, divide by 1
-//    PCLKSEL   = 4;              // Divide sysclk for PCLK
-
-//    _reset_reason = RSID;
-//    RSID = 0x1f;                // Write 1's to clear... O.o
+    _reset_reason = Stm32ClockTree::ResetCause();
 
     // Clear all pending interrupts
     ICPR0 = ~0;
@@ -347,10 +244,6 @@ void hwinit0() {
 //    volatile uint32_t *wwdt = (volatile uint32_t*)WWDT_BASE;
 //    _wwdt_mod = wwdt[0];
 
-    // Make sure no peripherals sit in reset
-//    RSTCON0 = 0;
-//    RSTCON1 = 0;
-
     // Zero out memory
     memset(MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);
     memset(IRAM_REGION_START, 0, IRAM_REGION_SIZE - MAIN_THREAD_STACK);
@@ -358,11 +251,8 @@ void hwinit0() {
 
 // "Soft" system initialization.  Initializers have been run now.
 void hwinit() {
-    // Enable main oscillator.  4- range select (1-20MHz), 5 - enable
-//    SCS = (SCS & ~BIT4) | BIT5;
-
-    // Set power boost, if needed
-//    PBOOST = CCLK >= 100000000 ? 3 : 0;
+    Stm32Power::Vos(HCLK > 144000000 ? 1 : 0);
+    Stm32Flash::Latency(uint32_t((HCLK+1000000)/30000000));
 
     // Power on/off peripherals
 //    PCONP = CLOCK_PCON | PCUART3 | PCSSP0 | PCI2C2 | PCI2S | PCADC | PCGPIO | PCSSP0;
@@ -371,34 +261,32 @@ void hwinit() {
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();
 
-    // Set up PCLK divider before changing CCLK
-    static_assert(CCLK/PCLK >= 1 && CCLK/PCLK <= 4);
-    PCLKSEL = CCLK/PCLK;
+    // 12MHz crystal
+    // * 56/2 = 336MHz (VCO)
+    // 336MHz/2 = 168MHz sysclk
+    // 336MHz/7 = 48MHz peripheral clock
+    // 168MHz/1 = 168MHz HCLK
+    // 168MHz HCLK/2 = 84MHz APB1 clock
+    // 168MHz HCLK/4 = 42MHz APB2 clock
 
-    // Wait for main osc to stabilize
-//    while (!(SCS & BIT6))
-//        ;
+    static const Stm32ClockTree::Config clkconf = {
+        .pll_clk_source = Stm32ClockTree::PllClkSource::HSE,
+        .pll_vco_mult = 56,
+        .pll_vco_div = 2,
+        .pll_sysclk_div = Stm32ClockTree::PllSysClkDiv::DIV2,
+        .pll_periph_div = 7,
+        .sys_clk_source = Stm32ClockTree::SysClkSource::PLL,
+        .hclk_prescale = Stm32ClockTree::HclkPrescale::DIV1,
+        .apb1_prescale = Stm32ClockTree::ApbPrescale::DIV2,
+        .apb2_prescale = Stm32ClockTree::ApbPrescale::DIV4,
+        .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
+    };
 
-    // Set flash cycle count (1 per 20MHz, starting at 0)
-//    FLASHCFG = (CCLK / 20000000) * BIT12;
-
-    // Use main osc as clock source for main PLL0 and sysclk
-//    CLKSRCSEL = 1;
-
-#ifdef ENABLE_PLL_CLK
-	// Start main PLL
-	_pll0.Init(CCLK);
-
-    // CCLK sourced off main PLL, no divider
-    CCLKSEL = BIT8 | 1;
-#else
-    // CCLK sourced off sysclk
-    CCLKSEL = 1;
-#endif
+    Stm32ClockTree.Configure(clkconf);
 
 #ifdef CLKOUTPIN
-    // 0x3 - usbclk, 8 - enable, div by four
-//    CLKOUTCFG = 3 | BIT8 | (3 << 4);
+    // 12/2 = 6MHz on MCO1
+    Stm32ClockTree.EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler.DIV2);
 #endif
 
 #ifdef ENABLE_PANEL
@@ -412,7 +300,6 @@ void hwinit() {
     _gpio1.MakeOutputs(BIT28);
     _gpio0.MakeInputs(BIT22);
 
-    _panel_reset.Raise();
     _t_cs.Lower();
 #endif
 	// Initialize main thread and set up stacks
@@ -501,39 +388,33 @@ void hwinit() {
     // First line of text
 //    _uart3.Write("\r\nEnetcore booting up...\r\n");
 
-    // Initialize EEPROM early so we can pull config from it
-//    _eeprom.Init();
-
     // Turn off LEDs
     _led.Lower();
 
-//	_spi0.Init();
-
-//	_i2c2.Init();
-//	_i2c2.SetSpeed(I2C_BUS_SPEED);
+//	_spi1.Init();
+//  _spi2.Init();
 
     assert(IntEnabled());
 
 #ifdef ENABLE_PANEL
     // Release from reset
-    _panel_reset.Lower();
     _touch_dev.SetSSEL(&_t_cs);
 #endif
 
-//    DMSG("RSID: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
+//    DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
 //    DMSG("CCLK: %d  PCLK: %d", CCLK, PCLK);
 
     _malloc_region.SetReserve(64);
 
 #if 0
-    console("\r\nSky Blue Rev 3 [%s:%s %s %s]",
+    console("\r\nCON2 Rev 1 [%s:%s %s %s]",
             _build_branch, _build_commit, _build_user, _build_date);
 
-    console("Copyright (c) 2018 Jan Brittenson");
+    console("Copyright (c) 2018-2021 Jan Brittenson");
     console("All Rights Reserved\r\n");
 
     DMSG("Random uint: 0x%x", Util::Random<uint>());
-#enedif
+#endif
 }
 
 

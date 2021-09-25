@@ -82,6 +82,12 @@ Implement StmSysCfg
 Implement StmGpio
 - StmGpio::Config for pin config
 - enums for ports, e.g. PORT_A = 0, PORT_B = 1, etc
+- Post config, for each pin:
+   - Port, bit
+   - Input/Output/Analog/AF
+   - PUR, PDR, Float
+- LpcGpio compatible
+
 
 Implement StmSerial
 
