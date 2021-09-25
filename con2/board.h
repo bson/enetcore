@@ -17,7 +17,9 @@
 enum { 
     FOSC = 12000000,            // Crystal = 12MHz
     CLOCK_TICK = 42000000,      // System clock (TIM5) tick: 42MHz
-    HCLK = 168000000            // Core clock
+    HCLK = 168000000,           // HCLK/core
+    APB1_CLK = 84000000,        // APB1 bus
+    APB2_CLK = 42000000         // APB2
 };
 
 enum {
@@ -36,10 +38,10 @@ enum {
 #include "stm32_flash.h"
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"
+#include "stm32_usart.h"
 
 //#include "stm32_crc.h"
 //#include "stm32_i2c.h"
-//#include "stm32_uart.h"
 //#include "stm32_spi.h"
 //#include "stm32_timer.h"
 //#include "stm32_eintr.h"
@@ -52,11 +54,11 @@ typedef Stm32ClockTree ClockTree;
 typedef Stm32Flash Flash;
 typedef Stm32SysCfg SysCfg;
 typedef Stm32GpioPort Gpio;
+typedef Stm32Usart SerialPort;
 
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;
 //typedef Stm32I2cDev I2cDev;
-//typedef Stm32Uart SerialPort;
 //typedef Stm32SpiBus SpiBus;
 //typedef Stm32SpiDev SpiDev;
 //typedef Stm32Timer Timer;
@@ -67,13 +69,15 @@ extern ClockTree _clocktree;
 extern NVic _nvic;
 
 //extern I2cBus _i2c2;
-//extern SerialPort _uart3;
+extern SerialPort _usart3;
+extern SerialPOrt _uart4;
 //extern SpiBus _spi0;
-//extern Gpio _gpio_a;
-//extern Gpio _gpio_b;
-//extern Gpio _gpio_c;
-//extern Gpio _gpio_d;
-//extern Gpio _gpio_e;
+
+extern Gpio _gpio_a;
+extern Gpio _gpio_b;
+extern Gpio _gpio_c;
+extern Gpio _gpio_d;
+extern Gpio _gpio_e;
 //extern GpioIntr _gpio0_intr;
 //extern GpioIntr _gpio2_intr;
 
@@ -84,7 +88,7 @@ extern NVic _nvic;
 #include "tsc2046.h"
 #endif
 
-//#define _console _uart3
+#define _console _usart3
 
 #ifdef ENABLE_PANEL
 typedef ssd1963::Panel<_gpio2, _gpio0, BIT18, BIT15, BIT17, BIT16> Panel;

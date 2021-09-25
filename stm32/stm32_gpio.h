@@ -59,27 +59,27 @@ public:
 
     static void PortConfig(const PinConf* pinconff) {
         while (pinconf->port != Port::END) {
-            volatile uint32_t& mode = reg<volatile uint32_t&>(pinconf->port, GPIO_MODER);
+            volatile uint32_t& mode = reg<volatile uint32_t>(pinconf->port, GPIO_MODER);
             mode = (mode & ~(3 << (pinconf->pin*2)))
                 | ((uint32_t)pinconf->mode << (pinconf->pin*2));
 
             if (pinconf->mode == Mode::AF) {
-                volatile uint32_t& af = reg<volatile uint32_t&>(pinconf->port,
+                volatile uint32_t& af = reg<volatile uint32_t>(pinconf->port,
                                                                 pinconf->pin < 8 ? GPIO_AFRL : GPIO_AFRH);
                 const uint32_t shift = (pinconf->pin & 7) * 4;
                 af = (af & ~(0xf << shift)) 
                     | (pinconf->af << shift);
             }
 
-            volatile uint32_t& speed = reg<volatile uint32_t&>(pinconf->port, GPIO_OSPEEDER);
+            volatile uint32_t& speed = reg<volatile uint32_t>(pinconf->port, GPIO_OSPEEDER);
             speed = (speed & ~(3 << (pinconf->pin*2)))
                 | ((uint32_t)pinconf->speed << (pinconf->pin*2));
 
-            volatile uint32_t& otyper = reg<volatile uint32_t&>(pinconf->port, GPIO_OTYPER);
+            volatile uint32_t& otyper = reg<volatile uint32_t>(pinconf->port, GPIO_OTYPER);
             otyper = (otyper & ~(1 << pinconf->pin))
                 | ((pinconf->type >= Type::OD_PUR ? 1 : 0) << pinconf->pin);
 
-            volatile uint32_t& pupdr = reg<volatile uint32_t&>(pinconf->port, GPIO_PUPDR);
+            volatile uint32_t& pupdr = reg<volatile uint32_t>(pinconf->port, GPIO_PUPDR);
             pupdr = (pupdr & ~(3 << pinconf->pin*2))
                 | (((uint32_t)pinconf->type & 0b0011) << (pinconf->pin*2));
 
@@ -88,30 +88,30 @@ public:
     }
     
     [[__finline]] static void Set(Port port, uint32_t mask) {
-        reg<volatile uint32_t&>(port, GPIO_BSRR) = mask;
+        reg<volatile uint32_t>(port, GPIO_BSRR) = mask;
     }
 
     [[__finline]] static void Clear(Port port, uint32_t mask) {
-        reg<volatile uint32_t&>(port, GPIO_BSRR) = mask << 16;
+        reg<volatile uint32_t>(port, GPIO_BSRR) = mask << 16;
     }
 
-    [[__finline]] static uint32_t Input() { return reg<volatile uint32_t&>(port, GPIO_IDR); }
+    [[__finline]] static uint32_t Input() { return reg<volatile uint32_t>(port, GPIO_IDR); }
 
     [[__finline]] static void Output(Port port, uint32_t mask, uint32_t value) {
-        volatile uint32_t& r = reg<volatile uint32_t&>(port, GPIO_ODR);
+        volatile uint32_t& r = reg<volatile uint32_t>(port, GPIO_ODR);
         r = (r & ~mask) | value;
     }
 
     static void SetPin(Port port, uint8_t pin) {
-        reg<volatile uint32_t&>(port, GPIO_BSRR) = 1 << pin;
+        reg<volatile uint32_t>(port, GPIO_BSRR) = 1 << pin;
     }
 
     static void ResetPin(Port port, uint8_t pin) {
-        reg<volatile uint32_t&>(port, GPIO_BSRR) = (1 << 16) << pin;
+        reg<volatile uint32_t>(port, GPIO_BSRR) = (1 << 16) << pin;
     }
 
     static bool TestPin(Port port, uint8_t pin) {
-        return reg<volatile uint32_t&>(port, GPIO_IDR) & (1 << pin);
+        return reg<volatile uint32_t>(port, GPIO_IDR) & (1 << pin);
     }
 };
 

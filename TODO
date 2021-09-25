@@ -77,8 +77,6 @@ Add StmFlash to configure flash subsystem
 Implement StmSysCfg
 - IO compensation cell enable/disable
 
------ TODO
-
 Implement StmGpio
 - StmGpio::Config for pin config
 - enums for ports, e.g. PORT_A = 0, PORT_B = 1, etc
@@ -87,6 +85,8 @@ Implement StmGpio
    - Input/Output/Analog/AF
    - PUR, PDR, Float
 - LpcGpio compatible
+
+----- TODO
 
 
 Implement StmSerial

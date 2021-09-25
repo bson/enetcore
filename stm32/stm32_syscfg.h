@@ -34,16 +34,16 @@ private:
 public:
     static void MapExti(Port p, uint32_t pin) {
         pin &= 0xf;
-        volatile uint32_t& r = reg<volatile uint32_t&>(SYSCFG_EXTICR1 + pin/4);
+        volatile uint32_t& r = reg<volatile uint32_t>(SYSCFG_EXTICR1 + pin/4);
         r = (r & ~(0b1111 << ((pin % 4) * 4)))
             | ((uint32_t)p << ((pin % 4) * 4));
     }
 
     static void Init(bool cmpcell) {
         if (cmpcell) {
-            volatile uint32_t& r = reg<volatile uint32_t&>(SYSCFG_CMPCR);
+            volatile uint32_t& r = reg<volatile uint32_t>(SYSCFG_CMPCR);
             r |= BIT(CMP_PD);
-            while (!r & BIT(READY))
+            while (!(r & BIT(READY)))
                 ;
     }
 };

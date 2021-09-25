@@ -106,11 +106,6 @@ public:
         HSE = 3
     };
 
-    // Prescaler when using HSE
-    enum RtcPrescaler {
-    }
-
-
     // PLL prescaler
     enum PllPrescale {
         DIV2 = 0,

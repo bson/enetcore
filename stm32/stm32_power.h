@@ -1,5 +1,5 @@
-#ifndef __STM32_POWER__
-#define __STM32_POWER__
+#ifndef __STM32_POWER_H__
+#define __STM32_POWER_H___
 
 class Stm32Power {
     enum {
@@ -18,4 +18,4 @@ public:
     }
 };
 
-#endif // __STM32_POWER__
+#endif // __STM32_POWER_H__

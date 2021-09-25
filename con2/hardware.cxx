@@ -44,7 +44,8 @@ PinOutput<Gpio::Pin> _led; // Green LED
 Clock _clock;
 SysTimer _systimer;
 
-//SerialPort _uart3(UART3_BASE, UART3_IRQ);
+SerialPort _usart3(BASE_USART3);
+SerialPort _uart4(BASE_UART4);
 
 #ifdef ENABLE_PANEL
 Panel _panel;
@@ -350,12 +351,9 @@ void hwinit() {
 	NVic::InstallIRQHandler(CLOCK_IRQ, Clock::Interrupt, IPL_CLOCK, &_clock);
 	NVic::EnableIRQ(CLOCK_IRQ);
 
-//	NVic::InstallIRQHandler(UART3_IRQ, SerialPort::Interrupt, IPL_UART, &_uart3);
-//	NVic::EnableIRQ(UART3_IRQ);
+	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);
+	NVic::EnableIRQ(INTR_USART3);
     
-//    NVic::InstallIRQHandler(EEPROM_IRQ, Eeprom::Interrupt, IPL_EEPROM, &_eeprom);
-//    NVic::EnableIRQ(EEPROM_IRQ);
-
     // Turn on proper assert handling
     _assert_stop = false;
 
@@ -372,8 +370,8 @@ void hwinit() {
 #endif
     NVic::EnableIRQ(GPIO_IRQ);
 
-//	_uart3.Init(19200, SerialPort::FRAMING_8N1);
-//	_uart3.SetInterrupts(true);
+	_usart3.InitAsync(19200, 1, APB2_CLK);
+	_usart3.SetInterrupts(true);
 
 	// Enable global interrupts by restoring to a non-disabled state :)
     RestoreInterrupts(0);
