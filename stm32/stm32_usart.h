@@ -18,7 +18,7 @@ private:
     const uintptr_t _base;
     Ring<SEND_BUF_SIZE> _sendq; // TX send q
     Ring<RECV_BUF_SIZE> _recvq; // RX send q
-    Mutex _w_mutex;
+    mutable Mutex _w_mutex;
 
 public:
     enum Register {
@@ -109,9 +109,8 @@ public:
 
     template typename <T>
     [[_finline]] T& reg(const Register r) {
-        return *((T*)(_base + (uint32_t)p*0x400 + (uint32_t)r)); 
+        return *((T*)(_base + (uint32_t)r)); 
     }
-
 
     // Set up for async use.  8 bits no parity.  1 or 2 stop bits.
     void InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timerclk);

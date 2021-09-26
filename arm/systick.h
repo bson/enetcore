@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef _SYSTICK_H_
@@ -22,13 +22,10 @@ class SysTick {
 public:
     SysTick() { }
 
-    void SetResolution(uint) { }
     static void Interrupt(void*);
     void SetTimer(uint usec);
 };
 
-#if !defined(STM)
 typedef SysTick SysTimer;
-#endif
 
 #endif  // _SYSTICK_H_

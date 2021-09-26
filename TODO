@@ -86,18 +86,49 @@ Implement StmGpio
    - PUR, PDR, Float
 - LpcGpio compatible
 
------ TODO
-
 
 Implement StmSerial
 
-Implement Stm32Timer (16 bit timer)
+Implement StmRandom
+- Init()
+- Random()
 
-Implement Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
+Implement Stm32Timer(s)
+- 16 bit
+- 32 bit
+Differences between timers
+TIM2-5
+    "General purpose timer"
+    Prescaler TIM_PSC 16-bit
+    Counter TIM_CNT   16/32-bit
+    Auto reload TIM_ARR 16/32-bit
+    4x capture/compare 16/32-bit
+    Run off bus timer clock
+    Upcount
+      CNT from 0 to ARR, then resets CNT
+      Generates overflow event
+    Downcount
+      CNT from ARR to 0, reset reload from ARR
+      Generates underflow event
+    Up-down counting
+      CNT from 0 ARR
+      Generates overflow event
+      CNT from ARR 0
+      Generates underflow event
+    Events can be disabled during register writes to avoid spurious interrupts or updated
+    Timers can prescale for TIM2
+    TIM2-4 can use external trigger
+    Can be set to pause on debug (see DBG_TIMx_STOP)
+
+----- TODO
+
+Add PWM function to timer similar to LpcPwm
+
+Add device power-on (clock enable) during hwinit
+
+Implement Clock, Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
 
 Add mapping for battery-backed SRAM 
-
-Implement StmRandom
 
 Implement StmCrc
 
@@ -105,7 +136,10 @@ Implement StmSpi
 
 Implement StmI2c (TBD - no use case, need test board)
 
-Implement StmPwm - use to control panel backlight
+Implement StmDac
+
+Implement StmAdc
+
 
 Implement StmRtc
 

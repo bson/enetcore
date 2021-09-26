@@ -18,8 +18,8 @@ enum {
     FOSC = 12000000,            // Crystal = 12MHz
     CLOCK_TICK = 42000000,      // System clock (TIM5) tick: 42MHz
     HCLK = 168000000,           // HCLK/core
-    APB1_CLK = 84000000,        // APB1 bus
-    APB2_CLK = 42000000         // APB2
+    APB1_CLK = 42000000,        // APB1
+    APB2_CLK = 84000000         // APB2 bus
 };
 
 enum {
@@ -39,20 +39,17 @@ enum {
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"
 #include "stm32_usart.h"
+#include "stm32_random.h"
+#include "stm32_timer.h"
 
 //#include "stm32_crc.h"
 //#include "stm32_i2c.h"
 //#include "stm32_spi.h"
-//#include "stm32_timer.h"
 //#include "stm32_eintr.h"
 //#include "stm32_pwm.h"
 
 // SoC peripherals used on CON2
 
-typedef Stm32Power Power;
-typedef Stm32ClockTree ClockTree;
-typedef Stm32Flash Flash;
-typedef Stm32SysCfg SysCfg;
 typedef Stm32GpioPort Gpio;
 typedef Stm32Usart SerialPort;
 
@@ -65,7 +62,6 @@ typedef Stm32Usart SerialPort;
 //typedef Stm32GpioIntr GpioIntr;
 //typedef Stm32Pwm Pwm;
 
-extern ClockTree _clocktree;
 extern NVic _nvic;
 
 //extern I2cBus _i2c2;

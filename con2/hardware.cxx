@@ -41,7 +41,7 @@ PinOutput<Gpio::Pin> _led; // Green LED
 //SpiBus _spi1(BASE_SPI1);
 //SpiBus _spi2(BASE_SPI2);
 
-Clock _clock;
+Clock _clock(BASE_TIM5, APB1_CLK);
 SysTimer _systimer;
 
 SerialPort _usart3(BASE_USART3);
@@ -320,36 +320,15 @@ void hwinit() {
 
     NVic::InstallCSWHandler(PENDSV_VEC, IPL_CSW);
 
-	// Grab 32 bytes from AIN2
-    // XXX encapsulate the ADC!
-//    volatile uint32_t& ADCR = ((volatile uint32_t*)ADC_BASE)[0];
-//    volatile uint32_t& GDR = ((volatile uint32_t*)ADC_BASE)[1];
-//    volatile uint32_t& INTEN = ((volatile uint32_t*)ADC_BASE)[3];
+    Stm32Random::Init();
 
-//    INTEN = 0;
-
-#if 0
-    // 2 - AIN2;  PCLK/12400000-1 divider; 21 - enable; 
-    enum { ADC_DIV = (PCLK / 12400000) - 1};
-    ADCR = BIT2 | ((ADC_DIV >= 0 ? ADC_DIV : 0) << 8) | BIT21;
-    
-	uint8_t buf[32];
-	for (uint8_t* p = (uint8_t*)buf; p < (uint8_t*)buf + sizeof buf; ) {
-		ADCR |= BIT24;		// Go
-		uint32_t ad;
-		do {
-			ad = GDR;
-		} while (!(ad & BIT31)); // 31 - done
-		*p++ = ad & 0xffff;
-	}
-	ADCR = 0;					// Power down ADC
-
-	Util::RandomSeed(buf, sizeof buf);
-#endif
+    uint8_t buf[32];
+    Stm32Random::Random(buf, sizeof buf);
+    Util::RandomSeed((const void*)buf, sizeof buf);
 
 	// Install IRQ handlers
-	NVic::InstallIRQHandler(CLOCK_IRQ, Clock::Interrupt, IPL_CLOCK, &_clock);
-	NVic::EnableIRQ(CLOCK_IRQ);
+	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, INTR_TIM5, &_clock);
+	NVic::EnableIRQ(INTR_TIM5);
 
 	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);
 	NVic::EnableIRQ(INTR_USART3);
@@ -370,7 +349,7 @@ void hwinit() {
 #endif
     NVic::EnableIRQ(GPIO_IRQ);
 
-	_usart3.InitAsync(19200, 1, APB2_CLK);
+	_usart3.InitAsync(19200, 1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
 	// Enable global interrupts by restoring to a non-disabled state :)
@@ -399,20 +378,15 @@ void hwinit() {
     _touch_dev.SetSSEL(&_t_cs);
 #endif
 
-//    DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
-//    DMSG("CCLK: %d  PCLK: %d", CCLK, PCLK);
+    DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
+    DMSG("CCLK: %d  PCLK: %d", CCLK, PCLK);
 
     _malloc_region.SetReserve(64);
 
-#if 0
     console("\r\nCON2 Rev 1 [%s:%s %s %s]",
             _build_branch, _build_commit, _build_user, _build_date);
 
-    console("Copyright (c) 2018-2021 Jan Brittenson");
-    console("All Rights Reserved\r\n");
-
     DMSG("Random uint: 0x%x", Util::Random<uint>());
-#endif
 }
 
 
