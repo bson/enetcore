@@ -1,4 +1,4 @@
-SOC_SRCS = stm32_usat.cxx
+SOC_SRCS = stm32_usart.cxx
 
 CFLAGS += -I$(STM32DIR)
 
