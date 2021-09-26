@@ -262,6 +262,9 @@ void hwinit() {
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();
 
+    // Turn on LED
+    _led.Raise();
+
     // 12MHz crystal
     // * 56/2 = 336MHz (VCO)
     // 336MHz/2 = 168MHz sysclk
@@ -363,9 +366,10 @@ void hwinit() {
 	_clock.RunTimerFreq(HZ);
 
     // First line of text
-//    _uart3.Write("\r\nEnetcore booting up...\r\n");
+    _uart3.Write("\r\nEnetcore booting up...\r\n");
+    _uart3.SyncDrain();
 
-    // Turn off LEDs
+    // Turn LED back off
     _led.Lower();
 
 //	_spi1.Init();

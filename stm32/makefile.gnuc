@@ -1,0 +1,7 @@
+SOC_SRCS = stm32_usat.cxx
+
+CFLAGS += -I$(STM32DIR)
+
+SRCS += $(addprefix $(SOCDIR)/,$(SOC_SRCS))
+
+ODIR_TREE += $(ODIR)/$(SOCDIR)

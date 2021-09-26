@@ -120,30 +120,29 @@ TIM2-5
     TIM2-4 can use external trigger
     Can be set to pause on debug (see DBG_TIMx_STOP)
 
------ TODO
+Implement Clock, Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
 
-Add PWM function to timer similar to LpcPwm
+----- TODO
 
 Add device power-on (clock enable) during hwinit
 
-Implement Clock, Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
+Add PWM function to timer similar to LpcPwm
 
 Add mapping for battery-backed SRAM 
 
-Implement StmCrc
-
 Implement StmSpi
-
-Implement StmI2c (TBD - no use case, need test board)
 
 Implement StmDac
 
 Implement StmAdc
 
-
 Implement StmRtc
 
 Implement StmWdt
+
+Implement StmCrc
+
+Implement StmI2c (TBD - no use case, need test board)
 
 Implement StmEthernet (TBD - no use case, need test board)
 
