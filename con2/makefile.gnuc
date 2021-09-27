@@ -5,7 +5,7 @@ BOARD_SRCS = hardware.cxx
 # SSD1963 is inlined in hardware.cxx
 HARDWARE_SRCS = tsc2046.cxx
 
-SOCDIR=stm
+SOCDIR=stm32
 ARMDIR=arm
 
 VARIANT=-DSTMF=1 -DSTM=405
@@ -22,7 +22,6 @@ AR   = $(TOOLDIR)/$(TARGET)-ar
 AS   = $(TOOLDIR)/$(TARGET)-as
 SIZE = $(TOOLDIR)/$(TARGET)-size
 
-#CHECKSUM = /usr/local/bin/lpcpatchelf -c 7 -f 
 CHECKSUM = true
 
 CFLAGS += -I$(BOARD) -I$(SOCDIR) -I$(ARMDIR)  -Ihardware $(VARIANT)  \

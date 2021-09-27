@@ -15,18 +15,17 @@
 #define ENABLE_WFI
 
 enum { 
-    FOSC = 12000000,            // Crystal = 12MHz
-    CLOCK_TICK = 42000000,      // System clock (TIM5) tick: 42MHz
-    HCLK = 168000000,           // HCLK/core
-    APB1_CLK = 42000000,        // APB1
+    FOSC          = 12000000,   // Crystal = 12MHz
+    HCLK          = 168000000,  // HCLK/core
+    APB1_CLK      = 42000000,   // APB1
     APB1_TIMERCLK = 42000000,   // APB1 timer clock
-    APB2_CLK = 84000000,        // APB2 bus
-    APB2_TIMERCLK = 84000000    // APB2 timer clock
+    APB2_CLK      = 84000000,   // APB2 bus
+    APB2_TIMERCLK = 84000000,   // APB2 timer clock
+    CLOCK_TICK    = 42000000,   // System clock (TIM5) tick: 42MHz
 };
 
 enum {
     I2C_BUS_SPEED = 100000,
-    USBCLK = 48000000,
 };
 
 #define PACKAGE_PINS 100
@@ -44,6 +43,7 @@ enum {
 #include "stm32_usart.h"
 #include "stm32_random.h"
 #include "stm32_timer.h"
+#include "stm32_backup.h"
 
 //#include "stm32_crc.h"
 //#include "stm32_i2c.h"
