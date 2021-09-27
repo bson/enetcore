@@ -41,7 +41,7 @@ PinOutput<Gpio::Pin> _led; // Green LED
 //SpiBus _spi1(BASE_SPI1);
 //SpiBus _spi2(BASE_SPI2);
 
-Clock _clock(BASE_TIM5, APB1_CLK);
+Clock _clock(BASE_TIM5, APB1_TIMERCLK);
 SysTimer _systimer;
 
 SerialPort _usart3(BASE_USART3);
@@ -55,6 +55,18 @@ EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 SpiDev _touch_dev(_spi0);
 TouchController _touch(_touch_dev, 480, 272);
 #endif
+// Backlight
+PinNegOutput<Gpio::Pin> _panel_bl;
+
+// ESP12E interface
+PinOutput<Gpio::Pin> _esp_boot_sel;
+PinNegOutput<Gpio::Pin> _esp_rst;
+//XXX INterrupt on PA2 ESP_INT (active low)
+PinNegOutput<Gpio::Pin> _esp_spi_cs0
+
+// SSR switch
+PinOutput<Gpio::Pin> _ssr_conduct;
+
 
 // Flash the LED a certain number of times to indicate a fault,
 // followed by a pause, where the number of pulses indicares a cause.
@@ -200,10 +212,15 @@ void ConfigurePins() {
 #undef PINCONF    
 
     Stm32Gpio::PortConfig(&pinconf);
-    _led = _gpio_b(Gpio::Port::B).GetPin(7);
 
+    _led          = _gpio_b.GetPin(7);
+    _panel_bl     = _gpio_b.GetPin(9);
+    _esp_boot_sel = _gpio_c.GetPin(5);
+    _esp_rst      = _gpio_c.GetPin(4);
+    _esp_spi_cs0  = _gpio_a.GetPin(3);
+    _ssr_conduct  = _gpio_c.GetPin(0);
 #ifdef ENABLE_PANEL
-    _t_cs        = _gpio_b.GetPin(12);
+    _t_cs         = _gpio_b.GetPin(12);
 #endif
 }
 
@@ -256,8 +273,21 @@ void hwinit() {
     Stm32Flash::Latency(uint32_t((HCLK+1000000)/30000000));
 
     // Power on/off peripherals
-//    PCONP = CLOCK_PCON | PCUART3 | PCSSP0 | PCI2C2 | PCI2S | PCADC | PCGPIO | PCSSP0;
-//    PCONP1 = 0;
+    Stm32ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN);
+    Stm32ClockTree::EnableAHB2(AHB2_RNGEN);
+#ifdef ENABLE_PANEL
+    Stm32ClockTree::EnableAHB3(AHB3_FSMCEN);
+#endif
+    Stm32ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
+    Stm32ClockTree::EnableAPB2(APB_SYSCFGEN);
+
+    Stm32ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN);
+    Stm32ClockTree::EnableAHB2LP(AHB2_RNGEN);
+#ifdef ENABLE_PANEL
+    Stm32ClockTree::EnableAHB3LP(AHB3_FSMCEN);
+#endif
+    Stm32ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
+    Stm32ClockTree::EnableAPB2LP(APB_SYSCFGEN);
 
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();
@@ -286,11 +316,11 @@ void hwinit() {
         .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
     };
 
-    Stm32ClockTree.Configure(clkconf);
+    Stm32ClockTree::Configure(clkconf);
 
 #ifdef CLKOUTPIN
     // 12/2 = 6MHz on MCO1
-    Stm32ClockTree.EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler.DIV2);
+    Stm32ClockTree::EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler.DIV2);
 #endif
 
 #ifdef ENABLE_PANEL
@@ -383,7 +413,9 @@ void hwinit() {
 #endif
 
     DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
-    DMSG("CCLK: %d  PCLK: %d", CCLK, PCLK);
+    DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
+    DMSG("APB1CLK: %d  APB2CLK: %d", APB1_CLK, APB2_CLK);
+    DMSG("APB2TCLK: %d APB2TCLK: %d", APB1_TIMERCLK, APB2_TIMERCLK);
 
     _malloc_region.SetReserve(64);
 

@@ -122,9 +122,19 @@ TIM2-5
 
 Implement Clock, Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
 
+Add device power-on (clock enable) during hwinit
+
+Add missing pin instances and initialize them
+
+Add defs for APBx_TIMERCLK as it may not match the bus clock
+
 ----- TODO
 
-Add device power-on (clock enable) during hwinit
+DBG: stop timers during debugging
+
+Make it all compile again!
+
+----
 
 Add PWM function to timer similar to LpcPwm
 
