@@ -339,6 +339,9 @@ void hwinit() {
 	// Initialize main thread and set up stacks
 	_main_thread = &Thread::Bootstrap();
 
+    // Freeze WWDT while in breakpoint
+    Stm32Debug::FreezeAPB1(Stm32Debug::APB1_WWDT_STOP);
+
 	// Initialize NVIC after threading, because the handler expect threads
     NVic::Init(Unexpected_Interrupt, IPL_UNEXP);
 
@@ -394,6 +397,7 @@ void hwinit() {
 	// Start clock
 	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ);
+    Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     // First line of text
     _uart3.Write("\r\nEnetcore booting up...\r\n");

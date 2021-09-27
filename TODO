@@ -128,9 +128,9 @@ Add missing pin instances and initialize them
 
 Add defs for APBx_TIMERCLK as it may not match the bus clock
 
------ TODO
-
 DBG: stop timers during debugging
+
+----- TODO
 
 Make it all compile again!
 

@@ -37,6 +37,7 @@ enum {
 #include "systick.h"
 #include "stm32_power.h"
 #include "stm32_clocktree.h"
+#include "stm32_debug.h"
 #include "stm32_flash.h"
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"
