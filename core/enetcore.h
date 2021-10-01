@@ -10,6 +10,8 @@
 
 #include "compiler.h"
 
+enum { NOT_FOUND = (uint)-1 };
+
 #define USE_LITERALS
 
 #include "hardware.h"
@@ -18,8 +20,6 @@
 #include "mem.h"
 
 #include "assert.h"
-
-enum { NOT_FOUND = (uint)-1 };
 
 typedef bool (*OrderFunc)(const void* a, const void* b);
 

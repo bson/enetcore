@@ -34,7 +34,7 @@ Gpio _gpio_d(Gpio::Port::D);
 Gpio _gpio_e(Gpio::Port::E);
 
 //GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
-//GpioIntr _gpio2_intr(GPIO2_INTR_BASE);
+//GpioIntr _gpio2_intr(GPIO2_INhaTR_BASE);
 
 PinOutput<Gpio::Pin> _led; // Green LED
 
@@ -62,7 +62,7 @@ PinNegOutput<Gpio::Pin> _panel_bl;
 PinOutput<Gpio::Pin> _esp_boot_sel;
 PinNegOutput<Gpio::Pin> _esp_rst;
 //XXX INterrupt on PA2 ESP_INT (active low)
-PinNegOutput<Gpio::Pin> _esp_spi_cs0
+PinNegOutput<Gpio::Pin> _esp_spi_cs0;
 
 // SSR switch
 PinOutput<Gpio::Pin> _ssr_conduct;
@@ -163,10 +163,10 @@ void ConfigurePins() {
     { Stm32Gpio::Port::PORT, PIN, Stm32Gpio::Mode::MODE, AF, Stm32Gpio::Type::TYPE, Stm32Gpio::Speed::SPEED }
 
     static const Stm32Gpio::PinConf pinconf[] = {
-        PINCONF(B, 10,  AF,  7, NONE, SLOW),
-        PINCONF(B, 11,  AF,  7, NONE, SLOW),
-        PINCONF(A,  1,  AF,  8, NONE, SLOW),
-        PINCONF(A,  0,  AF,  8, NONE, SLOW),
+        PINCONF(B, 10,  AF,  7, NONE, LOW),
+        PINCONF(B, 11,  AF,  7, NONE, LOW),
+        PINCONF(A,  1,  AF,  8, NONE, LOW),
+        PINCONF(A,  0,  AF,  8, NONE, LOW),
         PINCONF(C,  5, OUT,  0, NONE, MEDIUM),
         PINCONF(C,  4, OUT,  0, NONE, MEDIUM),
         PINCONF(A,  2,  IN,  0,  PDR, MEDIUM),
@@ -200,18 +200,18 @@ void ConfigurePins() {
         PINCONF(B, 15,  AF,  5, NONE, MEDIUM),
         PINCONF(B, 12,  AF,  5, NONE, MEDIUM),
         PINCONF(B, 13,  AF,  5, NONE, MEDIUM),
-        PINCONF(B,  0, ANALOG,0,NONE, SLOW),
-        PINCONF(B,  7, OUT,  0, NONE, SLOW),
-        PINCONF(A,  4, ANALOG,0,NONE, SLOW),
+        PINCONF(B,  0, ANALOG,0,NONE, LOW),
+        PINCONF(B,  7, OUT,  0, NONE, LOW),
+        PINCONF(A,  4, ANALOG,0,NONE, LOW),
 #ifdef CLKOUTPIN
         PINCONF(A,  8,  AF,  0, NONE, FAST),
 #endif
-        PINCONF(C,  0, OUT,  0, NONE, SLOW),
-        PINCONF(END,0,  IN,  0, NONE, SLOW)
+        PINCONF(C,  0, OUT,  0, NONE, LOW),
+        PINCONF(END,0,  IN,  0, NONE, LOW)
     };
 #undef PINCONF    
 
-    Stm32Gpio::PortConfig(&pinconf);
+    Stm32Gpio::PortConfig(pinconf);
 
     _led          = _gpio_b.GetPin(7);
     _panel_bl     = _gpio_b.GetPin(9);
@@ -269,7 +269,9 @@ void hwinit0() {
 
 // "Soft" system initialization.  Initializers have been run now.
 void hwinit() {
-    Stm32Power::Vos(HCLK > 144000000 ? 1 : 0);
+    if (HCLK > 144000000)
+        Stm32Power::EnableVos();
+
     Stm32Flash::Latency(uint32_t((HCLK+1000000)/30000000));
 
     // Power on/off peripherals
@@ -279,7 +281,7 @@ void hwinit() {
     Stm32ClockTree::EnableAHB3(AHB3_FSMCEN);
 #endif
     Stm32ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
-    Stm32ClockTree::EnableAPB2(APB_SYSCFGEN);
+    Stm32ClockTree::EnableAPB2(APB2_SYSCFGEN);
 
     Stm32ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN);
     Stm32ClockTree::EnableAHB2LP(AHB2_RNGEN);
@@ -287,7 +289,7 @@ void hwinit() {
     Stm32ClockTree::EnableAHB3LP(AHB3_FSMCEN);
 #endif
     Stm32ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
-    Stm32ClockTree::EnableAPB2LP(APB_SYSCFGEN);
+    Stm32ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
 
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();
@@ -320,7 +322,7 @@ void hwinit() {
 
 #ifdef CLKOUTPIN
     // 12/2 = 6MHz on MCO1
-    Stm32ClockTree::EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler.DIV2);
+    Stm32ClockTree::EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler::DIV2);
 #endif
 
 #ifdef ENABLE_PANEL
@@ -360,7 +362,7 @@ void hwinit() {
 
     uint8_t buf[32];
     Stm32Random::Random(buf, sizeof buf);
-    Util::RandomSeed((const void*)buf, sizeof buf);
+    Util::RandomSeed(buf, sizeof buf);
 
 	// Install IRQ handlers
 	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, INTR_TIM5, &_clock);
@@ -376,16 +378,16 @@ void hwinit() {
 //	NVic::EnableIRQ(I2C2_IRQ);
 
     // Generic GPIO pin interrupt handler
-    NVic::InstallIRQHandler(GPIO_IRQ, gpio_intr, IPL_GPIO, NULL);
+    //NVic::InstallIRQHandler(GPIO_IRQ, gpio_intr, IPL_GPIO, NULL);
 
 #ifdef ENABLE_PANEL
     _gpio0_intr.EnableR(BIT22);      // Enable P0.22 Rising edge interrupts
     _gpio0_intr.EnableF(BIT22);      // Enable P0.22 Falling edge interrupts
     _gpio0_intr.Clear(BIT22);
 #endif
-    NVic::EnableIRQ(GPIO_IRQ);
+    //NVic::EnableIRQ(GPIO_IRQ);
 
-	_usart3.InitAsync(19200, 1, APB1_CLK);
+	_usart3.InitAsync(19200, Stm32Usart::StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
 	// Enable global interrupts by restoring to a non-disabled state :)
@@ -395,13 +397,12 @@ void hwinit() {
     SetIPL(0);
 
 	// Start clock
-	_clock.SetResolution(TIME_RESOLUTION);
 	_clock.RunTimerFreq(HZ);
     Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     // First line of text
-    _uart3.Write("\r\nEnetcore booting up...\r\n");
-    _uart3.SyncDrain();
+    _usart3.Write("\r\nEnetcore booting up...\r\n");
+    _usart3.SyncDrain();
 
     // Turn LED back off
     _led.Lower();

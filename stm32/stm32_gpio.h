@@ -2,7 +2,7 @@
 #define __STM32_GPIO_H__
 
 class Stm32Gpio {
-    enum Register {
+    enum class Register {
         GPIO_MODER    = 0x00,
         GPIO_OTYPER   = 0x04,
         GPIO_OSPEEDER = 0x08,
@@ -16,18 +16,18 @@ class Stm32Gpio {
     };
 
 public:
-    enum Port {
+    enum class Port {
         A = 0, B, C, D, E, F, G, H, I, J, K, END
     };
 
-    enum Mode {
+    enum class Mode {
         IN        = 0,
         OUT       = 1,
         AF        = 2,
         ANALOG    = 3
     };
 
-    enum Type {
+    enum class Type {
         NONE      = 0b0000,
         FLOAT     = 0b0000,
         PUR       = 0b0001,
@@ -36,7 +36,7 @@ public:
         OD_PDR    = 0b0110
     };
         
-    enum Speed {
+    enum class Speed {
         LOW    = 0,
         MEDIUM = 1,
         FAST   = 2,
@@ -52,34 +52,34 @@ public:
         Speed    speed;
     };
 
-    template typename <T>
-    [[_finline]] static T& reg(const Port p, const Register r) {
+    template <typename T>
+    static T& reg(const Port p, const Register r) {
         return *((T*)(BASE_GPIOA + (uint32_t)p*0x400 + (uint32_t)r)); 
     }
 
-    static void PortConfig(const PinConf* pinconff) {
+    static void PortConfig(const PinConf* pinconf) {
         while (pinconf->port != Port::END) {
-            volatile uint32_t& mode = reg<volatile uint32_t>(pinconf->port, GPIO_MODER);
+            volatile uint32_t& mode = reg<volatile uint32_t>(pinconf->port, Register::GPIO_MODER);
             mode = (mode & ~(3 << (pinconf->pin*2)))
                 | ((uint32_t)pinconf->mode << (pinconf->pin*2));
 
             if (pinconf->mode == Mode::AF) {
                 volatile uint32_t& af = reg<volatile uint32_t>(pinconf->port,
-                                                                pinconf->pin < 8 ? GPIO_AFRL : GPIO_AFRH);
+                                   pinconf->pin < 8 ? Register::GPIO_AFRL : Register::GPIO_AFRH);
                 const uint32_t shift = (pinconf->pin & 7) * 4;
                 af = (af & ~(0xf << shift)) 
                     | (pinconf->af << shift);
             }
 
-            volatile uint32_t& speed = reg<volatile uint32_t>(pinconf->port, GPIO_OSPEEDER);
+            volatile uint32_t& speed = reg<volatile uint32_t>(pinconf->port, Register::GPIO_OSPEEDER);
             speed = (speed & ~(3 << (pinconf->pin*2)))
                 | ((uint32_t)pinconf->speed << (pinconf->pin*2));
 
-            volatile uint32_t& otyper = reg<volatile uint32_t>(pinconf->port, GPIO_OTYPER);
+            volatile uint32_t& otyper = reg<volatile uint32_t>(pinconf->port, Register::GPIO_OTYPER);
             otyper = (otyper & ~(1 << pinconf->pin))
                 | ((pinconf->type >= Type::OD_PUR ? 1 : 0) << pinconf->pin);
 
-            volatile uint32_t& pupdr = reg<volatile uint32_t>(pinconf->port, GPIO_PUPDR);
+            volatile uint32_t& pupdr = reg<volatile uint32_t>(pinconf->port, Register::GPIO_PUPDR);
             pupdr = (pupdr & ~(3 << pinconf->pin*2))
                 | (((uint32_t)pinconf->type & 0b0011) << (pinconf->pin*2));
 
@@ -88,30 +88,32 @@ public:
     }
     
     [[__finline]] static void Set(Port port, uint32_t mask) {
-        reg<volatile uint32_t>(port, GPIO_BSRR) = mask;
+        reg<volatile uint32_t>(port, Register::GPIO_BSRR) = mask;
     }
 
     [[__finline]] static void Clear(Port port, uint32_t mask) {
-        reg<volatile uint32_t>(port, GPIO_BSRR) = mask << 16;
+        reg<volatile uint32_t>(port, Register::GPIO_BSRR) = mask << 16;
     }
 
-    [[__finline]] static uint32_t Input() { return reg<volatile uint32_t>(port, GPIO_IDR); }
+    [[__finline]] static uint32_t Input(Port port) {
+        return reg<volatile uint32_t>(port, Register::GPIO_IDR);
+    }
 
     [[__finline]] static void Output(Port port, uint32_t mask, uint32_t value) {
-        volatile uint32_t& r = reg<volatile uint32_t>(port, GPIO_ODR);
+        volatile uint32_t& r = reg<volatile uint32_t>(port, Register::GPIO_ODR);
         r = (r & ~mask) | value;
     }
 
     static void SetPin(Port port, uint8_t pin) {
-        reg<volatile uint32_t>(port, GPIO_BSRR) = 1 << pin;
+        reg<volatile uint32_t>(port, Register::GPIO_BSRR) = 1 << pin;
     }
 
     static void ResetPin(Port port, uint8_t pin) {
-        reg<volatile uint32_t>(port, GPIO_BSRR) = (1 << 16) << pin;
+        reg<volatile uint32_t>(port, Register::GPIO_BSRR) = (1 << 16) << pin;
     }
 
     static bool TestPin(Port port, uint8_t pin) {
-        return reg<volatile uint32_t>(port, GPIO_IDR) & (1 << pin);
+        return reg<volatile uint32_t>(port, Register::GPIO_IDR) & (1 << pin);
     }
 };
 
@@ -128,8 +130,8 @@ public:
     
     [[__finline]] void Set(uint32_t mask) { Stm32Gpio::Set(_port, mask); }
     [[__finline]] void Clear(uint32_t mask) { Stm32Gpio::Clear(_port, mask); }
-    [[__finline]] uint32_t Input() { return Stm32GPio::Input(_port); }
-    [[__finline]] void Output(uint32_t mask, uint32_t value) { Stm32Gpio::Output(_port, mask value); }
+    [[__finline]] uint32_t Input() { return Stm32Gpio::Input(_port); }
+    [[__finline]] void Output(uint32_t mask, uint32_t value) { Stm32Gpio::Output(_port, mask, value); }
 
     // Self-contained Pin
 	class __novtable Pin {
@@ -149,7 +151,7 @@ public:
 
 		void Set() { Stm32Gpio::SetPin(_port, _pin); }
 		void Reset() { Stm32Gpio::ResetPin(_port, _pin); }
-		bool Test() { return Stm32Gpio::TestPin(_pin); }
+		bool Test() { return Stm32Gpio::TestPin(_port, _pin); }
 
 		void operator=(uint arg) { if (arg) Set(); else Reset(); }
 		operator bool() { return Test(); }

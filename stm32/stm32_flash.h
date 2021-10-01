@@ -21,11 +21,11 @@ public:
     };
 
 private:
-    template typename <T>
-    [[_finline]] static T& reg(const Register r) { return *((T*)(BASE_FLASH+(uint32_t)r)); }
+    template <typename T>
+    static T& reg(const Register r) { return *((T*)(BASE_FLASH+(uint32_t)r)); }
 
 public:
-    static void Init(uint32_t latency) {
+    static void Latency(uint32_t latency) {
         reg<volatile uint32_t>(Register::FLASH_ACR) |= BIT(DCRST) | BIT(ICRST);
         reg<volatile uint32_t>(Register::FLASH_ACR) = (reg<const uint32_t>(Register::FLASH_ACR) & ~(3 << LATENCY))
             | BIT(DCEN) | BIT(ICEN) | BIT(PRFTEN) | (latency << LATENCY);

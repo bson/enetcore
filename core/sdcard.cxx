@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_SDCARD
+
 #include "enetkit.h"
 #include "sdcard.h"
 #include "board.h"
@@ -262,3 +264,5 @@ void SDCard::Release()
     if (!--_inuse && _drivelock)
         _drivelock->Lower();
 }
+
+#endif // ENABLE_SDCARD

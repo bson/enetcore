@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_TSC2046
+
 #include "enetcore.h"
 #include "tsc2046.h"
 #include "board.h"
@@ -60,3 +62,5 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
 }
 
 }; // ns tsc2046
+
+#endif // ENABLE_TSC2046

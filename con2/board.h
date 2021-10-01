@@ -9,7 +9,6 @@
 
 #undef ENABLE_ENET
 #undef ENABLE_USB
-#define ENABLE_PLL_CLK          // Undefine to run at 1:1 with crystal, at 12MHz
 #undef ENABLE_PANEL
 
 #define ENABLE_WFI
@@ -25,6 +24,10 @@ enum {
 };
 
 enum {
+    CCLK = HCLK                 // For SysTick
+};
+
+enum {
     I2C_BUS_SPEED = 100000,
 };
 
@@ -35,7 +38,7 @@ enum {
 #include "nvic.h"
 #include "systick.h"
 #include "stm32_power.h"
-#include "stm32_clocktree.h"
+#include "stm32_clock_tree.h"
 #include "stm32_debug.h"
 #include "stm32_flash.h"
 #include "stm32_syscfg.h"
@@ -55,13 +58,14 @@ enum {
 
 typedef Stm32GpioPort Gpio;
 typedef Stm32Usart SerialPort;
+typedef Stm32Timer<uint32_t> Timer32;
+typedef Stm32Timer<uint16_t> Timer;
 
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;
 //typedef Stm32I2cDev I2cDev;
 //typedef Stm32SpiBus SpiBus;
 //typedef Stm32SpiDev SpiDev;
-//typedef Stm32Timer Timer;
 //typedef Stm32GpioIntr GpioIntr;
 //typedef Stm32Pwm Pwm;
 
@@ -69,7 +73,7 @@ extern NVic _nvic;
 
 //extern I2cBus _i2c2;
 extern SerialPort _usart3;
-extern SerialPOrt _uart4;
+extern SerialPort _uart4;
 //extern SpiBus _spi0;
 
 extern Gpio _gpio_a;

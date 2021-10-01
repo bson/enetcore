@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_USBTMC
+
 #include "enetcore.h"
 #include "usb.h"
 #include "usbtmc.h"
@@ -211,3 +213,5 @@ void UsbTmc::Ask(String& s) {
         Reply(r);
     }
 }
+
+#endif // ENABLE_USBTMC

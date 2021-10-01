@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetkit.h"
 #include "ip.h"
 #include "udp.h"
@@ -675,3 +677,5 @@ bool Ip::Route::Order(const void* ra, const void* rb)
 	const Route& b = **(Route**)rb;
 	return a.expire > b.expire;
 }
+
+#endif

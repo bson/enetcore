@@ -51,6 +51,7 @@ public:
 
         // XXX do this in-place, with one or two memmoves.  We really
         // don't want to allocate a temporary buffer on the heap.
+        extern void* xmalloc(size_t);
         T* tmp = xmalloc(N * sizeof (T));
         memcpy(tmp, _v, N * sizeof (T));
         const uint h = N - _head;

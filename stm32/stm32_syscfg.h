@@ -2,7 +2,7 @@
 #define __STM32_SYSCFG_H__
 
 class Stm32SysCfg {
-    enum Register {
+    enum class Register {
         SYSCFG_MEMRMP  = 0x00,
         SYSCFG_PMC     = 0x04,
         SYSCFG_EXTICR1 = 0x08,
@@ -28,23 +28,27 @@ public:
         
 
 private:
-    template typename <T>
-    [[_finline]] static T& reg(const Register r) { return *((T*)(BASE_SYSCFG + (uint32_t)r)); }
+    template <typename T>
+    static T& reg(const Register r) { return *((T*)(BASE_SYSCFG + (uint32_t)r)); }
+
+    template <typename T>
+    static T& reg(const uint32_t r) { return *((T*)(BASE_SYSCFG + (uint32_t)r)); }
 
 public:
     static void MapExti(Port p, uint32_t pin) {
         pin &= 0xf;
-        volatile uint32_t& r = reg<volatile uint32_t>(SYSCFG_EXTICR1 + pin/4);
+        volatile uint32_t& r = reg<volatile uint32_t>((uint32_t)Register::SYSCFG_EXTICR1 + pin/4);
         r = (r & ~(0b1111 << ((pin % 4) * 4)))
             | ((uint32_t)p << ((pin % 4) * 4));
     }
 
     static void Init(bool cmpcell) {
         if (cmpcell) {
-            volatile uint32_t& r = reg<volatile uint32_t>(SYSCFG_CMPCR);
+            volatile uint32_t& r = reg<volatile uint32_t>(Register::SYSCFG_CMPCR);
             r |= BIT(CMP_PD);
             while (!(r & BIT(READY)))
                 ;
+        }
     }
 };
 

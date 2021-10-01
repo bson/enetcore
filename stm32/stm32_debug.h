@@ -43,6 +43,6 @@ public:
     static void FreezeAPB2(uint32_t bits) {
         reg<volatile uint32_t>(DBGMCU_APB2_FZ) |= bits;
     }
-}
+};
 
 #endif // __STM32_DEBUG_H__

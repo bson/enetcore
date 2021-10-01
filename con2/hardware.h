@@ -4,7 +4,7 @@
 #ifndef __HARDWARE_H__
 #define __HARDWARE_H__
 
-#include "stm32f405.h"
+#include "stm32.h"
 
 // Set to 0 to disable nested interrupts for debugging
 
@@ -105,13 +105,6 @@ void fault0(uint num);
     }
 }
 
-// Use TIMER3 for system clock
-enum {
-    CLOCK_BASE = TIMER3_BASE,
-    CLOCK_IRQ  = TIMER3_IRQ,
-    CLOCK_PCON = PCTIM3
-};
-
 // Memory layout:
 //    0x00000000 FLASH sections
 //
@@ -135,6 +128,7 @@ enum {
 #define TEXT_REGION_SIZE  ((uintptr_t)&_etext - TEXT_REGION_START)
 
 #ifdef ENABLE_PANEL
+#enable ENABLE_TSC2046
 #define UI_THREAD_TERM (UI_THREAD_STACK + THREAD_DATA_SIZE)
 #else
 #define UI_THREAD_TERM 0
@@ -151,5 +145,7 @@ enum {
 // on startup.
 #define MALLOC_REGION_START ((uint8_t*)(((uintptr_t)&_bss_end + 3) & ~3))
 #define MALLOC_REGION_SIZE  (IRAM_REGION_START - MALLOC_REGION_START)
+
+#include "stm32_timer.h"
 
 #endif // __HARDWARE_H__

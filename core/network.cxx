@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetkit.h"
 #include "network.h"
 #include "ip.h"
@@ -200,3 +202,5 @@ void* NetThread(void*)
 	// Notreached
 	return NULL;
 }
+
+#endif // ENABLE_IP

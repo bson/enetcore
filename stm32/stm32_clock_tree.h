@@ -10,7 +10,7 @@ class Stm32ClockTree {
         RCC_PLLCFGR  = 0x04,
         RCC_CFGR     = 0x08,
         RCC_CIR      = 0x0c,
-        RCC_AHB2RSTR = 0x10,
+        RCC_AHB1RSTR = 0x10,
         RCC_AHB2RSTR = 0x14,
         RCC_AHB3RSTR = 0x18,
         RCC_APB1RSTR = 0x20,
@@ -87,19 +87,19 @@ class Stm32ClockTree {
 
 public:
     // Clock sources
-    enum SysClkSource {
+    enum class SysClkSource {
         HSI = 0,
         HSE = 1,
         PLL = 2
     };
 
-    enum PllClkSource {
+    enum class PllClkSource {
         HSI = 0,
         HSE = 1,
         OFF
     };
 
-    enum RtcClkSource {
+    enum class RtcClkSource {
         OFF = 0,
         LSI = 1,
         LSE = 2,
@@ -107,7 +107,7 @@ public:
     };
 
     // PLL prescaler
-    enum PllPrescale {
+    enum class PllPrescale {
         DIV2 = 0,
         DIV4 = 1,
         DIV6 = 2,
@@ -115,7 +115,7 @@ public:
     };
 
     // HCLK prescaler
-    enum HclkPrescale {
+    enum class HclkPrescale {
         DIV1   = 0,
         DIV2   = 8,
         DIV4   = 9,
@@ -128,7 +128,7 @@ public:
     };
 
     // APB1,2 prescalers
-    enum ApbPrescale {
+    enum class ApbPrescale {
         DIV1  = 0,
         DIV2  = 4,
         DIV4  = 5,
@@ -136,12 +136,12 @@ public:
         DIV16 = 7
     };
 
-    enum I2sSource {
+    enum class I2sSource {
         PLLI2S = 0,
         I2S_CKIN_PIN = 1
     };
         
-    enum PllSysClkDiv {
+    enum class PllSysClkDiv {
         DIV2 = 0,
         DIV4 = 1,
         DIV6 = 2,
@@ -152,9 +152,9 @@ public:
         PllClkSource pll_clk_source;
         uint16_t     pll_vco_mult:9;
         uint8_t      pll_vco_div:6;
-        uint8_t      pll_periph_div:4;  // 2-15
         PllSysClkDiv pll_sysclk_div;
-        SysClkSrc    sys_clk_source;
+        uint8_t      pll_periph_div:4;  // 2-15
+        SysClkSource sys_clk_source;
         HclkPrescale hclk_prescale;
         ApbPrescale  apb1_prescale;
         ApbPrescale  apb2_prescale;
@@ -163,21 +163,21 @@ public:
         I2sSource    i2s_source;
     };
 
-    enum Mco2Output {
+    enum class Mco2Output {
         SYSCLK = 0,
         PLLI2S = 1,
         HSE = 2,
         PLL = 3
     };
 
-    enum Mco1Output {
+    enum class Mco1Output {
         HSI = 0,
         LSE,
         HSE,
         PLL
     };
 
-    enum McoPrescaler {
+    enum class McoPrescaler {
         DIV1 = 0,
         DIV2 = 4,
         DIV3 = 5,
@@ -203,7 +203,7 @@ public:
         // Start the main PLL if wanted
         if (config.pll_clk_source != PllClkSource::OFF) {
             VREG(RCC_PLLCFGR) = (config.pll_periph_div << PLLQ)
-                | (config.pll_sysclk_div << PLLP)
+                | ((uint32_t)config.pll_sysclk_div << PLLP)
                 | (config.pll_vco_mult << PLLN)
                 | (config.pll_vco_div << PLLM)
                 | ((uint32_t)config.pll_clk_source << PLLSRC);
@@ -214,13 +214,13 @@ public:
 
         // Set prescalers for AHB, APB1, APB2
         VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(0b1111 << HPRE) & ~(0b111 << PPRE1) & ~(0b111 << PPRE2))
-            | ((uint32_t)hclk_prescale << HPRE)
-            | ((uint32_t)apb1_prescale << PPRE1)
-            | ((uint32_t)apb2_prescale << PPRE2);
+            | ((uint32_t)config.hclk_prescale << HPRE)
+            | ((uint32_t)config.apb1_prescale << PPRE1)
+            | ((uint32_t)config.apb2_prescale << PPRE2);
 
         // Set the system clock source
         VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << SW))
-            | ((uin32_t)config.sys_clk_source << SW);
+            | ((uint32_t)config.sys_clk_source << SW);
         while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
             ;
 
@@ -301,7 +301,7 @@ public:
     public:
         RtcAccess() { VREG(BASE_PWR) |= BIT(DBP); }
         ~RtcAccess() { VREG(BASE_PWR) &= ~BIT(DBP); }
-    }
+    };
 };
 
 #undef REG

@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetcore.h"
 #include "udp.h"
 #include "ip.h"
@@ -309,3 +311,5 @@ bool UdpCoreSocket::Close()
 	_udp0.Deregister(this);
 	return true;
 }
+
+#endif // ENABLE_IP

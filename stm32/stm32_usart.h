@@ -21,7 +21,7 @@ private:
     mutable Mutex _w_mutex;
 
 public:
-    enum Register {
+    enum class Register {
         USART_SR   = 0x00,
         USART_DR   = 0x04,
         USART_BRR  = 0x08,
@@ -107,8 +107,8 @@ public:
 
     Stm32Usart(const uintptr_t base) : _base(base) { }
 
-    template typename <T>
-    [[_finline]] T& reg(const Register r) {
+    template <typename T>
+    T& reg(const Register r) {
         return *((T*)(_base + (uint32_t)r)); 
     }
 

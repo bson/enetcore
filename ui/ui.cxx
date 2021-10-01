@@ -1,3 +1,5 @@
+#ifdef ENABLE_UI
+
 #include "ui.h"
 #include "uidecls.h"
 
@@ -11,3 +13,4 @@ uint32_t _parm;
 
 };
 };
+#endif

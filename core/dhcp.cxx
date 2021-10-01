@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetkit.h"
 #include "dhcp.h"
 #include "ip.h"
@@ -446,3 +448,5 @@ void Dhcp::FillHeader(IOBuffer* buf)
 
 	_netif.FillForBcast(buf, ETHERTYPE_IP);
 }
+
+#endif // ENABLE_IP

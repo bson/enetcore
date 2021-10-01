@@ -45,7 +45,7 @@ class Stm32Timer {
     const uint32_t _base;
     const uint32_t _timerclk;
 public:
-    enum Register {
+    enum class Register {
         TIM_CR1   = 0x00,
         TIM_CR2   = 0x04,
         TIM_SMCR  = 0x08,
@@ -80,6 +80,18 @@ public:
         UDIS   = 1,
         CEN    = 0,
 
+        // TIM_SR
+        CC4OF = 12,
+        CC3OF = 11,
+        CC2OF = 10,
+        CC1OF = 9,
+        TIF   = 6,
+        CC4IF = 4,
+        CC3IF = 3,
+        CC2IF = 2,
+        CC1IF = 1,
+        UIF   = 0,
+        
         // TIM_CR2
         TI1S   = 7,
         MMS    = 4,
@@ -166,8 +178,8 @@ public:
         IT4_RMP  = 6
     };
 
-    template typename <T>
-    [[_finline]] T& reg(const Register r) {
+    template <typename T>
+    T& reg(const Register r) {
         return *((T*)(_base + (uint32_t)r)); 
     }
 
@@ -177,57 +189,14 @@ public:
     { }
 
     // Run timer once up to count and interrupt.
-    void RunTimer(Counter count) {
-        Thread::IPL G(IPL_CLOCK);
-        volatile uint32_t& dier = reg<volatile uint32_t>(TIM_DIER);
-        dier &= ~BIT(UIE);
-
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(TIM_CR1);
-        cr1 = (cr1 & ~(BIT(CMS) | BIT(DIR) | BIT(CEN)))
-            | BIT(OPM);
-
-        reg<volatile uint32_t>(TIM_PSC) = 0;
-        reg<volatile uint32_t>(TIM_ARR) = count;
-        reg<volatile uint32_t>(TIM_CNT) = 0;
-
-        volatile uint32_t& egr = reg<volatile uint32_t>(TIM_EGR);
-        egr |= BIT(UG);  // Generates update event, so do this before enabling UIE
-        sr &= ~BIT(UIF);
-        dier |= BIT(UIE);
-        cr1 |= BIT(CEN);
-    }
+    void RunTimer(Counter count);
 
     // Run timer, repeatedly call Tick() at freq Hz
-    void RunTimerFreq(uint32_t freq) {
-        const uint32_t full_count = _timerclk / freq;
-        Counter prescale = 0;
-        uint32_t count = full_count;
-        if (count > (uint32_t)~(Counter)0) {
-            prescale = count >> sizeof(Counter*8);  // +1, but PSC adds 1
-            count /= (prescale + 1);
-        }
-
-        Thread::IPL G(IPL_CLOCK);
-        volatile uint32_t& dier = reg<volatile uint32_t>(TIM_DIER);
-        dier &= ~BIT(UIE);
-
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(TIM_CR1);
-        cr1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
-
-        reg<volatile uint32_t>(TIM_PSC) = prescale;
-        reg<volatile uint32_t>(TIM_ARR) = count;
-        reg<volatile uint32_t>(TIM_CNT) = 0;
-
-        volatile uint32_t& egr = reg<volatile uint32_t>(TIM_EGR);
-        egr |= BIT(UG);  // Generates update event, so do this before enabling UIE
-        sr &= ~BIT(UIF);
-        dier |= BIT(UIE);
-        cr1 |= BIT(CEN);
-    }
+    void RunTimerFreq(uint32_t freq);
 
     // Read timer count
-    uint32_t GetCount() const {
-        return reg<volatile uint32_t>(TIM_CNT);
+    uint32_t GetCount() {
+        return reg<volatile uint32_t>(Register::TIM_CNT);
     }
 
     // Interrupt handler
@@ -238,7 +207,7 @@ public:
 
 private:
     [[__finline]] inline void HandleInterrupt() {
-        volatile uint32_t& sr = reg<volatile uint32_t>(TIM_SR);
+        volatile uint32_t& sr = reg<volatile uint32_t>(Register::TIM_SR);
         if (sr & BIT(UIF)) {
             Tick();
             sr &= ~BIT(UIF);
@@ -255,11 +224,11 @@ class Clock: public Stm32Timer<uint32_t> {
 	uint64_t _time;
 public:
 	Clock(uint32_t base, uint32_t timerclk)
-        : Stm32Timer(base, timerclk),
+        : Stm32Timer<uint32_t>(base, timerclk),
           _time(0)
     { }
 
-	uint64_t GetTime() const { return _time + GetCount(); }
+	uint64_t GetTime() { return _time + GetCount(); }
 
 	void Tick();
 };

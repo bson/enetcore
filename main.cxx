@@ -1,14 +1,34 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
 #include "enetkit.h"
 #include "util.h"
 
-//extern Eeprom _eeprom;
+extern PinOutput<Gpio::Pin> _led;
 
-extern PinNegOutput<Gpio::Pin> _led;
+#ifdef ENABLE_ENET
+Thread* _net_thread;
+#endif
+#ifdef ENABLE_PANEL
+Thread* _ui_thread;
+#endif
+
+extern void UsbInit();
+extern void* UIThread(void*);
 
 int main() {
+#ifdef ENABLE_USB
+    UsbInit();
+#endif
+
+#ifdef ENABLE_ENET
+    _net_thread = Thread::Create("network", NetThread, NULL, NET_THREAD_STACK);
+#endif
+
+#ifdef ENABLE_PANEL
+    _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
+#endif
+
     DMSG("Main: blinking lights");
 
     Time wake = Time::Now();

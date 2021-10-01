@@ -4,8 +4,6 @@
 #ifndef __TIME_H__
 #define __TIME_H__
 
-#include "lpc_timer.h"
-
 extern Clock _clock;
 
 #ifdef ENETCORE

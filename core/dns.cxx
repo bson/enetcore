@@ -1,10 +1,11 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetkit.h"
 #include "dns.h"
 #include "udp.h"
-
 
 Dns _dns0(_udp0);
 
@@ -222,3 +223,5 @@ bool Dnsh::GetRRA1(const Deque<uint8_t>& dnspkt, in_addr_t& addr, uint& rcode)
 
 	return true;
 }
+
+#endif // ENABLE_IP

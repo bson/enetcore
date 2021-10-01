@@ -130,6 +130,8 @@ Add defs for APBx_TIMERCLK as it may not match the bus clock
 
 DBG: stop timers during debugging
 
+Add mapping for battery-backed SRAM 
+
 ----- TODO
 
 Make it all compile again!
@@ -137,8 +139,6 @@ Make it all compile again!
 ----
 
 Add PWM function to timer similar to LpcPwm
-
-Add mapping for battery-backed SRAM 
 
 Implement StmSpi
 
