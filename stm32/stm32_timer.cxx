@@ -1,6 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#include "params.h"
 #include "enetkit.h"
 #include "stm32_timer.h"
 #include "thread.h"
@@ -10,27 +11,31 @@ void Stm32Timer<Counter>::Interrupt(void* token) {
     ((Stm32Timer<Counter>*)token)->HandleInterrupt();
 }
 
+#define DIER reg<volatile uint32_t>(Register::TIM_DIER)
+#define CR1  reg<volatile uint32_t>(Register::TIM_CR1)
+#define SR   reg<volatile uint32_t>(Register::TIM_SR)
+#define PSC  reg<volatile uint32_t>(Register::TIM_PSC)
+#define ARR  reg<volatile uint32_t>(Register::TIM_ARR)
+#define CNT  reg<volatile uint32_t>(Register::TIM_CNT)
+#define EGR  reg<volatile uint32_t>(Register::TIM_EGR)
+
 template<typename Counter>
 void Stm32Timer<Counter>::RunTimer(Counter count) {
     Thread::IPL G(IPL_CLOCK);
-    volatile uint32_t& dier = reg<volatile uint32_t>(Register::TIM_DIER);
-    dier &= ~BIT(UIE);
+    DIER &= ~BIT(UIE);
 
-    volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::TIM_CR1);
-    cr1 = (cr1 & ~(BIT(CMS) | BIT(DIR) | BIT(CEN)))
+    CR1 = (CR1 & ~(BIT(CMS) | BIT(DIR) | BIT(CEN)))
         | BIT(OPM);
 
-    reg<volatile uint32_t>(Register::TIM_PSC) = 0;
-    reg<volatile uint32_t>(Register::TIM_ARR) = count;
-    reg<volatile uint32_t>(Register::TIM_CNT) = 0;
+    PSC = 0;
+    ARR = count;
+    CNT = 0;
 
-    volatile uint32_t& egr = reg<volatile uint32_t>(Register::TIM_EGR);
-    egr |= BIT(UG);  // Generates update event, so do this before enabling UIE
+    EGR |= BIT(UG);  // Generates update event, so do this before enabling UIE
 
-    volatile uint32_t& sr = reg<volatile uint32_t>(Register::TIM_SR);
-    sr &= ~BIT(UIF);
-    dier |= BIT(UIE);
-    cr1 |= BIT(CEN);
+    SR &= ~BIT(UIF);
+    DIER |= BIT(UIE);
+    CR1 |= BIT(CEN);
 }
 
 template<typename Counter>
@@ -45,29 +50,32 @@ void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq) {
     }
 
     Thread::IPL G(IPL_CLOCK);
-    volatile uint32_t& dier = reg<volatile uint32_t>(Register::TIM_DIER);
-    dier &= ~BIT(UIE);
+    DIER &= ~BIT(UIE);
 
-    volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::TIM_CR1);
-    cr1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
+    CR1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
 
-    reg<volatile uint32_t>(Register::TIM_PSC) = prescale;
-    reg<volatile uint32_t>(Register::TIM_ARR) = count;
-    reg<volatile uint32_t>(Register::TIM_CNT) = 0;
+    PSC = prescale;
+    ARR = count;
+    CNT = 0;
 
-    volatile uint32_t& egr = reg<volatile uint32_t>(Register::TIM_EGR);
-    egr |= BIT(UG);  // Generates update event, so do this before enabling UIE
+    EGR |= BIT(UG);  // Generates update event, so do this before enabling UIE
 
-    volatile uint32_t& sr = reg<volatile uint32_t>(Register::TIM_SR);
-    sr &= ~BIT(UIF);
-    dier |= BIT(UIE);
-    cr1 |= BIT(CEN);
+    SR &= ~BIT(UIF);
+    DIER |= BIT(UIE);
+    CR1 |= BIT(CEN);
 }
 
+template <typename Counter>
+inline void Stm32Timer<Counter>::HandleInterrupt() {
+    if (SR & BIT(UIF)) {
+        Tick();
+        SR &= ~BIT(UIF);
+    }
+}
 
 void Clock::Tick()
 {
-	_time += TIMEBASE / HZ;
+	_time += TIMEBASE / CLOCK_HZ;
 }
 
 template class Stm32Timer<uint32_t>;

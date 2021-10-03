@@ -132,11 +132,9 @@ DBG: stop timers during debugging
 
 Add mapping for battery-backed SRAM 
 
------ TODO
-
 Make it all compile again!
 
-----
+----- TODO
 
 Add PWM function to timer similar to LpcPwm
 

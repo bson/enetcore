@@ -206,13 +206,7 @@ public:
     virtual void Tick() = 0;
 
 private:
-    [[__finline]] inline void HandleInterrupt() {
-        volatile uint32_t& sr = reg<volatile uint32_t>(Register::TIM_SR);
-        if (sr & BIT(UIF)) {
-            Tick();
-            sr &= ~BIT(UIF);
-        }
-    }
+    void HandleInterrupt();
         
 private:
     Stm32Timer();

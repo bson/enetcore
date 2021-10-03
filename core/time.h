@@ -7,10 +7,11 @@
 extern Clock _clock;
 
 #ifdef ENETCORE
+#include "params.h"
+
 enum {
     TIME_RESOLUTION = 20,       // In bits, 2^r must be less than PCLK by some factor
     TIMEBASE = (1 << TIME_RESOLUTION),
-    HZ = 64,
 };
 
 #else

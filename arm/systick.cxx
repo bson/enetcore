@@ -1,6 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#include "params.h"
 #include "enetkit.h"
 #include "systick.h"
 

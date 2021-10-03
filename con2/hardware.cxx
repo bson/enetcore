@@ -397,7 +397,7 @@ void hwinit() {
     SetIPL(0);
 
 	// Start clock
-	_clock.RunTimerFreq(HZ);
+	_clock.RunTimerFreq(CLOCK_HZ);
     Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     // First line of text

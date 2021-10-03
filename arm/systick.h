@@ -7,7 +7,7 @@
 #include "compiler.h"
 #include "bits.h"
 
-// SYSTICK core timer used as a scheduler RR alarm.
+// SYSTICK core timer used by scheduler.
 // Ticks at CCLK for up to (2^32-1)/CCLK.  At 120MHz, that's 35s.
 // Stops when run down and needs to be reloaded.
 
