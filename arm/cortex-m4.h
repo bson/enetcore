@@ -121,6 +121,14 @@ static inline uint32_t SetIPL(uint32_t ipl) {
     return result;
 }
 
+// Return current IPL
+static inline uint32_t GetIPL() {
+    uint32_t result;
+    asm volatile("mrs %0, basepri"
+                 : "=r"(result) : :);
+    return result/8;
+}
+
 // Test if interrupts are enabled
 static inline bool IntEnabled() {
 	uint32_t primask;

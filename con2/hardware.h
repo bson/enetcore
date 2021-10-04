@@ -45,7 +45,6 @@ enum {
     IPL_GPIO     = IPL_MIN - 5,  // Pin interrupts
     IPL_ENET     = IPL_COMM - 4, // Ethernet controller
     IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
-    IPL_EEPROM   = IPL_COMM - 1, // EEPROM read/write
 };
 #else
 // Non-nested interrupt priorities.  Except HW faults.
