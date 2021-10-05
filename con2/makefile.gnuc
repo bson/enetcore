@@ -26,8 +26,8 @@ CHECKSUM = true
 
 CFLAGS += -I$(BOARD) -I$(SOCDIR) -I$(ARMDIR)  -Ihardware $(VARIANT)  \
     -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
-    -ffreestanding -fno-rtti -fno-exceptions -fno-threadsafe-statics \
-    -fshort-enums -I$(BOARD)
+    -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
+	-fno-threadsafe-statics -fshort-enums -I$(BOARD)
 
 # Add a startup delay for debug
 ifeq ($(CONFIG),debug)
