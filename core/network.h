@@ -4,6 +4,8 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#ifdef ENABLE_IP
+
 #include <stdint.h>
 #include "pstring.h"
 #include "compiler.h"
@@ -65,5 +67,7 @@ const Vector<InterfaceInfo*>& GetNetworkInterfaces();
 // Utility function to get MAC address of first interface
 bool GetIfMacAddr(const String& interface, uint8_t macaddr[6]);
 bool GetMacAddr(uint8_t macaddr[6]);
+
+#endif // ENABLE_IP
 
 #endif // __NETWORK_H__

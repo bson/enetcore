@@ -1,6 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifdef ENABLE_IP
+
 #include "enetkit.h"
 #include "netaddr.h"
 
@@ -139,3 +141,5 @@ bool NetAddr::IsLoopback() const
 	InterfaceInfo* netinfo = GetInterface(*this);
 	return netinfo && netinfo->_loopback;
 }
+
+#endif // ENABLE_IP

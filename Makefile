@@ -88,12 +88,12 @@ $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
-$(ODIR)/uidecls.h: ui.def
+$(ODIR)/uidecls.h: $(BOARD)/ui.def
 	@echo Generating $@
 	@mkdir -p $(ODIR_TREE)
 	@python ui/builder/build.py --decls $< >$@ 2>>$(LOG)
 
-$(ODIR)/uidefs.cxx: ui.def
+$(ODIR)/uidefs.cxx: $(BOARD)/ui.def
 	@echo Generating $@
 	@mkdir -p $(ODIR_TREE)
 	@python ui/builder/build.py --defs $< >$@ 2>>$(LOG)

@@ -195,9 +195,11 @@ const uint AppendVFmt(Vector<uchar>& dest, const uchar* fmt, va_list& va)
 				FormatCString(dest, va_arg(va, const String*)->CStr(), flags, param);
 				break;
 			case 'a':
+#ifdef ENABLE_IP
 			case 'A':
 				dest.PushBack(va_arg(va, const NetAddr*)->Printable(*fmt == 'A').CStr());
 				break;
+#endif
 #if 0
 			case 'o': {
 				Object* o = va_arg(va, Object*);

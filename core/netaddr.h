@@ -4,6 +4,8 @@
 #ifndef __NETADDR_H__
 #define __NETADDR_H__
 
+#ifdef ENABLE_IP
+
 #include "lookup3.h"
 
 enum { INADDR_ANY = 0 };
@@ -110,5 +112,7 @@ public:
 		Lookup3::hashword2(h, 2, &hash1, &hash2);
 	}
 };
+
+#endif // ENABLE_IP
 
 #endif // __NETADDR_H__
