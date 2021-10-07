@@ -1,7 +1,8 @@
-# This should be the location of the enetcore source tree
+# -*- Makefile -*-
+
 VPATH=.
 
-BOARD ?= con2
+ENETCORE = enetcore
 TOOLSET ?= gnuc
 
 TOOLCHAIN ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major
@@ -13,9 +14,9 @@ TOOLDIR=$(TOOLCHAIN)/bin
 
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
-CFLAGS = -Os -DTRACE -I. -I$(TOOLSET) -DCHECK_BOUNDS=1 -funsigned-char
+CFLAGS = -Os -DTRACE -I. -I$(ENETCORE)/$(TOOLSET) -DCHECK_BOUNDS=1 -funsigned-char
 else
-CFLAGS = -g -O0 -DTRACE -DDEBUG -I. -I$(TOOLSET) -funsigned-char
+CFLAGS = -g -O0 -DTRACE -DDEBUG -I. -I$(ENETCORE)/$(TOOLSET) -funsigned-char
 AFLAGS = --defsym DEBUG=1
 endif
 
@@ -33,18 +34,18 @@ SRCS += buildinfo.cxx
 # UI
 #SRCS += uidefs.cxx
 
-include $(BOARD)/makefile.$(TOOLSET)
-include core/makefile.$(TOOLSET)
-include ui/makefile.$(TOOLSET)
+include makefile.$(TOOLSET)
+include $(ENETCORE)/core/makefile.$(TOOLSET)
+include $(ENETCORE)/ui/makefile.$(TOOLSET)
 
-LOG=$(ODIR)/image.log
+LOG ?= $(ODIR)/image.log
 #LOG=/dev/stderr
 
 TOUCH_ODIR=$(ODIR)/.touch
 
 CFLAGS += -I$(ODIR)
 
-OBJS=$(patsubst %.s,$(ODIR)/%.o,$(patsubst %.cxx,$(ODIR)/%.o,$(SRCS)))
+OBJS=$(patsubst %.s,$(ODIR)/%.o, $(patsubst %.cxx, $(ODIR)/%.o, $(SRCS)))
 DEPS=$(patsubst %.s,$(ODIR)/%.d, $(patsubst %.cxx, $(ODIR)/%.d, $(SRCS)))
 
 
@@ -60,7 +61,7 @@ TAGS:
 clean:
 	-rm -rf $(ODIR)
 
-$(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) $(BOARD)/link.cmd 
+$(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) link.cmd 
 	@echo Linking $@
 	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) >>$(LOG)
 	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) 2>&1 >>$(LOG)
@@ -69,10 +70,10 @@ $(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) $(BOARD)/link.cmd
 	@$(SIZE) $@ 2>&1 >>$(LOG)
 	@$(SIZE) $@
 
-$(ODIR)/startup.o: $(BOARD)/startup.s $(TOUCH_ODIR)
-	@echo $(BOARD)/startup.s
-	@echo $(AS) $(AFLAGS) $(BOARD)/startup.s -o $@ -a=$(ODIR)/startup.lst >>$(LOG)
-	@$(AS) $(AFLAGS) $(BOARD)/startup.s -o $@ -a=$(ODIR)/startup.lst 2>&1 >>$(LOG)
+$(ODIR)/startup.o: startup.s $(TOUCH_ODIR)
+	@echo startup.s
+	@echo $(AS) $(AFLAGS) startup.s -o $@ -a=$(ODIR)/startup.lst >>$(LOG)
+	@$(AS) $(AFLAGS) startup.s -o $@ -a=$(ODIR)/startup.lst 2>&1 >>$(LOG)
 
 $(ODIR)/buildinfo.cxx:
 	@echo Generating $@
@@ -88,15 +89,15 @@ $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
-$(ODIR)/uidecls.h: $(BOARD)/ui.def
+$(ODIR)/uidecls.h: ui.def
 	@echo Generating $@
 	@mkdir -p $(ODIR_TREE)
-	@python ui/builder/build.py --decls $< >$@ 2>>$(LOG)
+	@python $(ENETCORE)/ui/builder/build.py --decls $< >$@ 2>>$(LOG)
 
-$(ODIR)/uidefs.cxx: $(BOARD)/ui.def
+$(ODIR)/uidefs.cxx: ui.def
 	@echo Generating $@
 	@mkdir -p $(ODIR_TREE)
-	@python ui/builder/build.py --defs $< >$@ 2>>$(LOG)
+	@python $(ENETCORE)/ui/builder/build.py --defs $< >$@ 2>>$(LOG)
 
 $(ODIR)/uidefs.o: $(ODIR)/uidefs.cxx
 	@echo $<
@@ -114,8 +115,8 @@ $(ODIR)/%.o: %.s $(TOUCH_ODIR)
 	@$(AS) $(AFLAGS) $< -o $@ -a=$(patsubst %.o,%.lst,$@)  2>&1 >>$(LOG)
 
 $(TOUCH_ODIR):
-	mkdir -p $(ODIR_TREE)
-	touch $(TOUCH_ODIR)
+	@mkdir -p $(ODIR_TREE)
+	@touch $(TOUCH_ODIR)
 
 -include $(DEPS)
 

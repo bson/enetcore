@@ -1,13 +1,14 @@
-# Copyright (c) 2018 Jan Brittenson
+# -*- Makefile -*-
+# Copyright (c) 2018-2021 Jan Brittenson
 # See LICENSE for details.
 
 # Set up tools, add board peripherals and SOC components to build
 #include $(BOARD)/makefile.$(TOOLSET)
 
-CFLAGS += -Iui
+CFLAGS += -I$(ENETCORE)/ui
 
 UI_SRCS = ui.cxx
 
-SRCS += $(addprefix ui/,$(UI_SRCS))
+SRCS += $(addprefix $(ENETCORE)/ui/,$(UI_SRCS))
 
-ODIR_TREE += $(ODIR)/ui
+ODIR_TREE += $(ODIR)/$(ENETCORE)/ui
