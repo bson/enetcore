@@ -6,7 +6,7 @@ SRCS += hardware.cxx
 HARDWARE_SRCS = tsc2046.cxx
 
 SOCDIR=$(ENETCORE)/soc/stm32/f4x
-ARMDIR=$(ENETCORE)/arch/arm
+ARMDIR=$(ENETCORE)/arch/armv7m
 
 VARIANT=-DSTMF=1 -DSTM=405
 CPUID=cm4

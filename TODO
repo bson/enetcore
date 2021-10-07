@@ -137,6 +137,12 @@ Make it all compile again!
 Move application out of enetcore tree
 Make enetcore a submodule of application
 
+Refactor chip support
+- Move LPC in under nxp/lpc407x and nxp/lpc (common)
+- Move stuff under arm into arm/cm4, cm0, cm7, etc
+- Much of what's in board.h (e.g. skyblue/board.h) belongs in the application config.h
+- Make more hardware support optional (e.g. SD, FAT)
+
 ----- TODO
 
 Add PWM function to timer similar to LpcPwm
@@ -163,17 +169,11 @@ Implement StmUsbDev (TBD - no use case, need test board)
 
 Implement StmI2s (TBD - no use case, need test board)
 
-Implement Reset (to use CM4 core software reset)
+Implement Reset (under arch/armv7m, to use CM4 core software reset)
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.
 
-Refactor chip support
-- Move LPC in under nxp/lpc407x and nxp/lpc (common)
-- Move stuff under arm into arm/cm4, cm0, cm7, etc
-- Much of what's in board.h (e.g. skyblue/board.h) belongs in the application config.h
-- Make more hardware support optional (e.g. SD, FAT)
 - Make DHCP support a compile time option
-
 
 Clean up genfont.py and call it something else
