@@ -1,7 +1,5 @@
 SOC_SRCS = stm32_usart.cxx stm32_timer.cxx
 
-CFLAGS += -I$(STM32DIR)
-
 SRCS += $(addprefix $(SOCDIR)/,$(SOC_SRCS))
 
 ODIR_TREE += $(ODIR)/$(SOCDIR)

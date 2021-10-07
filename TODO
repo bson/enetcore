@@ -134,6 +134,9 @@ Add mapping for battery-backed SRAM
 
 Make it all compile again!
 
+Move application out of enetcore tree
+Make enetcore a submodule of application
+
 ----- TODO
 
 Add PWM function to timer similar to LpcPwm
@@ -150,6 +153,8 @@ Implement StmWdt
 
 Implement StmCrc
 
+Implement StmFsmc
+
 Implement StmI2c (TBD - no use case, need test board)
 
 Implement StmEthernet (TBD - no use case, need test board)
@@ -159,11 +164,6 @@ Implement StmUsbDev (TBD - no use case, need test board)
 Implement StmI2s (TBD - no use case, need test board)
 
 Implement Reset (to use CM4 core software reset)
-
-Implement StmFsmc
-
-Move application out of enetcore tree
-Make enetcore a submodule of application
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.

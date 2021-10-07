@@ -5,7 +5,7 @@
 #define __HARDWARE_H__
 
 #include "params.h"
-#include "stm32.h"
+#include "stm32f4x.h"
 
 // Set to 0 to disable nested interrupts for debugging
 

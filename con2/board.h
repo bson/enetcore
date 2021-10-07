@@ -9,7 +9,7 @@
 
 #include "params.h"
 
-#include "stm32.h"
+#include "stm32f4x.h"
 
 #include "nvic.h"
 #include "systick.h"
