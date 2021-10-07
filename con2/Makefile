@@ -54,7 +54,9 @@ all: $(ODIR)/image
 etags: TAGS
 
 TAGS:
-	(find . -name '*.h' ; find . -name '*.cxx') | etags --language=c++ --declarations -
+	(for dir in . $(ENETCORE) ; do                        \
+	  find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
+    done) | etags --language=c++ --declarations -
 
 .phony: etags clean
 
