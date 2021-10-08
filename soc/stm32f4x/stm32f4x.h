@@ -8,6 +8,8 @@
 
 #define CORTEX_M 4
 
+#define HAVE_HW_CRC
+
 #include "cortex-m4.h"
 #include "arm.h"
 #include "assert.h"

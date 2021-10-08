@@ -145,6 +145,19 @@ Refactor chip support
 
 ----- TODO
 
+Enable hard fp support
+
+Further flatten soc/stm32/stm32f4x_xxx.h -> soc/stm32f4x/xxx.h and set SOCDIR=soc in the
+makefile.  Move stm32f4x.h to soc/.
+
+Include only soc and change #includes to e.g. stm32f4x/usart.h
+
+stm32f4x.h should include set ARMDIR=arch/armv7m
+
+Rename SOCDIR -> SOC
+Rename ARMDIR -> ARCH
+
+
 Add PWM function to timer similar to LpcPwm
 
 Implement StmSpi

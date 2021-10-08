@@ -5,13 +5,11 @@ SRCS += hardware.cxx
 # SSD1963 is inlined in hardware.cxx
 HARDWARE_SRCS = tsc2046.cxx
 
-SOCDIR=$(ENETCORE)/soc/stm32/f4x
-ARMDIR=$(ENETCORE)/arch/armv7m
+SOCDIR=$(ENETCORE)/soc
 
 VARIANT=-DSTMF=1 -DSTM=405
 CPUID=cm4
 
-include $(ARMDIR)/makefile.$(TOOLSET)
 include $(SOCDIR)/makefile.$(TOOLSET)
 
 TARGET=arm-none-eabi
@@ -24,7 +22,7 @@ SIZE = $(TOOLDIR)/$(TARGET)-size
 
 CHECKSUM = true
 
-CFLAGS += -I. -I$(SOCDIR) -I$(ARMDIR) -Ihardware $(VARIANT)  \
+CFLAGS += -I. -I$(SOCDIR) -I$(ARCH) -Ihardware $(VARIANT)  \
     -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
     -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
 	-fno-threadsafe-statics -fshort-enums

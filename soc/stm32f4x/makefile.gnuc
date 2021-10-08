@@ -1,0 +1,9 @@
+SOC_SRCS = usart.cxx timer.cxx
+
+SRCS += $(addprefix $(SOCDIR)/stm32f4x/,$(SOC_SRCS))
+
+ODIR_TREE += $(ODIR)/$(SOCDIR)/stm32f4x
+
+ARCH=$(ENETCORE)/arch/armv7m
+
+include $(ARCH)/makefile.$(TOOLSET)

@@ -1,9 +1,9 @@
-ARM_SRCS = nvic.cxx nvic_exc.s systick.cxx
+ARCH_SRCS = nvic.cxx nvic_exc.s systick.cxx
 
-CFLAGS += -I$(ARMDIR)
+CFLAGS += -I$(ARCH)
 
-SRCS += $(addprefix $(ARMDIR)/,$(ARM_SRCS))
+SRCS += $(addprefix $(ARCH)/,$(ARCH_SRCS))
 
-ODIR_TREE += $(ODIR)/$(ARMDIR)
+ODIR_TREE += $(ODIR)/$(ARCH)
 
-include $(ARMDIR)/makefile.$(CPUID).$(TOOLSET)
+include $(ARCH)/makefile.$(CPUID).$(TOOLSET)

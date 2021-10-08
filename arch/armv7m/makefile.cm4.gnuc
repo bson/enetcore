@@ -1,6 +1,6 @@
 # gcc settings for Cortex-M4
 
-CFLAGS += -DHAVE_HW_CRC -mcpu=cortex-m4 -mfloat-abi=softfp -mfpu=fpv4-sp-d16 \
+CFLAGS += -mcpu=cortex-m4 -mfloat-abi=softfp -mfpu=fpv4-sp-d16 \
        -mthumb -Wa,-mimplicit-it=always
 
 AFLAGS += -mcpu=cortex-m4 -mapcs-32 -mimplicit-it=thumb -mthumb
