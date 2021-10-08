@@ -143,10 +143,6 @@ Refactor chip support
 - Much of what's in board.h (e.g. skyblue/board.h) belongs in the application config.h
 - Make more hardware support optional (e.g. SD, FAT)
 
------ TODO
-
-Enable hard fp support
-
 Further flatten soc/stm32/stm32f4x_xxx.h -> soc/stm32f4x/xxx.h and set SOCDIR=soc in the
 makefile.  Move stm32f4x.h to soc/.
 
@@ -157,6 +153,9 @@ stm32f4x.h should include set ARMDIR=arch/armv7m
 Rename SOCDIR -> SOC
 Rename ARMDIR -> ARCH
 
+Enable hard fp support
+
+----- TODO
 
 Add PWM function to timer similar to LpcPwm
 

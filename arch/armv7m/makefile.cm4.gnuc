@@ -1,8 +1,8 @@
 # gcc settings for Cortex-M4
 
-CFLAGS += -mcpu=cortex-m4 -mfloat-abi=softfp -mfpu=fpv4-sp-d16 \
+CFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
        -mthumb -Wa,-mimplicit-it=always
 
 AFLAGS += -mcpu=cortex-m4 -mapcs-32 -mimplicit-it=thumb -mthumb
 
-LIBS +=  $(TOOLDIR)/../lib/gcc/$(TARGET)/$(TOOLVER)/thumb/v7e-m/nofp/libgcc.a
+LIBS +=  $(TOOLDIR)/../lib/gcc/$(TARGET)/$(TOOLVER)/thumb/v7e-m+fp/hard/libgcc.a
