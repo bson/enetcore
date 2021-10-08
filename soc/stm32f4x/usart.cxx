@@ -4,7 +4,7 @@
 #include "enetkit.h"
 #include "thread.h"
 #include "ring.h"
-#include "stm32_usart.h"
+#include "stm32f4x/usart.h"
 
 // Set up for async use.  8 bits no parity.  1 or 2 stop bits.
 void Stm32Usart::InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timerclk) {

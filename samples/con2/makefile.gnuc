@@ -5,12 +5,11 @@ SRCS += hardware.cxx
 # SSD1963 is inlined in hardware.cxx
 HARDWARE_SRCS = tsc2046.cxx
 
-SOCDIR=$(ENETCORE)/soc
-
 VARIANT=-DSTMF=1 -DSTM=405
 CPUID=cm4
 
-include $(SOCDIR)/makefile.$(TOOLSET)
+SOCDIR=$(ENETCORE)/soc
+include $(SOCDIR)/stm32f4x/makefile.$(TOOLSET)
 
 TARGET=arm-none-eabi
 

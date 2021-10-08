@@ -146,6 +146,6 @@ void fault0(uint num);
 #define MALLOC_REGION_START ((uint8_t*)(((uintptr_t)&_bss_end + 3) & ~3))
 #define MALLOC_REGION_SIZE  (IRAM_REGION_START - MALLOC_REGION_START)
 
-#include "stm32_timer.h"
+#include "stm32f4x/timer.h"
 
 #endif // __HARDWARE_H__

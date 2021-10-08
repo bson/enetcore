@@ -3,7 +3,7 @@
 
 #include "params.h"
 #include "enetkit.h"
-#include "stm32_timer.h"
+#include "stm32f4x/timer.h"
 #include "thread.h"
 
 template<typename Counter>

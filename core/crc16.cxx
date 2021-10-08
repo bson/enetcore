@@ -1,8 +1,6 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef HAVE_HW_CRC
-
 #ifdef GENTABLE
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +11,8 @@ typedef unsigned int uint;
 #include "enetkit.h"
 #include "crc16.h"
 #endif // GENTABLE
+
+#ifndef HAVE_HW_CRC
 
 #if 0
 // * static
