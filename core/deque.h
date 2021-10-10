@@ -4,8 +4,8 @@
 #ifndef __DEQUE_H__
 #define __DEQUE_H__
 
-// Functionally a deque, but doesn't adher to the STL's complexity contract
-// It's well suited for pushing at the back and popping from the front, while
+// Functionally a deque, but doesn't adher to the STL's complexity contract.
+// It's best suited for pushing at the back and popping from the front, while
 // poorly suited for pushing at the front and popping at the back.
 // Use for standard layout types only.
 

@@ -5,7 +5,7 @@ VPATH=.
 ENETCORE = enetcore
 TOOLSET ?= gnuc
 
-TOOLCHAIN ?= /home/bson/gcc-arm-none-eabi-10-2020-q4-major
+TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10-2020-q4-major
 TOOLVER ?= 10.2.1
 
 CONFIG ?= debug

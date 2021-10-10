@@ -6,7 +6,7 @@
 
 
 // Ordered vector
-// This differs from a set in that the same item can reoccur.
+// This differs from a set in that the same item can recur.
 // The only way to add items is using Insert()
 // Like STL, requires T to implement bool operator>(const T&) const
 

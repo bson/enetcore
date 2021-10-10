@@ -163,6 +163,10 @@ Implement StmSpi
 
 Implement StmDac
 
+Add DMA support - Stm32Dma?
+ - For DAC
+ - SPI
+
 Implement StmAdc
 
 Implement StmRtc
