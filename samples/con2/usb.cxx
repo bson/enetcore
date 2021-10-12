@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifdef ENABLE_USB
 
 #include "enetcore.h"
 #include "usb.h"
 #include "usbtmc.h"
-
-#ifdef ENABLE_USB
 
 using namespace usb;
 

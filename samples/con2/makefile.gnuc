@@ -1,5 +1,5 @@
 # -*- Makefile -*-
-SRCS += hardware.cxx
+SRCS += hardware.cxx ui.cxx usb.cxx
 
 # Peripherals found on this board
 # SSD1963 is inlined in hardware.cxx

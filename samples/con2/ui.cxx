@@ -1,3 +1,5 @@
+#ifdef ENABLE_PANEL
+
 #include "enetkit.h"
 #include "board.h"
 #include "mutex.h"
@@ -176,3 +178,5 @@ void* UIThread(void*) {
         }
     }
 }
+
+#endif

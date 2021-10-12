@@ -155,6 +155,8 @@ Rename ARMDIR -> ARCH
 
 Enable hard fp support
 
+Create gdbinit for con2
+
 ----- TODO
 
 Add PWM function to timer similar to LpcPwm
