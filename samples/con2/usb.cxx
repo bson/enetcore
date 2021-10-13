@@ -68,7 +68,7 @@ static const EndpointDescriptor usbep[] = {
 
 static const char* strs[3] = {
     "JB Design",
-    "Sky Blue",
+    "CON2",
     "0000001",
 };
 
@@ -81,7 +81,7 @@ const Usb::Descriptors descriptors = {
 };
 
 
-const char *idn = "JB DESIGN,Sky Blue,0000001,01.00.00";
+const char *idn = "JB DESIGN,CON2,0000001,01.00.00";
 
 
 UsbTmc _usbtmc(_usb);

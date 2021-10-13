@@ -297,10 +297,13 @@ public:
     // Reset cause word
     static uint32_t ResetCause() { return REG(RCC_CSR) & ~3; }
 
+    // Check if LSE is running (indicates power loss if used to clock RTC)
+    static bool CheckLSE() { return VREG(RCC_BDCR) & BIT(LSERDY); }
+
     class RtcAccess {
     public:
-        RtcAccess() { VREG(BASE_PWR) |= BIT(DBP); }
-        ~RtcAccess() { VREG(BASE_PWR) &= ~BIT(DBP); }
+        RtcAccess() { *(volatile uint32_t*)BASE_PWR |= BIT(DBP); }
+        ~RtcAccess() { *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP); }
     };
 };
 

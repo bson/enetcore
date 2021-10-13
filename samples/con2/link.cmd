@@ -4,11 +4,15 @@ MEMORY
 {
 	flash     			: ORIGIN = 0x08000000, LENGTH = 1024K
 	ram   				: ORIGIN = 0x20000000, LENGTH = 128K
+    ccmram              : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
 _eiram  = 0x20000000 + 128K;
 
 __stack_top = ORIGIN(ram) + LENGTH(ram);
+
+_ccm_ram = 0x10000000;
+_ccm_ram_length = LENGTH(ccmram);
 
 SECTIONS 
 {

@@ -1,22 +1,3 @@
-target remote localhost:3333
-
-set remote hardware-breakpoint-limit 6
-set remote hardware-watchpoint-limit 4
-
-set mem inaccessible-by-default off
-
-monitor reset halt
-
-set $pc = 0x400
-
-# Useful when launching from M-x gdb in emacs since gdb doesn't have a
-#  -C option.
-# cd ~/src/enetcore/samples/con2
-
-set output-radix 16
-set print pretty
-
-set print thread-events off
 
 # Enable enetcore thread/RTOS support in openocd.  OpenOCD doesn't
 # handle this too well, and RTOS support in OOCD is a work in progress
@@ -24,7 +5,7 @@ set print thread-events off
 # requiring you to relaunch openocd because something, either oocd or
 # gdb, doesn't think there is a "live" thread to debug).
 define m
-mon stm32f4xx.cpu configure -rtos enetcore
+mon stm32f4x.cpu configure -rtos enetcore
 end
 
 # Print backtraces for all threads
@@ -101,3 +82,25 @@ end
 define da
 disassemble
 end
+
+
+
+target remote localhost:3333
+
+set remote hardware-breakpoint-limit 6
+set remote hardware-watchpoint-limit 4
+
+set mem inaccessible-by-default off
+
+monitor reset halt
+
+set $pc = 0x400
+
+# Useful when launching from M-x gdb in emacs since gdb doesn't have a
+#  -C option.
+# cd ~/src/enetcore/samples/con2
+
+set output-radix 16
+set print pretty
+
+set print thread-events off

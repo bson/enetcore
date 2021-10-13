@@ -159,6 +159,8 @@ Create gdbinit for con2
 
 ----- TODO
 
+Add CCM data RAM to linker
+
 Add PWM function to timer similar to LpcPwm
 
 Implement StmSpi
@@ -181,7 +183,7 @@ Implement StmFsmc
 
 Implement StmI2c (TBD - no use case, need test board)
 
-Implement StmEthernet (TBD - no use case, need test board)
+Implement StmEthernet (TBD - no use case, need test board, F407 only)
 
 Implement StmUsbDev (TBD - no use case, need test board)
 

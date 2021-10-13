@@ -307,17 +307,18 @@ void hwinit() {
 
     static const Stm32ClockTree::Config clkconf = {
         .pll_clk_source = Stm32ClockTree::PllClkSource::HSE,
-        .pll_vco_mult = 56,
-        .pll_vco_div = 2,
+        .pll_vco_mult   = 56,
+        .pll_vco_div    = 2,
         .pll_sysclk_div = Stm32ClockTree::PllSysClkDiv::DIV2,
         .pll_periph_div = 7,
         .sys_clk_source = Stm32ClockTree::SysClkSource::PLL,
-        .hclk_prescale = Stm32ClockTree::HclkPrescale::DIV1,
-        .apb1_prescale = Stm32ClockTree::ApbPrescale::DIV2,
-        .apb2_prescale = Stm32ClockTree::ApbPrescale::DIV4,
+        .hclk_prescale  = Stm32ClockTree::HclkPrescale::DIV1,
+        .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
+        .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
         .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
     };
 
+    const bool power_reset = !Stm32ClockTree::CheckLSE();
     Stm32ClockTree::Configure(clkconf);
 
 #ifdef CLKOUTPIN
@@ -416,6 +417,10 @@ void hwinit() {
     // Release from reset
     _touch_dev.SetSSEL(&_t_cs);
 #endif
+
+    if (power_reset) {
+        DMSG("RTC power loss");
+    }
 
     DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
     DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
