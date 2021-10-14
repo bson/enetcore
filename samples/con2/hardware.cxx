@@ -315,7 +315,8 @@ void hwinit() {
         .hclk_prescale  = Stm32ClockTree::HclkPrescale::DIV1,
         .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
         .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
-        .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
+        .rtc_clk_source = Stm32ClockTree::RtcClkSource::OFF
+        //.rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
     };
 
     const bool power_reset = !Stm32ClockTree::CheckLSE();
@@ -366,7 +367,7 @@ void hwinit() {
     Util::RandomSeed(buf, sizeof buf);
 
 	// Install IRQ handlers
-	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, INTR_TIM5, &_clock);
+	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, IPL_CLOCK, &_clock);
 	NVic::EnableIRQ(INTR_TIM5);
 
 	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);

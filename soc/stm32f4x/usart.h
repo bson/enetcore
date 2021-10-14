@@ -19,6 +19,7 @@ private:
     Ring<SEND_BUF_SIZE> _sendq; // TX send q
     Ring<RECV_BUF_SIZE> _recvq; // RX send q
     mutable Mutex _w_mutex;
+    bool _ienable;              // Enable interrupts
 
 public:
     enum class Register {

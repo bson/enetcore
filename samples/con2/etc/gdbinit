@@ -15,7 +15,7 @@ end
 
 # Reconnect
 define recon
-target remote localhost:3333
+target extended-remote localhost:3333
 end
 
 # Mask interrupts while single stepping on Cortex-M, but doesn't
@@ -85,7 +85,7 @@ end
 
 
 
-target remote localhost:3333
+target extended-remote localhost:3333
 
 set remote hardware-breakpoint-limit 6
 set remote hardware-watchpoint-limit 4

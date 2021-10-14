@@ -24,8 +24,8 @@ void Stm32Usart::InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timercl
     cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBDIE));
 
     volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
-    cr3 = (cr3 & ~(BIT(CTSIE) | BIT(CTSE) | BIT(RTSE) | BIT(DMAT) | BIT(DMAR) | BIT(SCEN) | BIT(NACK) | BIT(HDSEL)
-                   | BIT(IRLP) | BIT(IREN) | BIT(EIE)))
+    cr3 = (cr3 & ~(BIT(CTSIE) | BIT(CTSE) | BIT(RTSE) | BIT(DMAT) | BIT(DMAR) | BIT(SCEN)
+                   | BIT(NACK) | BIT(HDSEL) | BIT(IRLP) | BIT(IREN) | BIT(EIE)))
         | BIT(ONEBIT);
     
     reg<volatile uint32_t>(Register::USART_BRR) = div;
@@ -56,11 +56,14 @@ void Stm32Usart::Write(const uint8_t* data, uint len) {
 
 void Stm32Usart::FillTd() {
     volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-    if (!_sendq.Empty() && (sr & TXE) != 0) {
+    if (!_sendq.Empty() && (sr & BIT(TXE)) != 0) {
         reg<volatile uint32_t>(Register::USART_DR) = _sendq.PopFront();
+        if (_ienable) {
+            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+            cr1 |= BIT(TXEIE);
+        }
     }
 }
-
 
 // Drain write buffer Stm32Usart::synchronously (= polled)
 void Stm32Usart::SyncDrain() {
@@ -72,11 +75,13 @@ void Stm32Usart::SyncDrain() {
 
 // Enable interrupts
 void Stm32Usart::SetInterrupts(bool enable) {
-    volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-    if (enable) {
-        cr1 |= BIT(TXEIE) | BIT(RXNEIE);
-    } else {
+    _ienable = enable;
+
+    if (!enable) {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
+    } else {
+        cr |= BIT(RXNEIE);
     }
 }
 
@@ -84,12 +89,20 @@ inline void Stm32Usart::HandleInterrupt() {
     volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
     bool wake = false;
     
-    if (sr & TXE) {
+    // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
+    // and if we don't have anything to send the only way to make it stop is to disable
+    // interrupts.  This makes for some rather messy code.  On TXE int we disable interrupts,
+    // and FillTd() will when reenable it if 1) we want interrupts, and 2) we had something
+    // to send.  If there is nothing to send we leave it disabled.  TXE remains set.
+    if (sr & BIT(TXE)) {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        cr1 &= ~BIT(TXEIE);
+
         FillTd();
         wake = true;
     }
 
-    if (sr & RXNE) {
+    if (sr & BIT(RXNE)) {
         volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
         const uint8_t c = (uint8_t)dr;
         if (_recvq.Headroom()) {
