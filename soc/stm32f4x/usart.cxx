@@ -47,21 +47,10 @@ void Stm32Usart::Write(const uint8_t* data, uint len) {
             while (_sendq.Headroom() && (p < data + len))
                 _sendq.PushBack(*p++);
 
-            FillTd();
+            WriteByte();
         }
         if (p < data + len)
             Thread::WaitFor(this);
-    }
-}
-
-void Stm32Usart::FillTd() {
-    volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-    if (!_sendq.Empty() && (sr & BIT(TXE)) != 0) {
-        reg<volatile uint32_t>(Register::USART_DR) = _sendq.PopFront();
-        if (_ienable) {
-            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-            cr1 |= BIT(TXEIE);
-        }
     }
 }
 
@@ -70,18 +59,34 @@ void Stm32Usart::SyncDrain() {
     ScopedNoInt G;
 
     while (!_sendq.Empty())
-        FillTd();
+        WriteByte();
 }
 
 // Enable interrupts
 void Stm32Usart::SetInterrupts(bool enable) {
+    Mutex::Scoped L(_w_mutex);
+    Thread::IPL G(IPL_UART);
+
     _ienable = enable;
 
     volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-    if (!enable) {
-        cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
+    if (enable) {
+        cr1 |= BIT(TXEIE) | BIT(RXNEIE);
     } else {
-        cr1 |= BIT(RXNEIE);
+        cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
+    }
+}
+
+inline void Stm32Usart::WriteByte() {
+    volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
+    if (sr & BIT(TXE)) {
+        if (!_sendq.Empty()) {
+            volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
+            dr = _sendq.PopFront();
+        } else {
+            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+            cr1 &= ~BIT(TXEIE);
+        }
     }
 }
 
@@ -95,11 +100,10 @@ inline void Stm32Usart::HandleInterrupt() {
     // and FillTd() will when reenable it if 1) we want interrupts, and 2) we had something
     // to send.  If there is nothing to send we leave it disabled.  TXE remains set.
     if (sr & BIT(TXE)) {
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-        cr1 &= ~BIT(TXEIE);
-
-        FillTd();
-        wake = true;
+        WriteByte();
+        if (_sendq.Empty()) {
+            wake = true;
+        }
     }
 
     if (sr & BIT(RXNE)) {

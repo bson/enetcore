@@ -138,7 +138,7 @@ public:
 	void SetInterrupts(bool enable);
 
 private:
-    inline void FillTd();
+    inline void WriteByte();
 	inline void HandleInterrupt();
 
     Stm32Usart(const Stm32Usart&);

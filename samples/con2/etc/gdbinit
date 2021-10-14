@@ -96,10 +96,6 @@ monitor reset halt
 
 set $pc = 0x400
 
-# Useful when launching from M-x gdb in emacs since gdb doesn't have a
-#  -C option.
-# cd ~/src/enetcore/samples/con2
-
 set output-radix 16
 set print pretty
 
