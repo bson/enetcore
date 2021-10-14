@@ -106,7 +106,10 @@ public:
     };
 
 
-    Stm32Usart(const uintptr_t base) : _base(base) { }
+    Stm32Usart(const uintptr_t base)
+        : _base(base),
+          _ienable(false) {
+    }
 
     template <typename T>
     T& reg(const Register r) {

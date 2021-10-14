@@ -77,11 +77,11 @@ void Stm32Usart::SyncDrain() {
 void Stm32Usart::SetInterrupts(bool enable) {
     _ienable = enable;
 
+    volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
     if (!enable) {
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
     } else {
-        cr |= BIT(RXNEIE);
+        cr1 |= BIT(RXNEIE);
     }
 }
 
