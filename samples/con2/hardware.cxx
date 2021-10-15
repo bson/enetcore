@@ -389,7 +389,7 @@ void hwinit() {
 #endif
     //NVic::EnableIRQ(GPIO_IRQ);
 
-	_usart3.InitAsync(19200, Stm32Usart::StopBits::SB_1, APB1_TIMERCLK);
+	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_TIMERCLK);
 	_usart3.SetInterrupts(true);
 
 	// Enable global interrupts by restoring to a non-disabled state :)

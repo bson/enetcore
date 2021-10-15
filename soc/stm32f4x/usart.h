@@ -99,10 +99,10 @@ public:
     };
 
     enum StopBits {
-        SB_0_5,                 // 0.5 (smartcard mode only)
-        SB_1,                   // 1
-        SB_1_5,                 // 1.5
-        SB_2                    // 2
+        SB_1   = 0,            // 1
+        SB_0_5 = 1,            // 0.5 (smartcard mode only)
+        SB_2   = 2,            // 2
+        SB_1_5 = 3             // 1.5
     };
 
 

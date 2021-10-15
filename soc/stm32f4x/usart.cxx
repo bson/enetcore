@@ -11,28 +11,28 @@ void Stm32Usart::InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timercl
     // BRR is Q12.4, so
     // BRR*16 = clk/(16*baud)   => BRR = clk/baud
     // XXX Simple truncatation, maybe use Q12.5 and round manually, but probably good enough (<< 1% error)
-    const uint32_t div = timerclk/baudrate;
-    assert(div <= 0xffff);
+    const uint32_t brr = timerclk/baudrate;
+    assert(brr <= 0xffff);
 
     Thread::IPL G(IPL_UART);
 
     volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-    cr1 &= BIT(PEIE) | BIT(TXEIE) | BIT(TCIE) | BIT(RXNEIE) | BIT(TE) | BIT(RE) | BIT(SBK) | BIT(RWU)
-        | BIT(M) | BIT(UE);
+    cr1 &= ~(BIT(PEIE) | BIT(TXEIE) | BIT(TCIE) | BIT(RXNEIE) | BIT(TE) | BIT(RE) | BIT(SBK) | BIT(RWU)
+             | BIT(M) | BIT(UE) | BIT(PCE) | BIT(IDLEIE) | BIT(OVER8));
 
     volatile uint32_t& cr2 = reg<volatile uint32_t>(Register::USART_CR2);
-    cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBDIE));
+    cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL) | BIT(LBDIE) | 0xf);
 
     volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
     cr3 = (cr3 & ~(BIT(CTSIE) | BIT(CTSE) | BIT(RTSE) | BIT(DMAT) | BIT(DMAR) | BIT(SCEN)
                    | BIT(NACK) | BIT(HDSEL) | BIT(IRLP) | BIT(IREN) | BIT(EIE)))
         | BIT(ONEBIT);
     
-    reg<volatile uint32_t>(Register::USART_BRR) = div;
+    reg<volatile uint32_t>(Register::USART_BRR) = brr;
 
     cr2 |= (uint32_t)stopbit << STOP;
     
-    cr1 &= BIT(OVER8);
+    cr1 &= ~BIT(OVER8);
     cr1 |= BIT(UE);
     cr1 |= BIT(TE) | BIT(RE);
 }
