@@ -15,10 +15,10 @@ enum {
     FOSC          = 12000000,   // Crystal = 12MHz
     HCLK          = 168000000,  // HCLK/core
     APB1_CLK      = 42000000,   // APB1
-    APB1_TIMERCLK = 42000000,   // APB1 timer clock
+    APB1_TIMERCLK = APB1_CLK*2, // APB1 timer clock
     APB2_CLK      = 84000000,   // APB2 bus
-    APB2_TIMERCLK = 84000000,   // APB2 timer clock
-    CLOCK_TICK    = 42000000,   // System clock (TIM5) tick: 42MHz
+    APB2_TIMERCLK = APB2_CLK*2, // APB2 timer clock
+    CLOCK_TICK    = APB1_TIMERCLK, // System clock (TIM5) tick
     CLOCK_HZ      = 1,          // Reload frequency for system cl
 };
 

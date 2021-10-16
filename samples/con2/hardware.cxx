@@ -302,8 +302,8 @@ void hwinit() {
     // 336MHz/2 = 168MHz sysclk
     // 336MHz/7 = 48MHz peripheral clock
     // 168MHz/1 = 168MHz HCLK
-    // 168MHz HCLK/2 = 84MHz APB1 clock
-    // 168MHz HCLK/4 = 42MHz APB2 clock
+    // 168MHz HCLK/4 = 42MHz APB1 clock
+    // 168MHz HCLK/2 = 84MHz APB2 clock
 
     static const Stm32ClockTree::Config clkconf = {
         .pll_clk_source = Stm32ClockTree::PllClkSource::HSE,
@@ -313,8 +313,8 @@ void hwinit() {
         .pll_periph_div = 7,
         .sys_clk_source = Stm32ClockTree::SysClkSource::PLL,
         .hclk_prescale  = Stm32ClockTree::HclkPrescale::DIV1,
-        .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
-        .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
+        .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
+        .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
         .rtc_clk_source = Stm32ClockTree::RtcClkSource::OFF
         //.rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
     };
@@ -389,7 +389,7 @@ void hwinit() {
 #endif
     //NVic::EnableIRQ(GPIO_IRQ);
 
-	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_TIMERCLK);
+	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
 	// Enable global interrupts by restoring to a non-disabled state :)

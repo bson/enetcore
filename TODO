@@ -157,9 +157,9 @@ Enable hard fp support
 
 Create gdbinit for con2
 
------ TODO
-
 Add CCM data RAM to linker
+
+----- TODO
 
 Add PWM function to timer similar to LpcPwm
 
@@ -169,7 +169,14 @@ Implement StmDac
 
 Add DMA support - Stm32Dma?
  - For DAC
- - SPI
+ - For USART!
+ - SPI?
+Per-channel interrupt delegation
+One peripheral at a time per channel
+Stm32Dma::Peripheral implemented by users
+  - Completed callback (in interrupt context)
+
+Clock rollover: allow fractional HZ (e.g. 0.1)
 
 Implement StmAdc
 
@@ -180,6 +187,8 @@ Implement StmWdt
 Implement StmCrc
 
 Implement StmFsmc
+
+Implement a "logout" feature in BKPSRAM
 
 Implement StmI2c (TBD - no use case, need test board)
 

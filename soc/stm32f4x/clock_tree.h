@@ -191,6 +191,8 @@ public:
     // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
     // LSE may be running.
     static void Configure(const Config& config) {
+        assert(config.pll_periph_div >= 2);
+
         // Start HSE if used as source
         if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE
             || config.rtc_clk_source == RtcClkSource::HSE) {
@@ -234,6 +236,7 @@ public:
                     ;
                 break;
             case RtcClkSource::HSE:
+                assert(config.rtc_clk_div >= 2);
                 VREG(RCC_CFGR)= (VREG(RCC_CFGR) & ~(31 << RTCPRE))
                     | (config.rtc_clk_div << RTCPRE);
                 break;
