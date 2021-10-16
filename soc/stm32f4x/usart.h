@@ -19,6 +19,7 @@ private:
     Ring<SEND_BUF_SIZE> _sendq; // TX send q
     Ring<RECV_BUF_SIZE> _recvq; // RX send q
     mutable Mutex _w_mutex;
+    uint8_t _read_wait;         // Readers waiting
     bool _ienable;              // Enable interrupts
 
 public:
@@ -108,7 +109,8 @@ public:
 
     Stm32Usart(const uintptr_t base)
         : _base(base),
-          _ienable(false) {
+          _ienable(false),
+          _read_wait(0) {
     }
 
     template <typename T>
@@ -127,6 +129,9 @@ public:
 
     // Write C string
     void WriteCStr(const char* s) { Write((const uint8_t*)s, strlen(s)); }
+
+    // getc
+    int getc();
 
 	// Drain write buffer synchronously (= polled)
 	void SyncDrain();

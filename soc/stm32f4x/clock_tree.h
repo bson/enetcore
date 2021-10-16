@@ -186,7 +186,6 @@ public:
     };
 
 
-#define REG(offset) (*((uint32_t*)(BASE_RCC+(offset))))
 #define VREG(offset) (*((volatile uint32_t*)(BASE_RCC+(offset))))
 
     // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
@@ -213,13 +212,13 @@ public:
         }
 
         // Set prescalers for AHB, APB1, APB2
-        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(0b1111 << HPRE) & ~(0b111 << PPRE1) & ~(0b111 << PPRE2))
+        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(0b1111 << HPRE) & ~(0b111 << PPRE1) & ~(0b111 << PPRE2))
             | ((uint32_t)config.hclk_prescale << HPRE)
             | ((uint32_t)config.apb1_prescale << PPRE1)
             | ((uint32_t)config.apb2_prescale << PPRE2);
 
         // Set the system clock source
-        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << SW))
+        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << SW))
             | ((uint32_t)config.sys_clk_source << SW);
         while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
             ;
@@ -235,7 +234,7 @@ public:
                     ;
                 break;
             case RtcClkSource::HSE:
-                VREG(RCC_CFGR)= (REG(RCC_CFGR) & ~(31 << RTCPRE))
+                VREG(RCC_CFGR)= (VREG(RCC_CFGR) & ~(31 << RTCPRE))
                     | (config.rtc_clk_div << RTCPRE);
                 break;
             case RtcClkSource::LSI:
@@ -244,7 +243,7 @@ public:
                     ;
                 break;
             }
-            VREG(RCC_BDCR) = (REG(RCC_BDCR) & ~(3 << RTCSEL))
+            VREG(RCC_BDCR) = (VREG(RCC_BDCR) & ~(3 << RTCSEL))
                 | ((uint32_t)config.rtc_clk_source << RTCSEL);
             VREG(RCC_BDCR) |= BIT(RTCEN);
         }
@@ -258,12 +257,12 @@ public:
 
     // Output clock on MCO1, MCO2, with given divider
     static void EnableMCO(Mco1Output clk, McoPrescaler div) {
-        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO1) & ~(7 << MCO1PRE))
+        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << MCO1) & ~(7 << MCO1PRE))
             | ((uint32_t)clk << MCO1)
             | ((uint32_t)div << MCO1PRE);
     }
     static void EnableMCO(Mco2Output clk, McoPrescaler div) {
-        VREG(RCC_CFGR) = (REG(RCC_CFGR) & ~(3 << MCO2) & ~(7 << MCO2PRE))
+        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << MCO2) & ~(7 << MCO2PRE))
             | ((uint32_t)clk << MCO2)
             | ((uint32_t)div << MCO2PRE);
     }
@@ -295,7 +294,7 @@ public:
     static void DisableAPB2LP(uint32_t flags) { VREG(RCC_APB2LPENR) &= ~flags; }
 
     // Reset cause word
-    static uint32_t ResetCause() { return REG(RCC_CSR) & ~3; }
+    static uint32_t ResetCause() { return VREG(RCC_CSR) & ~3; }
 
     // Check if LSE is running (indicates power loss if used to clock RTC)
     static bool CheckLSE() { return VREG(RCC_BDCR) & BIT(LSERDY); }

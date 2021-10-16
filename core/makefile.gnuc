@@ -2,7 +2,8 @@
 # Copyright (c) 2018-2021 Jan Brittenson
 # See LICENSE for details.
 
-CFLAGS += -I$(ENETCORE)/core
+COREDIR=$(ENETCORE)/core
+CFLAGS += -I$(COREDIR)
 
 CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
 	mem.cxx malloc.cxx freelist.cxx util.cxx arc4.cxx sha1.cxx		\
@@ -11,6 +12,6 @@ CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
     network.cxx dhcp.cxx ip.cxx udp.cxx dns.cxx                     \
     sdcard.cxx fat.cxx
 
-SRCS += $(addprefix $(ENETCORE)/core/,$(CORE_SRCS))
+SRCS += $(addprefix $(COREDIR)/,$(CORE_SRCS))
 
-ODIR_TREE += $(ODIR)/$(ENETCORE)/core
+ODIR_TREE += $(ODIR)/$(COREDIR)

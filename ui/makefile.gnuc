@@ -5,10 +5,11 @@
 # Set up tools, add board peripherals and SOC components to build
 #include $(BOARD)/makefile.$(TOOLSET)
 
-CFLAGS += -I$(ENETCORE)/ui
+UIDIR=$(ENETCORE)/ui
+CFLAGS += -I$(UIDIR)
 
 UI_SRCS = ui.cxx
 
-SRCS += $(addprefix $(ENETCORE)/ui/,$(UI_SRCS))
+SRCS += $(addprefix $(UIDIR)/,$(UI_SRCS))
 
-ODIR_TREE += $(ODIR)/$(ENETCORE)/ui
+ODIR_TREE += $(ODIR)/$(UIDIR)

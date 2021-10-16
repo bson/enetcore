@@ -115,14 +115,16 @@ public:
 	[[noreturn]] static void Exception(ExType ex);
 
     // Request a context switch.
+
     static void ContextSwitch() {
         if (!InExceptionHandler()) {
             assert(!IntEnabled());
             _pend_csw = false;
             PostContextSwitch();
-            EnableInterrupts(); // Permit the switch exception to happen
+            EnableInterrupts(); // Permit the context switch to happen here and now
             DisableInterrupts();
         } else {
+            // When in an exception or interrupt, process the context switch on return
             _pend_csw = false;
             PostContextSwitch();
         }

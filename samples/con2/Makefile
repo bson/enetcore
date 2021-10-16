@@ -54,14 +54,14 @@ all: $(ODIR)/image
 etags: TAGS
 
 TAGS:
-	(for dir in . $(ENETCORE) ; do                        \
+	(for dir in . $(ARCH) $(SOCDIR) $(COREDIR) $(ENETCORE)/$(TOOLSET) $(UIDIR); do                        \
 	  find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
     done) | etags --language=c++ --declarations -
 
 .phony: etags clean
 
 clean:
-	-rm -rf $(ODIR)
+	-rm -rf $(ODIR) TAGS
 
 $(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) link.cmd 
 	@echo Linking $@

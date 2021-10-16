@@ -50,7 +50,7 @@ void Stm32Usart::Write(const uint8_t* data, uint len) {
             WriteByte();
         }
         if (p < data + len)
-            Thread::WaitFor(this);
+            Thread::WaitFor(&_sendq);
     }
 }
 
@@ -78,6 +78,9 @@ void Stm32Usart::SetInterrupts(bool enable) {
 }
 
 inline void Stm32Usart::WriteByte() {
+    // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
+    // and if we don't have anything to send the only way to make it stop is to disable
+    // interrupts.  This makes for some rather messy code.
     volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
     if (sr & BIT(TXE)) {
         if (!_sendq.Empty()) {
@@ -90,20 +93,27 @@ inline void Stm32Usart::WriteByte() {
     }
 }
 
+int Stm32Usart::getc() {
+    Mutex::Scoped L(_w_mutex);
+    Thread::IPL G(IPL_UART);
+
+    for (;;) {
+        if (!_recvq.Empty())
+            return _recvq.PopFront();
+
+        ++_read_wait;
+        Thread::WaitFor(&_recvq);
+        --_read_wait;
+    }
+}
+
 inline void Stm32Usart::HandleInterrupt() {
     volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-    bool wake = false;
     
-    // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
-    // and if we don't have anything to send the only way to make it stop is to disable
-    // interrupts.  This makes for some rather messy code.  On TXE int we disable interrupts,
-    // and FillTd() will when reenable it if 1) we want interrupts, and 2) we had something
-    // to send.  If there is nothing to send we leave it disabled.  TXE remains set.
     if (sr & BIT(TXE)) {
         WriteByte();
-        if (_sendq.Empty()) {
-            wake = true;
-        }
+        if (_sendq.Empty())
+            Thread::WakeSingle(&_sendq);
     }
 
     if (sr & BIT(RXNE)) {
@@ -111,12 +121,10 @@ inline void Stm32Usart::HandleInterrupt() {
         const uint8_t c = (uint8_t)dr;
         if (_recvq.Headroom()) {
             _recvq.PushBack(c);
-            wake = true;
+            if (_read_wait)
+                Thread::WakeSingle(&_recvq);
         }
     }
-    
-    if (wake)
-        Thread::WakeAll(this);
 }
 
 // Interrupt handler
