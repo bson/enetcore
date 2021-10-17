@@ -412,12 +412,12 @@ void Thread::Delay(uint usec) {
 
 void Thread::SetTimer(uint usec)
 {
+    if (usec < 5)               // Kind of arbitrary
+        usec = 5;
+
     ScopedNoInt G;
 
-	if (usec < 5)
-        usec = 5;
-    
-	_systimer.SetTimer(min(usec, (uint)1024*1024*4));
+	_systimer.SetTimer(usec);
 }
 
 
