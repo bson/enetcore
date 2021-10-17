@@ -226,8 +226,7 @@ public:
             ;
 
         // Maybe enable RTC clock
-        if (config.rtc_clk_source != RtcClkSource::OFF /* (VREG(RCC_BDCR) >> RTCSEL) & 3 */) {
-            DMSG("\nRTCSEL before: %x", (VREG(RCC_BDCR) >> RTCSEL) & 3);
+        if ((uint32_t)config.rtc_clk_source != (VREG(RCC_BDCR) >> RTCSEL) & 3) {
 
             switch (config.rtc_clk_source) {
             case RtcClkSource::LSE:
@@ -246,16 +245,18 @@ public:
                     ;
                 break;
             }
-            RtcAccess RA();
+            
+            VREG(RCC_BDCR) |= BIT(BDRST);
+            VREG(RCC_BDCR) &= ~BIT(BDRST);
 
-            //VREG(RCC_BDCR) |= BIT(BDRST);
-            //VREG(RCC_BDCR) &= ~BIT(BDRST);
+            *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
 
             VREG(RCC_BDCR) = (VREG(RCC_BDCR) & ~(3 << RTCSEL))
                 | ((uint32_t)config.rtc_clk_source << RTCSEL);
 
             VREG(RCC_BDCR) |= BIT(RTCEN);
-            DMSG("RTCSEL after: %x", (VREG(RCC_BDCR) >> RTCSEL) & 3);
+
+            *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP);
         }
 
         // Stop HSI if unused
@@ -306,7 +307,7 @@ public:
     static uint32_t ResetCause() { return VREG(RCC_CSR) & ~3; }
 
     // Check if LSE or LSI is running (indicates power loss if off)
-    static bool CheckPowerLoss() { return VREG(RCC_BDCR) & (BIT(LSERDY) | BIT(LSIRDY)); }
+    static bool CheckPowerLoss() { return (VREG(RCC_BDCR) & (BIT(LSERDY) | BIT(LSIRDY))) == 0; }
 
     class RtcAccess {
     public:

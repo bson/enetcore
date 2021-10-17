@@ -318,7 +318,7 @@ void hwinit() {
         .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSI
     };
 
-    const bool power_reset = !Stm32ClockTree::CheckPowerLoss();
+    const bool power_reset = Stm32ClockTree::CheckPowerLoss();
     Stm32ClockTree::Configure(clkconf);
 
 #ifdef CLKOUTPIN
@@ -428,7 +428,7 @@ void hwinit() {
     DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
     DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
     DMSG("APB1CLK: %d  APB2CLK: %d", APB1_CLK, APB2_CLK);
-    DMSG("APB2TCLK: %d APB2TCLK: %d", APB1_TIMERCLK, APB2_TIMERCLK);
+    DMSG("APB1TCLK: %d APB2TCLK: %d", APB1_TIMERCLK, APB2_TIMERCLK);
 
     _malloc_region.SetReserve(64);
 

@@ -23,8 +23,8 @@ void logDateTime() {
     };
 
     DMSG("%s %04d-%02d-%02d %02d:%02d:%02d",
-         days[now.dow],
-         now.year + Rtc::EPOCH,
+         days[now.dow-1],
+         now.year,
          now.month,
          now.day,
          now.hour,

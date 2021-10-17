@@ -146,7 +146,7 @@ class Stm32Rtc {
         DBP = 8
     };
        
-    static volatile uint32_t& vreg(Register r) {
+    inline static volatile uint32_t& vreg(Register r) {
         return *(volatile uint32_t*)(BASE_RTC+(uint32_t)r);
     }
 
@@ -188,7 +188,7 @@ public:
         assert(date_time.min >= 0 && date_time.min <= 59);
         assert(date_time.sec >= 0 && date_time.sec <= 59);
 
-        Access A();
+        *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
 
         vreg(Register::WPR) = 0xca;
         vreg(Register::WPR) = 0x53;
@@ -206,7 +206,7 @@ public:
             | ((date_time.month / 10) << MT)
             | ((date_time.month % 10) << MU)
             | ((date_time.day / 10) << DT)
-            | ((date_time.month % 10) << DU)
+            | ((date_time.day % 10) << DU)
             | ((uint32_t)date_time.dow << WDU);
 
         vreg(Register::TR) =
@@ -225,6 +225,7 @@ public:
 
         while ((vreg(Register::ISR) & BIT(INITS)) == 0)
             ;
+        *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP);
     }
 
     static DateTime GetDateTime() {
