@@ -23,7 +23,7 @@ public:
     SysTick() { }
 
     static void Interrupt(void*);
-    void SetTimer(uint usec);
+    void SetTimer(uint32_t usec);
 };
 
 typedef SysTick SysTimer;

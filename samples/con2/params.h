@@ -19,11 +19,17 @@ enum {
     APB2_CLK      = 84000000,   // APB2 bus
     APB2_TIMERCLK = APB2_CLK*2, // APB2 timer clock
     CLOCK_TICK    = APB1_TIMERCLK, // System clock (TIM5) tick
-    CLOCK_HZ      = 1,          // Reload frequency for system cl
+    CLOCK_HZ      = 1,          // Reload frequency for system clock
 };
 
 enum {
-    CCLK = HCLK                 // For SysTick
+    CCLK = HCLK,                // Core (CPU) clock
+
+    // At 168MHz we can set a scheduling timer for a max of 2**32 / 168M * 8 = 200s
+    // There are 168/8 = 21 ticks per usec, giving us slightly better than 50ns precision.
+    // With a significantly slower HCLK, we'd want to undefine SYSTICK_ALT below and use
+    // the full HCLK here.
+    SYSTICK_CLK = HCLK/8        // Systick clock (alternative, HCLK/8)
 };
 
 enum {
@@ -32,5 +38,7 @@ enum {
 
 #define PACKAGE_PINS 100
 
+// SysTick uses alternative, implementation specific clock
+#define SYSTICK_ALT
 
 #endif // __PARAMS_H__

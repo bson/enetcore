@@ -188,11 +188,9 @@ public:
           _timerclk(timerclk)
     { }
 
-    // Run timer once up to count and interrupt.
-    void RunTimer(Counter count);
-
     // Run timer, repeatedly call Tick() at freq Hz
-    void RunTimerFreq(uint32_t freq);
+    // Count with precision prec
+    void RunTimerFreq(uint32_t freq, uint32_t prec);
 
     // Read timer count
     uint32_t GetCount() {
@@ -203,9 +201,9 @@ public:
     static void Interrupt(void* token);
 
     // Called from interrupt handler to indicate clock tick
-    virtual void Tick() = 0;
+    virtual void Tick() { };
 
-private:
+protected:
     void HandleInterrupt();
         
 private:
@@ -222,7 +220,9 @@ public:
           _time(0)
     { }
 
-	uint64_t GetTime() { return _time + GetCount(); }
+    void Start();
+
+	uint64_t GetTime();
 
 	void Tick();
 };

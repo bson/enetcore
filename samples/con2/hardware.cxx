@@ -393,12 +393,9 @@ void hwinit() {
 
 	// Enable global interrupts by restoring to a non-disabled state :)
     RestoreInterrupts(0);
-
-    // Disable IPLs
     SetIPL(0);
 
-	// Start clock
-	_clock.RunTimerFreq(CLOCK_HZ);
+    _clock.Start();
     Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     // First line of text
