@@ -83,11 +83,13 @@ inline void Stm32Usart::WriteByte() {
     // interrupts.  This makes for some rather messy code.
     volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
     if (sr & BIT(TXE)) {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         if (!_sendq.Empty()) {
             volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
             dr = _sendq.PopFront();
+            if (_ienable)
+                cr1 |= BIT(TXEIE);
         } else {
-            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
             cr1 &= ~BIT(TXEIE);
         }
     }
