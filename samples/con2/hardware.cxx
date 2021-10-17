@@ -315,11 +315,10 @@ void hwinit() {
         .hclk_prescale  = Stm32ClockTree::HclkPrescale::DIV1,
         .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
         .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
-        .rtc_clk_source = Stm32ClockTree::RtcClkSource::OFF
-        //.rtc_clk_source = Stm32ClockTree::RtcClkSource::LSE
+        .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSI
     };
 
-    const bool power_reset = !Stm32ClockTree::CheckLSE();
+    const bool power_reset = !Stm32ClockTree::CheckPowerLoss();
     Stm32ClockTree::Configure(clkconf);
 
 #ifdef CLKOUTPIN
@@ -420,7 +419,10 @@ void hwinit() {
 #endif
 
     if (power_reset) {
-        DMSG("RTC power loss");
+        DMSG("RTC power loss - initializing");
+        Rtc::SetDateTime(Rtc::DateTime(2021, 10, 16, 
+                                       20, 35, 00,
+                                       Rtc::DayOfWeek::Saturday));
     }
 
     DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);

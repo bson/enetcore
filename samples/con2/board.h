@@ -23,6 +23,7 @@
 #include "stm32f4x/random.h"
 #include "stm32f4x/timer.h"
 #include "stm32f4x/backup.h"
+#include "stm32f4x/rtc.h"
 
 //#include "stm32f4x/crc.h"
 //#include "stm32f4x/i2c.h"
@@ -32,6 +33,7 @@
 
 // SoC peripherals used on CON2
 
+typedef Stm32Rtc Rtc;
 typedef Stm32GpioPort Gpio;
 typedef Stm32Usart SerialPort;
 typedef Stm32Timer<uint32_t> Timer32;

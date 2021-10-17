@@ -101,8 +101,8 @@ public:
 
     enum class RtcClkSource {
         OFF = 0,
-        LSI = 1,
-        LSE = 2,
+        LSE = 1,
+        LSI = 2,
         HSE = 3
     };
 
@@ -225,9 +225,9 @@ public:
         while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
             ;
 
-        // Maybe enable RTC
-        if (config.rtc_clk_source != RtcClkSource::OFF) {
-            RtcAccess _ra();
+        // Maybe enable RTC clock
+        if (config.rtc_clk_source != RtcClkSource::OFF /* (VREG(RCC_BDCR) >> RTCSEL) & 3 */) {
+            DMSG("\nRTCSEL before: %x", (VREG(RCC_BDCR) >> RTCSEL) & 3);
 
             switch (config.rtc_clk_source) {
             case RtcClkSource::LSE:
@@ -246,16 +246,22 @@ public:
                     ;
                 break;
             }
+            RtcAccess RA();
+
+            //VREG(RCC_BDCR) |= BIT(BDRST);
+            //VREG(RCC_BDCR) &= ~BIT(BDRST);
+
             VREG(RCC_BDCR) = (VREG(RCC_BDCR) & ~(3 << RTCSEL))
                 | ((uint32_t)config.rtc_clk_source << RTCSEL);
+
             VREG(RCC_BDCR) |= BIT(RTCEN);
+            DMSG("RTCSEL after: %x", (VREG(RCC_BDCR) >> RTCSEL) & 3);
         }
 
         // Stop HSI if unused
         if (config.pll_clk_source != PllClkSource::HSI
-            && config.sys_clk_source != SysClkSource::HSI) {
+            && config.sys_clk_source != SysClkSource::HSI)
             VREG(RCC_CR) &= ~BIT(HSION);
-        }
     }
 
     // Output clock on MCO1, MCO2, with given divider
@@ -299,8 +305,8 @@ public:
     // Reset cause word
     static uint32_t ResetCause() { return VREG(RCC_CSR) & ~3; }
 
-    // Check if LSE is running (indicates power loss if used to clock RTC)
-    static bool CheckLSE() { return VREG(RCC_BDCR) & BIT(LSERDY); }
+    // Check if LSE or LSI is running (indicates power loss if off)
+    static bool CheckPowerLoss() { return VREG(RCC_BDCR) & (BIT(LSERDY) | BIT(LSIRDY)); }
 
     class RtcAccess {
     public:
@@ -309,7 +315,6 @@ public:
     };
 };
 
-#undef REG
 #undef VREG
 
 #endif // __STM32_CLOCK_TREE_H__

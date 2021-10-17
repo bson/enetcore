@@ -16,6 +16,22 @@ Thread* _ui_thread;
 extern void UsbInit();
 extern void* UIThread(void*);
 
+void logDateTime() {
+    const auto now = Rtc::GetDateTime();
+    static const char* const days[] = {
+        "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+    };
+
+    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d",
+         days[now.dow],
+         now.year + Rtc::EPOCH,
+         now.month,
+         now.day,
+         now.hour,
+         now.min,
+         now.sec);
+}
+
 int main() {
 #ifdef ENABLE_USB
     UsbInit();
@@ -34,10 +50,12 @@ int main() {
     Time wake = Time::Now();
     for (;;) {
         _led.Raise();
+        logDateTime();
         wake += Time::FromMsec(500);
         Thread::Sleep(wake);
 
         _led.Lower();
+        logDateTime();
         wake += Time::FromMsec(250);
         Thread::Sleep(wake);
     }

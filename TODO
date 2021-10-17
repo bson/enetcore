@@ -190,6 +190,8 @@ Implement StmFsmc
 
 Implement a "logout" feature in BKPSRAM
 
+Why doesn't the LSE OSC start up?  LSI works fine.
+
 Implement StmI2c (TBD - no use case, need test board)
 
 Implement StmEthernet (TBD - no use case, need test board, F407 only)
