@@ -434,6 +434,7 @@ void hwinit() {
             _build_branch, _build_commit, _build_user, _build_date);
 
     DMSG("Random uint: 0x%x", Util::Random<uint>());
+    DMSG("HW RNG: 0x%x", Stm32Random::Random());
 }
 
 
