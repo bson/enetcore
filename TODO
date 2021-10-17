@@ -159,7 +159,13 @@ Create gdbinit for con2
 
 Add CCM data RAM to linker
 
+Debug and fix RTC startup
+
+Debug and fix timing and clock support
+
 ----- TODO
+
+Fix GDB walking off the end of the stack
 
 Add PWM function to timer similar to LpcPwm
 
