@@ -158,22 +158,28 @@ public:
 
     class Peripheral {
     public:
+        bool _tx_active;
+
+        Peripheral()
+            : _tx_active(false) {
+        }
+
         // Transfer is complete, called in interrupt context
-        virtual void DmaComplete() = 0;
+        virtual void DmaTxComplete() = 0;
 
         // Get data register address to Tx to
-        virtual uint32_t DmaGetDR() = 0;
+        virtual uint32_t DmaTxDR() = 0;
     };
 
 private:
     const uint32_t _base;
     Peripheral* _handler[8];
+    const uint16_t* _irq;
 
 public:
-    Stm32Dma(uint32_t base)
-        : _base(base) {
+    Stm32Dma(uint32_t base, const uint16_t* irqs)
+        : _base(base), _irq(irqs) {
     };
-
 
     // Clear IF
     void ClearInterrupt(uint32_t stream) {
@@ -193,12 +199,17 @@ public:
         assert(stream <= 7);
         assert(channel <= 7);
         assert(nwords <= 0xffff);
-        assert(nword != 0);
+        assert(nwords != 0);
         assert(word_size == 1 || word_size == 2 || word_size == 4);
 
         volatile uint32_t& cr = s_cr(stream);
 
         ScopedNoInt G();
+
+        while (p->_tx_active)
+            Thread::WaitFor(&p->_tx_active);
+
+        p->_tx_active = true;
 
         cr &= ~BIT(EN);
         cr = (channel << CHSEL)
@@ -209,7 +220,7 @@ public:
             | BIT(PFCTRL) | BIT(MINC) | BIT(TCIE);
 
         s_ndtr(stream) = nwords;
-        s_par(stream) = p->DmaGetDR();
+        s_par(stream) = p->DmaTxDR();
         s_m0ar(stream) = (uint32_t)buf;
         s_fcr(stream) = 0;
 
@@ -220,11 +231,16 @@ public:
     }
 
 	// Interrupt handler
+    template <uint32_t STREAM, Register ISR, Register IFCR>
 	static void Interrupt(void* token);
 
-private:
-	inline void HandleInterrupt();
+    // Install NVIC interrupt handlers
+    void InstallHandlers();
 
+    // Enable NVIC interrupts
+    void EnableInterrupts();
+
+private:
     Stm32Dma(const Stm32Dma&);
     Stm32Dma& operator=(const Stm32Dma&);
 };

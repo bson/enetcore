@@ -44,8 +44,17 @@ PinOutput<Gpio::Pin> _led; // Green LED
 Clock _clock(BASE_TIM5, APB1_TIMERCLK);
 SysTimer _systimer;
 
-Dma _dma1(BASE_DMA1);
-Dma _dma2(BASE_DMA2);
+static const uint16_t _dma1_irqs[] = {
+    INTR_DMA1_Stream0, INTR_DMA1_Stream1, INTR_DMA1_Stream2, INTR_DMA1_Stream3,
+    INTR_DMA1_Stream4, INTR_DMA1_Stream5, INTR_DMA1_Stream6, INTR_DMA1_Stream7
+};
+static const uint16_t _dma2_irqs[] = {
+    INTR_DMA2_Stream0, INTR_DMA2_Stream1, INTR_DMA2_Stream2, INTR_DMA2_Stream3,
+    INTR_DMA2_Stream4, INTR_DMA2_Stream5, INTR_DMA2_Stream6, INTR_DMA2_Stream7
+};
+
+Dma _dma1(BASE_DMA1, _dma1_irqs);
+Dma _dma2(BASE_DMA2, _dma2_irqs);
 
 SerialPort _usart3(BASE_USART3);
 SerialPort _uart4(BASE_UART4);
@@ -363,6 +372,11 @@ void hwinit() {
     NVic::InstallSystemHandler(SYSTICK_VEC, SysTick::Interrupt, IPL_SYSTICK);
 
     NVic::InstallCSWHandler(PENDSV_VEC, IPL_CSW);
+
+    _dma1.InstallHandlers();
+    _dma2.InstallHandlers();
+    _dma1.EnableInterrupts();
+    _dma2.EnableInterrupts();
 
     Stm32Random::Init();
 
