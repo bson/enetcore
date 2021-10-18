@@ -165,14 +165,6 @@ Debug and fix timing and clock support
 
 ----- TODO
 
-Fix GDB walking off the end of the stack
-
-Add PWM function to timer similar to LpcPwm
-
-Implement StmSpi
-
-Implement StmDac
-
 Add DMA support - Stm32Dma?
  - For DAC
  - For USART!
@@ -183,6 +175,14 @@ Stm32Dma::Peripheral implemented by users
   - Completed callback (in interrupt context)
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
+
+Fix GDB walking off the end of the stack
+
+Add PWM function to timer similar to LpcPwm
+
+Implement StmSpi
+
+Implement StmDac
 
 Implement StmAdc
 

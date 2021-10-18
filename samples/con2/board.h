@@ -18,6 +18,7 @@
 #include "stm32f4x/debug.h"
 #include "stm32f4x/flash.h"
 #include "stm32f4x/syscfg.h"
+#include "stm32f4x/dma.h"
 #include "stm32f4x/gpio.h"
 #include "stm32f4x/usart.h"
 #include "stm32f4x/random.h"
@@ -33,6 +34,7 @@
 
 // SoC peripherals used on CON2
 
+typedef Stm32Dma Dma;
 typedef Stm32Rtc Rtc;
 typedef Stm32GpioPort Gpio;
 typedef Stm32Usart SerialPort;

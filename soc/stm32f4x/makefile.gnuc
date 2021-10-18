@@ -1,4 +1,4 @@
-SOC_SRCS = usart.cxx timer.cxx
+SOC_SRCS = usart.cxx timer.cxx dma.cxx
 
 SRCS += $(addprefix $(SOCDIR)/stm32f4x/,$(SOC_SRCS))
 
