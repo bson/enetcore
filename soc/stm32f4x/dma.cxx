@@ -5,7 +5,7 @@
 
 // Interrupt handler
 template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
-void Stm32Dma::Interrupt(void* token) {
+[[__optimize]] void Stm32Dma::Interrupt(void* token) {
     Stm32Dma* dma = (Stm32Dma*)token;
 
     static const uint32_t stream_to_tcif[] = {
@@ -29,22 +29,14 @@ void Stm32Dma::Interrupt(void* token) {
 }
 
 void Stm32Dma::InstallHandlers() {
-    NVic::InstallIRQHandler(_irq[0], Stm32Dma::Interrupt<0,Register::LISR,Register::LIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[1], Stm32Dma::Interrupt<1,Register::LISR,Register::LIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[2], Stm32Dma::Interrupt<2,Register::LISR,Register::LIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[3], Stm32Dma::Interrupt<3,Register::LISR,Register::LIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[4], Stm32Dma::Interrupt<4,Register::HISR,Register::HIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[5], Stm32Dma::Interrupt<5,Register::HISR,Register::HIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[6], Stm32Dma::Interrupt<6,Register::HISR,Register::HIFCR>, IPL_DMA,
-                            this);
-    NVic::InstallIRQHandler(_irq[7], Stm32Dma::Interrupt<7,Register::HISR,Register::HIFCR>, IPL_DMA,
-                            this);
+    NVic::InstallIRQHandler(_irq[0], Stm32Dma::Interrupt<0,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[1], Stm32Dma::Interrupt<1,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[2], Stm32Dma::Interrupt<2,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[3], Stm32Dma::Interrupt<3,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[4], Stm32Dma::Interrupt<4,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[5], Stm32Dma::Interrupt<5,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[6], Stm32Dma::Interrupt<6,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::InstallIRQHandler(_irq[7], Stm32Dma::Interrupt<7,Register::HISR,Register::HIFCR>, IPL_DMA, this);
 }
 
 void Stm32Dma::EnableInterrupts() {

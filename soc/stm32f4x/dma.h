@@ -132,20 +132,33 @@ class Stm32Dma {
         FTH = 0,
     };
 
+    [[__finline, __optimize]]
     volatile uint32_t& reg(Register r) {
         return *(volatile uint32_t*)(_base + (uint32_t)r);
     }
 
+    [[__finline, __optimize]]
     volatile uint32_t& stream_reg(Register r, uint32_t stream) {
         return *(volatile uint32_t*)(_base + (uint32_t)r + stream*0x18);
     }
 
     // Stream registers
+    [[__finline, __optimize]]
     volatile uint32_t& s_cr(uint32_t stream) { return stream_reg(Register::S0CR, stream); }
+
+    [[__finline, __optimize]]
     volatile uint32_t& s_ndtr(uint32_t stream) { return stream_reg(Register::S0NDTR, stream); }
+
+    [[__finline, __optimize]]
     volatile uint32_t& s_par(uint32_t stream) { return stream_reg(Register::S0PAR, stream); }
+
+    [[__finline, __optimize]]
     volatile uint32_t& s_m0ar(uint32_t stream) { return stream_reg(Register::S0M0AR, stream); }
+
+    [[__finline, __optimize]]
     volatile uint32_t& s_m1ar(uint32_t stream) { return stream_reg(Register::S0M1AR, stream); }
+
+    [[__finline, __optimize]]
     volatile uint32_t& s_fcr(uint32_t stream) { return stream_reg(Register::S0FCR, stream); }
 
 public:
@@ -180,18 +193,6 @@ public:
     Stm32Dma(uint32_t base, const uint16_t* irqs)
         : _base(base), _irq(irqs) {
     };
-
-    // Clear IF
-    void ClearInterrupt(uint32_t stream) {
-        assert(stream <= 7);
-
-        if (stream >= 4)
-            reg(Register::HIFCR) |= BIT(stream-4);
-        else
-            reg(Register::LIFCR) |= BIT(stream);
-
-        _handler[stream] = NULL;
-    }
 
     // Transfer to peripheral
     void PeripheralTx(Stm32Dma::Peripheral* p, uint32_t stream, uint32_t channel, Priority prio,
