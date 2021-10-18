@@ -18,14 +18,15 @@ void SysTick::SetTimer(uint32_t usec) {
     // instead of 100 we use 128 which reduces to a shift in the final scale-down.
     enum { 
         PREC_ENH       = 128,
-        MAX_WAIT_USEC  = ~(uint32_t)0 / SYSTICK_CLK / PREC_ENH,
+        MAX_WAIT_USEC  = ~(uint32_t)0 / uint32_t(SYSTICK_CLK) * 1000000UL / uint32_t(PREC_ENH),
         COUNT_PER_USEC = uint32_t(SYSTICK_CLK) * uint32_t(PREC_ENH) / 1000000UL
     };
 
     static_assert((uint32_t)COUNT_PER_USEC != 0);
     static_assert((uint32_t)COUNT_PER_USEC <= ~(uint16_t)0);
+    static_assert((uint32_t)MAX_WAIT_USEC > 10000); // At least 10ms
 
-    const uint32_t count = (usec > MAX_WAIT_USEC ? MAX_WAIT_USEC : usec)
+    const uint32_t count = (uint32_t)(usec > MAX_WAIT_USEC ? MAX_WAIT_USEC : usec)
         * (uint16_t)COUNT_PER_USEC / PREC_ENH;
 
     Thread::IPL G(IPL_SYSTICK);

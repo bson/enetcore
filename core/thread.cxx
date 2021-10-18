@@ -134,7 +134,6 @@ Thread& Thread::Bootstrap()
     _rr = 0;
 
     _qend = Time::Now() + Time::FromUsec(RRQUANTUM);
-    //_systimer.SetResolution(TIME_RESOLUTION);
 
     SetTimer(RRQUANTUM);
 
