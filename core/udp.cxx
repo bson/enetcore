@@ -286,8 +286,7 @@ bool UdpCoreSocket::RecvFrom(void* data, uint& len, NetAddr& sender)
 
 	Mutex::Scoped L(_lock);
 
-	IOBuffer* buf = _recvq.Front();
-	_recvq.PopFront();
+	IOBuffer* buf = _recvq.PopFront();
 	buf->SetHead(16);
 	Iph& iph = *(Iph*)(*buf + 0);
 	Udph& udph = *(Udph*)iph.GetTransport();

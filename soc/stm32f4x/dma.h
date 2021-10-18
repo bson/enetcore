@@ -171,23 +171,28 @@ public:
 
     class Peripheral {
     public:
-        bool _tx_active;
+        const uint32_t _tx_dr;        // Peripheral data register address
 
-        Peripheral()
-            : _tx_active(false) {
+        uint32_t _tx_size;      // Size of current or most recent transfer
+        uint8_t  _tx_ch;
+        uint8_t  _tx_stream;
+        Priority _tx_prio;
+        uint8_t  _tx_word_size;
+
+        Peripheral(uint32_t txdr)
+            : _tx_dr(txdr) {
         }
 
         // Transfer is complete, called in interrupt context
         virtual void DmaTxComplete() = 0;
-
-        // Get data register address to Tx to
-        virtual uint32_t DmaTxDR() = 0;
     };
 
 private:
-    const uint32_t _base;
-    Peripheral* _handler[8];
+    const uint32_t  _base;
+    Peripheral*     _handler[8];
     const uint16_t* _irq;
+
+    static const uint32_t stream_to_tcif[8];
 
 public:
     Stm32Dma(uint32_t base, const uint16_t* irqs)
@@ -195,41 +200,37 @@ public:
     };
 
     // Transfer to peripheral
-    void PeripheralTx(Stm32Dma::Peripheral* p, uint32_t stream, uint32_t channel, Priority prio,
-                      const void* buf, uint32_t nwords, uint32_t word_size) {
-        assert(stream <= 7);
-        assert(channel <= 7);
+    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint32_t nwords) {
         assert(nwords <= 0xffff);
         assert(nwords != 0);
-        assert(word_size == 1 || word_size == 2 || word_size == 4);
+        assert(buf != NULL);
 
-        volatile uint32_t& cr = s_cr(stream);
+        volatile uint32_t& cr = s_cr(p->_tx_stream);
 
         ScopedNoInt G();
 
-        while (p->_tx_active)
-            Thread::WaitFor(&p->_tx_active);
-
-        p->_tx_active = true;
-
         cr &= ~BIT(EN);
-        cr = (channel << CHSEL)
-            | ((uint32_t)prio << PL)
-            | (word_size << MSIZE)
-            | (word_size << PSIZE)
+        cr = (p->_tx_ch << CHSEL)
+            | ((uint32_t)p->_tx_prio << PL)
+            | (p->_tx_word_size << MSIZE)
+            | (p->_tx_word_size << PSIZE)
             | (1 << DIR)
             | BIT(PFCTRL) | BIT(MINC) | BIT(TCIE);
 
-        s_ndtr(stream) = nwords;
-        s_par(stream) = p->DmaTxDR();
-        s_m0ar(stream) = (uint32_t)buf;
-        s_fcr(stream) = 0;
+        s_ndtr(p->_tx_stream) = nwords;
+        s_par(p->_tx_stream) = p->_tx_dr;
+        s_m0ar(p->_tx_stream) = (uint32_t)buf;
+        s_fcr(p->_tx_stream) = 0;
 
-        _handler[stream] = p;
+        _handler[p->_tx_stream] = p;
 
         // Make it so
+        ClearTCIF(p->_tx_stream);
         cr |= BIT(EN);
     }
+
+    // Clear TCIF for stream
+    void ClearTCIF(uint32_t stream);
 
 	// Interrupt handler
     template <uint32_t STREAM, Register ISR, Register IFCR>

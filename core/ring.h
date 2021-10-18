@@ -41,6 +41,14 @@ public:
     void Clear() { _head = _tail = 0; }
     bool Empty() const { return _head == _tail; }
 
+    // Return amount of continuous buffer data, starting at _tail
+    size_type Continuous() const {
+        if (_head <= _tail)
+            return Size();
+
+        return N - _head;
+    }
+
     // Make _head <= _tail
 
     void Flatten() {
@@ -118,8 +126,13 @@ public:
 
     T PopFront() {
         BoundsCheck(0);
+        const T tmp = _v[_head];
         _head = (_head + 1) % N;
-        return _v[_head];
+        return tmp;
+    }
+
+    void PopFrontN(size_type n) {
+        _head = (_head + n) % N;
     }
 
     T PopBack() {

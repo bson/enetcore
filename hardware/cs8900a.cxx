@@ -122,8 +122,7 @@ IOBuffer* MacCS8900a::Receive(uint16_t& et)
 	if (_recvq.Empty())
         return NULL;
 
-	IOBuffer* buf = _recvq.Front();
-	_recvq.PopFront();
+	IOBuffer* buf = _recvq.PopFront();
 	_recvq.Compact();
 
 	buf->SetHead(0);
@@ -311,10 +310,9 @@ void MacCS8900a::BeginTx()
 	const uint16_t busst = _pp[ETH_PP_BusST];
 	if (busst & 0x80) {
 		// TxBidErr - something wrong with the TxCMD/TxLength
-		if (!_sendq.Empty())  {
-			BufferPool::FreeBuffer(_sendq.Front());
-			_sendq.PopFront();
-		}
+		if (!_sendq.Empty())
+			BufferPool::FreeBuffer(_sendq.PopFront());
+
 		_tx_state = TX_IDLE;
 		return;
 	}
@@ -336,8 +334,7 @@ void MacCS8900a::CopyTx()
 		return;
 	}
 
-	IOBuffer* buf = _sendq.Front();
-	_sendq.PopFront();
+	IOBuffer* buf = _sendq.PopFront();
 
 	// First 2 bytes are alignment padding
 	buf->SetHead(2);

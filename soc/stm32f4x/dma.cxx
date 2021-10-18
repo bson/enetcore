@@ -3,29 +3,36 @@
 #include "stm32f4x/dma.h"
 #include "nvic.h"
 
+const uint32_t Stm32Dma::stream_to_tcif[8] = {
+    BIT(TCIF0), BIT(TCIF1), BIT(TCIF2), BIT(TCIF3),
+    BIT(TCIF4), BIT(TCIF5), BIT(TCIF6), BIT(TCIF7)
+};
+
 // Interrupt handler
 template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
 [[__optimize]] void Stm32Dma::Interrupt(void* token) {
     Stm32Dma* dma = (Stm32Dma*)token;
-
-    static const uint32_t stream_to_tcif[] = {
-        BIT(TCIF0), BIT(TCIF1), BIT(TCIF2), BIT(TCIF3),
-        BIT(TCIF4), BIT(TCIF5), BIT(TCIF6), BIT(TCIF7)
-    };
 
     const uint32_t tcif = stream_to_tcif[STREAM];
     if (dma->reg(ISR) & tcif) {
         Peripheral* handler = dma->_handler[STREAM];
         dma->reg(IFCR) |= tcif;
         if (handler) {
-            if (handler->_tx_active)
-                handler->DmaTxComplete();
-
-            handler->_tx_active = false;
+            handler->DmaTxComplete();
             dma->_handler[STREAM] = NULL;
         }
         dma->s_cr(STREAM) &= ~(BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
     }
+}
+
+// Clear TCIF bit for stream
+void Stm32Dma::ClearTCIF(uint32_t stream) {
+    assert(stream <= 7);
+
+    if (stream <= 4)
+        reg(Register::LIFCR) |= stream_to_tcif[stream];
+    else
+        reg(Register::HIFCR) |= stream_to_tcif[stream];
 }
 
 void Stm32Dma::InstallHandlers() {

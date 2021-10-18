@@ -7,22 +7,13 @@
 #include "ring.h"
 #include "mutex.h"
 
-class Stm32Usart {
+class Stm32Usart: public Stm32Dma::Peripheral {
 public:
     enum { 
         SEND_BUF_SIZE = 128,
         RECV_BUF_SIZE = 16
     };
 
-private:
-    const uintptr_t _base;
-    Ring<SEND_BUF_SIZE> _sendq; // TX send q
-    Ring<RECV_BUF_SIZE> _recvq; // RX send q
-    mutable Mutex _w_mutex;
-    uint8_t _read_wait;         // Readers waiting
-    bool _ienable;              // Enable interrupts
-
-public:
     enum class Register {
         USART_SR   = 0x00,
         USART_DR   = 0x04,
@@ -106,11 +97,24 @@ public:
         SB_1_5 = 3             // 1.5
     };
 
+private:
+    const uintptr_t _base;
+    Ring<SEND_BUF_SIZE> _sendq; // TX send q
+    Ring<RECV_BUF_SIZE> _recvq; // RX send q
+    mutable Mutex _w_mutex;
+    uint8_t _read_wait;         // Readers waiting
+    bool _ienable;              // Enable interrupts
 
+    // For DMA
+    Stm32Dma* _tx_dma;          // TX DMA is enabled if this != NULL
+
+public:
     Stm32Usart(const uintptr_t base)
-        : _base(base),
+        : Peripheral(base + (uint32_t)Register::USART_DR),
+          _base(base),
           _ienable(false),
-          _read_wait(0) {
+          _read_wait(0),
+          _tx_dma(NULL) {
     }
 
     template <typename T>
@@ -130,6 +134,9 @@ public:
     // Write C string
     void WriteCStr(const char* s) { Write((const uint8_t*)s, strlen(s)); }
 
+    // Enable DMA TX
+    void EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio);
+
     // getc
     int getc();
 
@@ -142,8 +149,11 @@ public:
 	// Enable interrupts
 	void SetInterrupts(bool enable);
 
+    // DMA TX complete
+    void DmaTxComplete();
+
 private:
-    inline void WriteByte();
+    inline void StartTx();
 	inline void HandleInterrupt();
 
     Stm32Usart(const Stm32Usart&);

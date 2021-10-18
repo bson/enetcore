@@ -163,16 +163,24 @@ Debug and fix RTC startup
 
 Debug and fix timing and clock support
 
------ TODO
-
 Add DMA support - Stm32Dma?
- - For DAC
- - For USART!
- - SPI?
+ - For USART
 Per-channel interrupt delegation
 One peripheral at a time per channel
 Stm32Dma::Peripheral implemented by users
   - Completed callback (in interrupt context)
+
+Add support for PopMultiple() in Ring, use in DMA
+
+
+----- TODO
+Is Ring<>::PopFront broken?  Shouldn't it return the item that was popped?
+
+Make UART TX by non-DMA optional
+
+DMA
+ - For DAC
+ - SPI?
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
