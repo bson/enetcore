@@ -126,9 +126,8 @@ public:
 
     T PopFront() {
         BoundsCheck(0);
-        const T tmp = _v[_head];
         _head = (_head + 1) % N;
-        return tmp;
+        return _v[_head];
     }
 
     void PopFrontN(size_type n) {
