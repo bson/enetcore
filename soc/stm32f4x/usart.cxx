@@ -77,32 +77,6 @@ void Stm32Usart::SetInterrupts(bool enable) {
     }
 }
 
-inline void Stm32Usart::StartTx() {
-    if (_tx_dma) {
-        _tx_size = _sendq.Continuous();
-        _tx_dma->PeripheralTx(this, &_sendq.Front(), _tx_size);
-        return;
-    }
-
-    // Not DMA - use interrupt based Tx
-
-    // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
-    // and if we don't have anything to send the only way to make it stop is to disable
-    // interrupts.  This makes for some rather messy code.
-    volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-    if (sr & BIT(TXE)) {
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-        if (!_sendq.Empty()) {
-            volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
-            dr = _sendq.PopFront();
-            if (_ienable)
-                cr1 |= BIT(TXEIE);
-        } else {
-            cr1 &= ~BIT(TXEIE);
-        }
-    }
-}
-
 int Stm32Usart::getc() {
     Mutex::Scoped L(_w_mutex);
     Thread::IPL G(IPL_UART);
@@ -142,6 +116,42 @@ void Stm32Usart::Interrupt(void* token) {
     ((Stm32Usart*)token)->HandleInterrupt();
 }
 
+inline void Stm32Usart::StartTx() {
+    if (_tx_dma) {
+        if (!_sendq.Empty()) {
+            if (!_tx_active) {
+                _tx_size = _sendq.Continuous();
+                _tx_dma->PeripheralTx(this, _sendq.Buffer(), _tx_size);
+            }
+        } else {
+            _sendq.Clear();     // Normalize
+        }
+
+        // Just in case we got here on a TXE interrupt, right after enabling DMA
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        cr1 &= ~BIT(TXEIE);
+        return;
+    }
+
+    // Not DMA - use interrupt based Tx
+
+    // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
+    // and if we don't have anything to send the only way to make it stop is to disable
+    // interrupts.  This makes for some rather messy code.
+    volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
+    if (sr & BIT(TXE)) {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        if (!_sendq.Empty()) {
+            volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
+            dr = _sendq.PopFront();
+            if (_ienable)
+                cr1 |= BIT(TXEIE);
+        } else {
+            cr1 &= ~BIT(TXEIE);
+        }
+    }
+}
+
 void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio) {
     assert(stream <= 7);
     assert(ch <= 7);
@@ -149,11 +159,13 @@ void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma
     Mutex::Scoped L(_w_mutex);
     Thread::IPL G(IPL_UART);
 
+    _ipl = IPL_UART;
     _tx_dma = &dma;
     _tx_stream = stream;
     _tx_ch = ch;
     _tx_prio = prio;
-    _tx_word_size = 1;
+    _tx_word_size = Stm32Dma::WordSize::BYTE;
+    _tx_active = false;
 
     SetInterrupts(_ienable);
 
@@ -162,12 +174,9 @@ void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma
 }
 
 void Stm32Usart::DmaTxComplete() {
-    Thread::IPL G(IPL_UART);
+    ScopedNoInt G();
 
-    _sendq.PopFrontN(_tx_size);
-
-    _tx_size = 0;
-
+    _sendq.PopFront(exch(_tx_size, 0UL));
     StartTx();
     Thread::WakeSingle(&_sendq);
 }

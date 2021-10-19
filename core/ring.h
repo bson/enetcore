@@ -38,16 +38,22 @@ public:
     // Return unused space
     size_type Headroom() const { return N - Size() - 1; }
 
-    void Clear() { _head = _tail = 0; }
-    bool Empty() const { return _head == _tail; }
-
-    // Return amount of continuous buffer data, starting at _tail
+    // Return amount of continuous buffer data, starting at _head
     size_type Continuous() const {
         if (_head <= _tail)
             return Size();
 
-        return N - _head;
+        // If head is at N-1, then there is 0 continuous after it.  So
+        // report continuous at the beginning since the next item at
+        // the head is in location 0.
+        if (_head == N - 1)
+            return _tail + 1;
+
+        return N - _head - 1;
     }
+
+    void Clear() { _head = _tail = 0; }
+    bool Empty() const { return _head == _tail; }
 
     // Make _head <= _tail
 
@@ -78,11 +84,13 @@ public:
         return _v[_head];
     }
             
-    T& Front() { BoundsCheck(0); return _v[_head]; }
-    const T& Front() const { BoundsCheck(0); return _v[_head]; }
+    T& Front() { BoundsCheck(0); return _v[(_head + 1) % N]; }
+    const T& Front() const { BoundsCheck(0); return _v[(_head + 1) % N]; }
 
-    T& Back() { BoundsCheck(0); return _v[_tail - 1]; }
-    const T& Back() const { BoundsCheck(0); return _v[_tail - 1]; }
+    T& Back() { BoundsCheck(0); return _v[_tail]; }
+    const T& Back() const { BoundsCheck(0); return _v[_tail]; }
+
+    const T* Buffer() const { BoundsCheck(0); return _v + ((_head + 1) % N); }
 
     void PushFront(const T& arg) {
         SpaceCheck(1);
@@ -118,11 +126,11 @@ public:
         }
     }
 
-    T& operator[](uint arg) { BoundsCheck(arg); return _v[(_head + arg) % N]; }
-    const T& operator[](uint arg) const { BoundsCheck(arg); return _v[(_head + arg) % N]; }
+    T& operator[](uint arg) { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
+    const T& operator[](uint arg) const { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
     
-    T* operator+(uint arg) { BoundsCheck(arg); return _v + ((_head + arg) % N); }
-    const T* operator+(uint arg) const { BoundsCheck(arg); return _v + ((_head + arg) % N); }
+    T* operator+(uint arg) { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
+    const T* operator+(uint arg) const { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
 
     T PopFront() {
         BoundsCheck(0);
@@ -130,7 +138,8 @@ public:
         return _v[_head];
     }
 
-    void PopFrontN(size_type n) {
+    void PopFront(size_type n) {
+        BoundsCheck(0);
         _head = (_head + n) % N;
     }
 

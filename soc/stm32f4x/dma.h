@@ -169,6 +169,12 @@ public:
         VERY_HIGH = 3
     };
 
+    enum class WordSize {
+        BYTE   = 0,
+        WORD16 = 1,
+        WORD32 = 2
+    };
+
     class Peripheral {
     public:
         const uint32_t _tx_dr;        // Peripheral data register address
@@ -177,10 +183,16 @@ public:
         uint8_t  _tx_ch;
         uint8_t  _tx_stream;
         Priority _tx_prio;
-        uint8_t  _tx_word_size;
+        WordSize _tx_word_size;
+        bool     _tx_active;
+        uint8_t  _ipl;
 
         Peripheral(uint32_t txdr)
-            : _tx_dr(txdr) {
+            : _tx_dr(txdr),
+              _tx_prio(Priority::MEDIUM),
+              _tx_word_size(WordSize::BYTE),
+              _tx_active(false),
+              _ipl(IPL_DMA) {
         }
 
         // Transfer is complete, called in interrupt context
@@ -207,13 +219,17 @@ public:
 
         volatile uint32_t& cr = s_cr(p->_tx_stream);
 
-        ScopedNoInt G();
+        NVic::SetIRQPriority(_irq[p->_tx_stream], p->_ipl);
+
+        Thread::IPL G(p->_ipl);
 
         cr &= ~BIT(EN);
+        ClearTCIF(p->_tx_stream);
+
         cr = (p->_tx_ch << CHSEL)
             | ((uint32_t)p->_tx_prio << PL)
-            | (p->_tx_word_size << MSIZE)
-            | (p->_tx_word_size << PSIZE)
+            | ((uint32_t)p->_tx_word_size << MSIZE)
+            | ((uint32_t)p->_tx_word_size << PSIZE)
             | (1 << DIR)
             | BIT(PFCTRL) | BIT(MINC) | BIT(TCIE);
 
@@ -225,7 +241,7 @@ public:
         _handler[p->_tx_stream] = p;
 
         // Make it so
-        ClearTCIF(p->_tx_stream);
+        p->_tx_active = true;
         cr |= BIT(EN);
     }
 

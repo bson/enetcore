@@ -17,11 +17,12 @@ template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
     if (dma->reg(ISR) & tcif) {
         Peripheral* handler = dma->_handler[STREAM];
         dma->reg(IFCR) |= tcif;
+        dma->s_cr(STREAM) &= ~(BIT(EN) | BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
         if (handler) {
+            handler->_tx_active = false;
+            //dma->_handler[STREAM] = NULL;
             handler->DmaTxComplete();
-            dma->_handler[STREAM] = NULL;
         }
-        dma->s_cr(STREAM) &= ~(BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
     }
 }
 

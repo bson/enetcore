@@ -410,16 +410,18 @@ void hwinit() {
 	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
-	// Enable global interrupts by restoring to a non-disabled state :)
-    RestoreInterrupts(0);
-    SetIPL(0);
-
     _clock.Start();
     Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     // First line of text
-    _usart3.Write("\r\nEnetcore booting up...\r\n");
+    _usart3.Write("\r\nWelcome to Enetcore\r\n");
     _usart3.SyncDrain();
+
+	// Enable global interrupts by restoring to a non-disabled state :)
+    RestoreInterrupts(0);
+    SetIPL(0);
+
+    _usart3.EnableDmaTx(_dma1, 4, 7, Stm32Dma::Priority::MEDIUM);
 
     // Turn LED back off
     _led.Lower();
