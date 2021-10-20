@@ -9,14 +9,12 @@ MEMORY
 
 _eiram  = 0x20000000 + 128K;
 
-__stack_top = ORIGIN(ram) + LENGTH(ram);
+/* Symbol needed by NVic for stack vector */
+__stack_top = ORIGIN(ccmram) + LENGTH(ccmram);
 
-_ccm_ram = 0x10000000;
-_ccm_ram_length = LENGTH(ccmram);
-
-SECTIONS 
+SECTIONS
 {
-	. = 0;
+	. = ORIGIN(flash);
 	
 	.text :
 	{
@@ -99,7 +97,7 @@ No need to keep dtors if main() never returns
             __copy_table_end = .;
     } > flash
 
-    . = ORIGIN(ram);
+    . = ORIGIN(ccmram);
 
 	.data :
 	{
@@ -114,7 +112,7 @@ No need to keep dtors if main() never returns
 
 		. = ALIGN(4);
 		_edata = .;
-	} >ram
+	} >ccmram
 
 	.bss : {
 		_bss_start = .;
@@ -123,9 +121,7 @@ No need to keep dtors if main() never returns
 		*(COMMON)
 		. = ALIGN(4);
 		_bss_end = . ;
-	} >ram
-
-    _iram = .;
+	} >ccmram
 
 	/* main thread stack is at top of internal RAM */
     /* There shouldn't be anything here */
@@ -133,71 +129,7 @@ No need to keep dtors if main() never returns
    .stack (COPY):
 	{
         *(.stack)
-	} >ram
+	} >ccmram
 }
-	
-/* ARM Core Cortex-M4 system control */
-CPUID = 0xe000ed00;
-ACTLR = 0xe000e008;
-ICSR = 0xe000ed04;
-VTOR = 0xe000ed08;
-AIRCR = 0xe000ed0c;
-SCR = 0xe000ed10;
-CCR = 0xe000ed14;
-SHPR1 = 0xe000ed18;
-SHPR2 = 0xe000ed1c;
-SHPR3 = 0xe000ed20;
-SHCRS = 0xe000ed24;
-CFSR = 0xe000ed28;
-MMFSR = 0xe000ed28;
-BFSR = 0xe000ed29;
-UFSR = 0xe000ed2a;
-HFSR = 0xe000ed2c;
-MMAR = 0xe000ed34;
-BFAR = 0xe000ed38;
-AFSR = 0xe000ed3c;
 
-/* ARM Core NVIC */
-ISER0 = 0xe000e100;
-ISER1 = 0xe000e104;
-ICER0 = 0xe000e180;
-ICER1 = 0xe000e184;
-ISPR0 = 0xe000e200;
-ISPR1 = 0xe000e204;
-ICPR0 = 0xe000e280;
-ICPR1 = 0xe000e284;
-IABR0 = 0xe000e300;
-IABR1 = 0xe000e304;
-IPR0 = 0xe000e400;
-IPR1 = 0xe000e404;
-IPR2 = 0xe000e408;
-IPR3 = 0xe000e40c;
-IPR4 = 0xe000e410;
-IPR5 = 0xe000e414;
-IPR6 = 0xe000e418;
-IPR7 = 0xe000e41c;
-IPR8 = 0xe000e420;
-IPR9 = 0xe000e424;
-IPR10 = 0xe000e428;
-STIR = 0xe000ef00;
-
-/* ARM Core MPU */
-MPU_TYPE = 0xe000ed90;
-MPU_CTRL =  0xe000ed94;
-MPU_RNR =  0xe000ed98;
-MPU_RBAR =  0xe000ed9c;
-MPU_RASR =  0xe000eda0;
-MPU_RBAR_A1 =  0xe000eda4;
-MPU_RASR_A1 = 0xe000eda8;
-MPU_RBAR_A2 = 0xe000edac;
-MPU_RASR_A2 = 0xe000edb0;
-MPU_RBAR_A3 = 0xe000edb4;
-MPU_RASR_A3 = 0xe000edb8;
-
-/* ARM Core SYSTICK */
-
-SYST_CSR = 0xe000e010;
-SYST_RVR = 0xe000e014;
-SYST_CVR = 0xe000e018;
-SYST_CALIB = 0xe000e01c;
-
+INCLUDE enetcore/arch/armv7m/cortex-m4.link.cmd

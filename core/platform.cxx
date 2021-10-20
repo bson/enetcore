@@ -6,9 +6,9 @@
 
 namespace Platform {
 
-Region _malloc_region(MALLOC_REGION_SIZE, MALLOC_REGION_START);
-Region _iram_region(IRAM_REGION_SIZE, IRAM_REGION_START);
-Region _text_region(TEXT_REGION_SIZE, TEXT_REGION_START);
+Region _malloc_region(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
+Region _iram_region(IRAM_REGION_SIZE, (uint8_t*)IRAM_REGION_START);
+Region _text_region(TEXT_REGION_SIZE, (uint8_t*)TEXT_REGION_START);
 
 
 Region::Region() { }

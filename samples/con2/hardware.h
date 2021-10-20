@@ -83,8 +83,6 @@ extern uint8_t _edata;
 extern uint8_t _bss_start;
 extern uint8_t _bss_end;
 extern uint8_t _etext;
-extern uint8_t _iram;
-extern uint8_t _eiram;
 extern uint8_t _bss_start;
 extern uint8_t _bss_end;
 extern uint8_t __stack_top;
@@ -106,15 +104,24 @@ void fault0(uint num);
     }
 }
 
-// Memory layout:
-//    0x00000000 FLASH sections
+// STM32F405 memory layout
 //
-//    0x10000000 DATA   _data       - _edata
-//               BSS    _bss_start  - _bss_end
-//               MALLOC _bss_end    - _bss_end + MALLOC_SIZE
-//               IRAM   MALLOC_END  - __stack_top
-//    0x20000000 PRAM0   (16k)
-//    0x20004000 PRAM1   (16k)
+//    0x0800 0000 Start Flash   1MB
+//     end image                         _etext
+//    0x080F FFFF End Flash
+//
+//    0x1000 0000  CCM RAM 64k (IRAM)
+//    0x1000 0000  DATA   _data       - _edata
+//                 BSS    _bss_start  - _bss_end
+//                 IRAM               - __stack_top
+//    0x1000 FFFF
+//
+//    0x2000 0000  SRAM 112k  MALLOC_START
+//    0x2001 BFFF
+//    0x2001 C000  SRAM 16k
+//    0x2001 FFFF             MALLOC_START + MALLOC_SIZE
+//
+//    The last two adjacent SRAM sections are combined into a 128k region
 //
 // The existing main stack (MSP) is inside IRAM, and set aside
 // setting a reserve equal to MAIN_THREAD_STACK.
@@ -125,7 +132,7 @@ void fault0(uint num);
 #define THREAD_DATA_SIZE  ((sizeof(Thread) + 3) & ~3) // sizeof (Thread), aligned
 
 // all flash sections
-#define TEXT_REGION_START (0x00000000)
+#define TEXT_REGION_START (0x08000000)
 #define TEXT_REGION_SIZE  ((uintptr_t)&_etext - TEXT_REGION_START)
 
 #ifdef ENABLE_PANEL
@@ -135,17 +142,12 @@ void fault0(uint num);
 #define UI_THREAD_TERM 0
 #endif
 
-// Internal RAM
-#define IRAM_REGION_SIZE \
-    (MAIN_THREAD_STACK + THREAD_DATA_SIZE + INTR_THREAD_STACK + UI_THREAD_TERM)
+// Internal RAM region, contains thread stacks.
+#define IRAM_REGION_SIZE ((uintptr_t)&__stack_top - (uintptr_t)&_bss_end)
+#define IRAM_REGION_START ((uintptr_t)&_bss_end)
 
-#define IRAM_REGION_START ((uint8_t*)&__stack_top - IRAM_REGION_SIZE)
-
-// Malloc region; sits between BSS and IRAM and is the remainder of internal SRAM
-// XXX it would be simpler to simply make this nested inside IRAM and allocate it
-// on startup.
-#define MALLOC_REGION_START ((uint8_t*)(((uintptr_t)&_bss_end + 3) & ~3))
-#define MALLOC_REGION_SIZE  (IRAM_REGION_START - MALLOC_REGION_START)
+#define MALLOC_REGION_START 0x20000000
+#define MALLOC_REGION_SIZE  (128*1024*1024)
 
 #include "stm32f4x/timer.h"
 

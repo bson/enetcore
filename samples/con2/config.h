@@ -53,13 +53,13 @@ enum { SHUTDOWN_TIMEOUT = 10000 };
 enum { HASHTABLE_DEFAULT_RESERVE = 64 };
 enum { HASHTABLE_EVICTION_DEPTH = 10 };
 
-enum { MAIN_THREAD_STACK = 1024};
+enum { MAIN_THREAD_STACK = 2048};
 enum { INTR_THREAD_STACK = 2048 };
 
-enum { UI_THREAD_STACK = 1024 };
+enum { UI_THREAD_STACK = 2048 };
 enum { UI_THREAD_PRIORITY = 205 };
 
-enum { THREAD_DEFAULT_STACK = 1024 }; // Default thread stack size
+enum { THREAD_DEFAULT_STACK = 2048 }; // Default thread stack size
 enum { THREAD_DEFAULT_PRIORITY = 50 }; // Default thread priority
 
 // IOScheduler settings

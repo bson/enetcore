@@ -275,12 +275,15 @@ void hwinit0() {
 //    _wwdt_mod = wwdt[0];
 
     // Zero out memory
-    memset(MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);
-    memset(IRAM_REGION_START, 0, IRAM_REGION_SIZE - MAIN_THREAD_STACK);
+    memset((void*)MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);
+    memset((void*)IRAM_REGION_START, 0, IRAM_REGION_SIZE - MAIN_THREAD_STACK);
 }
 
 // "Soft" system initialization.  Initializers have been run now.
 void hwinit() {
+    assert((IRAM_REGION_START & 3) == 0);
+    assert((IRAM_REGION_SIZE & 3) == 0);
+
     if (HCLK > 144000000)
         Stm32Power::EnableVos();
 
