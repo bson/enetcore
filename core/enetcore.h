@@ -14,7 +14,7 @@ enum { NOT_FOUND = (uint)-1 };
 
 #define USE_LITERALS
 
-#include "hardware.h"
+#include "init.h"
 #include "gpio.h"
 #include "config.h"
 #include "mem.h"

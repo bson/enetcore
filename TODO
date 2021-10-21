@@ -172,15 +172,20 @@ Stm32Dma::Peripheral implemented by users
 
 Add support for PopMultiple() in Ring, use in DMA
 
-
------ TODO
 Is Ring<>::PopFront broken?  Shouldn't it return the item that was popped?
 
-Make UART TX by non-DMA optional
+Implement StmRtc
 
-DMA
- - For DAC
- - SPI?
+----- TODO
+Make UART TX by non-DMA optional again
+
+Fix UART DMA TX
+
+Implement external pin interrupt
+
+Hash processor
+- Clean support for hardware hashing vs soft
+- Clean support for hardware CRC vs soft
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
@@ -191,16 +196,20 @@ Add PWM function to timer similar to LpcPwm
 Implement StmSpi
 
 Implement StmDac
+- With DMA
 
 Implement StmAdc
+- With DMA?
 
-Implement StmRtc
+Add DMA memmove()?
 
 Implement StmWdt
 
 Implement StmCrc
 
 Implement StmFsmc
+
+Implement StmSdio
 
 Implement a "logout" feature in BKPSRAM
 
@@ -215,6 +224,8 @@ Implement StmUsbDev (TBD - no use case, need test board)
 Implement StmI2s (TBD - no use case, need test board)
 
 Implement Reset (under arch/armv7m, to use CM4 core software reset)
+
+Add WaitFor(Vector<>&)
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.
