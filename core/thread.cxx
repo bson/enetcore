@@ -147,7 +147,7 @@ Thread& Thread::Bootstrap()
     // the stack by installing a reserve to cover the top portion
     // with the two stacks.
 
-	_iram_region.SetReserve(MAIN_THREAD_STACK + INTR_THREAD_STACK);
+	_iram_region.SetReserve(MAIN_THREAD_STACK + INTR_THREAD_STACK + 8);
 
 	_main_thread_stack = (uint8_t*)_iram_region.GetEnd() - MAIN_THREAD_STACK; // Stack limit
 

@@ -12,10 +12,10 @@ extern const char _build_user[];
 extern const char _build_date[];
 extern const char _build_branch[];
 
-#define BOARD_REV 1
+#define BOARD_REV 3
 
 // Define to use MCO1 as clock output
-#define CLKOUTPIN
+#undef CLKOUTPIN
 
 #define MAYBE_STOP \
     while(!Thread::Bootstrapped()) \
@@ -33,13 +33,7 @@ Gpio _gpio_c(Gpio::Port::C);
 Gpio _gpio_d(Gpio::Port::D);
 Gpio _gpio_e(Gpio::Port::E);
 
-//GpioIntr _gpio0_intr(GPIO0_INTR_BASE);
-//GpioIntr _gpio2_intr(GPIO2_INhaTR_BASE);
-
 PinOutput<Gpio::Pin> _led; // Green LED
-
-//SpiBus _spi1(BASE_SPI1);
-//SpiBus _spi2(BASE_SPI2);
 
 Clock _clock(BASE_TIM5, APB1_TIMERCLK);
 SysTimer _systimer;
@@ -101,11 +95,11 @@ void fault0(uint num) {
 //   STM32F405
 
 uint8_t* AllocThreadStack(uint size) {
-    return (uint8_t*)malloc(Util::Align<uint>(size, 4));
+    return (uint8_t*)Platform::_iram_region.GetMem(Util::Align<size_t>(size, 4));
 }
 
 Thread* AllocThreadContext() { 
-    return new Thread();
+    return new (Platform::_iram_region.GetMem(Util::Align<size_t>(sizeof(Thread), 4))) Thread();
 }
 
 void ConfigurePins() {
@@ -236,24 +230,6 @@ void ConfigurePins() {
 #endif
 }
 
-// GPIO0 pin interrupt handler
-static void gpio_intr(void*) {
-#ifdef ENABLE_PANEL
-    // Disable interrupts - they will be reenabled on a debounce timer
-    if (_gpio0_intr.PendingF(BIT22)) {
-        _gpio0_intr.DisableR(BIT22);
-        _gpio0_intr.DisableF(BIT22);
-        _panel_tap.Set(1);      // Set to 1 to signal press
-    }
-    if (_gpio0_intr.PendingR(BIT22)) {
-        _gpio0_intr.DisableR(BIT22);
-        _gpio0_intr.DisableF(BIT22);
-        _panel_tap.Set(2);      // Set to 2 to signal release
-    }
-#endif
-//    _gpio0_intr.Clear(~0UL);
-//    _gpio2_intr.Clear(~0UL);
-}
 
 static uint8_t _reset_reason;
 static uint32_t _wwdt_mod;
@@ -291,7 +267,7 @@ void hwinit() {
 
     // Power on/off peripherals
     Stm32ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                               | AHB1_DMA2EN | AHB1_DMA1EN);
+                               | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     Stm32ClockTree::EnableAHB2(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
     Stm32ClockTree::EnableAHB3(AHB3_FSMCEN);
@@ -300,7 +276,7 @@ void hwinit() {
     Stm32ClockTree::EnableAPB2(APB2_SYSCFGEN);
 
     Stm32ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                                 | AHB1_DMA2EN | AHB1_DMA1EN);
+                                 | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     Stm32ClockTree::EnableAHB2LP(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
     Stm32ClockTree::EnableAHB3LP(AHB3_FSMCEN);
@@ -343,19 +319,6 @@ void hwinit() {
     Stm32ClockTree::EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler::DIV2);
 #endif
 
-#ifdef ENABLE_PANEL
-    // P4.28 = RESET#
-    // P0.15-18 CS#/WR#/RD#/RS
-    // P0.22 = T_IRQ#
-    // P1.28 = T_CS#
-    _gpio0.MakeOutputs(BIT15 | BIT16 | BIT17 | BIT18);
-    _gpio0.Set(BIT15 | BIT16 | BIT17 | BIT18);
-
-    _gpio1.MakeOutputs(BIT28);
-    _gpio0.MakeInputs(BIT22);
-
-    _t_cs.Lower();
-#endif
 	// Initialize main thread and set up stacks
 	_main_thread = &Thread::Bootstrap();
 
@@ -376,11 +339,12 @@ void hwinit() {
 
     NVic::InstallCSWHandler(PENDSV_VEC, IPL_CSW);
 
+#if 0
     _dma1.InstallHandlers();
     _dma2.InstallHandlers();
     _dma1.EnableInterrupts();
     _dma2.EnableInterrupts();
-
+#endif
     Stm32Random::Init();
 
     uint8_t buf[32];
@@ -397,26 +361,12 @@ void hwinit() {
     // Turn on proper assert handling
     _assert_stop = false;
 
-//	NVic::InstallIRQHandler(I2C2_IRQ, I2cBus::Interrupt, IPL_I2C, &_i2c2);
-//	NVic::EnableIRQ(I2C2_IRQ);
-
-    // Generic GPIO pin interrupt handler
-    //NVic::InstallIRQHandler(GPIO_IRQ, gpio_intr, IPL_GPIO, NULL);
-
-#ifdef ENABLE_PANEL
-    _gpio0_intr.EnableR(BIT22);      // Enable P0.22 Rising edge interrupts
-    _gpio0_intr.EnableF(BIT22);      // Enable P0.22 Falling edge interrupts
-    _gpio0_intr.Clear(BIT22);
-#endif
-    //NVic::EnableIRQ(GPIO_IRQ);
-
 	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
     _clock.Start();
     Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
-    // First line of text
     _usart3.Write("\r\nWelcome to Enetcore\r\n");
     _usart3.SyncDrain();
 
@@ -424,13 +374,10 @@ void hwinit() {
     RestoreInterrupts(0);
     SetIPL(0);
 
-    _usart3.EnableDmaTx(_dma1, 4, 7, Stm32Dma::Priority::MEDIUM);
+    //_usart3.EnableDmaTx(_dma1, 4, 7, Stm32Dma::Priority::MEDIUM);
 
     // Turn LED back off
     _led.Lower();
-
-//	_spi1.Init();
-//  _spi2.Init();
 
     assert(IntEnabled());
 
@@ -438,6 +385,8 @@ void hwinit() {
     // Release from reset
     _touch_dev.SetSSEL(&_t_cs);
 #endif
+
+    _malloc_region.SetReserve(64);
 
     if (power_reset) {
         DMSG("RTC power loss - initializing");
@@ -450,8 +399,6 @@ void hwinit() {
     DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
     DMSG("APB1CLK: %d  APB2CLK: %d", APB1_CLK, APB2_CLK);
     DMSG("APB1TCLK: %d APB2TCLK: %d", APB1_TIMERCLK, APB2_TIMERCLK);
-
-    _malloc_region.SetReserve(64);
 
     console("\r\nCON2 Rev 1 [%s:%s %s %s]",
             _build_branch, _build_commit, _build_user, _build_date);

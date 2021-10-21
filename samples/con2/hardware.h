@@ -110,21 +110,19 @@ void fault0(uint num);
 //     end image                         _etext
 //    0x080F FFFF End Flash
 //
-//    0x1000 0000  CCM RAM 64k (IRAM)
-//    0x1000 0000  DATA   _data       - _edata
-//                 BSS    _bss_start  - _bss_end
-//                 IRAM               - __stack_top
+//    0x1000 0000  CCM RAM 64k  - unused for now
 //    0x1000 FFFF
 //
-//    0x2000 0000  SRAM 112k  MALLOC_START
+//    0x2000 0000  SRAM 112k  MALLOC_START             _bss_end
 //    0x2001 BFFF
-//    0x2001 C000  SRAM 16k
-//    0x2001 FFFF             MALLOC_START + MALLOC_SIZE
+//    0x2001 C000  SRAM 16k   IRAM_START
+//    0x2001 FFFF             IRAM_START + IRAM_SIZE   __stack_top
 //
 //    The last two adjacent SRAM sections are combined into a 128k region
 //
 // The existing main stack (MSP) is inside IRAM, and set aside
-// setting a reserve equal to MAIN_THREAD_STACK.
+// setting a reserve equal to MAIN_THREAD_STACK plus INTR_THREAD_STACK.
+// Thread data structures are allocated using the IRAM region as well.
 // 
 
 // A lot of #define's here unfortunately, resolve symbols later
@@ -143,11 +141,11 @@ void fault0(uint num);
 #endif
 
 // Internal RAM region, contains thread stacks.
-#define IRAM_REGION_SIZE ((uintptr_t)&__stack_top - (uintptr_t)&_bss_end)
-#define IRAM_REGION_START ((uintptr_t)&_bss_end)
+#define IRAM_REGION_SIZE (MAIN_THREAD_STACK + INTR_THREAD_STACK + 2*THREAD_DATA_SIZE + 8 + UI_THREAD_TERM)
+#define IRAM_REGION_START ((uintptr_t)&__stack_top - IRAM_REGION_SIZE)
 
-#define MALLOC_REGION_START 0x20000000
-#define MALLOC_REGION_SIZE  (128*1024*1024)
+#define MALLOC_REGION_START ((uintptr_t)&_bss_end)
+#define MALLOC_REGION_SIZE  (IRAM_REGION_START - MALLOC_REGION_START)
 
 #include "stm32f4x/timer.h"
 

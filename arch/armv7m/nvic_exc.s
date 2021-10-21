@@ -1,6 +1,6 @@
 @@@ -*- mode: asm; asm-comment-char: "@"; -*-
 @@@
-@@@ Copyright (c) 2018 Jan Brittenson
+@@@ Copyright (c) 2018-2021 Jan Brittenson
 @@@ See LICENSE for details.
 	
 .syntax    unified
@@ -11,15 +11,15 @@
 
 @@@ Nesting NVIC exception handlers
 @@@
-@@@ On an context swich, the following is pushed onto the stack:
-@@@    0x1c - PSR
-@@@    0x18 - PC
-@@@    0x14 - LR
-@@@    0x10 - R12
-@@@    0x0c - R3
-@@@    0x08 - R2
-@@@    0x04 - R1
-@@@    SP+0 - R0
+@@@ On an exception, the following is pushed onto the stack:
+@@@    SP+0x1c - PSR
+@@@    SP+0x18 - PC
+@@@    SP+0x14 - LR
+@@@    SP+0x10 - R12
+@@@    SP+0x0c - R3
+@@@    SP+0x08 - R2
+@@@    SP+0x04 - R1
+@@@    SP+0x00 - R0
 
 .align
 	

@@ -18,10 +18,13 @@ void* NVic::_token_table[];
 extern "C" {
 extern void exc_handler();
 extern void pendsv_handler();
+extern uint32_t _reset;
 }
 
 void NVic::Init(IRQHandler handler, uint8_t prio) {
     assert(prio && prio < IPL_NUM);
+
+    assert(((uintptr_t)__vector_table & 0x7f) == 0);
 
     prio *= IPL_QUANTUM;
 
@@ -32,13 +35,14 @@ void NVic::Init(IRQHandler handler, uint8_t prio) {
 
     // The first two entries in the table are SP, Reset.  Fill those
     // in for good measure.
-    __vector_table[0] = (uintptr_t)&__stack_top;
-    __vector_table[1] = 0x400;
+    //__vector_table[0] = (uintptr_t)&__stack_top;
+    __vector_table[0] = 0x000be00;          // BPKT #0 to catch jumps/calls to 0
+    __vector_table[1] = (uintptr_t)&_reset; // Defined in startup.s
     
     // Everything else gets a default handler
     for (uintptr_t* p = __vector_table + 2; p < __vector_table + INT_NUM + 16; )
         *p++ = (uintptr_t)handler | THUMB;
-    
+
     memset(_token_table, 0, sizeof _token_table);
     
 #if 0
@@ -56,6 +60,8 @@ void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* t
                              bool fast) {
 	assert(irq < INT_NUM);
     assert(prio && prio < IPL_NUM);
+    assert(handler);
+    assert(fast || token);
 
     ScopedNoInt G;
 

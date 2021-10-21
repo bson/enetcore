@@ -2,15 +2,15 @@ ENTRY(_startup)
 
 MEMORY 
 {
-	flash     			: ORIGIN = 0x08000000, LENGTH = 1024K
-	ram   				: ORIGIN = 0x20000000, LENGTH = 128K
-    ccmram              : ORIGIN = 0x10000000, LENGTH = 64K
+	flash (rx)			: ORIGIN = 0x08000000, LENGTH = 1024K
+	ram (rwx)			: ORIGIN = 0x20000000, LENGTH = 128K
+    ccmram (rwx)        : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
 _eiram  = 0x20000000 + 128K;
 
 /* Symbol needed by NVic for stack vector */
-__stack_top = ORIGIN(ccmram) + LENGTH(ccmram);
+__stack_top = ORIGIN(ram) + LENGTH(ram);
 
 SECTIONS
 {
@@ -97,7 +97,7 @@ No need to keep dtors if main() never returns
             __copy_table_end = .;
     } > flash
 
-    . = ORIGIN(ccmram);
+    . = ORIGIN(ram);
 
 	.data :
 	{
@@ -112,7 +112,7 @@ No need to keep dtors if main() never returns
 
 		. = ALIGN(4);
 		_edata = .;
-	} >ccmram
+	} >ram
 
 	.bss : {
 		_bss_start = .;
@@ -121,15 +121,12 @@ No need to keep dtors if main() never returns
 		*(COMMON)
 		. = ALIGN(4);
 		_bss_end = . ;
-	} >ccmram
-
-	/* main thread stack is at top of internal RAM */
-    /* There shouldn't be anything here */
+	} >ram
 
    .stack (COPY):
 	{
         *(.stack)
-	} >ccmram
+	} >ram
 }
 
 INCLUDE enetcore/arch/armv7m/cortex-m4.link.cmd
