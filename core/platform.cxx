@@ -6,7 +6,9 @@
 
 namespace Platform {
 
+[[__noinit]] // Explicitly initialized
 Region _malloc_region(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
+
 Region _iram_region(IRAM_REGION_SIZE, (uint8_t*)IRAM_REGION_START);
 Region _text_region(TEXT_REGION_SIZE, (uint8_t*)TEXT_REGION_START);
 
@@ -15,21 +17,21 @@ Region::Region() { }
 
 void Region::Init(uint size, uint8_t* start)
 {
-	_reserve = 0;
+    assert(start);
+    assert(size);
 
-	if (start) {
-		_next = start;
-		_end = _start + size;
-		return;
-	}
-	
-	abort();
+	_reserve = 0;
+    _next = 0;
+
+    return;
 }
 
 
 void* Region::GetMem(int amount)
 {
     ScopedNoInt G;
+
+    assert(_end);               // Make sure region has been initialized before use
 
 	if (!amount)
         return _next;

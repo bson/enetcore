@@ -137,6 +137,12 @@ public:
     // Enable DMA TX
     void EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio);
 
+    // Enable DMA
+    void EnableDma();
+
+    // Disable DMA
+    void DisableDMA();
+
     // getc
     int getc();
 
@@ -151,6 +157,10 @@ public:
 
     // DMA TX complete
     void DmaTxComplete();
+
+    // Enable disable DMA (attach, detach trigger)
+    void DmaEnable();
+    void DmaDisable();
 
 private:
     inline void StartTx();

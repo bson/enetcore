@@ -253,6 +253,9 @@ void hwinit0() {
     // Zero out memory
     memset((void*)MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);
     memset((void*)IRAM_REGION_START, 0, IRAM_REGION_SIZE - MAIN_THREAD_STACK);
+
+    // Explicitly initialize before static initializers are run
+    _malloc_region.Init(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
 }
 
 // "Soft" system initialization.  Initializers have been run now.

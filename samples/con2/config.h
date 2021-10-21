@@ -25,7 +25,7 @@ enum { SHUTDOWN_TIMEOUT = 10000 };
 #define LOCK_INITIALIZER
 
 #define HAVE_MORECORE 1
-#define MORECORE(X)  _malloc_region.GetCore((X), MALLOC_REGION_SIZE)
+#define MORECORE(X)  _malloc_region.GetMem((X))
 #define HAVE_MMAP 0
 #define HAVE_MREMAP 0
 #define malloc_getpagesize _malloc_region.GetPageSize()

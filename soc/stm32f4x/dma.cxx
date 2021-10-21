@@ -20,7 +20,7 @@ template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
         dma->s_cr(STREAM) &= ~(BIT(EN) | BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
         if (handler) {
             handler->_tx_active = false;
-            //dma->_handler[STREAM] = NULL;
+            handler->DmaDisable();       // Remove DMA trigger
             handler->DmaTxComplete();
         }
     }

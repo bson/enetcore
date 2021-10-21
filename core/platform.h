@@ -39,19 +39,6 @@ namespace Platform {
         // Get a block of memory with a given alignment
         void* GetAlignedMem(int amount, uint alignment);
 
-		// Wrapper that also auto-inits; useful when called from static ctor's
-		inline void* GetCore(int amount, uint size, uint8_t* start = NULL) {
-            ScopedNoInt G;
-
-			if (!_start)
-                Init(size, start);
-
-			if (!_start)
-                abort();
-
-			return GetMem(amount);
-		}
-			
 		// Page size.  Malloc wants this for its aligned alloc ops. We don't
 		// particularly care, so just tell it something reasonable.
 		uint GetPageSize() { return 4096; }

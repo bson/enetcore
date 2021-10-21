@@ -197,6 +197,10 @@ public:
 
         // Transfer is complete, called in interrupt context
         virtual void DmaTxComplete() = 0;
+
+        // Enable or disable DMA
+        virtual void DmaEnable() = 0;
+        virtual void DmaDisable() = 0;
     };
 
 private:
@@ -216,6 +220,7 @@ public:
         assert(nwords <= 0xffff);
         assert(nwords != 0);
         assert(buf != NULL);
+        assert(p);
 
         volatile uint32_t& cr = s_cr(p->_tx_stream);
 
@@ -241,6 +246,7 @@ public:
         _handler[p->_tx_stream] = p;
 
         // Make it so
+        p->DmaEnable();
         p->_tx_active = true;
         cr |= BIT(EN);
     }

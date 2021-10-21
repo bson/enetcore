@@ -32,6 +32,7 @@ typedef uint32_t in_addr_t;
 #define __naked gnu::naked
 #define __noinstrument gnu::no_instrument_function
 #define __novtable
+#define __noinit gnu::noinit
 
 #define __section(SECT) gnu::section(SECT)
 

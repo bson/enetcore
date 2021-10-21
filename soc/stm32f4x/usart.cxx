@@ -152,6 +152,16 @@ inline void Stm32Usart::StartTx() {
     }
 }
 
+void Stm32Usart::DmaEnable() {
+    volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
+    cr3 |= BIT(DMAT);
+}
+
+void Stm32Usart::DmaDisable() {
+    volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
+    cr3 &= ~BIT(DMAT);
+}
+
 void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio) {
     assert(stream <= 7);
     assert(ch <= 7);
@@ -168,9 +178,6 @@ void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma
     _tx_active = false;
 
     SetInterrupts(_ienable);
-
-    volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
-    cr3 |= BIT(DMAT);
 }
 
 void Stm32Usart::DmaTxComplete() {
