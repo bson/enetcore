@@ -176,8 +176,11 @@ Is Ring<>::PopFront broken?  Shouldn't it return the item that was popped?
 
 Implement StmRtc
 
------ TODO
+Fix GDB walking off the end of the stack.  It SHOULD stop when it sees a zero FP.
+
 Make UART TX by non-DMA optional again
+
+----- TODO
 
 Fix UART DMA TX
 
@@ -189,7 +192,8 @@ Hash processor
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
-Fix GDB walking off the end of the stack
+Canonical use is PSP (process SP) for thread stacks, MSP for
+interrupts. Use the same, as GDB might have code that expects this.
 
 Add PWM function to timer similar to LpcPwm
 

@@ -24,7 +24,13 @@ _startup:
     . = 0
     
 _vectors:
+.ifdef DEBUG
+	/* To catch calls to 0 */
+    bkpt    #0
+    .byte   0, 0
+.else
     .word   __stack_top         /* Initial SP */
+.endif
     .word   _reset+1            /* Reset vector */
     .word   NMI_Handler+1       /* NMI */
     .word   HardFault_Handler+1 /* Hard fault */
@@ -55,11 +61,11 @@ _reset:
     msr      primask, r0
 
     /* delay loop */
-    .ifdef DELAY
+.ifdef DELAY
     ldr     r0, =DELAY
 3:  subs    r0, r0, #1
     bne     3b
-    .endif
+.endif
 
     /* Start main stack at top of internal RAM */
     /* May be redundant */
@@ -85,11 +91,7 @@ _reset:
     cmp     r1, r2
     blo     2b
 
-    /* Create dummy frame */
-    mov     r7, r0
-    mov     lr, r0
-    push    {r7,lr}
-
+    mov     fp, #0   /* End-of-stack marker for GDB */
     bl      _Z7hwinit0v
     bl      _Z10init_arrayv
     bl      _Z6hwinitv
