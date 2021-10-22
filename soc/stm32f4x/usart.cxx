@@ -181,9 +181,7 @@ void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma
 }
 
 void Stm32Usart::DmaTxComplete() {
-    ScopedNoInt G();
-
-    _sendq.PopFront(exch(_tx_size, 0UL));
+    _sendq.PopFront(exch(_tx_size, uint16_t(0)));
     StartTx();
     Thread::WakeSingle(&_sendq);
 }

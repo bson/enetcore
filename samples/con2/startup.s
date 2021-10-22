@@ -91,7 +91,11 @@ _reset:
     cmp     r1, r2
     blo     2b
 
-    mov     fp, #0   /* End-of-stack marker for GDB */
+    mov     fp, sp   /* End-of-stack marker for GDB */
+	push    {r0,fp}
+    push    {r0}
+    push    {r0}
+
     bl      _Z7hwinit0v
     bl      _Z10init_arrayv
     bl      _Z6hwinitv

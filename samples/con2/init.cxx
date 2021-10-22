@@ -342,7 +342,7 @@ void hwinit() {
 
     NVic::InstallCSWHandler(PENDSV_VEC, IPL_CSW);
 
-#if 0
+#if 1
     _dma1.InstallHandlers();
     _dma2.InstallHandlers();
     _dma1.EnableInterrupts();
@@ -377,7 +377,7 @@ void hwinit() {
     RestoreInterrupts(0);
     SetIPL(0);
 
-    //_usart3.EnableDmaTx(_dma1, 4, 7, Stm32Dma::Priority::MEDIUM);
+    _usart3.EnableDmaTx(_dma1, DMA_STREAM_USART3, DMA_CHANNEL_USART3, DMA_PRIORITY_USART3);
 
     // Turn LED back off
     _led.Lower();

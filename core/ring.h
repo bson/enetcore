@@ -139,7 +139,7 @@ public:
     }
 
     void PopFront(size_type n) {
-        BoundsCheck(0);
+        BoundsCheck(n-1);
         _head = (_head + n) % N;
     }
 

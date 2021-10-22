@@ -115,6 +115,15 @@ enum {
 };
 #endif
 
+// DMA stream and channel usage
+enum {
+    // DMA1
+    DMA_STREAM_USART3  = 3,
+    DMA_CHANNEL_USART3 = 4,
+#define DMA_PRIORITY_USART3  Stm32Dma::Priority::MEDIUM
+};
+
+
 // Enetcore configuration parameters
 
 #define VARIANT "Enetcore"

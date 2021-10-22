@@ -180,9 +180,11 @@ Fix GDB walking off the end of the stack.  It SHOULD stop when it sees a zero FP
 
 Make UART TX by non-DMA optional again
 
+Fix UART DMA TX
+
 ----- TODO
 
-Fix UART DMA TX
+Enable I and D flash caching in FLASH_SCR
 
 Implement external pin interrupt
 

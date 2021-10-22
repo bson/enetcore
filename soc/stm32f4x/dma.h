@@ -2,6 +2,7 @@
 #define __DMA_H__
 
 class Stm32Dma {
+public:
     enum class Register {
         LISR = 0x00,
         HISR = 0x04,
@@ -179,7 +180,7 @@ public:
     public:
         const uint32_t _tx_dr;        // Peripheral data register address
 
-        uint32_t _tx_size;      // Size of current or most recent transfer
+        uint16_t _tx_size;      // Size of current or most recent transfer
         uint8_t  _tx_ch;
         uint8_t  _tx_stream;
         Priority _tx_prio;
@@ -216,7 +217,7 @@ public:
     };
 
     // Transfer to peripheral
-    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint32_t nwords) {
+    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords) {
         assert(nwords <= 0xffff);
         assert(nwords != 0);
         assert(buf != NULL);
@@ -236,12 +237,12 @@ public:
             | ((uint32_t)p->_tx_word_size << MSIZE)
             | ((uint32_t)p->_tx_word_size << PSIZE)
             | (1 << DIR)
-            | BIT(PFCTRL) | BIT(MINC) | BIT(TCIE);
+            | BIT(MINC) | BIT(TCIE);
 
-        s_ndtr(p->_tx_stream) = nwords;
+        s_fcr(p->_tx_stream) = BIT(DMDIS);
         s_par(p->_tx_stream) = p->_tx_dr;
         s_m0ar(p->_tx_stream) = (uint32_t)buf;
-        s_fcr(p->_tx_stream) = 0;
+        s_ndtr(p->_tx_stream) = nwords;
 
         _handler[p->_tx_stream] = p;
 
