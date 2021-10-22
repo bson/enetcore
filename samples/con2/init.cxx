@@ -361,6 +361,8 @@ void hwinit() {
 	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);
 	NVic::EnableIRQ(INTR_USART3);
     
+    Stm32Flash::EnableIDCaching();
+
     // Turn on proper assert handling
     _assert_stop = false;
 

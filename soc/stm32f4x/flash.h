@@ -30,6 +30,10 @@ public:
         reg<volatile uint32_t>(Register::FLASH_ACR) = (reg<const uint32_t>(Register::FLASH_ACR) & ~(3 << LATENCY))
             | BIT(DCEN) | BIT(ICEN) | BIT(PRFTEN) | (latency << LATENCY);
     }
+
+    static void EnableIDCaching() {
+        reg<volatile uint32_t>(Register::FLASH_ACR) |= BIT(ICEN) | BIT(DCEN);
+    }
 };
 
 #endif // __STM32_FLASH_H__
