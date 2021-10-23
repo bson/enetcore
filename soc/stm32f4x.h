@@ -53,6 +53,7 @@ enum {
     BASE_TIM8       = 0x40010400,
     BASE_USART1     = 0x40011000,
     BASE_USART6     = 0x40011400,
+    BASE_ADCCOM     = 0x40012300,
     BASE_ADC3       = 0x40012200,
     BASE_ADC2       = 0x40012100,
     BASE_ADC1       = 0x40012000,

@@ -182,9 +182,9 @@ Make UART TX by non-DMA optional again
 
 Fix UART DMA TX
 
------ TODO
-
 Enable I and D flash caching in FLASH_SCR
+
+----- TODO
 
 Implement external pin interrupt
 

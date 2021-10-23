@@ -17,12 +17,12 @@
 #include "stm32f4x/timer.h"
 #include "stm32f4x/backup.h"
 #include "stm32f4x/rtc.h"
+#include "stm32f4x/adc.h"
 
 //#include "stm32f4x/crc.h"
 //#include "stm32f4x/i2c.h"
 //#include "stm32f4x/spi.h"
 //#include "stm32f4x/eintr.h"
 //#include "stm32f4x/pwm.h"
-//#include "stm32f4x/adc.h"
 
 #endif // __F405_H__
