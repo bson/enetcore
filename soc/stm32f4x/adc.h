@@ -142,10 +142,11 @@ public:
         const uint32_t bits = ch >= 10 ? ch - 10 : ch;
         smpr = (smpr & ~(7 << bits)) | ((uint32_t)ts << bits);
     
-        reg(Register::SR) &= ~BIT(OVR);
-        reg(Register::CR1) |= BIT(EOCIE);
         reg(Register::SQR1) = 0b01 << L;
         reg(Register::SQR3) = ch;
+
+        reg(Register::SR) &= ~BIT(OVR);
+        reg(Register::CR1) |= BIT(EOCIE);
     }
 
     void Start() {
@@ -157,7 +158,7 @@ public:
         return reg(Register::DR);
     }
 
-    virtual void AdcComplete(bool ovr);
+    virtual void AdcComplete(uint32_t sample, bool ovr);
 
     void HandleInterrupt();
 

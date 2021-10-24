@@ -16,7 +16,7 @@ class Sampler: public Adc {
     Timer _timer;
     Ring<RING_SIZE> _samples;
     uint32_t _sum = 0;
-    uint32_t _ovr_count = 0;
+    uint16_t _ovr_count = 0;
 
 public:
     Sampler(uint32_t adc_base, uint32_t timer_base)
@@ -29,11 +29,13 @@ public:
         Adc::Configure(0, TIMER_TRIGGER, Adc::Mode::CONT, Adc::SampleTime::TS_480);
     }
         
-    void AdcComplete(bool ovr) {
+    uint16_t Overruns() const { return _ovr_count; }
+
+    // * implements Adc::AdcComplete
+    void AdcComplete(uint32_t sample, bool ovr) {
         if (ovr)
             ++_ovr_count;
 
-        const uint32_t sample = Adc::GetSample();
         _samples.PushBack(sample);
         _sum += sample;
         if (_samples.Size() > NSAMPLES) {

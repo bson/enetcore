@@ -3,6 +3,8 @@
 
 #include "enetkit.h"
 #include "sampler.h"
+#include "nvic.h"
+
 
 class TSense: public Sampler<Timer16, 10, 16, Adc::Trigger::TIM3_TRGO, APB1_TIMERCLK> {
     uint32_t _value;
@@ -13,9 +15,14 @@ public:
     };
 
     void Run(uint freq) {
+        NVic::InstallIRQHandler(INTR_ADC, Adc::Interrupt, IPL_ADC, dynamic_cast<Adc*>(this));
+        NVic::EnableIRQ(INTR_ADC);
+        NVic::DisableIRQ(INTR_TIM3);
+
         Sampler::Run(freq);
     }
 
+    // * implements Sampler::SampleReady
     void SampleReady(uint32_t value) {
         _ready = true;
         _value = value;
