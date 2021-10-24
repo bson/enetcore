@@ -12,12 +12,19 @@
 
 // SoC peripherals used on CON2
 
+typedef Stm32ClockTree ClockTree;
+typedef Stm32Power Power;
+typedef Stm32Flash Flash;
 typedef Stm32Dma Dma;
 typedef Stm32Rtc Rtc;
 typedef Stm32GpioPort Gpio;
 typedef Stm32Usart SerialPort;
 typedef Stm32Timer<uint32_t> Timer32;
-typedef Stm32Timer<uint16_t> Timer;
+typedef Stm32Timer<uint16_t> Timer16;
+typedef Stm32Adc Adc;
+typedef Stm32AdcCommon AdcCommon;
+typedef Stm32Random Random;
+typedef Stm32Debug Debug;
 
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;

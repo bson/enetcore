@@ -126,6 +126,8 @@ public:
     }
 
     void Configure(uint32_t ch, Trigger t, Mode m, SampleTime ts) {
+        assert(ch <= 18);
+
         Thread::IPL G(IPL_ADC);
 
         reg(Register::CR2) |= BIT(ADON);
@@ -142,13 +144,17 @@ public:
     
         reg(Register::SR) &= ~BIT(OVR);
         reg(Register::CR1) |= BIT(EOCIE);
-        reg(Register::SQR1) = 1 << L;
+        reg(Register::SQR1) = 0b01 << L;
         reg(Register::SQR3) = ch;
     }
 
     void Start() {
         volatile uint32_t& cr2 = reg(Register::CR2);
         cr2 |= SWSTART;
+    }
+
+    uint16_t GetSample() {
+        return reg(Register::DR);
     }
 
     virtual void AdcComplete(bool ovr);

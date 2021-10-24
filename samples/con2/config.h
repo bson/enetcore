@@ -125,6 +125,9 @@ enum {
 #define DMA_PRIORITY_USART3  Stm32Dma::Priority::MEDIUM
 };
 
+enum {
+    ADC1_PRESCALE = 8
+};
 
 // Enetcore configuration parameters
 

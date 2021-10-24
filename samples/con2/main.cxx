@@ -3,17 +3,16 @@
 
 #include "enetkit.h"
 #include "util.h"
+#include "tsense.h"
+
+TSense _tsense;
 
 extern PinOutput<Gpio::Pin> _led;
 
-#ifdef ENABLE_ENET
-Thread* _net_thread;
-#endif
 #ifdef ENABLE_PANEL
 Thread* _ui_thread;
 #endif
 
-extern void UsbInit();
 extern void* UIThread(void*);
 
 void logDateTime() {
@@ -30,20 +29,18 @@ void logDateTime() {
          now.hour,
          now.min,
          now.sec);
+
+    if (_tsense.Ready()) {
+        DMSG("TSense %u", _tsense.Value());
+    }
 }
 
 int main() {
-#ifdef ENABLE_USB
-    UsbInit();
-#endif
-
-#ifdef ENABLE_ENET
-    _net_thread = Thread::Create("network", NetThread, NULL, NET_THREAD_STACK);
-#endif
-
 #ifdef ENABLE_PANEL
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
+
+    _tsense.Run(8);
 
     DMSG("Main: blinking lights");
 

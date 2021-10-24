@@ -264,28 +264,29 @@ void hwinit() {
     assert((IRAM_REGION_SIZE & 3) == 0);
 
     if (HCLK > 144000000)
-        Stm32Power::EnableVos();
+        Power::EnableVos();
 
-    Stm32Flash::Latency(uint32_t((HCLK+1000000)/30000000));
+    Flash::Latency(uint32_t((HCLK+1000000)/30000000));
 
     // Power on/off peripherals
-    Stm32ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
+    ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                                | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
-    Stm32ClockTree::EnableAHB2(AHB2_RNGEN);
+    ClockTree::EnableAHB2(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
-    Stm32ClockTree::EnableAHB3(AHB3_FSMCEN);
+    ClockTree::EnableAHB3(AHB3_FSMCEN);
 #endif
-    Stm32ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
-    Stm32ClockTree::EnableAPB2(APB2_SYSCFGEN);
+    ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
+                               | APB1_TIM3EN);
+    ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN);
 
-    Stm32ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
+    ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                                  | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
-    Stm32ClockTree::EnableAHB2LP(AHB2_RNGEN);
+    ClockTree::EnableAHB2LP(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
-    Stm32ClockTree::EnableAHB3LP(AHB3_FSMCEN);
+    ClockTree::EnableAHB3LP(AHB3_FSMCEN);
 #endif
-    Stm32ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
-    Stm32ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
+    ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
+    ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
 
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();
@@ -301,32 +302,32 @@ void hwinit() {
     // 168MHz HCLK/4 = 42MHz APB1 clock
     // 168MHz HCLK/2 = 84MHz APB2 clock
 
-    static const Stm32ClockTree::Config clkconf = {
-        .pll_clk_source = Stm32ClockTree::PllClkSource::HSE,
+    static const ClockTree::Config clkconf = {
+        .pll_clk_source = ClockTree::PllClkSource::HSE,
         .pll_vco_mult   = 56,
         .pll_vco_div    = 2,
-        .pll_sysclk_div = Stm32ClockTree::PllSysClkDiv::DIV2,
+        .pll_sysclk_div = ClockTree::PllSysClkDiv::DIV2,
         .pll_periph_div = 7,
-        .sys_clk_source = Stm32ClockTree::SysClkSource::PLL,
-        .hclk_prescale  = Stm32ClockTree::HclkPrescale::DIV1,
-        .apb1_prescale  = Stm32ClockTree::ApbPrescale::DIV4,
-        .apb2_prescale  = Stm32ClockTree::ApbPrescale::DIV2,
-        .rtc_clk_source = Stm32ClockTree::RtcClkSource::LSI
+        .sys_clk_source = ClockTree::SysClkSource::PLL,
+        .hclk_prescale  = ClockTree::HclkPrescale::DIV1,
+        .apb1_prescale  = ClockTree::ApbPrescale::DIV4,
+        .apb2_prescale  = ClockTree::ApbPrescale::DIV2,
+        .rtc_clk_source = ClockTree::RtcClkSource::LSI
     };
 
-    const bool power_reset = Stm32ClockTree::CheckPowerLoss();
-    Stm32ClockTree::Configure(clkconf);
+    const bool power_reset = ClockTree::CheckPowerLoss();
+    ClockTree::Configure(clkconf);
 
 #ifdef CLKOUTPIN
     // 12/2 = 6MHz on MCO1
-    Stm32ClockTree::EnableMCO(Stm32ClockTree::Mco1Output::HSE, Stm32ClockTree::McoPrescaler::DIV2);
+    ClockTree::EnableMCO(ClockTree::Mco1Output::HSE, ClockTree::McoPrescaler::DIV2);
 #endif
 
 	// Initialize main thread and set up stacks
 	_main_thread = &Thread::Bootstrap();
 
     // Freeze WWDT while in breakpoint
-    Stm32Debug::FreezeAPB1(Stm32Debug::APB1_WWDT_STOP);
+    Debug::FreezeAPB1(Debug::APB1_WWDT_STOP);
 
 	// Initialize NVIC after threading, because the handler expect threads
     NVic::Init(Unexpected_Interrupt, IPL_UNEXP);
@@ -348,10 +349,10 @@ void hwinit() {
     _dma1.EnableInterrupts();
     _dma2.EnableInterrupts();
 #endif
-    Stm32Random::Init();
+    Random::Init();
 
     uint8_t buf[32];
-    Stm32Random::Random(buf, sizeof buf);
+    Random::Random(buf, sizeof buf);
     Util::RandomSeed(buf, sizeof buf);
 
 	// Install IRQ handlers
@@ -361,16 +362,18 @@ void hwinit() {
 	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);
 	NVic::EnableIRQ(INTR_USART3);
     
-    Stm32Flash::EnableIDCaching();
+    AdcCommon::SetPrescaler(ADC1_PRESCALE);
+
+    Flash::EnableIDCaching();
 
     // Turn on proper assert handling
     _assert_stop = false;
 
-	_usart3.InitAsync(115200, Stm32Usart::StopBits::SB_1, APB1_CLK);
+	_usart3.InitAsync(115200, SerialPort::StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
     _clock.Start();
-    Stm32Debug::FreezeAPB1(Stm32Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
+    Debug::FreezeAPB1(Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
 
     _usart3.Write("\r\nWelcome to Enetcore\r\n");
     _usart3.SyncDrain();
@@ -409,7 +412,7 @@ void hwinit() {
             _build_branch, _build_commit, _build_user, _build_date);
 
     DMSG("Random uint: 0x%x", Util::Random<uint>());
-    DMSG("HW RNG: 0x%x", Stm32Random::Random());
+    DMSG("HW RNG: 0x%x", Random::Random());
 }
 
 
