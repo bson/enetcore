@@ -99,8 +99,8 @@ public:
 
 private:
     const uintptr_t _base;
-    Ring<SEND_BUF_SIZE> _sendq; // TX send q
-    Ring<RECV_BUF_SIZE> _recvq; // RX send q
+    volatile Ring<SEND_BUF_SIZE> _sendq; // TX send q
+    volatile Ring<RECV_BUF_SIZE> _recvq; // RX send q
     mutable Mutex _w_mutex;
     uint8_t _read_wait;         // Readers waiting
     bool _ienable;              // Enable interrupts

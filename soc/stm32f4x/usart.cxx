@@ -50,7 +50,7 @@ void Stm32Usart::Write(const uint8_t* data, uint len) {
             StartTx();
         }
         if (p < data + len)
-            Thread::WaitFor(&_sendq);
+            Thread::WaitFor((void*)&_sendq);
     }
 }
 
@@ -86,7 +86,7 @@ int Stm32Usart::getc() {
             return _recvq.PopFront();
 
         ++_read_wait;
-        Thread::WaitFor(&_recvq);
+        Thread::WaitFor((void*)&_recvq);
         --_read_wait;
     }
 }
@@ -97,7 +97,7 @@ inline void Stm32Usart::HandleInterrupt() {
     if (sr & BIT(TXE)) {
         StartTx();
         if (_sendq.Empty())
-            Thread::WakeSingle(&_sendq);
+            Thread::WakeSingle((void*)&_sendq);
     }
 
     if (sr & BIT(RXNE)) {
@@ -106,7 +106,7 @@ inline void Stm32Usart::HandleInterrupt() {
         if (_recvq.Headroom()) {
             _recvq.PushBack(c);
             if (_read_wait)
-                Thread::WakeSingle(&_recvq);
+                Thread::WakeSingle((void*)&_recvq);
         }
     }
 }
@@ -121,7 +121,7 @@ inline void Stm32Usart::StartTx() {
         if (!_sendq.Empty()) {
             if (!_tx_active) {
                 _tx_size = _sendq.Continuous();
-                _tx_dma->PeripheralTx(this, _sendq.Buffer(), _tx_size);
+                _tx_dma->PeripheralTx(this, (void*)_sendq.Buffer(), _tx_size);
             }
         } else {
             _sendq.Clear();     // Normalize
@@ -183,5 +183,5 @@ void Stm32Usart::EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma
 void Stm32Usart::DmaTxComplete() {
     _sendq.PopFront(exch(_tx_size, uint16_t(0)));
     StartTx();
-    Thread::WakeSingle(&_sendq);
+    Thread::WakeSingle((void*)&_sendq);
 }

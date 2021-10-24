@@ -28,15 +28,21 @@ public:
 
     // Check that arg is valid index
     void BoundsCheck(uint arg) const { assert_bounds(arg < Size()); }
+    void BoundsCheck(uint arg) const volatile { assert_bounds(arg < Size()); }
     void SpaceCheck(uint arg) const { assert_bounds(Headroom() >= arg); }
+    void SpaceCheck(uint arg) const volatile { assert_bounds(Headroom() >= arg); }
 
     // Return amount of data in ring
     size_type Size() const {
         return _tail >= _head ? _tail - _head : N - _head + _tail;
     }
+    size_type Size() const volatile {
+        return _tail >= _head ? _tail - _head : N - _head + _tail;
+    }
 
     // Return unused space
     size_type Headroom() const { return N - Size() - 1; }
+    size_type Headroom() const volatile { return N - Size() - 1; }
 
     // Return amount of continuous buffer data, starting at _head
     size_type Continuous() const {
@@ -52,8 +58,23 @@ public:
         return N - _head - 1;
     }
 
+    size_type Continuous() const volatile {
+        if (_head <= _tail)
+            return Size();
+
+        // If head is at N-1, then there is 0 continuous after it.  So
+        // report continuous at the beginning since the next item at
+        // the head is in location 0.
+        if (_head == N - 1)
+            return _tail + 1;
+
+        return N - _head - 1;
+    }
+
     void Clear() { _head = _tail = 0; }
+    void Clear() volatile { _head = _tail = 0; }
     bool Empty() const { return _head == _tail; }
+    bool Empty() const volatile { return _head == _tail; }
 
     // Make _head <= _tail
 
@@ -91,6 +112,7 @@ public:
     const T& Back() const { BoundsCheck(0); return _v[_tail]; }
 
     const T* Buffer() const { BoundsCheck(0); return _v + ((_head + 1) % N); }
+    const volatile T* Buffer() const volatile { BoundsCheck(0); return _v + ((_head + 1) % N); }
 
     void PushFront(const T& arg) {
         SpaceCheck(1);
@@ -110,6 +132,12 @@ public:
     }
 
     void PushBack(const T arg) {
+        SpaceCheck(1);
+        _tail = (_tail + 1) % N;
+        _v[_tail] = arg;
+    }
+
+    void PushBack(const T arg) volatile {
         SpaceCheck(1);
         _tail = (_tail + 1) % N;
         _v[_tail] = arg;
@@ -138,7 +166,18 @@ public:
         return _v[_head];
     }
 
+    T PopFront() volatile {
+        BoundsCheck(0);
+        _head = (_head + 1) % N;
+        return _v[_head];
+    }
+
     void PopFront(size_type n) {
+        BoundsCheck(n-1);
+        _head = (_head + n) % N;
+    }
+
+    void PopFront(size_type n) volatile {
         BoundsCheck(n-1);
         _head = (_head + n) % N;
     }
