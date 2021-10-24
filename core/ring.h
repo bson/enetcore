@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __RING_H__
@@ -10,15 +10,15 @@
 
 template <int N, typename size_type = uint, typename T = uint8_t>
 class Ring {
-    size_type _head;            // Index of first item
-    size_type _tail;            // Index of last item (*not* last + 1!)
+    size_type _head;            // Index of first item - 1
+    size_type _tail;            // Index of last item
     T _v[N];
 
     typedef Ring<N, size_type, T>  Self;
 
 public:
-    Ring() : _head(0), _tail(0) { }
-    Ring(const Self& arg) {
+    [[__optimize]] Ring() : _head(0), _tail(0) { }
+    [[__optimize]] Ring(const Self& arg) {
         if (&arg != this) {
             memcpy(_v, arg, N);
             _head = arg._head;
@@ -27,25 +27,25 @@ public:
     }
 
     // Check that arg is valid index
-    void BoundsCheck(uint arg) const { assert_bounds(arg < Size()); }
-    void BoundsCheck(uint arg) const volatile { assert_bounds(arg < Size()); }
-    void SpaceCheck(uint arg) const { assert_bounds(Headroom() >= arg); }
-    void SpaceCheck(uint arg) const volatile { assert_bounds(Headroom() >= arg); }
+    [[__optimize]] void BoundsCheck(uint arg) const { assert_bounds(arg < Size()); }
+    [[__optimize]] void BoundsCheck(uint arg) const volatile { assert_bounds(arg < Size()); }
+    [[__optimize]] void SpaceCheck(uint arg) const { assert_bounds(Headroom() >= arg); }
+    [[__optimize]] void SpaceCheck(uint arg) const volatile { assert_bounds(Headroom() >= arg); }
 
     // Return amount of data in ring
-    size_type Size() const {
+    [[__optimize]] size_type Size() const {
         return _tail >= _head ? _tail - _head : N - _head + _tail;
     }
-    size_type Size() const volatile {
+    [[__optimize]] size_type Size() const volatile {
         return _tail >= _head ? _tail - _head : N - _head + _tail;
     }
 
     // Return unused space
-    size_type Headroom() const { return N - Size() - 1; }
-    size_type Headroom() const volatile { return N - Size() - 1; }
+    [[__optimize]] size_type Headroom() const { return N - Size() - 1; }
+    [[__optimize]] size_type Headroom() const volatile { return N - Size() - 1; }
 
     // Return amount of continuous buffer data, starting at _head
-    size_type Continuous() const {
+    [[__optimize]] size_type Continuous() const {
         if (_head <= _tail)
             return Size();
 
@@ -58,7 +58,7 @@ public:
         return N - _head - 1;
     }
 
-    size_type Continuous() const volatile {
+    [[__optimize]] size_type Continuous() const volatile {
         if (_head <= _tail)
             return Size();
 
@@ -71,10 +71,10 @@ public:
         return N - _head - 1;
     }
 
-    void Clear() { _head = _tail = 0; }
-    void Clear() volatile { _head = _tail = 0; }
-    bool Empty() const { return _head == _tail; }
-    bool Empty() const volatile { return _head == _tail; }
+    [[__optimize]] void Clear() { _head = _tail = 0; }
+    [[__optimize]] void Clear() volatile { _head = _tail = 0; }
+    [[__optimize]] bool Empty() const { return _head == _tail; }
+    [[__optimize]] bool Empty() const volatile { return _head == _tail; }
 
     // Make _head <= _tail
 
@@ -105,22 +105,42 @@ public:
         return _v[_head];
     }
             
-    T& Front() { BoundsCheck(0); return _v[(_head + 1) % N]; }
-    const T& Front() const { BoundsCheck(0); return _v[(_head + 1) % N]; }
+    [[__optimize]] T& Front() { BoundsCheck(0); return _v[(_head + 1) % N]; }
+    [[__optimize]] const T& Front() const { BoundsCheck(0); return _v[(_head + 1) % N]; }
+    [[__optimize]] T& Front() volatile { BoundsCheck(0); return _v[(_head + 1) % N]; }
+    [[__optimize]] const T& Front() const volatile { BoundsCheck(0); return _v[(_head + 1) % N]; }
 
-    T& Back() { BoundsCheck(0); return _v[_tail]; }
-    const T& Back() const { BoundsCheck(0); return _v[_tail]; }
+    [[__optimize]] T& Back() { BoundsCheck(0); return _v[_tail]; }
+    [[__optimize]] const T& Back() const { BoundsCheck(0); return _v[_tail]; }
+    [[__optimize]] T& Back() volatile { BoundsCheck(0); return _v[_tail]; }
+    [[__optimize]] const T& Back() const volatile { BoundsCheck(0); return _v[_tail]; }
 
-    const T* Buffer() const { BoundsCheck(0); return _v + ((_head + 1) % N); }
-    const volatile T* Buffer() const volatile { BoundsCheck(0); return _v + ((_head + 1) % N); }
+    [[__optimize]] const T* Buffer() const { BoundsCheck(0); return _v + ((_head + 1) % N); }
+    [[__optimize]] const volatile T* Buffer() const volatile { BoundsCheck(0); return _v + ((_head + 1) % N); }
 
-    void PushFront(const T& arg) {
+    [[__optimize]] void PushFront(const T& arg) {
         SpaceCheck(1);
         _head = (_head - 1) % N;
         _v[_head] = arg;
     }
 
-    void PushFront(const T* arg, uint len = -1) {
+    [[__optimize]] void PushFront(const T& arg) volatile {
+        SpaceCheck(1);
+        _head = (_head - 1) % N;
+        _v[_head] = arg;
+    }
+
+    [[__optimize]] void PushFront(const T* arg, uint len = -1) {
+        if (len == (uint)-1) {
+            while (*arg)
+                PushFront(*arg++);
+        } else {
+            SpaceCheck(len);
+            while (len--)
+                PushFront(*arg++);
+        }
+    }
+    [[__optimize]] void PushFront(const T* arg, uint len = -1) volatile {
         if (len == (uint)-1) {
             while (*arg)
                 PushFront(*arg++);
@@ -131,19 +151,19 @@ public:
         }
     }
 
-    void PushBack(const T arg) {
+    [[__optimize]] void PushBack(const T arg) {
         SpaceCheck(1);
         _tail = (_tail + 1) % N;
         _v[_tail] = arg;
     }
 
-    void PushBack(const T arg) volatile {
+    [[__optimize]] void PushBack(const T arg) volatile {
         SpaceCheck(1);
         _tail = (_tail + 1) % N;
         _v[_tail] = arg;
     }
 
-    void PushBack(const T* arg, uint len = -1) {
+    [[__optimize]] void PushBack(const T* arg, uint len = -1) {
         if (len == (uint)-1) {
             while (*arg)
                 PushBack(*arg++);
@@ -154,35 +174,57 @@ public:
         }
     }
 
-    T& operator[](uint arg) { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
-    const T& operator[](uint arg) const { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
+    [[__optimize]] void PushBack(const T* arg, uint len = -1) volatile {
+        if (len == (uint)-1) {
+            while (*arg)
+                PushBack(*arg++);
+        } else {
+            SpaceCheck(len);
+            while (len--)
+                PushBack(*arg++);
+        }
+    }
+
+    [[__optimize]] T& operator[](uint arg) { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
+    [[__optimize]] const T& operator[](uint arg) const { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
+    [[__optimize]] T& operator[](uint arg) volatile { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
+    [[__optimize]] const T& operator[](uint arg) const volatile { BoundsCheck(arg); return _v[(_head + arg + 1) % N]; }
     
-    T* operator+(uint arg) { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
-    const T* operator+(uint arg) const { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
+    [[__optimize]] T* operator+(uint arg) { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
+    [[__optimize]] const T* operator+(uint arg) const { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
+    [[__optimize]] T* operator+(uint arg) volatile { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
+    [[__optimize]] const T* operator+(uint arg) const volatile { BoundsCheck(arg); return _v + ((_head + arg + 1) % N); }
 
-    T PopFront() {
+    [[__optimize]] T PopFront() {
         BoundsCheck(0);
         _head = (_head + 1) % N;
         return _v[_head];
     }
 
-    T PopFront() volatile {
+    [[__optimize]] T PopFront() volatile {
         BoundsCheck(0);
         _head = (_head + 1) % N;
         return _v[_head];
     }
 
-    void PopFront(size_type n) {
+    [[__optimize]] void PopFront(size_type n) {
         BoundsCheck(n-1);
         _head = (_head + n) % N;
     }
 
-    void PopFront(size_type n) volatile {
+    [[__optimize]] void PopFront(size_type n) volatile {
         BoundsCheck(n-1);
         _head = (_head + n) % N;
     }
 
-    T PopBack() {
+    [[__optimize]] T PopBack() {
+        BoundsCheck(0);
+        T val = _v[_tail];
+        _tail = (_tail - 1) % N;
+        return val;
+    }
+
+    [[__optimize]] T PopBack() volatile {
         BoundsCheck(0);
         T val = _v[_tail];
         _tail = (_tail - 1) % N;

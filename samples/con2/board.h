@@ -18,7 +18,7 @@ typedef Stm32Flash Flash;
 typedef Stm32Dma Dma;
 typedef Stm32Rtc Rtc;
 typedef Stm32GpioPort Gpio;
-typedef Stm32Usart SerialPort;
+#define Uart Stm32Usart
 typedef Stm32Timer<uint32_t> Timer32;
 typedef Stm32Timer<uint16_t> Timer16;
 typedef Stm32Adc Adc;
@@ -26,19 +26,19 @@ typedef Stm32AdcCommon AdcCommon;
 typedef Stm32Random Random;
 typedef Stm32Debug Debug;
 
+//typedef Stm32Fsmc Fsmc;
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;
 //typedef Stm32I2cDev I2cDev;
 //typedef Stm32SpiBus SpiBus;
 //typedef Stm32SpiDev SpiDev;
 //typedef Stm32GpioIntr GpioIntr;
-//typedef Stm32Pwm Pwm;
 
 extern NVic _nvic;
 
 //extern I2cBus _i2c2;
-extern SerialPort _usart3;
-extern SerialPort _uart4;
+extern Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3;
+extern Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4;
 //extern SpiBus _spi0;
 
 extern Gpio _gpio_a;

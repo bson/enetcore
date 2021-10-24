@@ -126,7 +126,11 @@ enum {
 };
 
 enum {
-    ADC1_PRESCALE = 8
+    ADC1_PRESCALE = 8,
+    USART3_SENDQ_SIZE = 128,
+    USART3_RECVQ_SIZE = 8,
+    UART4_SENDQ_SIZE = 1024,
+    UART4_RECVQ_SIZE = 1024
 };
 
 // Enetcore configuration parameters

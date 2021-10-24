@@ -50,8 +50,8 @@ static const uint16_t _dma2_irqs[] = {
 Dma _dma1(BASE_DMA1, _dma1_irqs);
 Dma _dma2(BASE_DMA2, _dma2_irqs);
 
-SerialPort _usart3(BASE_USART3);
-SerialPort _uart4(BASE_UART4);
+Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3(BASE_USART3);
+Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
 
 #ifdef ENABLE_PANEL
 Panel _panel;
@@ -343,12 +343,11 @@ void hwinit() {
 
     NVic::InstallCSWHandler(PENDSV_VEC, IPL_CSW);
 
-#if 1
     _dma1.InstallHandlers();
     _dma2.InstallHandlers();
     _dma1.EnableInterrupts();
     _dma2.EnableInterrupts();
-#endif
+
     Random::Init();
 
     uint8_t buf[32];
@@ -359,7 +358,7 @@ void hwinit() {
 	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, IPL_CLOCK, &_clock);
 	NVic::EnableIRQ(INTR_TIM5);
 
-	NVic::InstallIRQHandler(INTR_USART3, SerialPort::Interrupt, IPL_UART, &_usart3);
+	NVic::InstallIRQHandler(INTR_USART3, _usart3.Interrupt, IPL_UART, &_usart3);
 	NVic::EnableIRQ(INTR_USART3);
     
     AdcCommon::SetPrescaler(ADC1_PRESCALE);
@@ -369,7 +368,7 @@ void hwinit() {
     // Turn on proper assert handling
     _assert_stop = false;
 
-	_usart3.InitAsync(115200, SerialPort::StopBits::SB_1, APB1_CLK);
+	_usart3.InitAsync(115200, _usart3.StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 
     _clock.Start();
