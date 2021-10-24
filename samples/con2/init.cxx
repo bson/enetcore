@@ -373,7 +373,10 @@ void hwinit() {
 	_usart3.SetInterrupts(true);
 
     _clock.Start();
-    Debug::FreezeAPB1(Debug::APB1_TIM5_STOP); // Stop clock timer while stopped in a breakpoint
+
+    // Stop timers while stopped in a breakpoint
+    Debug::FreezeAPB1(Debug::APB1_TIM5_STOP);
+    Debug::FreezeAPB1(Debug::APB1_TIM3_STOP);
 
     _usart3.Write("\r\nWelcome to Enetcore\r\n");
     _usart3.SyncDrain();

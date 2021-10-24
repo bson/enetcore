@@ -11,16 +11,17 @@ void Stm32Timer<Counter>::Interrupt(void* token) {
     ((Stm32Timer<Counter>*)token)->HandleInterrupt();
 }
 
-#define DIER reg<volatile uint32_t>(Register::TIM_DIER)
-#define CR1  reg<volatile uint32_t>(Register::TIM_CR1)
-#define SR   reg<volatile uint32_t>(Register::TIM_SR)
-#define PSC  reg<volatile uint32_t>(Register::TIM_PSC)
-#define ARR  reg<volatile uint32_t>(Register::TIM_ARR)
-#define CNT  reg<volatile uint32_t>(Register::TIM_CNT)
-#define EGR  reg<volatile uint32_t>(Register::TIM_EGR)
+#define DIER reg(Register::TIM_DIER)
+#define CR1  reg(Register::TIM_CR1)
+#define SR   reg(Register::TIM_SR)
+#define PSC  reg(Register::TIM_PSC)
+#define ARR  reg(Register::TIM_ARR)
+#define CNT  reg(Register::TIM_CNT)
+#define EGR  reg(Register::TIM_EGR)
+#define CCER reg(Register::TIM_CCER)
 
 template<typename Counter>
-void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t prec) {
+void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t prec, bool intr) {
     assert(prec/freq <= ~(Counter)0);
 
     const uint32_t count = _timerclk / freq;
@@ -42,9 +43,59 @@ void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t prec) {
     EGR |= BIT(UG);  // Generates update event, so do this before enabling UIE
 
     SR &= ~BIT(UIF);
-    DIER |= BIT(UIE);
+    if (intr)
+        DIER |= BIT(UIE);
     CR1 |= BIT(CEN);
 }
+
+template<typename Counter>
+void Stm32Timer<Counter>::RunPwm(uint32_t freq) {
+    assert(PWM_PREC/freq <= ~(Counter)0);
+
+    const uint32_t count = _timerclk / freq;
+    const Counter prescale = count / PWM_PREC;
+    const uint32_t full_count = count / prescale;
+
+    assert(prescale <= ~(Counter)0);
+    assert(full_count <= ~(Counter)0);
+
+    Thread::IPL G(IPL_CLOCK);
+    DIER &= ~BIT(UIE);
+
+    CR1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
+
+    PSC = prescale;
+    ARR = count;
+    CNT = 0;
+
+    CR1 |= BIT(ARPE);
+    EGR |= BIT(UG);
+
+    SR &= ~BIT(UIF);
+    CR1 |= BIT(CEN);
+}
+
+
+template <typename Counter>
+void Stm32Timer<Counter>::ConfigurePwm(Stm32Timer::CCR ccr, Stm32Timer::PwmPolarity pol) {
+    const uint32_t ccer_shift = 4 * (uint32_t)ccr;
+
+    CCER &= ~BIT(CC1E + ccer_shift);
+
+    const uint32_t ccmbits = BIT(OC1PE) | ((uint32_t)PwmMode::MODE2 << OC1M);
+    const uint32_t ccmr_shift = 8 * ((uint32_t)ccr & 1);
+    volatile uint32_t& ccmr = reg(ccr >= CCR::CCR3 ? Register::TIM_CCMR2 : Register::TIM_CCMR1);
+    ccmr = (ccmr & ~(0b11111111 << ccmr_shift))
+        | (ccmbits << ccmr_shift);
+
+    CCER = (CCER & ~(BIT(CC1E) | BIT(CC1P) | BIT(CC1NP)) << ccer_shift)
+        | ((uint32_t)pol << ccer_shift);
+    
+    SetPwmDuty(ccr, PWM_OFF);
+
+    CCER |= BIT(CC1E + ccer_shift);
+}
+
 
 template <typename Counter>
 inline void Stm32Timer<Counter>::HandleInterrupt() {

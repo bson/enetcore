@@ -25,7 +25,7 @@ public:
     }
 
     void Run(uint32_t freq) {
-        _timer.RunTimerFreq(freq, 100); // 1/100 = 1% precision
+        _timer.RunTimerFreq(freq, 100, false); // 1/100 = 1% precision
         Adc::Configure(0, TIMER_TRIGGER, Adc::Mode::CONT, Adc::SampleTime::TS_480);
     }
         

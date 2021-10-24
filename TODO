@@ -184,12 +184,14 @@ Fix UART DMA TX
 
 Enable I and D flash caching in FLASH_SCR
 
------ TODO
-
 Add trigger out enable to Stm32Timer
  - Use in Sampler
 
 Implement temp sensor
+
+Fix enetcore support in openocd
+
+----- TODO
 
 Implement %f Format
 

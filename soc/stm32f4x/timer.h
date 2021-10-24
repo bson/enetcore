@@ -178,9 +178,31 @@ public:
         IT4_RMP  = 6
     };
 
-    template <typename T>
-    T& reg(const Register r) {
-        return *((T*)(_base + (uint32_t)r)); 
+    enum {
+        PWM_PREC = 1024,
+        PWM_OFF  = PWM_PREC + 1 // Duty value to shut off
+    };
+
+    enum class PwmPolarity {
+        HIGH = BIT(CC1P),
+        LOW = 0,
+    };
+
+    enum class CCR {
+        CCR1 = 0, CCR2, CCR3, CCR4
+    };
+
+    enum class PwmMode {
+        MODE1 = 6,
+        MODE2 = 7
+    };
+
+    volatile uint32_t& reg(const Register r) {
+        return *((volatile uint32_t*)(_base + (uint32_t)r)); 
+    }
+
+    volatile uint32_t& r_ccr(CCR ccr) {
+        return *((volatile uint32_t*)(_base + (uint32_t)Register::TIM_CCR1 + (uint32_t)ccr * 4));
     }
 
     Stm32Timer(uint32_t base, uint32_t timerclk)
@@ -188,13 +210,30 @@ public:
           _timerclk(timerclk)
     { }
 
-    // Run timer, repeatedly call Tick() at freq Hz
-    // Count with precision prec
-    void RunTimerFreq(uint32_t freq, uint32_t prec);
+    // Run timer, repeatedly call Tick() in an interrupt context at IPL_TIMER at freq Hz.
+    // Count with precision prec.
+    void RunTimerFreq(uint32_t freq, uint32_t prec, bool intr = true);
+
+    // Run timer in PWM mode.  The CCRs are used to generate outputs.
+    void RunPwm(uint32_t freq);
+
+    // Enable PWM output for a CCR.
+    void ConfigurePwm(CCR ccr, PwmPolarity pol);
+
+    // Use a CCR previously set up with ConfigurePwm to output a PWM
+    // signal with a duty.  Duty is in units of 1/PWM_PREC and the
+    // actual duty is (duty/PWM_PREC+1) * 100%.  This means 0
+    // represents a brief pulse of 1/PWM_PREC, or ~0.1% of the period.
+    // To completely shut off the output, set the duty to a value >
+    // PWM_PREC; this will cause the CCR to never match the count.
+    void SetPwmDuty(CCR ccr, uint32_t duty) {
+        assert(duty <= PWM_OFF);
+        r_ccr(ccr) = duty * reg(Register::TIM_ARR) / PWM_PREC;
+    }
 
     // Read timer count
     uint32_t GetCount() {
-        return reg<volatile uint32_t>(Register::TIM_CNT);
+        return reg(Register::TIM_CNT);
     }
 
     // Interrupt handler
