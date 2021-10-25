@@ -150,6 +150,16 @@ static inline void PostContextSwitch() {
     ICSR |= BIT28;              // Set PendSV as pending
 }
     
+// Save FP state
+static inline void SaveFP(uint32_t* to) {
+    asm volatile("vstmia %0!,{s0-s31}" : : "r"(to) : "mem");
+}
+
+// Load FP state
+static inline void LoadFP(uint32_t* from) {
+    asm volatile("vldmia %0!,{s0-s31}" : : "r"(from) : "mem");
+}
+
 #else
 #error "Unsupported compiler"
 #endif
@@ -188,6 +198,11 @@ struct PcbPrimitive {
     uint32_t psp;           // Thread PSP
 };
 
+
+// FP state
+struct FPState {
+    uint32_t s[32];
+}
 
 #if defined (__GNUC__)
 

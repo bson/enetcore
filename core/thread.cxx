@@ -28,11 +28,11 @@ bool Thread::_pend_csw;
 
 
 Thread::Thread() :
-	_state(State::SLEEP),
+    _state(State::SLEEP),
     _prio(THREAD_DEFAULT_PRIORITY),
     _waitob(NULL),
     _waittime(0),
-	_stack(NULL),
+    _stack(NULL),
     _estack(NULL) { 
 }
 
@@ -109,10 +109,10 @@ Thread::~Thread()
 {
     ScopedNoInt G;
 
-	assert(_curthread != this);	// Thread can't destroy itself
+    assert(_curthread != this); // Thread can't destroy itself
 
-	const uint pos = _runq.Find(this);
-	if (pos != NOT_FOUND)
+    const uint pos = _runq.Find(this);
+    if (pos != NOT_FOUND)
         _runq.Erase(pos);
 }
 
@@ -121,6 +121,7 @@ Thread& Thread::Bootstrap()
 {
     assert(!IntEnabled());
     assert(!_curthread);
+    assert(!_fpthread);
     assert(!_bootstrapped);
     assert(!_ipl_count);
 
@@ -137,22 +138,24 @@ Thread& Thread::Bootstrap()
 
     SetTimer(RRQUANTUM);
 
-	extern void* _main_thread_stack;
+    extern void* _main_thread_stack;
 
     // Bootstrap main thread and interrupt stacks.  The main thread
     // inherits the current stack and the interrupt stack is set up
     // below it.
     //
-	// Since the region allocates low to high we do set aside room for
+    // Since the region allocates low to high we do set aside room for
     // the stack by installing a reserve to cover the top portion
     // with the two stacks.
 
-	_iram_region.SetReserve(MAIN_THREAD_STACK + INTR_THREAD_STACK + 8);
+    _iram_region.SetReserve(MAIN_THREAD_STACK + INTR_THREAD_STACK + 8);
 
-	_main_thread_stack = (uint8_t*)_iram_region.GetEnd() - MAIN_THREAD_STACK; // Stack limit
+    _main_thread_stack = (uint8_t*)_iram_region.GetEnd() - MAIN_THREAD_STACK; // Stack limit
 
-	_curthread->_stack = _main_thread_stack;
-	_curthread->_estack = _iram_region.GetEnd();
+    _curthread->_stack = _main_thread_stack;
+    _curthread->_estack = _iram_region.GetEnd();
+
+    _curthread->_fpstate = NULL;
 
     // Set up stacks
     StackStrap((uintptr_t)_main_thread_stack - 8);
@@ -162,7 +165,7 @@ Thread& Thread::Bootstrap()
     // Add to scheduler
     _runq.PushBack(_curthread);
 
-	return *_curthread;
+    return *_curthread;
 }
 
 
@@ -172,13 +175,18 @@ void Thread::SetPriority(uint8_t new_prio)
 
     ScopedNoInt G;
     
-	_curthread->_prio = new_prio;
+    _curthread->_prio = new_prio;
 
     ContextSwitch();
 
-	assert(!IntEnabled());
+    assert(!IntEnabled());
 }
 
+
+void Thread::EnableFP() {
+    if (!_curthread->_fpstate)
+        _curthread->_fpstate = xmalloc(sizeof (FPState));
+}
 
 void Thread::Rotate(bool in_csw)
 {
@@ -186,83 +194,89 @@ void Thread::Rotate(bool in_csw)
     if (!in_csw && _pend_csw)
         return;
 
-	const Time now = Time::Now();
+    const Time now = Time::Now();
 
-	// Make a pass through runq, collecting the parameters we'll need
+    // Make a pass through runq, collecting the parameters we'll need
 
-	Thread* wake = NULL;		// Next thread due on timed wait
-	Thread* top = NULL;			// Thread with highest priority
-	uint numrun = 0;			// Number of running threads with prio equal to current's
-	Thread* firstrun = NULL;	// First other thread with prio equal to current
-	Thread* nextrun = NULL;		// Next other thread with prio equal to current
-	bool seencur = false;		// Set to true when we've encountered current thread
-	
-	for (uint i = 0; i < _runq.Size(); ++i) {
-		Thread* t = _runq[i];
+    Thread* wake = NULL;        // Next thread due on timed wait
+    Thread* top = NULL;         // Thread with highest priority
+    uint numrun = 0;            // Number of running threads with prio equal to current's
+    Thread* firstrun = NULL;    // First other thread with prio equal to current
+    Thread* nextrun = NULL;     // Next other thread with prio equal to current
+    bool seencur = false;       // Set to true when we've encountered current thread
+    
+    for (uint i = 0; i < _runq.Size(); ++i) {
+        Thread* t = _runq[i];
 
-		if (t == _curthread)
+        if (t == _curthread)
             seencur = true;
 
-		switch (t->_state) {
-		case State::TWAIT:
-			if (t->_waittime > now) {
-				if (!wake || t->_waittime < wake->_waittime)
+        switch (t->_state) {
+        case State::TWAIT:
+            if (t->_waittime > now) {
+                if (!wake || t->_waittime < wake->_waittime)
                     wake = t;
-				break;
-			}
-			t->_state = State::RUN;
+                break;
+            }
+            t->_state = State::RUN;
 
-			// fallthru
-		case State::RUN:
-			if (!top || t->_prio > top->_prio)
-				top = t;
+            // fallthru
+        case State::RUN:
+            if (!top || t->_prio > top->_prio)
+                top = t;
 
-			if (t->_prio == _curthread->_prio) {
-				if (t != _curthread) {
-					if (seencur) {
-						if (!nextrun)
+            if (t->_prio == _curthread->_prio) {
+                if (t != _curthread) {
+                    if (seencur) {
+                        if (!nextrun)
                             nextrun = t;
-					} else {
-						if (!firstrun)
+                    } else {
+                        if (!firstrun)
                             firstrun = t;
-					}
-				}
-				++numrun;
-			}
-			break;
-		default: ;
-		}
-	}
+                    }
+                }
+                ++numrun;
+            }
+            break;
+        default: ;
+        }
+    }
 
-	Thread* next = _curthread;
-	Time next_timer = wake ? wake->_waittime : now + Time::FromSec(10); // 10sec is a gratuitous upper bound
+    Thread* next = _curthread;
+    Time next_timer = wake ? wake->_waittime : now + Time::FromSec(10); // 10sec is a gratuitous upper bound
 
-	// If there's a thread with a prio higher than current, switch to it
-	if (top->_prio > _curthread->_prio) {
-		next = top;
-	} else if (numrun > 1 && now >= _qend) {
-		// If there's nothing running with higher prio and there are multiple threads
-		// running with current prio, round-robin when the quantum is over.
+    // If there's a thread with a prio higher than current, switch to it
+    if (top->_prio > _curthread->_prio) {
+        next = top;
+    } else if (numrun > 1 && now >= _qend) {
+        // If there's nothing running with higher prio and there are multiple threads
+        // running with current prio, round-robin when the quantum is over.
 
-		assert(nextrun || firstrun);
-		next = nextrun ? nextrun : firstrun;
-		assert(next != _curthread);
+        assert(nextrun || firstrun);
+        next = nextrun ? nextrun : firstrun;
+        assert(next != _curthread);
 
-		_qend = now + Time::FromUsec(RRQUANTUM);
-	} else if (_curthread->_state != State::RUN) {
-		// Current thread is blocked, so just pick first runnable, if any
-		if (top)
-			next = top;
-	}
+        _qend = now + Time::FromUsec(RRQUANTUM);
+    } else if (_curthread->_state != State::RUN) {
+        // Current thread is blocked, so just pick first runnable, if any
+        if (top)
+            next = top;
+    }
 
-	if (_qend > now)
-		SetTimer((min(next_timer, _qend) - now).GetUsec());
-	else
-		SetTimer((next_timer - now).GetUsec());
+    if (_qend > now)
+        SetTimer((min(next_timer, _qend) - now).GetUsec());
+    else
+        SetTimer((next_timer - now).GetUsec());
 
-	if (next && next != _curthread) {
+    if (next && next != _curthread) {
         _pend_csw = false;
         if (in_csw) {
+            if (_fpthread != next && _next->_fpstate) {
+                if (_fpthread)
+                    StoreFP(_fpthread->_fpstate);
+                LoadFP(next->_fpstate);
+                _fpthread = next;
+            }
             SetCurThread(next);
         } else {
             if (!_ipl_count) {
@@ -278,25 +292,25 @@ void Thread::WakeAll(const void* ob)
 {
     ScopedNoInt G;
 
-	bool cx = false;
-	for (uint i = 0; i < _runq.Size(); ++i) {
-		Thread* t = _runq[i];
-		
-		switch (t->_state) {
-		case State::WAIT:
-		case State::TWAIT:
-			if (t->_waitob == ob)  {
-				t->_state = State::RUN;
+    bool cx = false;
+    for (uint i = 0; i < _runq.Size(); ++i) {
+        Thread* t = _runq[i];
+        
+        switch (t->_state) {
+        case State::WAIT:
+        case State::TWAIT:
+            if (t->_waitob == ob)  {
+                t->_state = State::RUN;
 
                 if (t->_prio > _curthread->_prio)
                     cx = true;
-			}
-			break;
-		default: ;
-		}
-	}
+            }
+            break;
+        default: ;
+        }
+    }
 
-	if (cx)
+    if (cx)
         ContextSwitch();
 }
 
@@ -305,31 +319,31 @@ void Thread::WakeSingle(const void* ob)
 {
     ScopedNoInt G;
 
-	Thread* top = NULL;
-	for (uint i = 0; i < _runq.Size(); ++i) {
-		Thread* t = _runq[i];
-		
-		switch (t->_state) {
-		case State::WAIT:
-		case State::TWAIT:
-			if (t->_waitob == ob && (!top || t->_prio > top->_prio))
-				top = t;
-			break;
-		default: ;
-		}
-	}
-	
-	if (top) {
-		top->_state = State::RUN;
+    Thread* top = NULL;
+    for (uint i = 0; i < _runq.Size(); ++i) {
+        Thread* t = _runq[i];
+        
+        switch (t->_state) {
+        case State::WAIT:
+        case State::TWAIT:
+            if (t->_waitob == ob && (!top || t->_prio > top->_prio))
+                top = t;
+            break;
+        default: ;
+        }
+    }
+    
+    if (top) {
+        top->_state = State::RUN;
 
-		if (top->_prio > _curthread->_prio || (_curthread->_state != State::RUN))
+        if (top->_prio > _curthread->_prio || (_curthread->_state != State::RUN))
             ContextSwitch();
-	}
+    }
 }
 
 
 void Thread::Idle()  {
-	AssertNotInterrupt();
+    AssertNotInterrupt();
 
     Rotate(false);
 
@@ -354,7 +368,7 @@ void Thread::Idle()  {
 
 void Thread::WaitFor(const void* ob)
 {
-	AssertNotInterrupt();
+    AssertNotInterrupt();
 
     ScopedNoInt G;
 
@@ -367,9 +381,9 @@ void Thread::WaitFor(const void* ob)
 
 void Thread::WaitFor(const void* ob, Time until)
 {
-	AssertNotInterrupt();
+    AssertNotInterrupt();
 
-	if (until <= Time::Now())
+    if (until <= Time::Now())
         return;
 
     ScopedNoInt G;
@@ -384,17 +398,17 @@ void Thread::WaitFor(const void* ob, Time until)
 
 void Thread::Sleep(Time until)
 {
-	AssertNotInterrupt();
+    AssertNotInterrupt();
 
-	while (Time::Now() < until) {
+    while (Time::Now() < until) {
         ScopedNoInt G;
 
-		_curthread->_state = State::TWAIT;
-		_curthread->_waitob = NULL;
-		_curthread->_waittime = until;
+        _curthread->_state = State::TWAIT;
+        _curthread->_waitob = NULL;
+        _curthread->_waittime = until;
 
         Idle();
-	}
+    }
 }
 
 
@@ -416,7 +430,7 @@ void Thread::SetTimer(uint usec)
 
     ScopedNoInt G;
 
-	_systimer.SetTimer(usec);
+    _systimer.SetTimer(usec);
 }
 
 
@@ -445,4 +459,3 @@ void Thread::TimerInterrupt()
     if (_curthread != prev)
         ContextSwitch();
 }
-
