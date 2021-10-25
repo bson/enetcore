@@ -19,7 +19,9 @@ static void logDateTime() {
         "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
     };
 
-    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d  Tsense: %x (%d)",
+    const int temp = _tsense.Temp() * 100.0f;
+
+    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d  Tsense: %d.%02u %x (%d)",
          days[now.dow-1],
          now.year,
          now.month,
@@ -27,6 +29,7 @@ static void logDateTime() {
          now.hour,
          now.min,
          now.sec,
+         temp/100, temp % 100,
          _tsense.Value(),
          _tsense.Count());
 }
