@@ -1,0 +1,29 @@
+#ifndef __FPU_H__
+#define __FPU_H__
+
+extern volatile uint32_t CPACR;
+extern volatile uint32_t FPCCR;
+
+class Fpu {
+    enum {
+        // CPACR
+        CP10 = 20,
+        CP11 = 22,
+
+        // FPCCR
+        ASPEN = 31,
+        LSPEN = 30
+    };
+
+public:
+    static void EnableAccess() {
+        // Enable access
+        CPACR |= (0b11 << CP10) | (0b11 << CP11);
+
+        // Disable automatic or lazy FP register saves.  Enetcore
+        // saves them on CSW.
+        FPCCR &= ~(BIT(ASPEN) | BIT(LSPEN));
+    }
+};
+
+#endif // __FPU_H__

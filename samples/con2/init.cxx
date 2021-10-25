@@ -6,6 +6,7 @@
 #include "util.h"
 #include "platform.h"
 #include "arm.h"
+#include "fpu.h"
 
 extern const char _build_commit[];
 extern const char _build_user[];
@@ -249,6 +250,9 @@ void hwinit0() {
     // Save watchdog state
 //    volatile uint32_t *wwdt = (volatile uint32_t*)WWDT_BASE;
 //    _wwdt_mod = wwdt[0];
+
+    // Set up FPU access
+    Fpu::EnableAccess();
 
     // Zero out memory
     memset((void*)MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);

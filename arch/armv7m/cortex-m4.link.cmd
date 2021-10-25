@@ -19,6 +19,8 @@ HFSR = 0xe000ed2c;
 MMAR = 0xe000ed34;
 BFAR = 0xe000ed38;
 AFSR = 0xe000ed3c;
+CPACR = 0xe000ed88;
+FPCCR = 0xe000ef34;
 
 /* ARM Core NVIC */
 ISER0 = 0xe000e100;
@@ -58,7 +60,6 @@ MPU_RBAR_A3 = 0xe000edb4;
 MPU_RASR_A3 = 0xe000edb8;
 
 /* ARM Core SYSTICK */
-
 SYST_CSR = 0xe000e010;
 SYST_RVR = 0xe000e014;
 SYST_CVR = 0xe000e018;
