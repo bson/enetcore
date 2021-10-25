@@ -3,21 +3,21 @@
 
 class Stm32SysCfg {
     enum class Register {
-        SYSCFG_MEMRMP  = 0x00,
-        SYSCFG_PMC     = 0x04,
-        SYSCFG_EXTICR1 = 0x08,
-        SYSCFG_CMPCR = 0x20
+        MEMRMP  = 0x00,
+        PMC     = 0x04,
+        EXTICR1 = 0x08,
+        CMPCR = 0x20
     };
 
 public:
     enum {
-        // SYSCFG_REMAP, reset = boot pins for mode
+        // REMAP, reset = boot pins for mode
         MEM_MODE = 0,
 
-        // SYSCFG_PMC
+        // PMC
         MII_RMII_SEL = 23,
 
-        // SYSCFG_CMPCR
+        // CMPCR
         READY = 8,
         CMP_PD = 0
     };
@@ -28,28 +28,35 @@ public:
         
 
 private:
-    template <typename T>
-    static T& reg(const Register r) { return *((T*)(BASE_SYSCFG + (uint32_t)r)); }
-
-    template <typename T>
-    static T& reg(const uint32_t r) { return *((T*)(BASE_SYSCFG + (uint32_t)r)); }
+    static volatile uint32_t& reg(const Register r) {
+        return *((volatile uint32_t*)(BASE_SYSCFG + (uint32_t)r));
+    }
 
 public:
-    static void MapExti(Port p, uint32_t pin) {
+    static void ConfigureExti(Port p, uint32_t pin, uint16_t irq,
+                              IRQHandler handler, uint8_t prio, void* token) {
         pin &= 0xf;
-        volatile uint32_t& r = reg<volatile uint32_t>((uint32_t)Register::SYSCFG_EXTICR1 + pin/4);
+        volatile uint32_t& r = reg(Register((uint32_t)Register::EXTICR1 + pin/4));
         r = (r & ~(0b1111 << ((pin % 4) * 4)))
             | ((uint32_t)p << ((pin % 4) * 4));
+
+        NVic::InstallIRQHandler(irq, handler, prio, token);
+        NVic::EnableIRQ(irq);
     }
 
     static void Init(bool cmpcell) {
         if (cmpcell) {
-            volatile uint32_t& r = reg<volatile uint32_t>(Register::SYSCFG_CMPCR);
+            volatile uint32_t& r = reg(Register::CMPCR);
             r |= BIT(CMP_PD);
             while (!(r & BIT(READY)))
                 ;
         }
     }
+
+    // Unique device ID.  It's 96 bits, but we present it as two separate IDs,
+    // one 32-bit and one 64-bit.
+    [[__finline]] static uint32_t UniqueID32() { return *(uint32_t*)0x1fff7a10; }
+    [[__finline]] static uint64_t UniqueID64() { return *(uint32_t*)0x1fff7a14; }
 };
 
-#endif // __STM32_SYSCFG_H__
+#endif // __STM32_H__

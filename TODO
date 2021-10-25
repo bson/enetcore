@@ -191,11 +191,15 @@ Implement temp sensor
 
 Fix enetcore support in openocd
 
+Add UniqueID to SysConfig
+
 ----- TODO
 
-Implement %f Format
+Implement StmAdc
+- With DMA?
 
-Implement external pin interrupt
+Implement external pin interrupt.  Mapping is implemented in SysCfg.
+- Enable interrupt on EXTI?
 
 Hash processor
 - Clean support for hardware hashing vs soft
@@ -203,18 +207,12 @@ Hash processor
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
-Canonical use is PSP (process SP) for thread stacks, MSP for
-interrupts. Use the same, as GDB might have code that expects this.
-
 Add PWM function to timer similar to LpcPwm
 
 Implement StmSpi
 
 Implement StmDac
 - With DMA
-
-Implement StmAdc
-- With DMA?
 
 Add DMA memmove()?
 
