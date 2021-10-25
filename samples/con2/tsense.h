@@ -16,7 +16,7 @@ static float logf(float x) {
     float sum = v;
 
     for (uint i = 0; i < 5; i++) {
-        v *= v;
+        v *= v*v;
         div += 2.0f;
         sum += v/div;
     }
