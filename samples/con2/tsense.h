@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __TSENSE_H__
 #define __TSENSE_H__
 
@@ -39,7 +42,7 @@ class TSense: public Sampler<Timer16, 10, 16, 8, Adc::Trigger::TIM3_TRGO, APB1_T
     enum {
         T0   = 25,
         B    = 3950,
-        S_FS = (1 << 10) - 1 // Full scale sample value
+        S_FS = ((1 << 10) - 1)*(15/16) // Full scale sample value with 1k||15k
     };
 
 public:
@@ -65,6 +68,7 @@ public:
     bool Ready() const {
         return _ready;
     }
+
     uint32_t Value() {
         Thread::IPL G(IPL_ADC);
         _ready = false;
