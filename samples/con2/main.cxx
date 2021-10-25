@@ -21,18 +21,16 @@ void logDateTime() {
         "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
     };
 
-    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d",
+    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d  Tsense: %x (%d)",
          days[now.dow-1],
          now.year,
          now.month,
          now.day,
          now.hour,
          now.min,
-         now.sec);
-
-    if (_tsense.Ready()) {
-        DMSG("TSense %u", _tsense.Value());
-    }
+         now.sec,
+         _tsense.Value(),
+         _tsense.Count());
 }
 
 int main() {

@@ -202,7 +202,8 @@ public:
     }
 
     volatile uint32_t& r_ccr(CCR ccr) {
-        return *((volatile uint32_t*)(_base + (uint32_t)Register::TIM_CCR1 + (uint32_t)ccr * 4));
+        return *((volatile uint32_t*)(_base + (uint32_t)Register::TIM_CCR1
+                                      + (uint32_t)ccr * 4));
     }
 
     Stm32Timer(uint32_t base, uint32_t timerclk)
@@ -210,9 +211,12 @@ public:
           _timerclk(timerclk)
     { }
 
-    // Run timer, repeatedly call Tick() in an interrupt context at IPL_TIMER at freq Hz.
-    // Count with precision prec.
-    void RunTimerFreq(uint32_t freq, uint32_t prec, bool intr = true);
+    // Run timer, repeatedly call Tick() in an interrupt context at
+    // IPL_TIMER at freq Hz.  Count with precision 'timebase'.  If
+    // intr is true, enable interrupts to call Tick().  If trgo is
+    // true, generate trigger out on update (full count).
+    void RunTimerFreq(uint32_t freq, uint32_t timebase, bool intr = true,
+                      bool trgo = false);
 
     // Run timer in PWM mode.  The CCRs are used to generate outputs.
     void RunPwm(uint32_t freq);

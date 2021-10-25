@@ -17,12 +17,12 @@ class Fpu {
 
 public:
     static void EnableAccess() {
-        // Enable access
-        CPACR |= (0b11 << CP10) | (0b11 << CP11);
-
         // Disable automatic or lazy FP register saves.  Enetcore
         // saves them on CSW.
         FPCCR &= ~(BIT(ASPEN) | BIT(LSPEN));
+
+        // Enable access
+        CPACR |= (0b11 << CP10) | (0b11 << CP11);
     }
 };
 

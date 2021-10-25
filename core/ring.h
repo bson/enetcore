@@ -8,13 +8,13 @@
 // Ring buffer of static size. Size should be a power of two, but can technically
 // be any integer value.  Designed purely for performance.
 
-template <int N, typename size_type = uint, typename T = uint8_t>
+template <int N, typename T = uint8_t, typename size_type = uint>
 class Ring {
     size_type _head;            // Index of first item - 1
     size_type _tail;            // Index of last item
     T _v[N];
 
-    typedef Ring<N, size_type, T>  Self;
+    typedef Ring<N, T, size_type>  Self;
 
 public:
     [[__optimize]] Ring() : _head(0), _tail(0) { }

@@ -193,21 +193,26 @@ Fix enetcore support in openocd
 
 Add UniqueID to SysConfig
 
------ TODO
-
-Implement StmAdc
-- With DMA?
+Add PWM function to timer similar to LpcPwm
 
 Implement external pin interrupt.  Mapping is implemented in SysCfg.
 - Enable interrupt on EXTI?
+
+Implement StmAdc
+
+----- TODO
+
+Flag threads as using FPU and lazy save them
+- Track the current FP state owner
+- If switching to a new FP-flagged thread, check if it's the current owner
+  - If not, save old state to its owner
+  - Load new state and update the owner
 
 Hash processor
 - Clean support for hardware hashing vs soft
 - Clean support for hardware CRC vs soft
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
-
-Add PWM function to timer similar to LpcPwm
 
 Implement StmSpi
 

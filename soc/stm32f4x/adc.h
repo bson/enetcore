@@ -133,16 +133,17 @@ public:
         reg(Register::CR2) |= BIT(ADON);
 
         uint32_t tbits = 0;
-        if (t < Trigger::NONE)
-            tbits = (1 << EXTEN) | ((uint32_t)t << EXTSEL);
+        if (t != Trigger::NONE)
+            tbits = (0b01 << EXTEN) | ((uint32_t)t << EXTSEL);
 
         reg(Register::CR2) = tbits | BIT(EOCS) | (uint32_t)m | BIT(ADON);
 
         volatile uint32_t& smpr = reg(ch >= 10 ? Register::SMPR1 : Register::SMPR2);
-        const uint32_t bits = ch >= 10 ? ch - 10 : ch;
+        const uint32_t bits = (ch >= 10 ? ch - 10 : ch) * 3;
         smpr = (smpr & ~(7 << bits)) | ((uint32_t)ts << bits);
     
-        reg(Register::SQR1) = 0b01 << L;
+        reg(Register::SQR1) = 0; // 1 conversion (L=0)
+        reg(Register::SQR2) = 0;
         reg(Register::SQR3) = ch;
 
         reg(Register::SR) &= ~BIT(OVR);
@@ -158,7 +159,7 @@ public:
         return reg(Register::DR);
     }
 
-    virtual void AdcComplete(uint32_t sample, bool ovr);
+    virtual void AdcComplete(uint16_t sample, bool ovr);
 
     void HandleInterrupt();
 
@@ -186,7 +187,7 @@ class Stm32AdcCommon {
 
 public:
     static void SetPrescaler(uint32_t psc) {
-        assert(psc <= 3);
+        assert(psc <= 8);
         reg(Register::CCR) = (reg(Register::CCR) & ~(3 << ADCPRE)) | (psc << ADCPRE);
     }
     static void EnableVbat() {

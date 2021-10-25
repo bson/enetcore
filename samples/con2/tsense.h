@@ -6,8 +6,8 @@
 #include "nvic.h"
 
 
-class TSense: public Sampler<Timer16, 10, 16, Adc::Trigger::TIM3_TRGO, APB1_TIMERCLK> {
-    uint32_t _value;
+class TSense: public Sampler<Timer16, 10, 16, 8, Adc::Trigger::TIM3_TRGO, APB1_TIMERCLK> {
+    uint32_t _count = 0;
     bool _ready = false;
 public:
     TSense()
@@ -15,7 +15,7 @@ public:
     };
 
     void Run(uint freq) {
-        NVic::InstallIRQHandler(INTR_ADC, Adc::Interrupt, IPL_ADC, dynamic_cast<Adc*>(this));
+        NVic::InstallIRQHandler(INTR_ADC, Adc::Interrupt, IPL_ADC, this);
         NVic::EnableIRQ(INTR_ADC);
         NVic::DisableIRQ(INTR_TIM3);
 
@@ -23,17 +23,23 @@ public:
     }
 
     // * implements Sampler::SampleReady
-    void SampleReady(uint32_t value) {
+    void SampleReady() {
         _ready = true;
-        _value = value;
+        ++_count;
         Thread::WakeSingle(this);
     }
 
-    bool Ready() const { return _ready; }
+    bool Ready() const {
+        return _ready;
+    }
     uint32_t Value() {
         Thread::IPL G(IPL_ADC);
         _ready = false;
-        return _value;
+        return GetSample();
+    }
+
+    uint32_t Count() const {
+        return _count;
     }
 
     float Temp() {

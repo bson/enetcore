@@ -13,6 +13,7 @@ void Stm32Timer<Counter>::Interrupt(void* token) {
 
 #define DIER reg(Register::TIM_DIER)
 #define CR1  reg(Register::TIM_CR1)
+#define CR2  reg(Register::TIM_CR2)
 #define SR   reg(Register::TIM_SR)
 #define PSC  reg(Register::TIM_PSC)
 #define ARR  reg(Register::TIM_ARR)
@@ -21,23 +22,25 @@ void Stm32Timer<Counter>::Interrupt(void* token) {
 #define CCER reg(Register::TIM_CCER)
 
 template<typename Counter>
-void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t prec, bool intr) {
-    assert(prec/freq <= ~(Counter)0);
-
+void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t timebase, bool intr, bool trgo) {
     const uint32_t count = _timerclk / freq;
-    const Counter prescale = count / prec;
+    const Counter prescale = count / timebase;
     const uint32_t full_count = count / prescale;
 
-    assert(prescale <= ~(Counter)0);
-    assert(full_count <= ~(Counter)0);
+    assert(prescale <= (Counter)~0);
+    assert(full_count <= (Counter)~0);
+
+//    DMSG("freq: %u, timebase: %u, timerclk: %u", freq, timebase, _timerclk);
+//    DMSG(" => count: %u, prescale: %u, full_count: %u", count, prescale, full_count);
 
     Thread::IPL G(IPL_CLOCK);
     DIER &= ~BIT(UIE);
 
     CR1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
+    CR2 = trgo ? (0b010 << MMS) : 0;
 
     PSC = prescale;
-    ARR = count;
+    ARR = full_count;
     CNT = 0;
 
     EGR |= BIT(UG);  // Generates update event, so do this before enabling UIE
@@ -50,14 +53,14 @@ void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t prec, bool intr) 
 
 template<typename Counter>
 void Stm32Timer<Counter>::RunPwm(uint32_t freq) {
-    assert(PWM_PREC/freq <= ~(Counter)0);
+    assert(PWM_PREC/freq <= (Counter)~0);
 
     const uint32_t count = _timerclk / freq;
     const Counter prescale = count / PWM_PREC;
     const uint32_t full_count = count / prescale;
 
-    assert(prescale <= ~(Counter)0);
-    assert(full_count <= ~(Counter)0);
+    assert(prescale <= (Counter)~0);
+    assert(full_count <= (Counter)~0);
 
     Thread::IPL G(IPL_CLOCK);
     DIER &= ~BIT(UIE);
@@ -65,7 +68,7 @@ void Stm32Timer<Counter>::RunPwm(uint32_t freq) {
     CR1 &= ~(BIT(CMS) | BIT(DIR) | BIT(CEN) | BIT(OPM));
 
     PSC = prescale;
-    ARR = count;
+    ARR = full_count;
     CNT = 0;
 
     CR1 |= BIT(ARPE);
