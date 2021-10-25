@@ -6,8 +6,20 @@
 #include "nvic.h"
 #include "float.h"
 
-// Pull in the symbol without all the stdlib.h gunk
-extern float logf(float);
+
+static float logf(float x) {
+    float v = (x-1.0f)/(x+1.0f);
+    float div = 1.0f;
+    float sum = v;
+
+    for (uint i = 0; i < 5; i++) {
+        v *= v;
+        div += 2.0f;
+        sum += v/div;
+    }
+
+    return sum*2.0f;
+}
 
 class TSense: public Sampler<Timer16, 10, 16, 8, Adc::Trigger::TIM3_TRGO, APB1_TIMERCLK> {
     uint32_t _count = 0;
@@ -64,8 +76,8 @@ public:
     }
 
     float Temp() {
-        return float(1.0)/(float(1.0)/float(T0) + float(1.0)/float(B) +
-                           logf(float(S_FS)/float(Value()) - float(1.0)));
+        return 1.0f/(1.0f/float(T0) + 1.0f/float(B) +
+                           logf(float(S_FS)/float(Value()) - 1.0f));
     }
 };
 

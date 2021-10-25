@@ -13,9 +13,7 @@ extern PinOutput<Gpio::Pin> _led;
 Thread* _ui_thread;
 #endif
 
-extern void* UIThread(void*);
-
-void logDateTime() {
+static void logDateTime() {
     const auto now = Rtc::GetDateTime();
     static const char* const days[] = {
         "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
@@ -37,6 +35,7 @@ int main() {
     Thread::EnableFP();
 
 #ifdef ENABLE_PANEL
+    extern void* UIThread(void*);
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 
