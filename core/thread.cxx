@@ -13,6 +13,7 @@
 #endif
 
 Thread* Thread::_curthread;
+Thread* Thread::_fpthread;
 Time Thread::_curtimer;
 bool Thread::_bootstrapped;
 
@@ -185,7 +186,7 @@ void Thread::SetPriority(uint8_t new_prio)
 
 void Thread::EnableFP() {
     if (!_curthread->_fpstate)
-        _curthread->_fpstate = xmalloc(sizeof (FPState));
+        _curthread->_fpstate = (FPState*)xmalloc(sizeof (FPState));
 }
 
 void Thread::Rotate(bool in_csw)
@@ -271,7 +272,7 @@ void Thread::Rotate(bool in_csw)
     if (next && next != _curthread) {
         _pend_csw = false;
         if (in_csw) {
-            if (_fpthread != next && _next->_fpstate) {
+            if (_fpthread != next && next->_fpstate) {
                 if (_fpthread)
                     StoreFP(_fpthread->_fpstate);
                 LoadFP(next->_fpstate);

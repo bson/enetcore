@@ -200,13 +200,15 @@ Implement external pin interrupt.  Mapping is implemented in SysCfg.
 
 Implement StmAdc
 
------ TODO
-
 Flag threads as using FPU and lazy save them
 - Track the current FP state owner
 - If switching to a new FP-flagged thread, check if it's the current owner
   - If not, save old state to its owner
   - Load new state and update the owner
+
+----- TODO
+
+FP: set/clear access to FP coprocessor (CP10,CP11) on csw
 
 Hash processor
 - Clean support for hardware hashing vs soft

@@ -4,11 +4,32 @@
 #include "enetkit.h"
 #include "sampler.h"
 #include "nvic.h"
+#include "float.h"
 
+// Pull in the symbol without all the stdlib.h gunk
+extern float logf(float);
 
 class TSense: public Sampler<Timer16, 10, 16, 8, Adc::Trigger::TIM3_TRGO, APB1_TIMERCLK> {
     uint32_t _count = 0;
     bool _ready = false;
+
+    // Murata NCP21XW153J03RA
+    // NTC 15k 3%
+    // T0 = 25 deg C
+    // R0 = 15k
+    // B  = 3950
+    //
+    // 1/T = 1/T0 + 1/B * ln(R/R0)
+    // R = R0 * ( ( Sfs / S ) - 1 )
+    // => 1/T = 1/T0 + 1/B * ln( R0 * ( ( Sfs / S ) - 1 ) / R0 )
+    // <=> 1/T = 1/T0 + 1/B * ln( ( Sfs / S ) – 1 )
+
+    enum {
+        T0   = 25,
+        B    = 3950,
+        S_FS = (1 << 10) - 1 // Full scale sample value
+    };
+
 public:
     TSense()
         : Sampler(BASE_ADC1, BASE_TIM3) {
@@ -43,7 +64,8 @@ public:
     }
 
     float Temp() {
-        return (float)Value() / 100.0; // XXX implement me
+        return float(1.0)/(float(1.0)/float(T0) + float(1.0)/float(B) +
+                           logf(float(S_FS)/float(Value()) - float(1.0)));
     }
 };
 

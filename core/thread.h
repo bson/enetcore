@@ -49,8 +49,8 @@ private:
     PcbPrimitive   _pcb;        // [0x0]
     const char*    _name;       // Thread identifier string [0x4]
     volatile State _state;      // Thread state [0x8]
+    uint8_t        _prio; // Thread priority - lowest is 0, highest 255 [0x9]
     FPState*       _fpstate;    // Thread FP state [0xa]
-    uint8_t        _prio; // Thread priority - lowest is 0, highest 255 [0xc]
     // End of fixed offsets.
 
     const void* _waitob;        // Object thread is blocked on, if any
@@ -216,6 +216,7 @@ public:
     static_assert(offsetof(Thread, _name) == sizeof(void*));
     static_assert(offsetof(Thread, _state) == sizeof(void*)*2);
     static_assert(offsetof(Thread, _prio) == sizeof(void*)*2 + 1);
+    static_assert(offsetof(Thread, _fpstate) == sizeof(void*)*2 + 4);
 }
 
 extern Thread* _main_thread;

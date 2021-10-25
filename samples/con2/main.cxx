@@ -34,7 +34,7 @@ void logDateTime() {
 }
 
 int main() {
-    EnableFP();
+    Thread::EnableFP();
 
 #ifdef ENABLE_PANEL
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
