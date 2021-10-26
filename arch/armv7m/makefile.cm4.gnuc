@@ -1,7 +1,7 @@
 # gcc settings for Cortex-M4
 
 CFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
-       -mthumb -Wa,-mimplicit-it=always
+       -mthumb -Wa,-mimplicit-it=always -march=armv7e-m+vfpv4-sp-d16
 
 AFLAGS += -mcpu=cortex-m4 -mapcs-32 -mimplicit-it=thumb -mthumb
 
