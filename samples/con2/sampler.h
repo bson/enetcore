@@ -32,7 +32,8 @@ public:
     uint16_t Overruns() const { return _ovr_count; }
 
     uint32_t GetSample() const {
-        return _sum;
+        //return _sum;
+        return _samples.Empty() ? 4095 : _samples.Front();
     }
 
     // * implements Adc::AdcComplete

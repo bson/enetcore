@@ -27,7 +27,7 @@ static void logDateTime() {
 
     const int temp = _tsense.Temp() * 100.0f;
 
-    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d  Tsense: %d.%02u %u (%d)",
+    DMSG("%s %04d-%02d-%02d %02d:%02d:%02d  Tsense: %d.%02uF %u (%d)",
          days[now.dow-1],
          now.year,
          now.month,
@@ -48,6 +48,7 @@ int main() {
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 
+    _tsense.SetUnit(_tsense.Unit::F);
     _tsense.Run(8);
 
     DMSG("Main: blinking lights");
