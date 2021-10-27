@@ -11,7 +11,7 @@ String FixedPoint<T, FBITS, T2>::ToString() const {
     *p++ = 'd';
     *p++ = '.';
     T ip = Int();
-    auto x = *this;
+    FixedPoint x = *this;
     x -= ip;
     do {
         x *= 10;
