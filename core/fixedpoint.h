@@ -69,7 +69,7 @@ public:
     }
 
     FixedPoint ceil() const {
-        return _v != Int() ? FixedPoint(Int() + 1) : floor();
+        return _v != Int() ? Int() + 1 : floor();
     }
 
     bool operator==(const FixedPoint& rhs) const {
@@ -84,7 +84,20 @@ public:
         return _v > rhs._v;
     }
 
+    operator bool() const {
+        return _v != 0;
+    }
+
     String ToString() const;
 };
+
+typedef FixedPoint<uint16_t, 14, uint32_t> Q2_14;
+typedef FixedPoint<uint16_t, 12, uint32_t> Q4_12;
+typedef FixedPoint<uint16_t, 10, uint32_t> Q6_10;
+typedef FixedPoint<uint16_t, 8, uint32_t> Q8_8;
+
+typedef FixedPoint<uint32_t, 28, uint64_t> Q4_28;
+typedef FixedPoint<uint32_t, 24, uint64_t> Q8_24;
+typedef FixedPoint<uint32_t, 20, uint64_t> Q12_20;
 
 #endif // __FIXEDPOINT_H__
