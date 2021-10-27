@@ -36,7 +36,7 @@ static void logDateTime() {
          now.min,
          now.sec,
          temp/100, abs(temp) % 100,
-         _tsense.Value()/(TSENSE_NSAMPLES),
+         _tsense.Value(),
          _tsense.Count());
 }
 

@@ -45,13 +45,15 @@ private:
     // R = 15k
     // R0 = 1k
     // B  = 3950
+    // FS is a little shy of actual 12 bit max
 
     enum {
         T0   = 25,
         B    = 3950,
         RT0  = 15000,
         R0   = 1000,
-        S_FS = (1 << 12) - 1    // Full scale sample value
+        C_mW = 1,               // Self-heating mW/K
+        S_FS = (1 << 12) - 1 - 160    // Full scale sample value
     };
 
 public:
@@ -103,38 +105,56 @@ public:
 
 private:
     void recalcTemp() {
-        float s;
-        {
-            Thread::IPL G(IPL_ADC);
-            //s = float(Value()) / float(TSENSE_NSAMPLES);
-            s = float(Value());
-        }
         // In a divider with a constant R0 on top and the thermistor resistance R on the
         // bottom half,
-        //     Vout = Vin (R0/(R + R0))
+        //     Vout = Vin (R/(R + R0))
         // =>
-        //     R = R0 ((Vin - Vout)/Vout)
-        //     R = R0 ((s - FS))/s)
+        //     R = R0 Vout/(Vin - Vout)
+        //     R = R0 s/(FS - s)
         //
         // with a thermistor resistance RT0 at T0,
         //
-        //     B = Log[(R/RT0)/(1/T–1/T0)]
+        //     B = Log[(R/RT0)]/(1/T–1/T0)
         //
-        // Substituting R from above and solving for T gives:
+        // Solving for T gives:
         //
-        // =>  T = (B T0)/(B + T0 Log[(R0 (FS - s))/(RT0 s)])
+        // =>  T = 1/(log(R/RT0)/B + 1/T0)
         //
         // T0 and T are in Kelvin.
         // s is the sample, FS the full scale sample value.
         //
+        const float s = float(Value());
         const float t0 = T0 + 273.15f;
         const float b = B;
         const float bt0 = B * T0;
         const float r0 = R0;
         const float rt0 = RT0;
-        const float fs = S_FS;
+        const float fs = S_FS * TSENSE_NSAMPLES;
 
-        const float tempk = bt0/(b + t0 * logf((r0 * (fs - s))/(rt0 * s)));
+        const float r = r0*s/(fs-s);
+        const float t = 1.0f/(logf(r/rt0)/b + 1.0f/t0);
+
+        // Self-heating adjustment.  The thermistor heats by the power dissipated from
+        // the current through it.  The parameter C is W/K.
+        //     P = C(T - T0)
+        // =>
+        //     T = (P + C T0)/C
+        //     P = U^2/R
+        // =>
+        //     T = (U^2 / (R0 s / (FS - s)) + C T0) / C
+        //
+        // U is the voltage across R:
+        //     U = Vout
+        //     U = Vin * R/(R + R0)
+        // =>
+        //     U = Vin s / fs
+        //
+        const float c = float(C_mW) / 1000.0f;
+        const float u = 3.3 * s / fs;
+        const float tadj = (u * u / (r0 * s / (fs - s)) + c * t0) / c - t0;
+
+        const float tempk = t - tadj;
+
         switch (_unit) {
         case Unit::C:
             _temp = tempk - 273.15f;
