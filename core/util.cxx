@@ -32,7 +32,6 @@ int ParseHexDigit(int c)
 }
 
 
-
 void FormatNumber(Vector<uchar>& dest, uint64_t val, uint flags, uint radix, uint digits)
 {
 	assert_bounds(radix <= 16);

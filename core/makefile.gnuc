@@ -8,7 +8,7 @@ CFLAGS += -I$(COREDIR)
 CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
 	mem.cxx malloc.cxx freelist.cxx util.cxx arc4.cxx sha1.cxx		\
 	time.cxx lookup3.cxx pstring.cxx hashtable.cxx thread.cxx		\
-	mutex.cxx init.cxx netaddr.cxx usbtmc.cxx                       \
+	fixedpoint.cxx mutex.cxx init.cxx netaddr.cxx usbtmc.cxx		\
     network.cxx dhcp.cxx ip.cxx udp.cxx dns.cxx                     \
     sdcard.cxx fat.cxx
 

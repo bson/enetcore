@@ -52,7 +52,7 @@ private:
         B    = 3950,
         RT0  = 15000,
         R0   = 1000,
-        C_mW = 1,               // Self-heating mW/K
+        C_mW = 2,                  // Self-heating mW/K
         S_FS = (1 << 12) - 1 - 160    // Full scale sample value
     };
 

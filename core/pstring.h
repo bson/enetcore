@@ -177,6 +177,7 @@ public:
 
 	// Append
 	String& operator+=(const String& arg);
+    String& operator+=(char arg);
 
 	// For OContainer<String>
 	static bool Order(const void* a, const void* b);
