@@ -29,7 +29,7 @@ LFLAGS=-Map $(ODIR)/image.map
 #SRCS += main.cxx usb.cxx ui.cxx
 SRCS += main.cxx
 
-SRCS += buildinfo.cxx
+SRCS += buildinfo.cxx sounds.cxx
 
 # UI
 #SRCS += uidefs.cxx
@@ -86,6 +86,17 @@ $(ODIR)/buildinfo.cxx:
 	@echo "extern const char _build_user[] = \""${LOGNAME}"@"`hostname`"\";" >>$@
 
 $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
+	@mkdir -p $(ODIR_TREE)
+	@echo $<
+	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
+	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
+
+$(ODIR)/sounds.cxx:
+	@echo Generating $@
+	@mkdir -p $(ODIR_TREE)
+	@python3 $(ENETCORE)/audio/convert.py $(ENETCORE)/audio/bell.wav >$@
+
+$(ODIR)/sounds.o: $(ODIR)/sounds.cxx
 	@mkdir -p $(ODIR_TREE)
 	@echo $<
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)

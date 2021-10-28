@@ -1,9 +1,10 @@
 // Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "util.h"
+#include "core/enetkit.h"
+#include "core/util.h"
 #include "tsense.h"
+#include "audio/audio.h"
 
 TSense _tsense;
 
@@ -12,6 +13,9 @@ extern PinOutput<Gpio::Pin> _led;
 #ifdef ENABLE_PANEL
 Thread* _ui_thread;
 #endif
+
+extern Sound sound_bell;
+
 
 template <typename T>
 static T abs(const T& a) {
