@@ -53,8 +53,8 @@ public:
     }
 
     enum Buffer {
-        ENABLE = BIT(BOFF1),
-        DISABLE = 0
+        DISABLE = 0,
+        ENABLE = 1
     };
 
     enum Trigger {
@@ -68,21 +68,21 @@ public:
         SWTRIG    = 0b111
     };
 
-    void Output(Buffer b, void* data, uint32_t len, Trigger t,
+    void Output(const uint16_t* data, uint32_t nsamples, Trigger t,
                 Stm32Dma& dma, uint8_t stream, uint8_t dma_ch,
                 Stm32Dma::Priority prio) {
 
-        reg(Register::CR) = (uint32_t)b | BIT(EN1) | BIT(TEN1) | ((uint32_t)t << TSEL1)
+        reg(Register::CR) = BIT(BOFF1) | BIT(EN1) | BIT(TEN1) | ((uint32_t)t << TSEL1)
             | BIT(DMAEN1);
 
-        _tx_size = len/2;
+        _tx_size = nsamples;
         _tx_stream = stream;
         _tx_prio = prio;
         _tx_word_size = Stm32Dma::WordSize::WORD16;
         _tx_active = false;
         _ipl = IPL_DAC;
             
-        dma.PeripheralTx(this, data, len/2);
+        dma.PeripheralTx(this, data, nsamples);
     }
 
 private:

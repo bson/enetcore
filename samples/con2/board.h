@@ -50,6 +50,9 @@ extern Gpio _gpio_e;
 //extern GpioIntr _gpio0_intr;
 //extern GpioIntr _gpio2_intr;
 
+extern Dma _dma1;
+extern Dma _dma2;
+extern Timer16 _tim6;
 extern Dac _dac;
 
 // Board peripherals

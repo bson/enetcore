@@ -38,6 +38,7 @@ PinOutput<Gpio::Pin> _led; // Green LED
 
 Clock _clock(BASE_TIM5, APB1_TIMERCLK);
 SysTimer _systimer;
+Timer16 _tim6(BASE_TIM6, APB1_TIMERCLK);
 
 static const uint16_t _dma1_irqs[] = {
     INTR_DMA1_Stream0, INTR_DMA1_Stream1, INTR_DMA1_Stream2, INTR_DMA1_Stream3,
@@ -277,22 +278,23 @@ void hwinit() {
 
     // Power on/off peripherals
     ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                               | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
+                          | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     ClockTree::EnableAHB2(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
     ClockTree::EnableAHB3(AHB3_FSMCEN);
 #endif
     ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
-                               | APB1_TIM3EN);
+                          | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
     ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN);
 
     ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                                 | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
+                            | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     ClockTree::EnableAHB2LP(AHB2_RNGEN);
 #ifdef ENABLE_PANEL
     ClockTree::EnableAHB3LP(AHB3_FSMCEN);
 #endif
-    ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN);
+    ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
+                            | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
     ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
 
     // Configure pins.  Don't do this before powering on GPIO.
@@ -383,6 +385,7 @@ void hwinit() {
     // Stop timers while stopped in a breakpoint
     Debug::FreezeAPB1(Debug::APB1_TIM5_STOP);
     Debug::FreezeAPB1(Debug::APB1_TIM3_STOP);
+    Debug::FreezeAPB1(Debug::APB1_TIM6_STOP);
 
     _usart3.Write("\r\nWelcome to Enetcore\r\n");
     _usart3.SyncDrain();

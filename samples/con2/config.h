@@ -124,7 +124,13 @@ enum {
     // DMA1
     DMA_STREAM_USART3  = 3,
     DMA_CHANNEL_USART3 = 4,
+
+    // DAC
+    DMA_STREAM_DAC = 5,
+    DMA_CHANNEL_DAC = 7
+
 #define DMA_PRIORITY_USART3  Stm32Dma::Priority::MEDIUM
+#define DMA_PRIORITY_DAC Stm32Dma::Priority::HIGH
 };
 
 enum {

@@ -16,14 +16,21 @@ extern Dac _dac;
 Thread* _ui_thread;
 #endif
 
-extern Sound sound_bell;
-
+namespace sound {
+extern Sound bell;
+}
 
 template <typename T>
 static T abs(const T& a) {
     return a < (T)0 ? -a : a;
 }
 
+
+static void play(const Sound& sound) {
+    _tim6.RunTimerFreq(sound.samplerate, sound.samplerate*4, false, true);
+    _dac.Output(sound.samples, sound.nsamples, Dac::Trigger::TIM6_TRGO,
+                _dma1, DMA_STREAM_DAC, DMA_CHANNEL_DAC, DMA_PRIORITY_DAC);
+}
 
 static void logDateTime() {
     const auto now = Rtc::GetDateTime();
@@ -56,6 +63,8 @@ int main() {
 
     _tsense.SetUnit(_tsense.Unit::F);
     _tsense.Run(8);
+
+    play(sound::bell);
 
     DMSG("Main: blinking lights");
 

@@ -25,7 +25,7 @@ def output(file):
     atten = 0.6/3.3*((1 << BITS)/maxval)
 
     filename = (file.split("/")[-1]).split('.',1)[0]
-    print("\nconst Sound sound_%s = {" % filename)
+    print("\nextern const Sound %s = {" % filename)
     print("    %u, 2, %u, {" % (len(data1), RATE))
     n = 0
     m = 0
@@ -50,7 +50,9 @@ def output(file):
     print("};")
 
         
-print("#include \"audio/audio.h\"")
+print("#include \"audio/audio.h\"\n\nnamespace sound {")
 
 for arg in sys.argv[1:]:
     output(arg)
+
+print("} // ns sound")

@@ -54,7 +54,7 @@ all: $(ODIR)/image
 etags: TAGS
 
 TAGS:
-	(for dir in . $(ARCH) $(SOCDIR) $(COREDIR) $(ENETCORE)/$(TOOLSET) $(UIDIR); do                        \
+	(for dir in . $(ARCH) $(SOCDIR) $(COREDIR) $(ENETCORE)/$(TOOLSET) $(UIDIR) $(ENETCORE)/audio; do                        \
 	  find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
     done) | etags --language=c++ --declarations -
 
@@ -91,13 +91,12 @@ $(ODIR)/buildinfo.o: $(ODIR)/buildinfo.cxx
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
-$(ODIR)/sounds.cxx:
+$(ODIR)/sounds.cxx: $(ENETCORE)/audio/bell.wav
 	@echo Generating $@
 	@mkdir -p $(ODIR_TREE)
 	@python3 $(ENETCORE)/audio/convert.py $(ENETCORE)/audio/bell.wav >$@
 
 $(ODIR)/sounds.o: $(ODIR)/sounds.cxx
-	@mkdir -p $(ODIR_TREE)
 	@echo $<
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
