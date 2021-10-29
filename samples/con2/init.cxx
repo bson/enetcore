@@ -54,6 +54,9 @@ Dma _dma2(BASE_DMA2, _dma2_irqs);
 Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3(BASE_USART3);
 Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
 
+Dac _dac(BASE_DAC);
+
+
 #ifdef ENABLE_PANEL
 Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#

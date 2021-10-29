@@ -10,6 +10,8 @@ TSense _tsense;
 
 extern PinOutput<Gpio::Pin> _led;
 
+extern Dac _dac;
+
 #ifdef ENABLE_PANEL
 Thread* _ui_thread;
 #endif

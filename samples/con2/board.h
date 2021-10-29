@@ -23,6 +23,7 @@ typedef Stm32Timer<uint32_t> Timer32;
 typedef Stm32Timer<uint16_t> Timer16;
 typedef Stm32Adc Adc;
 typedef Stm32AdcCommon AdcCommon;
+typedef Stm32Dac Dac;
 typedef Stm32Random Random;
 typedef Stm32Debug Debug;
 
@@ -48,6 +49,8 @@ extern Gpio _gpio_d;
 extern Gpio _gpio_e;
 //extern GpioIntr _gpio0_intr;
 //extern GpioIntr _gpio2_intr;
+
+extern Dac _dac;
 
 // Board peripherals
 

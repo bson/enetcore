@@ -18,6 +18,7 @@
 #include "stm32f4x/backup.h"
 #include "stm32f4x/rtc.h"
 #include "stm32f4x/adc.h"
+#include "stm32f4x/dac.h"
 
 //#include "stm32f4x/crc.h"
 //#include "stm32f4x/i2c.h"

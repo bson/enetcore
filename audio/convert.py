@@ -4,10 +4,12 @@ from scipy.io import wavfile
 import scipy.signal as sps
 import sys
 
+RATE=6300
+BITS=12
+
 def output(file):
     rate, data = wavfile.read(file)
-    new_rate = 6300
-    nsamples = round(len(data) * float(new_rate) / rate)
+    nsamples = round(len(data) * float(RATE) / rate)
     data = sps.resample(data, nsamples)
     
     # Convert to mono by averaging channels
@@ -20,11 +22,11 @@ def output(file):
         data1.append(val)
 
     # Output max 0.6V (1.2V P-P)
-    atten = 0.6/3.3*(65535.0/maxval)
+    atten = 0.6/3.3*((1 << BITS)/maxval)
 
     filename = (file.split("/")[-1]).split('.',1)[0]
     print("\nconst Sound sound_%s = {" % filename)
-    print("    %u, 2, %u, {" % (len(data1), new_rate))
+    print("    %u, 2, %u, {" % (len(data1), RATE))
     n = 0
     m = 0
     str = ""
@@ -32,7 +34,7 @@ def output(file):
         if n == 0:
             str += "        "
 
-        str += "0x%04x" % (int)((sample*atten) + 32768)
+        str += "0x%04x" % (int)((sample*atten) + (1 << (BITS-1)))
 
         m += 1
         if m < len(data1):

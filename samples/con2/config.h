@@ -86,6 +86,7 @@ enum {
     IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_MIN  - 3, // DMA (generic)
     IPL_ADC      = IPL_MIN  - 3, // ADC
+    IPL_DAC      = IPL_CRIT + 1, // DAC
 };
 #else
 // Non-nested interrupt priorities.  Except HW faults.
@@ -114,6 +115,7 @@ enum {
     IPL_MISR     = IPL_SOFT,  // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_SOFT,  // DMA
     IPL_ADC      = IPL_SOFT,  // ADC
+    IPL_DAC      = IPL_SOFT,  // DAC
 };
 #endif
 
