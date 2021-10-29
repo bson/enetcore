@@ -62,9 +62,9 @@ int main() {
     _tsense.SetUnit(_tsense.Unit::F);
     _tsense.Run(8);
 
-    DMSG("Main: blinking lights");
-
     play(sound::bell);
+
+    DMSG("Main: blinking lights");
 
     Time wake = Time::Now();
     for (;;) {

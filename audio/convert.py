@@ -7,7 +7,7 @@ import sys
 RATE  = 6300
 BITS  = 12
 VDD   = 3.3
-VAVG  = 3                       # Target average
+VAVG  = 0.3                       # Target average
 
 FS    = 2**BITS
 
