@@ -1,8 +1,10 @@
 #ifndef __DAC_H__
 #define __DAC_H__
 
+// Simplified DAC interface. Uses only channel 1.
+
 class Stm32Dac: public Stm32Dma::Peripheral {
-    enum Register {
+    enum class Register {
         CR = 0x00,
         SWTRIGR = 0x04,
         DHR12R1 = 0x08,
@@ -49,34 +51,34 @@ public:
     Stm32Dac(uint32_t base)
         : Peripheral(base + (uint32_t)Register::DHR12R1),
           _base(base) {
+    }
+
+    void Enable() {
         reg(Register::CR) |= BIT(EN1);
     }
 
-    enum Buffer {
-        DISABLE = 0,
-        ENABLE = 1
-    };
-
-    enum Trigger {
-        TIM6_TRGO = 0b000,
-        TIM8_TRGO = 0b001,
-        TIM7_TRGO = 0b010,
-        TIM5_TRGO = 0b011,
-        TIM2_TRGO = 0b100,
-        TIM4_TRGO = 0b101,
-        EXTI9     = 0b110,
-        SWTRIG    = 0b111
+    enum class Trigger {
+        TIM6_TRGO = 0b000 << TSEL1,
+        TIM8_TRGO = 0b001 << TSEL1,
+        TIM7_TRGO = 0b010 << TSEL1,
+        TIM5_TRGO = 0b011 << TSEL1,
+        TIM2_TRGO = 0b100 << TSEL1,
+        TIM4_TRGO = 0b101 << TSEL1,
+        EXTI9     = 0b110 << TSEL1,
+        SWTRIG    = 0b111 << TSEL1
     };
 
     void Output(const uint16_t* data, uint32_t nsamples, Trigger t,
                 Stm32Dma& dma, uint8_t stream, uint8_t dma_ch,
                 Stm32Dma::Priority prio) {
-
-        reg(Register::CR) = BIT(BOFF1) | BIT(EN1) | BIT(TEN1) | ((uint32_t)t << TSEL1)
-            | BIT(DMAEN1);
+        volatile uint32_t& cr = reg(Register::CR);
+        cr &= ~BIT(EN1);
+        cr = /* BIT(BOFF1)  |*/ BIT(TEN1) | (uint32_t)t | BIT(DMAEN1);
+        cr |=  BIT(EN1);
 
         _tx_size = nsamples;
         _tx_stream = stream;
+        _tx_ch = dma_ch;
         _tx_prio = prio;
         _tx_word_size = Stm32Dma::WordSize::WORD16;
         _tx_active = false;

@@ -236,7 +236,7 @@ public:
             | ((uint32_t)p->_tx_prio << PL)
             | ((uint32_t)p->_tx_word_size << MSIZE)
             | ((uint32_t)p->_tx_word_size << PSIZE)
-            | (1 << DIR)
+            | (0b01 << DIR)
             | BIT(MINC) | BIT(TCIE);
 
         s_fcr(p->_tx_stream) = BIT(DMDIS);

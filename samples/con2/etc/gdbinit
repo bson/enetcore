@@ -46,7 +46,7 @@ define r
 monitor reset halt
 end
 
-# Reset image
+# Reset/refresh image
 define f
 file build_debug/image
 end
@@ -84,7 +84,6 @@ disassemble
 end
 
 
-
 target extended-remote localhost:3333
 
 set remote hardware-breakpoint-limit 6
@@ -92,7 +91,7 @@ set remote hardware-watchpoint-limit 4
 
 set mem inaccessible-by-default off
 
-monitor reset halt
+monitor halt
 
 set $pc = 0x400
 

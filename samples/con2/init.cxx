@@ -377,6 +377,8 @@ void hwinit() {
     // Turn on proper assert handling
     _assert_stop = false;
 
+    _dac.Enable();
+
 	_usart3.InitAsync(115200, _usart3.StopBits::SB_1, APB1_CLK);
 	_usart3.SetInterrupts(true);
 

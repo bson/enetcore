@@ -4,8 +4,12 @@ from scipy.io import wavfile
 import scipy.signal as sps
 import sys
 
-RATE=6300
-BITS=12
+RATE  = 6300
+BITS  = 12
+VDD   = 3.3
+VAVG  = 3                       # Target average
+
+FS    = 2**BITS
 
 def output(file):
     rate, data = wavfile.read(file)
@@ -14,15 +18,16 @@ def output(file):
     
     # Convert to mono by averaging channels
     data1 = []
-    maxval = 0;
+    sum = 0
     for pair in data:
         val = (pair[0] + pair[1])/2
-        if abs(val) > maxval:
-            maxval = val
+        sum += abs(val)
         data1.append(val)
 
-    # Output max 0.6V (1.2V P-P)
-    atten = 0.6/3.3*((1 << BITS)/maxval)
+    avg = sum/len(data)
+
+    # Scaling factor to create
+    atten = VAVG/VDD * (FS/2)/avg
 
     filename = (file.split("/")[-1]).split('.',1)[0]
     print("\nextern const Sound %s = {" % filename)
@@ -34,7 +39,11 @@ def output(file):
         if n == 0:
             str += "        "
 
-        str += "0x%04x" % (int)((sample*atten) + (1 << (BITS-1)))
+        s = sample * atten + (FS/2)
+        s = min(s, FS-1)
+        s = max(s, 0)
+
+        str += "0x%04x" % (int)(s)
 
         m += 1
         if m < len(data1):

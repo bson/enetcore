@@ -26,11 +26,11 @@ public:
         APB1_TIM2_STOP = BIT(0),
 
         // DBGMCU_APB2_FZ
-        DBG_TIM11_STOP = BIT(18),
-        DBG_TIM10_STOP = BIT(17),
-        DBG_TIM9_STOP = BIT(16),
-        APB2_TIM8_STOP = BIT(1),
-        APB2_TIM11_STOP = BIT(0)
+        APB2_TIM11_STOP = BIT(18),
+        APB2_TIM10_STOP = BIT(17),
+        APB2_TIM9_STOP  = BIT(16),
+        APB2_TIM8_STOP  = BIT(1),
+        APB2_TIM1_STOP  = BIT(0)
     };
         
     template <typename T>

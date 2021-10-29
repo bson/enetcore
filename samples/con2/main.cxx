@@ -10,8 +10,6 @@ TSense _tsense;
 
 extern PinOutput<Gpio::Pin> _led;
 
-extern Dac _dac;
-
 #ifdef ENABLE_PANEL
 Thread* _ui_thread;
 #endif
@@ -27,7 +25,7 @@ static T abs(const T& a) {
 
 
 static void play(const Sound& sound) {
-    _tim6.RunTimerFreq(sound.samplerate, sound.samplerate*4, false, true);
+    _tim6.RunTimerFreq(sound.samplerate, APB1_TIMERCLK/0x10000, false, true);
     _dac.Output(sound.samples, sound.nsamples, Dac::Trigger::TIM6_TRGO,
                 _dma1, DMA_STREAM_DAC, DMA_CHANNEL_DAC, DMA_PRIORITY_DAC);
 }
@@ -64,9 +62,9 @@ int main() {
     _tsense.SetUnit(_tsense.Unit::F);
     _tsense.Run(8);
 
-    play(sound::bell);
-
     DMSG("Main: blinking lights");
+
+    play(sound::bell);
 
     Time wake = Time::Now();
     for (;;) {
