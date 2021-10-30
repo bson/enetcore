@@ -22,8 +22,7 @@ template <typename Accessor>
 [[__optimize]]
 void Panel<Accessor>::Init() {
 
-    _CPORT.MakeOutputs(MASK_CTL);
-    _DPORT.MakeOutputs(0xff); // Output by default
+    Accessor::Init();
 
     enum {
         XT_IN = 10000000ULL,    // 10MHz crystal
@@ -69,7 +68,7 @@ void Panel<Accessor>::Init() {
 
     wcommand8(CMD_SET_PLL, 0);
     static const uint8_t pll[] = { PLL_M - 1, PLL_N - 1, 4 };
-    wcommand_barr(CMD_SET_PLL_MN, 3, pll);
+    wcommand_barr(CMD_SET_PLL_MN, pll, sizeof pll);
 
     wcommand8(CMD_SET_PLL, 0x01);   // Enable PLL
     Thread::Delay(100);
@@ -103,7 +102,7 @@ void Panel<Accessor>::Init() {
         const uint8_t cmd = *p++;
         const uint8_t n   = *p++;
         if (n) {
-            wcommand_barr(cmd, n, p);
+            wcommand_barr(cmd, p, n);
             p += n;
         } else {
             wcommand(cmd);
@@ -126,35 +125,12 @@ void Panel<Accessor>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
 
     Accessor::StartCommand(CMD_WRITE_MEMORY_START);
 
-#if defined(CORTEX_M)
-    asm volatile ("                                                  \
-    1:                                                               \
-       str    %7, [%0];    /* _CPORT.CLR = MASK_WR */                \
-       str    %3, [%2];    /* _DPORT.PIN = _r */                     \
-       str    %7, [%1];    /* _CPORT.SET = MASK_WR */                \
-       str    %7, [%0];    /* _CPORT.CLR = MASK_WR */                \
-       str    %4, [%2];    /* _DPORT.PIN = _g */                     \
-       str    %7, [%1];    /* _CPORT.SET = MASK_WR */                \
-       str    %7, [%0];    /* _CPORT.CLR = MASK_WR */                \
-       str    %5, [%2];    /* _DPORT.PIN = _b */                     \
-       str    %7, [%1];    /* _CPORT.SET = MASK_WR */                \
-       subs   %6, %6, #1;                                            \
-       bne    1b                                                     \
-        " : :     "r"(_CPORT.RegClr()),
-                  "r"(_CPORT.RegSet()),
-                  "r"(_DPORT.RegPin()),
-                  "r"(_r),
-                  "r"(_g),
-                  "r"(_b),
-                  "r"(w * h),
-                  "r"(MASK_WR) : );
-#else
     for (uint n = 0; n < w * h; ++n) {
         Accessor::Write(_r);
         Accessor::Write(_g);
         Accessor::Write(_b);
     }
-#endif
+
     Accessor::EndCommand();
     wcommand(CMD_NOP);
 }

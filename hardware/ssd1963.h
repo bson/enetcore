@@ -168,7 +168,7 @@ public:
                           uint8_t brite = 0x80,
                           uint8_t sat   = 0x40) {
         uint8_t v[4] = { cont, brite, sat, 1 };
-        wcommand_barr(CMD_SET_POST_PROC, 4, v);
+        wcommand_barr(CMD_SET_POST_PROC, v, sizeof v);
     }
 
     static void TestPattern();
@@ -187,7 +187,7 @@ private:
         Accessor::EndCommand();
     }
     // Yet another variation: command with an array of bytes used for parameters
-    static void wcommand_barr(uint8_t cmd, uint8_t nbytes, const uint8_t* d) {
+    static void wcommand_barr(uint8_t cmd, const uint8_t* d, uint8_t nbytes) {
         Accessor::StartCommand(cmd);
         while (nbytes--)
             Accessor::Write(*d++);
