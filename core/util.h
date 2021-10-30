@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include "arc4.h"
+#include "core/arc4.h"
 
 
 // These are higher-order utility functions

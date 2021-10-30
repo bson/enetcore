@@ -36,8 +36,8 @@ mixing with 12*3 instructions on 3 integers than you can with 3 instructions
 on 1 byte), but shoehorning those bytes into integers efficiently is messy.
 -------------------------------------------------------------------------------
 */
-#include "enetkit.h"
-#include "lookup3.h"
+#include "core/enetkit.h"
+#include "core/lookup3.h"
 
 namespace Lookup3 {
 

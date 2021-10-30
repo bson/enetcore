@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __SDCARD_H__
 #define __SDCARD_H__
 
-#include "mutex.h"
-#include "blockdev.h"
+#include "core/mutex.h"
+#include "core/blockdev.h"
 
 
 class SDCard: public BlockDev {

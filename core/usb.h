@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef _USB_H_
@@ -6,7 +6,7 @@
 
 // Common USB definitions
 
-#include "bits.h"
+#include "core/bits.h"
 
 namespace usb {
 

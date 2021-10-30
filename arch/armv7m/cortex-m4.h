@@ -4,8 +4,8 @@
 #ifndef _CORTEX_M4_H_
 #define _CORTEX_M4_H_
 
-#include "defs.h"
-#include "bits.h"
+#include "arch/armv7m/defs.h"
+#include "core/bits.h"
 
 // Various constants
 enum {

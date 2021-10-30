@@ -2,9 +2,10 @@
 // See LICENSE for details.
 
 #include "params.h"
-#include "enetkit.h"
-#include "stm32f4x/timer.h"
-#include "thread.h"
+#include "core/enetkit.h"
+#include "soc/stm32f4x/timer.h"
+#include "core/thread.h"
+
 
 template<typename Counter>
 void Stm32Timer<Counter>::Interrupt(void* token) {

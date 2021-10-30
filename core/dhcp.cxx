@@ -3,12 +3,12 @@
 
 #ifdef ENABLE_IP
 
-#include "enetkit.h"
-#include "dhcp.h"
-#include "ip.h"
-#include "udp.h"
-#include "util.h"
-#include "dns.h"
+#include "core/enetkit.h"
+#include "core/dhcp.h"
+#include "core/ip.h"
+#include "core/udp.h"
+#include "core/util.h"
+#include "core/dns.h"
 
 
 Dhcp _dhcp0(_eth0, _ip0, _dns0);

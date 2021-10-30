@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __TRACE_H__
 #define __TRACE_H__
 
-#include "util.h"
+#include "core/util.h"
 
 
 // Console message

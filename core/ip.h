@@ -4,13 +4,13 @@
 #ifndef __IP_H__
 #define __IP_H__
 
-#include "mutex.h"
+#include "core/mutex.h"
 
 
 // Checksum
 uint16_t ipcksum(const uint16_t* block, uint len, uint32_t sum = 0);
 
-#include "icmp.h"
+#include "core/icmp.h"
 
 
 // IP protocols of interest

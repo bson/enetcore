@@ -1,12 +1,13 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef  _USBTMC_H_
 #define _USBTMC_H_
 
-#include "enetcore.h"
+#include "core/enetcore.h"
 #include "board.h"
-#include "usb.h"
+#include "core/usb.h"
+
 
 // Simple USBTMC implementation, sitting on top of the simple USB device.
 // Implements the usb488 subclass

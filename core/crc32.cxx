@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 // Derived from CRC32 algorithm in RFC1952
@@ -6,8 +6,8 @@
 
 #ifndef HAVE_HW_CRC
 
-#include "enetkit.h"
-#include "crc32.h"
+#include "core/enetkit.h"
+#include "core/crc32.h"
 
 
 // Table of CRCs of all 8-bit messages.

@@ -1,11 +1,11 @@
 #ifdef _INLINE_CXX_
 
 #include <stdint.h>
-#include "enetcore.h"
-#include "ssd1963.h"
-#include "font.h"
-#include "font/runes.h"
-#include "hsd04319w1_a.h"
+#include "core/enetcore.h"
+#include "hardware/ssd1963.h"
+#include "ui/font/font.h"
+#include "ui/font/runes.h"
+#include "hardware/hsd04319w1_a.h"
 
 namespace ssd1963 {
 

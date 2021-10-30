@@ -1,5 +1,8 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __BUTTON_H__
+#define __BUTTON_H__
 
 class Button: public Element {
 public:
@@ -65,3 +68,6 @@ private:
     Button(const Button&);
     Button& operator=(const Button&);
 };
+
+
+#endif // __BUTTON_H__

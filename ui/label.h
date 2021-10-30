@@ -1,5 +1,9 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __LABEL_H__
+#define __LABEL_H__
+
 
 class Label: public Element {
 public:
@@ -63,3 +67,5 @@ private:
     Label(const Label&);
     Label& operator=(const Label&);
 };
+
+#endif // __LABEL_H__

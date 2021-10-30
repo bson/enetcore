@@ -2,7 +2,7 @@
 #define  _TLK110_H_
 
 #include <stdint.h>
-#include "enet_phy.h"
+#include "core/enet_phy.h"
 
 class Ethernet;
 

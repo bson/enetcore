@@ -4,13 +4,13 @@
 #ifndef __DHCP_H__
 #define __DHCP_H__
 
-#include "mutex.h"
-#include "network.h"
-#include "time.h"
-#include "netaddr.h"
-#include "ip.h"
-#include "udp.h"
-#include "dns.h"
+#include "core/mutex.h"
+#include "core/network.h"
+#include "core/time.h"
+#include "core/netaddr.h"
+#include "core/ip.h"
+#include "core/udp.h"
+#include "core/dns.h"
 
 
 struct Dhcp {

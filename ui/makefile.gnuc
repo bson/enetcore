@@ -6,7 +6,6 @@
 #include $(BOARD)/makefile.$(TOOLSET)
 
 UIDIR=$(ENETCORE)/ui
-CFLAGS += -I$(UIDIR)
 
 UI_SRCS = ui.cxx
 

@@ -1,7 +1,7 @@
 #ifndef __STM32_DEBUG_H__
 #define __STM32_DEBUG_H__
 
-#include "bits.h"
+#include "core/bits.h"
 
 class Stm32Debug {
 public:

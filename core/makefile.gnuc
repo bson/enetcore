@@ -3,7 +3,6 @@
 # See LICENSE for details.
 
 COREDIR=$(ENETCORE)/core
-CFLAGS += -I$(COREDIR)
 
 CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
 	mem.cxx malloc.cxx freelist.cxx util.cxx arc4.cxx sha1.cxx		\

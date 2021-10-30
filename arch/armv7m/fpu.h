@@ -1,6 +1,9 @@
 #ifndef __FPU_H__
 #define __FPU_H__
 
+#include "core/bits.h"
+
+
 extern volatile uint32_t CPACR;
 extern volatile uint32_t FPCCR;
 

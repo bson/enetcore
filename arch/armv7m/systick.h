@@ -5,7 +5,7 @@
 #define _SYSTICK_H_
 
 #include "compiler.h"
-#include "bits.h"
+#include "core/bits.h"
 
 // SYSTICK core timer used by scheduler.
 // Ticks at CCLK for up to (2^32-1)/CCLK.  At 120MHz, that's 35s.

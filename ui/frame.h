@@ -1,5 +1,9 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __FRAME_H__
+#define __FRAME_H__
+
 
 class Frame: public Element {
 public:
@@ -31,3 +35,6 @@ public:
         p.Rect(_pos._x, _pos._y, _config->_size._w, _config->_size._h, _config->_width);
     }
 };
+
+
+#endif // __FRAME_H__

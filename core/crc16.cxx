@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef GENTABLE
@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include <inttypes.h>
 typedef unsigned int uint;
-#include "crc16.h"
+#include "core/crc16.h"
 #else
-#include "enetkit.h"
-#include "crc16.h"
+#include "core/enetkit.h"
+#include "core/crc16.h"
 #endif // GENTABLE
 
 #ifndef HAVE_HW_CRC

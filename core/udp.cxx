@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef ENABLE_IP
 
-#include "enetcore.h"
-#include "udp.h"
-#include "ip.h"
+#include "core/enetcore.h"
+#include "core/udp.h"
+#include "core/ip.h"
 
 
 Udp _udp0(_ip0);

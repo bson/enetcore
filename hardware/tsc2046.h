@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef _TSC2046_H_
 #define _TSC2046_H_
 
-#include "mutex.h"
+#include "core/mutex.h"
 
 namespace tsc2046 {
 

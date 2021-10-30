@@ -4,8 +4,8 @@
 #ifndef __DNS_H__
 #define __DNS_H__
 
-#include "network.h"
-#include "udp.h"
+#include "core/network.h"
+#include "core/udp.h"
 
 
 enum { DNS_PORT = 123 };

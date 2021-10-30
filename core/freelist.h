@@ -4,9 +4,6 @@
 #ifndef __FREELIST_H__
 #define __FREELIST_H__
 
-// #include "mutex.h"
-
-
 // Free list
 // Use to reduce heap thrashing for short-lived objects.
 // Don't use for long-lived objects or it will become horribly fragmented;

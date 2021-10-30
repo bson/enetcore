@@ -1,11 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "util.h"
-#include "sha1.h"
-//#include "object.h"
-#include "mutex.h"
+#include "core/enetkit.h"
+#include "core/util.h"
+#include "core/sha1.h"
+#include "core/mutex.h"
 
 
 namespace Util {

@@ -1,7 +1,7 @@
 #ifndef __ADC_H__
 #define __ADC_H__
 
-#include "thread.h"
+#include "core/thread.h"
 
 // The ADC is really 3 ADCs in a single peripheral with a common
 // block.  We split them into three separate logical peripherals used

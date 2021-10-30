@@ -4,9 +4,9 @@
 #ifndef __TSENSE_H__
 #define __TSENSE_H__
 
-#include "enetkit.h"
+#include "core/enetkit.h"
 #include "sampler.h"
-#include "nvic.h"
+#include "arch/armv7m/nvic.h"
 #include "float.h"
 
 enum { TSENSE_NSAMPLES = 10 };

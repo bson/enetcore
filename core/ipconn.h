@@ -4,7 +4,7 @@
 #ifndef __IPCONN_H__
 #define __IPCONN_H__
 
-#include "lookup3.h"
+#include "core/lookup3.h"
 
 
 // Endpoint tuple

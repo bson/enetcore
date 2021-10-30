@@ -1,8 +1,8 @@
 #ifndef __FAT_H__
 #define __FAT_H__
 
-#include "file.h"
-#include "blockdev.h"
+#include "core/file.h"
+#include "core/blockdev.h"
 
 
 // PC partition entry

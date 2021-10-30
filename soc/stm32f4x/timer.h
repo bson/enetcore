@@ -38,7 +38,7 @@
 // Counter is the timer counter type, uint16_t or uint32_t.
 
 #include <stdint.h>
-#include "bits.h"
+#include "core/bits.h"
 
 template <typename Counter>
 class Stm32Timer {

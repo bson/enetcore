@@ -1,5 +1,8 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __VIEW_H__
+#define __VIEW_H__
 
 class View: public Element {
 public:
@@ -69,3 +72,5 @@ public:
         }
     }
 };
+
+#endif // __VIEW_H__

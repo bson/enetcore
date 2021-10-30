@@ -1,6 +1,9 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
+#ifndef __VLINE_H__
+#define __VLINE_H__
+
 class VLine: public Element {
 public:
     struct Config {
@@ -30,3 +33,5 @@ public:
         p.VLine(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
     }
 };
+
+#endif // __VLINE_H__

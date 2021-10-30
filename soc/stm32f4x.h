@@ -10,10 +10,11 @@
 
 #define HAVE_HW_CRC
 
-#include "cortex-m4.h"
-#include "arm.h"
-#include "assert.h"
-#include "bits.h"
+#include "arch/armv7m/cortex-m4.h"
+#include "arch/armv7m/arm.h"
+#include "core/assert.h"
+#include "core/bits.h"
+
 
 // Max CCLK = 168MHz
 enum { CCLK_MAX = 168000000 };

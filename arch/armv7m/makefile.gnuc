@@ -1,7 +1,5 @@
 ARCH_SRCS = nvic.cxx nvic_exc.s systick.cxx
 
-CFLAGS += -I$(ARCH)
-
 SRCS += $(addprefix $(ARCH)/,$(ARCH_SRCS))
 
 ODIR_TREE += $(ODIR)/$(ARCH)

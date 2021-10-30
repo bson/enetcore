@@ -1,9 +1,10 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "thread.h"
-#include "platform.h"
+#include "core/enetkit.h"
+#include "core/thread.h"
+#include "core/platform.h"
+
 
 // THUMB is 1 to force Thumb
 #ifdef CORTEX_M

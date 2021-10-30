@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __PSTRING_H__
 #define __PSTRING_H__
 
-#include "lookup3.h"
+#include "core/lookup3.h"
 
 #pragma GCC system_header
 

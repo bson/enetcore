@@ -1,7 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "pstring.h"
+#ifndef __INTEGER_H__
+#define __INTEGER_H__
+
+#include "core/pstring.h"
+
 
 class Integer: public Element {
 public:
@@ -63,3 +67,5 @@ public:
         Redraw();
     }
 };
+
+#endif // __INTEGER_H__

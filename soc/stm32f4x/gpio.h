@@ -1,6 +1,8 @@
 #ifndef __STM32_GPIO_H__
 #define __STM32_GPIO_H__
 
+#include "core/bits.h"
+
 class Stm32Gpio {
     enum class Register {
         GPIO_MODER    = 0x00,

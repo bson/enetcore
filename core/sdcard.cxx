@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef ENABLE_SDCARD
 
-#include "enetkit.h"
-#include "sdcard.h"
+#include "core/enetkit.h"
+#include "core/sdcard.h"
 #include "board.h"
 
 

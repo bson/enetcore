@@ -1,12 +1,13 @@
 // Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "thread.h"
-#include "util.h"
-#include "platform.h"
-#include "arm.h"
-#include "fpu.h"
+#include "core/enetkit.h"
+#include "core/thread.h"
+#include "core/util.h"
+#include "core/platform.h"
+#include "arch/armv7m/arm.h"
+#include "arch/armv7m/fpu.h"
+
 
 extern const char _build_commit[];
 extern const char _build_user[];

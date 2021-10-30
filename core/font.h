@@ -4,7 +4,7 @@
 #ifndef _FONT_H_
 #define _FONT_H_
 
-#include "enetcore.h"
+#include "core/enetcore.h"
 
 // Font: container for font-related data A font is a set of runes of a
 // uniform size, optionally with a translation table (if sparse).

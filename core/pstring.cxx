@@ -1,8 +1,8 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "util.h"
+#include "core/enetkit.h"
+#include "core/util.h"
 
 
 #ifdef STRING_FREELIST

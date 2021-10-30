@@ -1,9 +1,9 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "freelist.h"
-#include "util.h"
+#include "core/enetkit.h"
+#include "core/freelist.h"
+#include "core/util.h"
 
 
 // Note that this file doesn't use DMSG.

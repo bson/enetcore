@@ -1,6 +1,8 @@
 #ifndef __STM32_RANDOM_H__
 #define __STM32_RANDOM_H__
 
+#include "core/bits.h"
+
 class Stm32Random {
     enum class Register {
         RNG_CR = 0x00,

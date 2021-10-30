@@ -1,12 +1,12 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef ENABLE_IP
 
-#include "enetkit.h"
-#include "network.h"
-#include "ip.h"
-#include "dhcp.h"
+#include "core/enetkit.h"
+#include "core/network.h"
+#include "core/ip.h"
+#include "core/dhcp.h"
 
 
 EventObject _net_event;

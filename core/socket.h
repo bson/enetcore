@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
-#include "mutex.h"
+#include "core/mutex.h"
 
 
 // Socket interface.  Sockets are always non-blocking by design.

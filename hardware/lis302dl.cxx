@@ -1,18 +1,5 @@
-Make UART use Ring<> (see ring.h) instead of Deque<>.  It's much lower
-overhead and less contention.  Just block threads if it's full.
-
-
-Refactor chip support
-- Move LPC in under nxp/lpc407x and nxp/lpc (common)
-- Move stuff under arm into arm/cm4, cm0, cm7, etc
-- Much of what's in board.h (e.g. skyblue/board.h) belongs in the application config.h
-- Make more hardware support optional (e.g. SD, FAT)
-- Make DHCP support a compile time option
-
-- Move application out of enetcore tree
-- Make enetcore a submodule of application
-#include "enetkit.h"
-#include "lis302dl.h"
+#include "core/enetkit.h"
+#include "hardware/lis302dl.h"
 
 
 Lis302dl::Lis302dl(I2cBus& bus, uint8_t addr) :

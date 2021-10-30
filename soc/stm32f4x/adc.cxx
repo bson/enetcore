@@ -1,6 +1,6 @@
-#include "enetkit.h"
-#include "thread.h"
-#include "stm32f4x/adc.h"
+#include "core/enetkit.h"
+#include "core/thread.h"
+#include "soc/stm32f4x/adc.h"
 
 
 void Stm32Adc::AdcComplete(uint16_t, bool) {

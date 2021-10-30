@@ -1,6 +1,8 @@
 #ifndef __RTC_H__
 #define __RTC_H__
 
+#include "core/bits.h"
+
 class Stm32Rtc {
     enum class Register {
         TR = 0x00,

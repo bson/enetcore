@@ -6,9 +6,9 @@
 #define _SSD1306_H_
 
 #include <stdint.h>
-#include "enetcore.h"
-#include "font.h"
-#include "font/runes.h"
+#include "core/enetcore.h"
+#include "ui/font.h"
+#include "ui/font/runes.h"
 
 namespace ssd1963 {
 

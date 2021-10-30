@@ -1,8 +1,8 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "hashtable.h"
+#include "core/enetkit.h"
+#include "core/hashtable.h"
 
 
 HashTable::HashTable(HashTable::HashFunc& hf, HashTable::CompareFunc& cf, uint reserve, uint d) :

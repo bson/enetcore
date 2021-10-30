@@ -8,7 +8,7 @@
 // provides external decls.
 
 #include "params.h"
-#include "stm32f4x/f405.h"
+#include "soc/stm32f4x/f405.h"
 
 // SoC peripherals used on CON2
 

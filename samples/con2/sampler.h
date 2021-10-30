@@ -1,9 +1,9 @@
 #ifndef __SAMPLER_H__
 #define __SAMPLER_H__
 
-#include "enetkit.h"
-#include "thread.h"
-#include "ring.h"
+#include "core/enetkit.h"
+#include "core/thread.h"
+#include "core/ring.h"
 
 
 // Simple sampler with boxcar filtering

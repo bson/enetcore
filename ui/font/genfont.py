@@ -223,9 +223,9 @@ if gen_inc and opt_end:
 
 if gen_data:
     if opt_map and opt_start:
-        print "#include \"runes.h\""
+        print "#include \"ui/font/runes.h\""
     if opt_font and opt_start:
-        print "#include \"font.h\""
+        print "#include \"ui/font/font.h\""
 
     print
 

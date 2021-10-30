@@ -1,9 +1,9 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "mutex.h"
-#include "thread.h"
+#include "core/enetkit.h"
+#include "core/mutex.h"
+#include "core/thread.h"
 
 
 bool Mutex::TryLock() const 

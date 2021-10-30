@@ -1,9 +1,9 @@
 #ifdef ENABLE_PANEL
 
-#include "enetkit.h"
+#include "core/enetkit.h"
 #include "board.h"
-#include "mutex.h"
-#include "ui.h"
+#include "core/mutex.h"
+#include "ui/ui.h"
 #include "uidecls.h"
 
 #include "font/runes.inc"

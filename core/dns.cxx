@@ -3,9 +3,9 @@
 
 #ifdef ENABLE_IP
 
-#include "enetkit.h"
-#include "dns.h"
-#include "udp.h"
+#include "core/enetkit.h"
+#include "core/dns.h"
+#include "core/udp.h"
 
 Dns _dns0(_udp0);
 

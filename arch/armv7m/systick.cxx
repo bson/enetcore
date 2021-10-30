@@ -2,8 +2,8 @@
 // See LICENSE for details.
 
 #include "params.h"
-#include "enetkit.h"
-#include "systick.h"
+#include "core/enetkit.h"
+#include "arch/armv7m/systick.h"
 
 
 void SysTick::SetTimer(uint32_t usec) {

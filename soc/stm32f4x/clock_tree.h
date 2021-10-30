@@ -1,8 +1,6 @@
 #ifndef __STM32_CLOCK_TREE_H__
 #define __STM32_CLOCK_TREE_H__
 
-#include "bits.h"
-
 class Stm32ClockTree {
     // Register byte offsets
     enum {

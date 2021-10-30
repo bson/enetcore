@@ -1,5 +1,8 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __HLINE_H__
+#define __HLINE_H__
 
 class HLine: public Element {
 public:
@@ -30,3 +33,5 @@ public:
         p.HLine(_pos._x, _pos._y, _config->_size._w, _config->_size._h);
     }
 };
+
+#endif // __HLINE_H__

@@ -3,9 +3,9 @@
 
 #ifdef ENABLE_USB
 
-#include "enetcore.h"
-#include "usb.h"
-#include "usbtmc.h"
+#include "core/enetcore.h"
+#include "core/usb.h"
+#include "core/usbtmc.h"
 
 using namespace usb;
 

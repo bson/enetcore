@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef _UI_H_
 #define _UI_H_
 
-#include "enetcore.h"
-#include "font.h"
+#include "core/enetcore.h"
+#include "core/font.h"
 
 namespace uibuilder {
 extern uint32_t GetColor(uint n);

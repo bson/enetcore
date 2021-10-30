@@ -14,11 +14,12 @@ TOOLDIR=$(TOOLCHAIN)/bin
 
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
-CFLAGS = -Os -DTRACE -I. -I$(ENETCORE)/$(TOOLSET) -DCHECK_BOUNDS=1 -funsigned-char
+CFLAGS = -Os -DTRACE -DCHECK_BOUNDS=1 -funsigned-char
 else
-CFLAGS = -g -O0 -DTRACE -DDEBUG -I. -I$(ENETCORE)/$(TOOLSET) -funsigned-char
+CFLAGS = -g -O0 -DTRACE -DDEBUG -funsigned-char
 AFLAGS = --defsym DEBUG=1
 endif
+CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno
 
 ODIR ?= build_$(CONFIG)
 
@@ -43,7 +44,7 @@ LOG ?= $(ODIR)/image.log
 
 TOUCH_ODIR=$(ODIR)/.touch
 
-CFLAGS += -I$(ODIR)
+CFLAGS += -I. -I$(ENETCORE) -I$(ENETCORE)/$(TOOLSET) -I$(ODIR)
 
 OBJS=$(patsubst %.s,$(ODIR)/%.o, $(patsubst %.cxx, $(ODIR)/%.o, $(SRCS)))
 DEPS=$(patsubst %.s,$(ODIR)/%.d, $(patsubst %.cxx, $(ODIR)/%.d, $(SRCS)))

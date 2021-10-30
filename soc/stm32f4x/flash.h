@@ -1,7 +1,7 @@
 #ifndef __STM32_FLASH_H__
 #define __STM32_FLASH_H__
 
-#include "bits.h"
+#include "core/bits.h"
 
 // Basic flash support.  No erase or write support.
 class Stm32Flash {

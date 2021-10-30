@@ -1,6 +1,6 @@
 #ifdef ENABLE_UI
 
-#include "ui.h"
+#include "ui/ui.h"
 #include "uidecls.h"
 
 namespace ui {

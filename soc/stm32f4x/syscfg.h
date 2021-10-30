@@ -1,6 +1,8 @@
 #ifndef __STM32_SYSCFG_H__
 #define __STM32_SYSCFG_H__
 
+#include "core/bits.h"
+
 class Stm32SysCfg {
     enum class Register {
         MEMRMP  = 0x00,

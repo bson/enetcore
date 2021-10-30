@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef ENABLE_TSC2046
 
-#include "enetcore.h"
-#include "tsc2046.h"
+#include "core/enetcore.h"
+#include "hardware/tsc2046.h"
 #include "board.h"
 
 namespace tsc2046 {

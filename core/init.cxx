@@ -1,7 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
+#include "core/enetkit.h"
 
 [[__weak]] extern void (*__preinit_array_start []) (void);
 [[__weak]] extern void (*__preinit_array_end []) (void);

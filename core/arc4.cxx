@@ -1,8 +1,9 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "arc4.h"
+#include "core/enetkit.h"
+#include "core/arc4.h"
+
 
 Arc4 Arc4::_random;
 

@@ -1,9 +1,9 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#include "enetkit.h"
-#include "fat.h"
-#include "util.h"
+#include "core/enetkit.h"
+#include "core/fat.h"
+#include "core/util.h"
 
 
 Fat::Fat(BlockDev& dev) :

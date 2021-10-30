@@ -21,7 +21,7 @@ SIZE = $(TOOLDIR)/$(TARGET)-size
 
 CHECKSUM = true
 
-CFLAGS += -I. -I$(ENETCORE) -I$(SOCDIR) -I$(ARCH) -Ihardware $(VARIANT)  \
+CFLAGS += -Ihardware $(VARIANT)  \
     -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
     -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
 	-fno-threadsafe-statics -fshort-enums

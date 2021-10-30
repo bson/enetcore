@@ -1,7 +1,8 @@
-#include "enetkit.h"
-#include "thread.h"
-#include "stm32f4x/dma.h"
-#include "nvic.h"
+#include "core/enetkit.h"
+#include "core/thread.h"
+#include "soc/stm32f4x/dma.h"
+#include "arch/armv7m/nvic.h"
+
 
 const uint32_t Stm32Dma::stream_to_tcif[8] = {
     BIT(TCIF0), BIT(TCIF1), BIT(TCIF2), BIT(TCIF3),

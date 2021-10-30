@@ -1,5 +1,5 @@
-#include "enetkit.h"
-#include "fixedpoint.h"
+#include "core/enetkit.h"
+#include "core/fixedpoint.h"
 
 
 template <typename T, uint FBITS, typename T2>

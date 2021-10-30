@@ -19,6 +19,9 @@ public:
         return *this;
     }
 
+    FixedPoint(const float& f) : _v(f * (1 << FBITS)) {
+    }
+
     FixedPoint operator+(const FixedPoint& rhs) {
         return FixedPoint(_v + rhs._v);
     }

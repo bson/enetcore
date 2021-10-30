@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifdef ENABLE_IP
 
-#include "enetkit.h"
-#include "ip.h"
-#include "udp.h"
+#include "core/enetkit.h"
+#include "core/ip.h"
+#include "core/udp.h"
 
 
 Ip _ip0(_udp0);

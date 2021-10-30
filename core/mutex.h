@@ -4,7 +4,7 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
 
-#include "thread.h"
+#include "core/thread.h"
 
 template <typename T> class ScopedLock {
 	const T& _lock;

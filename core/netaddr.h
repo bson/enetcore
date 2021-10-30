@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __NETADDR_H__
@@ -6,7 +6,7 @@
 
 #ifdef ENABLE_IP
 
-#include "lookup3.h"
+#include "core/lookup3.h"
 
 enum { INADDR_ANY = 0 };
 

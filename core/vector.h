@@ -1,10 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-#include "arithmetic.h"
+#include "core/arithmetic.h"
 
 // Simple vector
 // Safe for use with POD only

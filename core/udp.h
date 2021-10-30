@@ -1,14 +1,14 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __UDP_H__
 #define __UDP_H__
 
-#include "ip.h"
-#include "netaddr.h"
-#include "ipconn.h"
-#include "socket.h"
-#include "hashmap.h"
+#include "core/ip.h"
+#include "core/netaddr.h"
+#include "core/ipconn.h"
+#include "core/socket.h"
+#include "core/hashmap.h"
 
 
 struct __novtable Udph {

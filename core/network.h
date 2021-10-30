@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __NETWORK_H__
@@ -7,11 +7,11 @@
 #ifdef ENABLE_IP
 
 #include <stdint.h>
-#include "pstring.h"
-#include "compiler.h"
-#include "deque.h"
-#include "netaddr.h"
-#include "mutex.h"
+#include "core/pstring.h"
+#include "core/compiler.h"
+#include "core/deque.h"
+#include "core/netaddr.h"
+#include "core/mutex.h"
 
 typedef Deque<uint8_t> IOBuffer;
 

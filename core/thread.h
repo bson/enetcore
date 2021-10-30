@@ -1,11 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __THREAD_H__
 #define __THREAD_H__
 
-#include "vector.h"
-#include "arithmetic.h"
+#include "core/vector.h"
+#include "core/arithmetic.h"
 
 typedef class Thread* ThreadId;
 

@@ -1,5 +1,8 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
+
+#ifndef __INDICATOR_H__
+#define __INDICATOR_H__
 
 class Indicator: public Element {
 public:
@@ -62,3 +65,5 @@ public:
         Redraw();
     }
 };
+
+#endif // __INDICATOR_H__

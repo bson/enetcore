@@ -3,8 +3,8 @@
 
 #ifdef ENABLE_IP
 
-#include "enetkit.h"
-#include "netaddr.h"
+#include "core/enetkit.h"
+#include "core/netaddr.h"
 
 
 const NetAddr NetAddr::addr_any;

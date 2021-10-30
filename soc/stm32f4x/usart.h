@@ -4,8 +4,8 @@
 #ifndef __STM32_USART_H__
 #define __STM32_USART_H__
 
-#include "ring.h"
-#include "mutex.h"
+#include "core/ring.h"
+#include "core/mutex.h"
 
 template <uint32_t SEND_BUF_SIZE = 128, uint32_t RECV_BUF_SIZE = 32>
 class Stm32Usart: public Stm32Dma::Peripheral {
@@ -132,11 +132,13 @@ public:
         Thread::IPL G(IPL_UART);
 
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-        cr1 &= ~(BIT(PEIE) | BIT(TXEIE) | BIT(TCIE) | BIT(RXNEIE) | BIT(TE) | BIT(RE) | BIT(SBK) | BIT(RWU)
-                 | BIT(M) | BIT(UE) | BIT(PCE) | BIT(IDLEIE) | BIT(OVER8));
+        cr1 &= ~(BIT(PEIE) | BIT(TXEIE) | BIT(TCIE) | BIT(RXNEIE) | BIT(TE) | BIT(RE)
+                 | BIT(SBK) | BIT(RWU) | BIT(M) | BIT(UE) | BIT(PCE) | BIT(IDLEIE)
+                 | BIT(OVER8));
 
         volatile uint32_t& cr2 = reg<volatile uint32_t>(Register::USART_CR2);
-        cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL) | BIT(LBDIE) | 0xf);
+        cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL)
+                 | BIT(LBDIE) | 0xf);
 
         volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
         cr3 = (cr3 & ~(BIT(CTSIE) | BIT(CTSE) | BIT(RTSE) | BIT(DMAT) | BIT(DMAR) | BIT(SCEN)

@@ -4,7 +4,7 @@
 #ifndef __HASHMAP_H__
 #define __HASHMAP_H__
 
-#include "hashtable.h"
+#include "core/hashtable.h"
 
 template <typename K, typename V,
 		  HashTable::HashFunc KeyHash = K::Hash,
