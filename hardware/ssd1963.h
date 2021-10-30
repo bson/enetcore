@@ -12,15 +12,7 @@
 
 namespace ssd1963 {
 
-// DBPORT is the data port
-// CTLPORT is the control port
-// Operates in 8080 mode
-template <Gpio& _DPORT,
-          Gpio& _CPORT,
-          uint32_t _CTL_CS,
-          uint32_t _CTL_WR,
-          uint32_t _CTL_RD,
-          uint32_t _CTL_RS>
+template <typename Accessor>
 class Panel {
     static uint8_t _r;
     static uint8_t _g;
@@ -162,14 +154,14 @@ public:
 
     // Set PWM brightness, only usable for modules that use the PWM
     static void SetBrightness(uint8_t b) {
-        command_start(CMD_SET_PWM_CONF);
-        data(0x0e);  // 300Hz @ 120MHz PLL
-        data(b);
-        data(0x01);  // Enable
-        data(0);
-        data(0);
-        data(0);
-        command_end();
+        Accessor::StartCommand(CMD_SET_PWM_CONF);
+        Accessor::Write(0x0e);  // 300Hz @ 120MHz PLL
+        Accessor::Write(b);
+        Accessor::Write(0x01);  // Enable
+        Accessor::Write(0);
+        Accessor::Write(0);
+        Accessor::Write(0);
+        Accessor::EndCommand();
     }
 
     static void AdjustCbs(uint8_t cont  = 0x40,
@@ -185,60 +177,28 @@ private:
     // Set window
     static void set_window(uint16_t col, uint16_t row, uint16_t w, uint16_t h);
 
-    // A bunch of inlined primitives
-    [[__optimize, __finline]] static void command_start(uint8_t cmd) {
-        _CPORT.Set(MASK_RS | MASK_RD | MASK_WR | MASK_CS);
-        _CPORT.Clear(MASK_CS | MASK_RS | MASK_WR);  // CS active across command
-        _DPORT.Output(0xff, cmd);            // Data on bus
-        _CPORT.Set(MASK_WR); // WR inactive - data is latched on this edge
-        _CPORT.Set(MASK_RS); // Restore RS
-    }
-    [[__finline, __optimize]] static void command_end() {
-        _CPORT.Set(MASK_CS | MASK_RD | MASK_WR | MASK_RS);  // CS inactive
-    }
-
-    // In a series of data writes CS is kept low across all of them, then
-    // released by command_end().
-    [[__optimize, __finline]] static void data(uint8_t d) {
-        _CPORT.Clear(MASK_WR); // WR active; RS = 1 = data
-        _DPORT.Output(0xff, d); // Data on bus
-        _CPORT.Set(MASK_WR); // WR inactive - data is latched on this edge
-    }
-    static void data16(uint16_t d) {
-        data(d >> 8);
-        data(d);
-    }
     static void wcommand(uint8_t cmd) {
-        command_start(cmd);
-        command_end();
+        Accessor::StartCommand(cmd);
+        Accessor::EndCommand();
     }
     static void wcommand8(uint8_t cmd, uint8_t param) {
-        command_start(cmd);
-        data(param);
-        command_end();
+        Accessor::StartCommand(cmd);
+        Accessor::Write(param);
+        Accessor::EndCommand();
     }
-    // Yet another variation: command followed by array of bytes
+    // Yet another variation: command with an array of bytes used for parameters
     static void wcommand_barr(uint8_t cmd, uint8_t nbytes, const uint8_t* d) {
-        command_start(cmd);
+        Accessor::StartCommand(cmd);
         while (nbytes--)
-            data(*d++);
+            Accessor::Write(*d++);
 
-        command_end();
+        Accessor::EndCommand();
     }
 
-    static uint8_t rdata() {
-        _DPORT.MakeInputs(0xff);  // Input
-        _CPORT.Set(MASK_RS);  // Data
-        _CPORT.Clear(MASK_RD);
-        const uint8_t tmp = _DPORT.Input() & 0xff;
-        _CPORT.Set(MASK_RD);
-        _DPORT.MakeOutputs(0xff);  // Return to output
-        return tmp;
-    }
     static uint8_t rcommand(uint8_t cmd) {
-        command_start(cmd);
-        const uint8_t val = rdata();
-        command_end();
+        Accessor::StartCommand(cmd);
+        const uint8_t val = Accessor::Read();
+        Accessor::EndCommand();
         return val;
     }
 };

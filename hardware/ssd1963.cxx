@@ -11,27 +11,16 @@ namespace ssd1963 {
 
 using namespace PanelInfo;
 
-#define TEMPLATE \
-template <Gpio& _DPORT, \
-          Gpio& _CPORT, \
-          uint32_t _CTL_CS, \
-          uint32_t _CTL_WR, \
-          uint32_t _CTL_RD, \
-          uint32_t _CTL_RS> \
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_r;
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_g;
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_b;
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_bg_r;
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_bg_g;
+template <typename Accessor> uint8_t ssd1963::Panel<Accessor>::_bg_b;
 
-#define PARAMS \
-_DPORT, _CPORT, _CTL_CS, _CTL_WR, _CTL_RD, _CTL_RS
-
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_r;
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_g;
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_b;
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_bg_r;
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_bg_g;
-TEMPLATE uint8_t ssd1963::Panel<PARAMS>::_bg_b;
-
-TEMPLATE
+template <typename Accessor>
 [[__optimize]]
-void Panel<PARAMS>::Init() {
+void Panel<Accessor>::Init() {
 
     _CPORT.MakeOutputs(MASK_CTL);
     _DPORT.MakeOutputs(0xff); // Output by default
@@ -124,18 +113,18 @@ void Panel<PARAMS>::Init() {
     Clear();
 }
 
-TEMPLATE
-void Panel<PARAMS>::Clear() {
+template <typename Accessor>
+void Panel<Accessor>::Clear() {
     SetRgb(_bg_r, _bg_g, _bg_b);
     Fill(0, 0, HOR_VISIBLE, VERT_VISIBLE);
 }
 
-TEMPLATE
-void Panel<PARAMS>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
+template <typename Accessor>
+void Panel<Accessor>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
 
     set_window(col, row, w, h);
 
-    command_start(CMD_WRITE_MEMORY_START);
+    Accessor::StartCommand(CMD_WRITE_MEMORY_START);
 
 #if defined(CORTEX_M)
     asm volatile ("                                                  \
@@ -161,130 +150,65 @@ void Panel<PARAMS>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
                   "r"(MASK_WR) : );
 #else
     for (uint n = 0; n < w * h; ++n) {
-        data(_r);
-        data(_g);
-        data(_b);
+        Accessor::Write(_r);
+        Accessor::Write(_g);
+        Accessor::Write(_b);
     }
 #endif
-    command_end();
+    Accessor::EndCommand();
     wcommand(CMD_NOP);
 }
 
-TEMPLATE
-void Panel<PARAMS>::set_window(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
+template <typename Accessor>
+void Panel<Accessor>::set_window(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
 
-    command_start(CMD_SET_COLUMN_ADDRESS);
+    Accessor::StartCommand(CMD_SET_COLUMN_ADDRESS);
     data16(col);
     data16(col + w - 1);
-    command_end();
+    Accessor::EndCommand();
 
-    command_start(CMD_SET_PAGE_ADDRESS);
+    Accessor::StartCommand(CMD_SET_PAGE_ADDRESS);
     data16(row);
     data16(row + h - 1);
-    command_end();
+    Accessor::EndCommand();
 }
 
-TEMPLATE
-void Panel<PARAMS>::HLine(uint16_t x, uint16_t y, uint16_t len, uint8_t w) {
+template <typename Accessor>
+void Panel<Accessor>::HLine(uint16_t x, uint16_t y, uint16_t len, uint8_t w) {
     Fill(x, y, len, w);
 }
 
-TEMPLATE
-void Panel<PARAMS>::VLine(uint16_t x, uint16_t y, uint16_t len, uint8_t w) {
+template <typename Accessor>
+void Panel<Accessor>::VLine(uint16_t x, uint16_t y, uint16_t len, uint8_t w) {
     Fill(x, y, w, len);
 }
 
-TEMPLATE
-void Panel<PARAMS>::Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t s) {
+template <typename Accessor>
+void Panel<Accessor>::Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t s) {
     HLine(x, y, w, s);
     HLine(x, y + h - s, w, s);
     VLine(x, y, h, s);
     VLine(x + w - s, y, h, s);
 }
 
-TEMPLATE
-void Panel<PARAMS>::Blit(uint16_t x, uint16_t y, const uint8_t* image, 
+template <typename Accessor>
+void Panel<Accessor>::Blit(uint16_t x, uint16_t y, const uint8_t* image, 
                          uint16_t w, uint16_t h)  {
     set_window(x, y, w, h);
 
-    command_start(CMD_WRITE_MEMORY_START);
-
-#if defined(CORTEX_M)
-    // Asm args:
-    // %0 - CPORT.CLR
-    // %1 - CPORT.SET
-    // %2 - DPORT.PIN
-    // %3 - FG RGB
-    // %4 - BG RGB
-    // %5 - image
-    // %6 - w*h
-    // %7 - MASK_WR
-    // %8 - tmp (image bits)
-    // %9 - tmp (image bit counter)
-    // %10 - tmp
-    asm volatile (
-#if CORTEX_M == 0
-// CM0 doesn't support unaligned word loads, so load bytewise
-"   1:                                                               \
-       ldrb   %8, [%5], #1;                                          \
-       mov    %9, #9;                                                \
-"
-#else
-// CM4, CM7 do, so load in groups of 32 bits (yes, we may overrun at
-// the end).
-"   1:                                                               \
-       ldr    %8, [%5], #4;                                          \
-       mov    %9, #33;                                               \
-"
-#endif
-"   2:                                                               \
-       subs   %9, %9, #1;                                            \
-       beq    1b;                                                    \
-                                                                     \
-       asrs   %8, %8, #1;                                            \
-       movcs  %10, %3;      /* Set: use FG RGB */                    \
-       movcc  %10, %4;      /* Clear: use BG RGB */                  \
-                                                                     \
-       str    %10, [%2];    /* _DPORT.PIN = r */                     \
-       str    %7, [%0];     /* _CPORT.CLR = MASK_WR */               \
-       lsr    %10, %10, #8;                                          \
-       str    %7, [%1];     /* _CPORT.SET = MASK_WR */               \
-                                                                     \
-       str    %10, [%2];    /* _DPORT.PIN = g */                     \
-       str    %7, [%0];     /* _CPORT.CLR = MASK_WR */               \
-       lsr    %10, %10, #8;                                          \
-       str    %7, [%1];     /* _CPORT.SET = MASK_WR */               \
-                                                                     \
-       str    %10, [%2];    /* _DPORT.PIN = b */                     \
-       str    %7, [%0];     /* _CPORT.CLR = MASK_WR */               \
-       subs   %6, %6, #1;                                            \
-       str    %7, [%1];     /* _CPORT.SET = MASK_WR */               \
-       bne    2b                                                     \
-        " : :     "r"(_CPORT.RegClr()),
-                  "r"(_CPORT.RegSet()),
-                  "r"(_DPORT.RegPin()),
-                  "r"((_b << 16) | (_g << 8) | _r),
-                  "r"((_bg_b << 16) | (_bg_g << 8) | _bg_r),
-                  "r"(image),
-                  "r"(uint(w) * uint(h)),
-                  "r"(MASK_WR),
-                  "r"(0),
-                  "r"(0),
-                  "r"(0)
-                  : );
-#else
+    Accessor::StartCommand(CMD_WRITE_MEMORY_START);
     uint8_t v = *image++;
     uint bits = 8;
 
     for (uint n = w * h; n > 0; --n) {
         if (v & 1) {
-            data(_r);
-            data(_g);
-            data(_b);
+            Accessor::Write(_r);
+            Accessor::Write(_g);
+            Accessor::Write(_b);
         } else {
-            data(_bg_r); 
-            data(_bg_g);
-            data(_bg_b);
+            Accessor::Write(_bg_r); 
+            Accessor::Write(_bg_g);
+            Accessor::Write(_bg_b);
         }
         if (!--bits) {
             v = *image++;
@@ -293,16 +217,15 @@ void Panel<PARAMS>::Blit(uint16_t x, uint16_t y, const uint8_t* image,
             v >>= 1;
         }
     }
-#endif
 
-    command_end();
+    Accessor::EndCommand();
     wcommand(CMD_NOP);
 }
 
 
-TEMPLATE
+template <typename Accessor>
 [[__optimize]]
-uint Panel<PARAMS>::Text(uint x, uint y, const Font& font, 
+uint Panel<Accessor>::Text(uint x, uint y, const Font& font, 
                          const String& s, uint8_t kern, bool vkern) {
     uint x0 = x;
     const uint w = font.GetWidth();
@@ -329,8 +252,8 @@ uint Panel<PARAMS>::Text(uint x, uint y, const Font& font,
 }
 
 
-TEMPLATE
-void Panel<PARAMS>::TestPattern() {
+template <typename Accessor>
+void Panel<Accessor>::TestPattern() {
 
     // Test patterns to verify scan order, RGB mapping, and timing
     SetRgb(255, 0, 0);
@@ -349,8 +272,5 @@ void Panel<PARAMS>::TestPattern() {
 }
 
 };
-
-#undef TEMPLATE
-#undef PARAMS
 
 #endif // _INLINE_CXX_
