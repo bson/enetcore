@@ -4,7 +4,7 @@
 #ifdef ENABLE_TSC2046
 
 #include "core/enetcore.h"
-#include "hardware/tsc2046.h"
+#include "devices/tsc2046.h"
 #include "board.h"
 
 namespace tsc2046 {

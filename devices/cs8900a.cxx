@@ -1,5 +1,5 @@
 #include "core/enetkit.h"
-#include "hardware/cs8900a.h"
+#include "devices/cs8900a.h"
 #include "core/util.h"
 
 

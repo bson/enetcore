@@ -51,7 +51,7 @@ extern Dac _dac;
 // Board peripherals
 
 #ifdef ENABLE_PANEL
-#include "hardware/ssd1963.h"
+#include "devices/ssd1963.h"
 // XXX
 // #include "tsc2046.h"
 #include "panel_accessor.h"

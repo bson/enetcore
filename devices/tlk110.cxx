@@ -1,6 +1,6 @@
 #include "core/enetcore.h"
 #include "core/enet_phy.h"
-#include "hardware/tlk110.h"
+#include "devices/tlk110.h"
 
 
 namespace EnetPHY {

@@ -2,7 +2,7 @@
 SRCS += init.cxx ui.cxx
 
 # Peripherals found on this board
-# SSD1963 is inlined in hardware.cxx
+# SSD1963 is inlined in init.cxx
 HARDWARE_SRCS = tsc2046.cxx
 
 VARIANT=-DSTMF=1 -DSTM=405
@@ -21,7 +21,7 @@ SIZE = $(TOOLDIR)/$(TARGET)-size
 
 CHECKSUM = true
 
-CFLAGS += -Ihardware $(VARIANT)  \
+CFLAGS += -Idevices $(VARIANT)  \
     -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
     -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
 	-fno-threadsafe-statics -fshort-enums
@@ -36,6 +36,6 @@ CPFLAGS = -O binary
 HEXFLAGS = -O ihex
 ODFLAGS	= -x --syms
 
-SRCS += $(addprefix $(ENETCORE)/hardware/,$(HARDWARE_SRCS))
+SRCS += $(addprefix $(ENETCORE)/devices/,$(HARDWARE_SRCS))
 
-ODIR_TREE += $(ODIR)/$(ENETCORE) $(ODIR)/$(ENETCORE)/hardware
+ODIR_TREE += $(ODIR)/$(ENETCORE) $(ODIR)/$(ENETCORE)/devices

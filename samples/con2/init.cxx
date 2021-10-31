@@ -479,5 +479,5 @@ void SVCall_Handler(void*)
 
 #ifdef ENABLE_PANEL
 #define _INLINE_CXX_
-#include "hardware/ssd1963.cxx"
+#include "devices/ssd1963.cxx"
 #endif // ENABLE_PANEL

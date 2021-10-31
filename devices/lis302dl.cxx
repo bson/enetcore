@@ -1,5 +1,5 @@
 #include "core/enetkit.h"
-#include "hardware/lis302dl.h"
+#include "devices/lis302dl.h"
 
 
 Lis302dl::Lis302dl(I2cBus& bus, uint8_t addr) :

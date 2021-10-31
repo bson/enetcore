@@ -2,10 +2,10 @@
 
 #include <stdint.h>
 #include "core/enetcore.h"
-#include "hardware/ssd1963.h"
+#include "devices/ssd1963.h"
 #include "core/font.h"
 #include "ui/font/runes.h"
-#include "hardware/hsd04319w1_a.h"
+#include "devices/hsd04319w1_a.h" // LCD panel, defines PanelInfo
 
 namespace ssd1963 {
 
