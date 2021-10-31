@@ -19,6 +19,7 @@
 #include "soc/stm32f4x/rtc.h"
 #include "soc/stm32f4x/adc.h"
 #include "soc/stm32f4x/dac.h"
+#include "soc/stm32f4x/fsmc.h"
 
 //#include "soc/stm32f4x/crc.h"
 //#include "soc/stm32f4x/eintr.h"

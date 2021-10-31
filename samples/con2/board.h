@@ -26,8 +26,8 @@ typedef Stm32AdcCommon AdcCommon;
 typedef Stm32Dac Dac;
 typedef Stm32Random Random;
 typedef Stm32Debug Debug;
+typedef Stm32Fsmc Fsmc;
 
-//typedef Stm32Fsmc Fsmc;
 //typedef Stm32Eintr Eintr;
 //typedef Stm32I2cBus I2cBus;
 //typedef Stm32I2cDev I2cDev;

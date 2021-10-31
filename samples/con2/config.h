@@ -139,6 +139,12 @@ enum {
     UART4_RECVQ_SIZE = 1024
 };
 
+enum {
+    FSMC_PANEL_BASE = 0x70000000, // Base address for bank 2
+    FSMC_PANEL_DATA = FSMC_PANEL_BASE + (1 << 16), // Data access
+    FSMC_PANEL_CMD  = FSMC_PANEL_BASE              // Cmd access
+};
+
 // Enetcore configuration parameters
 
 #define VARIANT "Enetcore"

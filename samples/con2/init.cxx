@@ -281,19 +281,14 @@ void hwinit() {
     ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                           | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     ClockTree::EnableAHB2(AHB2_RNGEN);
-#ifdef ENABLE_PANEL
     ClockTree::EnableAHB3(AHB3_FSMCEN);
-#endif
     ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
                           | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
     ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN);
-
     ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                             | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
     ClockTree::EnableAHB2LP(AHB2_RNGEN);
-#ifdef ENABLE_PANEL
     ClockTree::EnableAHB3LP(AHB3_FSMCEN);
-#endif
     ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
                             | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
     ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
@@ -403,6 +398,8 @@ void hwinit() {
     _led.Lower();
 
     assert(IntEnabled());
+
+    Fsmc::ConfigureSRAM(PANEL_BANK, PANEL_DATA_SETUP_CLK, PANEL_DATA_HOLD_CLK, PANEL_BUS_TURN_CLK);
 
 #ifdef ENABLE_PANEL
     // Release from reset
