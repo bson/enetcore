@@ -11,6 +11,14 @@ template <Gpio& _DPORT,
           uint32_t _CTL_RD,
           uint32_t _CTL_RS>
 class BitBangAccessor {
+    enum {
+        MASK_CS = _CTL_CS,
+        MASK_WR = _CTL_WR,
+        MASK_RD = _CTL_RD,
+        MASK_RS = _CTL_RS,
+        MASK_CTL = MASK_CS | MASK_WR | MASK_RD | MASK_CS
+    };
+
 public:
     static void Init() {
         _CPORT.MakeOutputs(MASK_CTL);

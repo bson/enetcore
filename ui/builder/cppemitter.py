@@ -134,8 +134,8 @@ class CppEmitter:
 
     def output_decls(self):
         print "#include <stdint.h>"
-        print "#include \"ui.h\""
-        print "#include \"font.h\""
+        print "#include \"ui/ui.h\""
+        print "#include \"core/font.h\""
 
         print
         self.decl_fonts()
@@ -154,7 +154,7 @@ class CppEmitter:
 
     def output_defs(self):
         print "#include <stdint.h>"
-        print "#include \"ui.h\""
+        print "#include \"ui/ui.h\""
         # XXX this dependency is bad
         print "#include \"uidecls.h\""
         print "\nnamespace uibuilder {"

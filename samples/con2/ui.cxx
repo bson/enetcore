@@ -1,16 +1,18 @@
-#ifdef ENABLE_PANEL
-
 #include "core/enetkit.h"
 #include "board.h"
+
+#ifdef ENABLE_PANEL
+
 #include "core/mutex.h"
 #include "ui/ui.h"
 #include "uidecls.h"
-
-#include "font/runes.inc"
+#include "ui/font/runes.inc"
 
 extern EventObject _panel_tap;
+// XXX
+#if 0
 extern GpioIntr _gpio0_intr;
-
+#endif
 Panel& GetPanel() { return _panel; }
 
 // Output memory status
@@ -27,9 +29,12 @@ static void memstats() {
 
 // Enable panel tap interrupts
 static void EnableTapIntr() {
+    // XXX
+#if 0
     _gpio0_intr.Clear(BIT22);
     _gpio0_intr.EnableR(BIT22);
     _gpio0_intr.EnableF(BIT22);
+#endif
 }
 
 enum class TapState: bool {
@@ -48,6 +53,8 @@ static TapState _panel_state = TapState::RELEASED;
 // Called to handle tap on panel.  'press' is true if it's a press,
 // otherwise false on release.
 static  void HandleTap(TapState state) {
+// XXX
+#if 0
     if (state != _panel_state) {
         _panel_state = state;
 
@@ -77,6 +84,7 @@ static  void HandleTap(TapState state) {
             }
         }
     }
+#endif
 }
 
 
@@ -118,7 +126,8 @@ void* UIThread(void*) {
     _panel.SetBackground(64, 64, 80);
     _panel.Init();
 
-    _touch.Init();
+    // XXX
+    // _touch.Init();
     
 #if 1
     _panel.TestPattern();

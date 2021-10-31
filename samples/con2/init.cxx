@@ -64,8 +64,9 @@ Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
 
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
-SpiDev _touch_dev(_spi0);
-TouchController _touch(_touch_dev, 480, 272);
+// XXX
+//SpiDev _touch_dev(_spi0);
+//TouchController _touch(_touch_dev, 480, 272);
 #endif
 // Backlight
 PinNegOutput<Gpio::Pin> _panel_bl;
@@ -73,6 +74,7 @@ PinNegOutput<Gpio::Pin> _panel_bl;
 // ESP12E interface
 PinOutput<Gpio::Pin> _esp_boot_sel;
 PinNegOutput<Gpio::Pin> _esp_rst;
+
 //XXX INterrupt on PA2 ESP_INT (active low)
 PinNegOutput<Gpio::Pin> _esp_spi_cs0;
 
@@ -403,7 +405,8 @@ void hwinit() {
 
 #ifdef ENABLE_PANEL
     // Release from reset
-    _touch_dev.SetSSEL(&_t_cs);
+// XXX
+//    _touch_dev.SetSSEL(&_t_cs);
 #endif
 
     _malloc_region.SetReserve(64);
@@ -476,5 +479,5 @@ void SVCall_Handler(void*)
 
 #ifdef ENABLE_PANEL
 #define _INLINE_CXX_
-#include "ssd1963.cxx"
+#include "hardware/ssd1963.cxx"
 #endif // ENABLE_PANEL

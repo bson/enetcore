@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "core/enetcore.h"
 #include "hardware/ssd1963.h"
-#include "ui/font/font.h"
+#include "core/font.h"
 #include "ui/font/runes.h"
 #include "hardware/hsd04319w1_a.h"
 

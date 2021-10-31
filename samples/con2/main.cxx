@@ -55,7 +55,7 @@ int main() {
     Thread::EnableFP();
 
 #ifdef ENABLE_PANEL
-    extern void* UIThread(void*);
+    void* UIThread(void*);
     _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 

@@ -1,6 +1,6 @@
 // -*- C -*-
-#include "runes.h"
-#include "font.h"
+#include "ui/font/runes.h"
+#include "core/font.h"
 
 const unsigned char rune_map_5x8[128] = {
     0x80|RUNE_5x8_BLANK, 0x80|RUNE_5x8_BLANK, 0x80|RUNE_5x8_BLANK, 

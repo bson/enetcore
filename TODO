@@ -206,7 +206,26 @@ Flag threads as using FPU and lazy save them
   - If not, save old state to its owner
   - Load new state and update the owner
 
+Implement StmDac
+- With DMA
+
+Implement StmFsmc
+
+Refactor Panel<> to use accessor, implement FSMC accessor
+
 ----- TODO
+
+Make ENABLE_PANEL work again
+
+Implement StmSpi
+- Bus
+- Device
+- Make compatible with Lpc Impl
+
+Toggle SSR in main.cxx and measure to verify it works
+  - _ssr_conduct.Raise(), _ssr_conduct.Lower()
+
+Add ESP12E serial support
 
 FP: set/clear access to FP coprocessor (CP10,CP11) on csw
 
@@ -216,18 +235,11 @@ Hash processor
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
-Implement StmSpi
-
-Implement StmDac
-- With DMA
-
 Add DMA memmove()?
 
 Implement StmWdt
 
 Implement StmCrc
-
-Implement StmFsmc
 
 Implement StmSdio
 
@@ -245,7 +257,7 @@ Implement StmI2s (TBD - no use case, need test board)
 
 Implement Reset (under arch/armv7m, to use CM4 core software reset)
 
-Add WaitFor(Vector<>&)
+Add MWait/MWaitFor with MWaitObject
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.

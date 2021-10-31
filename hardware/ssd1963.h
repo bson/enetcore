@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "core/enetcore.h"
-#include "ui/font.h"
+#include "core/font.h"
 #include "ui/font/runes.h"
 
 namespace ssd1963 {
@@ -22,14 +22,6 @@ class Panel {
     static uint8_t _bg_b;
 
 public:
-    enum {
-        MASK_CS = _CTL_CS,
-        MASK_WR = _CTL_WR,
-        MASK_RD = _CTL_RD,
-        MASK_RS = _CTL_RS,
-        MASK_CTL = MASK_CS | MASK_WR | MASK_RD | MASK_CS
-    };
-
     enum {
         CMD_NOP                = 0,
         CMD_SOFT_RESET         = 0x01,
@@ -193,6 +185,11 @@ private:
             Accessor::Write(*d++);
 
         Accessor::EndCommand();
+    }
+
+    static void data16(uint16_t v) {
+        Accessor::Write(v >> 16);
+        Accessor::Write(v);
     }
 
     static uint8_t rcommand(uint8_t cmd) {

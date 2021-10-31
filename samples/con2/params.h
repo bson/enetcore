@@ -6,7 +6,7 @@
 
 #undef ENABLE_ENET
 #undef ENABLE_USB
-#undef ENABLE_PANEL
+#define ENABLE_PANEL
 #undef ENABLE_IP
 
 #define ENABLE_WFI
