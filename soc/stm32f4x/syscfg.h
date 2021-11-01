@@ -25,7 +25,7 @@ public:
     };
 
     enum Port {
-        A = 0, B, C, D, E, F, G, H, I
+        A = 0, B, C, D, E, F, G, H, I, END
     };
         
 
@@ -35,15 +35,11 @@ private:
     }
 
 public:
-    static void ConfigureExti(Port p, uint32_t pin, uint16_t irq,
-                              IRQHandler handler, uint8_t prio, void* token) {
+    static void ConfigureExti(Port p, uint32_t pin) {
         pin &= 0xf;
         volatile uint32_t& r = reg(Register((uint32_t)Register::EXTICR1 + pin/4));
         r = (r & ~(0b1111 << ((pin % 4) * 4)))
             | ((uint32_t)p << ((pin % 4) * 4));
-
-        NVic::InstallIRQHandler(irq, handler, prio, token);
-        NVic::EnableIRQ(irq);
     }
 
     static void Init(bool cmpcell) {

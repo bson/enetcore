@@ -213,6 +213,10 @@ Implement StmFsmc
 
 Refactor Panel<> to use accessor, implement FSMC accessor
 
+Implement Stm32Eintr
+- Table based init
+- DEBUG: add checks
+
 ----- TODO
 
 Make ENABLE_PANEL work again

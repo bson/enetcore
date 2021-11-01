@@ -37,13 +37,16 @@ public:
         OD_PUR    = 0b0101,
         OD_PDR    = 0b0110
     };
-        
+
     enum class Speed {
         LOW    = 0,
         MEDIUM = 1,
         FAST   = 2,
         HIGH   = 3
     };
+
+#define PINCONF(PORT, PIN, MODE, AF, TYPE, SPEED) \
+    { Stm32Gpio::Port::PORT, PIN, Stm32Gpio::Mode::MODE, AF, Stm32Gpio::Type::TYPE, Stm32Gpio::Speed::SPEED }
 
     struct PinConf {
         Port     port;

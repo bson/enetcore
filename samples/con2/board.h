@@ -27,6 +27,7 @@ typedef Stm32Dac Dac;
 typedef Stm32Random Random;
 typedef Stm32Debug Debug;
 typedef Stm32Fsmc Fsmc;
+typedef Stm32Eintr Eintr;
 
 //typedef Stm32SpiBus SpiBus;
 //typedef Stm32SpiDev SpiDev;

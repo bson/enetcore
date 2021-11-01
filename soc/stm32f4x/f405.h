@@ -20,9 +20,9 @@
 #include "soc/stm32f4x/adc.h"
 #include "soc/stm32f4x/dac.h"
 #include "soc/stm32f4x/fsmc.h"
+#include "soc/stm32f4x/eintr.h"
 
 //#include "soc/stm32f4x/crc.h"
-//#include "soc/stm32f4x/eintr.h"
 //#include "soc/stm32f4x/spi.h"
 //#include "soc/stm32f4x/i2c.h"
 

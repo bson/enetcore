@@ -172,10 +172,6 @@ void ConfigurePins() {
     // 67 PA8   AF0   MCO1          CLKOUT     MCO1 clock output
     // 15 PC0   out                 SWITCH     SSR switch
     //
-
-#define PINCONF(PORT, PIN, MODE, AF, TYPE, SPEED) \
-    { Stm32Gpio::Port::PORT, PIN, Stm32Gpio::Mode::MODE, AF, Stm32Gpio::Type::TYPE, Stm32Gpio::Speed::SPEED }
-
     static const Stm32Gpio::PinConf pinconf[] = {
         PINCONF(B, 10,  AF,  7, NONE, LOW),
         PINCONF(B, 11,  AF,  7, NONE, LOW),
@@ -236,11 +232,32 @@ void ConfigurePins() {
 #ifdef ENABLE_PANEL
     _t_cs         = _gpio_b.GetPin(12);
 #endif
+
+    const Stm32Eintr::EintrConf eintrconf[] = {
+//        EINTRCONF(A, 2, FALLING), // ESP_INT#
+        EINTRCONF(A, 12, BOTH),   // T_INT#
+        EINTRCONF(END, 0, BOTH)
+    };
+    Stm32Eintr::EintrConfig(eintrconf);
 }
 
 
 static uint8_t _reset_reason;
 static uint32_t _wwdt_mod;
+
+static void TouchInterrupt(void*) {
+#ifdef ENABLE_PANEL
+    if (Eintr::Pending(12)) {
+        if (_t_cs.Test()) {
+            _panel_tap.Set(1);
+        } else {
+            _panel_tap.Set(2);
+        }
+        Eintr::ClearPending(12);
+    }
+#endif
+}
+
 
 // Hard system initialization.  Take control and prepare to run initializers.
 void hwinit0() {
@@ -368,6 +385,9 @@ void hwinit() {
 	NVic::InstallIRQHandler(INTR_USART3, _usart3.Interrupt, IPL_UART, &_usart3);
 	NVic::EnableIRQ(INTR_USART3);
     
+    NVic::InstallIRQHandler(INTR_EXTI10_15, TouchInterrupt, IPL_COMM, NULL);
+    NVic::EnableIRQ(INTR_EXTI10_15);
+
     AdcCommon::SetPrescaler(ADC1_PRESCALE);
 
     Flash::EnableIDCaching();

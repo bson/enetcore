@@ -26,7 +26,7 @@ def output(file):
 
     avg = sum/len(data)
 
-    # Scaling factor to create
+    # Scaling factor
     atten = VAVG/VDD * (FS/2)/avg
 
     filename = (file.split("/")[-1]).split('.',1)[0]
