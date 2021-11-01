@@ -262,9 +262,6 @@ public:
     // Install NVIC interrupt handlers
     void InstallHandlers();
 
-    // Enable NVIC interrupts
-    void EnableInterrupts();
-
 private:
     Stm32Dma(const Stm32Dma&);
     Stm32Dma& operator=(const Stm32Dma&);

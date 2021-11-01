@@ -369,8 +369,6 @@ void hwinit() {
 
     _dma1.InstallHandlers();
     _dma2.InstallHandlers();
-    _dma1.EnableInterrupts();
-    _dma2.EnableInterrupts();
 
     Random::Init();
 
@@ -379,14 +377,9 @@ void hwinit() {
     Util::RandomSeed(buf, sizeof buf);
 
 	// Install IRQ handlers
-	NVic::InstallIRQHandler(INTR_TIM5, Clock::Interrupt, IPL_CLOCK, &_clock);
-	NVic::EnableIRQ(INTR_TIM5);
-
-	NVic::InstallIRQHandler(INTR_USART3, _usart3.Interrupt, IPL_UART, &_usart3);
-	NVic::EnableIRQ(INTR_USART3);
-    
-    NVic::InstallIRQHandler(INTR_EXTI10_15, TouchInterrupt, IPL_COMM, NULL);
-    NVic::EnableIRQ(INTR_EXTI10_15);
+	NVic::RouteIRQ(INTR_TIM5, Clock::Interrupt, IPL_CLOCK, &_clock);
+	NVic::RouteIRQ(INTR_USART3, _usart3.Interrupt, IPL_UART, &_usart3);
+    NVic::RouteIRQ(INTR_EXTI10_15, TouchInterrupt, IPL_COMM, NULL);
 
     AdcCommon::SetPrescaler(ADC1_PRESCALE);
 

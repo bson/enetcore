@@ -38,23 +38,12 @@ void Stm32Dma::ClearTCIF(uint32_t stream) {
 }
 
 void Stm32Dma::InstallHandlers() {
-    NVic::InstallIRQHandler(_irq[0], Stm32Dma::Interrupt<0,Register::LISR,Register::LIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[1], Stm32Dma::Interrupt<1,Register::LISR,Register::LIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[2], Stm32Dma::Interrupt<2,Register::LISR,Register::LIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[3], Stm32Dma::Interrupt<3,Register::LISR,Register::LIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[4], Stm32Dma::Interrupt<4,Register::HISR,Register::HIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[5], Stm32Dma::Interrupt<5,Register::HISR,Register::HIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[6], Stm32Dma::Interrupt<6,Register::HISR,Register::HIFCR>, IPL_DMA, this);
-    NVic::InstallIRQHandler(_irq[7], Stm32Dma::Interrupt<7,Register::HISR,Register::HIFCR>, IPL_DMA, this);
-}
-
-void Stm32Dma::EnableInterrupts() {
-    NVic::EnableIRQ(_irq[0]);
-    NVic::EnableIRQ(_irq[1]);
-    NVic::EnableIRQ(_irq[2]);
-    NVic::EnableIRQ(_irq[3]);
-    NVic::EnableIRQ(_irq[4]);
-    NVic::EnableIRQ(_irq[5]);
-    NVic::EnableIRQ(_irq[6]);
-    NVic::EnableIRQ(_irq[7]);
+    NVic::RouteIRQ(_irq[0], Stm32Dma::Interrupt<0,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[1], Stm32Dma::Interrupt<1,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[2], Stm32Dma::Interrupt<2,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[3], Stm32Dma::Interrupt<3,Register::LISR,Register::LIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[4], Stm32Dma::Interrupt<4,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[5], Stm32Dma::Interrupt<5,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[6], Stm32Dma::Interrupt<6,Register::HISR,Register::HIFCR>, IPL_DMA, this);
+    NVic::RouteIRQ(_irq[7], Stm32Dma::Interrupt<7,Register::HISR,Register::HIFCR>, IPL_DMA, this);
 }

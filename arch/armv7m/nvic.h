@@ -39,6 +39,14 @@ public:
     static void InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* token,
                                   bool fast = false);
 
+    // Install handler, enable
+    [[__finline]]
+    static void RouteIRQ(uint irq, IRQHandler handler, uint8_t prio, void* token,
+                         bool fast = false) {
+        InstallIRQHandler(irq, handler, prio, token, fast);
+        EnableIRQ(irq);
+    }
+
     // Install system exception handler
     static void InstallSystemHandler(uint id, IRQHandler handler, uint8_t prio,
                                      bool fast = false);
