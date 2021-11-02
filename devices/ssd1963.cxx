@@ -175,10 +175,14 @@ void Panel<Accessor>::VLine(uint16_t x, uint16_t y, uint16_t len, uint8_t w) {
 
 template <typename Accessor>
 void Panel<Accessor>::Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t s) {
+    Accessor::Select();
+
     HLine(x, y, w, s);
     HLine(x, y + h - s, w, s);
     VLine(x, y, h, s);
     VLine(x + w - s, y, h, s);
+
+    Accessor::Deselect();
 }
 
 template <typename Accessor>
@@ -252,7 +256,6 @@ uint Panel<Accessor>::Text(uint x, uint y, const Font& font,
 
 template <typename Accessor>
 void Panel<Accessor>::TestPattern() {
-
     // Test patterns to verify scan order, RGB mapping, and timing
     SetRgb(255, 0, 0);
     Fill(0, 0, 100, 100);

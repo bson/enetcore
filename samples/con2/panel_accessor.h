@@ -5,18 +5,24 @@ extern PinNegOutput<Gpio::Pin> _lcd_cs;
 
 class PanelAccessor {
 public:
+    static uint32_t _selected;
+
     [[__finline]] static void Init() {
         Deselect();
+        _selected = 0;
     }
 
     [[__finline, __optimize]]
     static void Select() {
-        _lcd_cs.Raise();
+        if (!_selected)
+            _lcd_cs.Raise();
+        ++_selected;
     }
 
     [[__finline, __optimize]]
     static void Deselect() {
-        _lcd_cs.Lower();
+        if (!--_selected)
+            _lcd_cs.Lower();
     }
 
     [[__finline, __optimize]]
