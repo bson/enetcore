@@ -1,6 +1,4 @@
 # -*- Makefile -*-
-SRCS += init.cxx ui.cxx
-
 # Peripherals found on this board
 # SSD1963 is inlined in init.cxx
 HARDWARE_SRCS = tsc2046.cxx

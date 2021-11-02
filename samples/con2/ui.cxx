@@ -9,11 +9,9 @@
 #include "ui/font/runes.inc"
 
 extern EventObject _panel_tap;
-// XXX
-#if 0
-extern GpioIntr _gpio0_intr;
-#endif
 Panel& GetPanel() { return _panel; }
+
+uint32_t PanelAccessor::_selected;
 
 // Output memory status
 static void memstats() {
@@ -25,7 +23,6 @@ static void memstats() {
 
     _panel.Text(8, 272-8-6, font_5x8, s);
 }
-
 
 // Enable panel tap interrupts
 static void EnableTapIntr() {

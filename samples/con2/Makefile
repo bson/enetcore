@@ -15,25 +15,32 @@ TOOLDIR=$(TOOLCHAIN)/bin
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
 CFLAGS = -Os -DTRACE -DCHECK_BOUNDS=1 -funsigned-char
-else
+endif
+ifeq ($(CONFIG),debug)
 CFLAGS = -g -O0 -DTRACE -DDEBUG -funsigned-char
 AFLAGS = --defsym DEBUG=1
 endif
-CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno
+
+
+release: CFLAGS = -Os -DCHECK_BOUNDS=1 -funsigned-char -fwhole-file
+
+release: CONFIG=release
 
 ODIR ?= build_$(CONFIG)
+
+all: $(ODIR)/image
+
+CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno
 
 AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map
 
 # Project components
-#SRCS += main.cxx usb.cxx ui.cxx
-SRCS += main.cxx
-
-SRCS += buildinfo.cxx sounds.cxx
+SRCS += main.cxx ui.cxx init.cxx
+GENSRCS = buildinfo.cxx sounds.cxx
 
 # UI
-#SRCS += uidefs.cxx
+#GENSRCS += uidefs.cxx
 
 include makefile.$(TOOLSET)
 include $(ENETCORE)/core/makefile.$(TOOLSET)
@@ -46,11 +53,14 @@ TOUCH_ODIR=$(ODIR)/.touch
 
 CFLAGS += -I. -I$(ENETCORE) -I$(ENETCORE)/$(TOOLSET) -I$(ODIR)
 
+FATSRCS:=$(SRCS) $(patsubst %.cxx, $(ODIR)/%.cxx, $(GENSRCS))
+
+SRCS += $(GENSRCS)
+
 OBJS=$(patsubst %.s,$(ODIR)/%.o, $(patsubst %.cxx, $(ODIR)/%.o, $(SRCS)))
 DEPS=$(patsubst %.s,$(ODIR)/%.d, $(patsubst %.cxx, $(ODIR)/%.d, $(SRCS)))
 
 
-all: $(ODIR)/image
 
 etags: TAGS
 
@@ -59,10 +69,29 @@ TAGS:
 	  find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
     done) | etags --language=c++ --declarations -
 
-.phony: etags clean
+.phony: etags clean release
 
 clean:
 	-rm -rf $(ODIR) TAGS
+
+release: $(ODIR)/release
+
+$(ODIR)/release: $(ODIR)/startup.o $(ODIR)/uidecls.h $(ODIR)/fat_src.o link.cmd
+	@echo Linking $@
+	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) 2>&1 >>$(LOG)
+	@echo Updating vector checksum
+	@$(CHECKSUM) $@ >>$(LOG)
+	@$(SIZE) $@ 2>&1 >>$(LOG)
+	@$(SIZE) $@
+
+$(ODIR)/fat_src.o: $(FATSRCS)
+	@mkdir -p $(ODIR_TREE)
+	@echo $<
+	@echo cat $(FATSRCS) > $(ODIR)/fat_src.cxx >>$(LOG)
+	@cat $(FATSRCS) > $(ODIR)/fat_src.cxx 2>&1 >>$(LOG)
+	@echo $(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx >>$(LOG)
+	@$(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx 2>&1 >>$(LOG)
 
 $(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) link.cmd 
 	@echo Linking $@
