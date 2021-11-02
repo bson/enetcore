@@ -247,6 +247,8 @@ Implement StmCrc
 
 Implement StmSdio
 
+Fat release build
+
 Implement a "logout" feature in BKPSRAM
 
 Why doesn't the LSE OSC start up?  LSI works fine.

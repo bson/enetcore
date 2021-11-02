@@ -60,8 +60,17 @@ public:
                 reg(Register::FTSR) |= bit;
 
             reg(Register::PR) &= ~bit;
+            reg(Register::IMR) |= bit;
             ++config;
         }
+    }
+
+    static void EnableInt(uint32_t pin) {
+        reg(Register::IMR) |= BIT(pin);
+    }
+
+    static void DisableInt(uint32_t pin) {
+        reg(Register::IMR) &= ~BIT(pin);
     }
 
     static bool Pending(uint32_t pin) {

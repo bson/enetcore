@@ -61,7 +61,6 @@ void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* t
 	assert(irq < INT_NUM);
     assert(prio && prio < IPL_NUM);
     assert(handler);
-    assert(fast || token);
 
     ScopedNoInt G;
 

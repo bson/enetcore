@@ -62,6 +62,7 @@ Dac _dac(BASE_DAC);
 #ifdef ENABLE_PANEL
 Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
+PinNegOutput<Gpio::Pin> _lcd_cs; // CS# for LCD controller
 
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 // XXX
@@ -185,7 +186,8 @@ void ConfigurePins() {
         PINCONF(A,  5,  AF,  5, NONE, MEDIUM),
         PINCONF(A,  3, OUT,  0, NONE, MEDIUM),
         PINCONF(D, 11,  AF, 12, NONE, FAST),
-        PINCONF(D,  7,  AF, 12, NONE, FAST),
+        //PINCONF(D,  7,  AF, 12, NONE, FAST),
+        PINCONF(D,  7, OUT,  0, NONE, FAST),
         PINCONF(D,  5,  AF, 12, NONE, FAST),
         PINCONF(D,  4,  AF, 12, NONE, FAST),
         PINCONF(D, 10,  AF, 12, NONE, FAST),
@@ -231,6 +233,7 @@ void ConfigurePins() {
     _ssr_conduct  = _gpio_c.GetPin(0);
 #ifdef ENABLE_PANEL
     _t_cs         = _gpio_b.GetPin(12);
+    _lcd_cs       = _gpio_d.GetPin(7);
 #endif
 
     const Stm32Eintr::EintrConf eintrconf[] = {
@@ -248,6 +251,7 @@ static uint32_t _wwdt_mod;
 static void TouchInterrupt(void*) {
 #ifdef ENABLE_PANEL
     if (Eintr::Pending(12)) {
+        Eintr::DisableInt(12);
         if (_t_cs.Test()) {
             _panel_tap.Set(1);
         } else {
@@ -421,7 +425,6 @@ void hwinit() {
 // XXX
 //    _touch_dev.SetSSEL(&_t_cs);
 #endif
-
     _malloc_region.SetReserve(64);
 
     if (power_reset) {

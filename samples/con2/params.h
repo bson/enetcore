@@ -41,7 +41,7 @@ enum {
 
 // FSMC SRAM mode 1 timing
 enum {
-    PANEL_BUS_FREQ       = 10000000,  // 10MHz bus freq (5MHz write/read speed)      
+    PANEL_BUS_FREQ       = 20000000,  // 10MHz bus freq (5MHz write/read speed)      
     PANEL_HCLK_PER_CYC   = HCLK/PANEL_BUS_FREQ,                 // HCLKs per bus cycle
     PANEL_BUS_TURN_CLK   = PANEL_HCLK_PER_CYC/2,                // Bus turn HCLKs
     PANEL_DATA_CLK       = (PANEL_HCLK_PER_CYC - PANEL_BUS_TURN_CLK), // Data cycle HCLKs

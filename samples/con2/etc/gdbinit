@@ -91,7 +91,7 @@ set remote hardware-watchpoint-limit 4
 
 set mem inaccessible-by-default off
 
-monitor halt
+monitor reset halt
 
 set $pc = 0x400
 

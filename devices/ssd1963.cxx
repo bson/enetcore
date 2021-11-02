@@ -60,8 +60,12 @@ void Panel<Accessor>::Init() {
         REFRESH_RATE = uint64_t(PIXEL_CLOCK) / (uint64_t(PARM_HT) * uint64_t(PARM_VT))
     };
 
+    Accessor::Select();
     wcommand(CMD_EXIT_SLEEP_MODE);
+    Accessor::Deselect();
     Thread::Delay(5000);
+
+    Accessor::Select();
 
     // Disable during init to avoid flickering
     wcommand(CMD_SET_DISPLAY_OFF);
@@ -110,6 +114,8 @@ void Panel<Accessor>::Init() {
     }
 
     Clear();
+
+    Accessor::Deselect();
 }
 
 template <typename Accessor>
@@ -120,6 +126,8 @@ void Panel<Accessor>::Clear() {
 
 template <typename Accessor>
 void Panel<Accessor>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
+
+    Accessor::Select();
 
     set_window(col, row, w, h);
 
@@ -133,10 +141,14 @@ void Panel<Accessor>::Fill(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
 
     Accessor::EndCommand();
     wcommand(CMD_NOP);
+
+    Accessor::Deselect();
 }
 
 template <typename Accessor>
 void Panel<Accessor>::set_window(uint16_t col, uint16_t row, uint16_t w, uint16_t h) {
+
+    Accessor::Select();
 
     Accessor::StartCommand(CMD_SET_COLUMN_ADDRESS);
     data16(col);
@@ -147,6 +159,8 @@ void Panel<Accessor>::set_window(uint16_t col, uint16_t row, uint16_t w, uint16_
     data16(row);
     data16(row + h - 1);
     Accessor::EndCommand();
+
+    Accessor::Deselect();
 }
 
 template <typename Accessor>
@@ -170,6 +184,8 @@ void Panel<Accessor>::Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8
 template <typename Accessor>
 void Panel<Accessor>::Blit(uint16_t x, uint16_t y, const uint8_t* image, 
                          uint16_t w, uint16_t h)  {
+    Accessor::Select();
+
     set_window(x, y, w, h);
 
     Accessor::StartCommand(CMD_WRITE_MEMORY_START);
@@ -196,6 +212,8 @@ void Panel<Accessor>::Blit(uint16_t x, uint16_t y, const uint8_t* image,
 
     Accessor::EndCommand();
     wcommand(CMD_NOP);
+
+    Accessor::Deselect();
 }
 
 
@@ -203,6 +221,8 @@ template <typename Accessor>
 [[__optimize]]
 uint Panel<Accessor>::Text(uint x, uint y, const Font& font, 
                          const String& s, uint8_t kern, bool vkern) {
+    Accessor::Select();
+
     uint x0 = x;
     const uint w = font.GetWidth();
     const uint h = font.GetHeight();
@@ -223,6 +243,8 @@ uint Panel<Accessor>::Text(uint x, uint y, const Font& font,
             y += h + kern * 2;
         }
     }
+
+    Accessor::Deselect();
 
     return x - x0;
 }

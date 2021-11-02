@@ -1,9 +1,23 @@
 #ifndef __PANEL_ACCESSOR_H__
 #define  __PANEL_ACCESSOR_H__
 
+extern PinNegOutput<Gpio::Pin> _lcd_cs;
+
 class PanelAccessor {
 public:
-    [[__finline]] static void Init() { }
+    [[__finline]] static void Init() {
+        Deselect();
+    }
+
+    [[__finline, __optimize]]
+    static void Select() {
+        _lcd_cs.Raise();
+    }
+
+    [[__finline, __optimize]]
+    static void Deselect() {
+        _lcd_cs.Lower();
+    }
 
     [[__finline, __optimize]]
     static void StartCommand(uint8_t byte) {

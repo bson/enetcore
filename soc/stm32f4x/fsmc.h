@@ -112,13 +112,17 @@ private:
 
 public:
     static void ConfigureSRAM(Bank b, uint16_t data_setup, uint16_t data_hold, uint16_t bus_turn) {
-
-        assert(bus_turn <= 15);
+        if (bus_turn > 15)
+            bus_turn = 15;
         assert(data_setup <= 15);
         assert(data_hold >= 1 && data_hold <= 255);
 
-        reg(b, Register::BCR) = BIT(WREN) | (Width::WORD16 << MWID) | (Type::SRAM << MTYP) | BIT(MBKEN);
-        reg(b, Register::BTR) = (bus_turn << BUSTURN) | (data_setup << ADDSET) | (data_hold << DATAST);
+        reg(b, Register::BCR) &= ~BIT(MBKEN);
+        reg(b, Register::BCR) = BIT(WREN) | (Width::WORD16 << MWID) | (Type::SRAM << MTYP)
+            | BIT(7);
+        reg(b, Register::BTR) = (bus_turn << BUSTURN) | (data_setup << ADDSET)
+            | (data_hold << DATAST);
+        reg(b, Register::BCR) |= BIT(MBKEN);
     }
 };
 

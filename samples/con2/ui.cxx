@@ -29,12 +29,7 @@ static void memstats() {
 
 // Enable panel tap interrupts
 static void EnableTapIntr() {
-    // XXX
-#if 0
-    _gpio0_intr.Clear(BIT22);
-    _gpio0_intr.EnableR(BIT22);
-    _gpio0_intr.EnableF(BIT22);
-#endif
+    Eintr::EnableInt(12);
 }
 
 enum class TapState: bool {
