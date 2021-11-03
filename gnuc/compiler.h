@@ -33,6 +33,7 @@ typedef uint32_t in_addr_t;
 #define __noinstrument gnu::no_instrument_function
 #define __novtable
 #define __noinit gnu::noinit
+#define __externally_visible gnu::externally_visible
 
 #define __section(SECT) gnu::section(SECT)
 

@@ -12,6 +12,8 @@ CONFIG ?= debug
 
 TOOLDIR=$(TOOLCHAIN)/bin
 
+release: CONFIG := release
+
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
 CFLAGS = -Os -DTRACE -DCHECK_BOUNDS=1 -funsigned-char
@@ -20,11 +22,9 @@ ifeq ($(CONFIG),debug)
 CFLAGS = -g -O0 -DTRACE -DDEBUG -funsigned-char
 AFLAGS = --defsym DEBUG=1
 endif
-
-
-release: CFLAGS = -Os -DCHECK_BOUNDS=1 -funsigned-char -fwhole-file
-
-release: CONFIG=release
+ifeq ($(CONFIG),release)
+CFLAGS = -Os -DCHECK_BOUNDS=1 -funsigned-char -fwhole-file
+endif
 
 ODIR ?= build_$(CONFIG)
 
@@ -53,7 +53,9 @@ TOUCH_ODIR=$(ODIR)/.touch
 
 CFLAGS += -I. -I$(ENETCORE) -I$(ENETCORE)/$(TOOLSET) -I$(ODIR)
 
-FATSRCS:=$(SRCS) $(patsubst %.cxx, $(ODIR)/%.cxx, $(GENSRCS))
+FATSRCS:=$(filter-out %.s, $(SRCS)) $(patsubst %.cxx, $(ODIR)/%.cxx, $(GENSRCS))
+FATASRCS:=$(filter %.s, $(SRCS))
+FATAOBJS=$(patsubst %s.,$(ODIR)/%.o, $(FATASRCS))
 
 SRCS += $(GENSRCS)
 
@@ -76,7 +78,7 @@ clean:
 
 release: $(ODIR)/release
 
-$(ODIR)/release: $(ODIR)/startup.o $(ODIR)/uidecls.h $(ODIR)/fat_src.o link.cmd
+$(ODIR)/release: $(ODIR)/startup.o $(ODIR)/uidecls.h $(FATAOBJS) $(ODIR)/fat_src.o link.cmd
 	@echo Linking $@
 	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) >>$(LOG)
 	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) 2>&1 >>$(LOG)
@@ -88,8 +90,8 @@ $(ODIR)/release: $(ODIR)/startup.o $(ODIR)/uidecls.h $(ODIR)/fat_src.o link.cmd
 $(ODIR)/fat_src.o: $(FATSRCS)
 	@mkdir -p $(ODIR_TREE)
 	@echo $<
-	@echo cat $(FATSRCS) > $(ODIR)/fat_src.cxx >>$(LOG)
-	@cat $(FATSRCS) > $(ODIR)/fat_src.cxx 2>&1 >>$(LOG)
+	@echo cat $(FATSRCS) \> $(ODIR)/fat_src.cxx >>$(LOG)
+	@cat $(FATSRCS) > $(ODIR)/fat_src.cxx 2>&1 2>>$(LOG)
 	@echo $(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx >>$(LOG)
 	@$(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx 2>&1 >>$(LOG)
 

@@ -15,7 +15,7 @@ Thread* _ui_thread;
 #endif
 
 namespace sound {
-extern Sound bell;
+extern const Sound bell;
 }
 
 template <typename T>

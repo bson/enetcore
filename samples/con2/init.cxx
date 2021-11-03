@@ -264,6 +264,7 @@ static void TouchInterrupt(void*) {
 
 
 // Hard system initialization.  Take control and prepare to run initializers.
+[[__externally_visible]]
 void hwinit0() {
     // Disable MPU
     MPU_CTRL &= ~BIT0;
@@ -290,7 +291,9 @@ void hwinit0() {
     _malloc_region.Init(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
 }
 
+
 // "Soft" system initialization.  Initializers have been run now.
+[[__externally_visible]]
 void hwinit() {
     assert((IRAM_REGION_START & 3) == 0);
     assert((IRAM_REGION_SIZE & 3) == 0);

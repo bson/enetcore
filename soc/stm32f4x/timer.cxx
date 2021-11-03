@@ -1,11 +1,10 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-21 Jan Brittenson
 // See LICENSE for details.
 
 #include "params.h"
 #include "core/enetkit.h"
 #include "soc/stm32f4x/timer.h"
 #include "core/thread.h"
-
 
 template<typename Counter>
 void Stm32Timer<Counter>::Interrupt(void* token) {
@@ -134,3 +133,14 @@ uint64_t Clock::GetTime() {
 
 template class Stm32Timer<uint32_t>;
 template class Stm32Timer<uint16_t>;
+
+// for -fwhole-file
+#undef DIER
+#undef CR1
+#undef CR2
+#undef SR
+#undef PSC
+#undef ARR
+#undef CNT
+#undef EGR
+#undef CCER
