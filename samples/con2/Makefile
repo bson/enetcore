@@ -36,7 +36,7 @@ AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map
 
 # Project components
-SRCS += main.cxx ui.cxx init.cxx
+SRCS += main.cxx ui.cxx init.cxx startup.s
 GENSRCS = buildinfo.cxx sounds.cxx
 
 # UI
@@ -55,13 +55,12 @@ CFLAGS += -I. -I$(ENETCORE) -I$(ENETCORE)/$(TOOLSET) -I$(ODIR)
 
 FATSRCS:=$(filter-out %.s, $(SRCS)) $(patsubst %.cxx, $(ODIR)/%.cxx, $(GENSRCS))
 FATASRCS:=$(filter %.s, $(SRCS))
-FATAOBJS=$(patsubst %s.,$(ODIR)/%.o, $(FATASRCS))
+FATAOBJS=$(patsubst %.s,$(ODIR)/%.o, $(FATASRCS))
 
 SRCS += $(GENSRCS)
 
 OBJS=$(patsubst %.s,$(ODIR)/%.o, $(patsubst %.cxx, $(ODIR)/%.o, $(SRCS)))
 DEPS=$(patsubst %.s,$(ODIR)/%.d, $(patsubst %.cxx, $(ODIR)/%.d, $(SRCS)))
-
 
 
 etags: TAGS
@@ -78,16 +77,16 @@ clean:
 
 release: $(ODIR)/release
 
-$(ODIR)/release: $(ODIR)/startup.o $(ODIR)/uidecls.h $(FATAOBJS) $(ODIR)/fat_src.o link.cmd
+$(ODIR)/release: $(ODIR)/uidecls.h $(FATAOBJS) $(ODIR)/fat_src.o link.cmd
 	@echo Linking $@
-	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) >>$(LOG)
-	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(ODIR)/fat_src.o $(LIBS) 2>&1 >>$(LOG)
+	@echo $(LD) $(LFLAGS) -o $@ $(FATAOBJS)$(ODIR)/fat_src.o $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(FATAOBJS) $(ODIR)/fat_src.o $(LIBS) 2>&1 >>$(LOG)
 	@echo Updating vector checksum
 	@$(CHECKSUM) $@ >>$(LOG)
 	@$(SIZE) $@ 2>&1 >>$(LOG)
 	@$(SIZE) $@
 
-$(ODIR)/fat_src.o: $(FATSRCS)
+$(ODIR)/fat_src.o: $(FATSRCS) $(TOUCH_ODIR)
 	@mkdir -p $(ODIR_TREE)
 	@echo $<
 	@echo cat $(FATSRCS) \> $(ODIR)/fat_src.cxx >>$(LOG)
@@ -95,10 +94,10 @@ $(ODIR)/fat_src.o: $(FATSRCS)
 	@echo $(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx >>$(LOG)
 	@$(CC) $(CFLAGS) -o $@ -c $(ODIR)/fat_src.cxx 2>&1 >>$(LOG)
 
-$(ODIR)/image: $(ODIR)/startup.o $(ODIR)/uidecls.h $(OBJS) link.cmd 
+$(ODIR)/image: $(ODIR)/uidecls.h $(OBJS) link.cmd 
 	@echo Linking $@
-	@echo $(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) >>$(LOG)
-	@$(LD) $(LFLAGS) -o $@ $(ODIR)/startup.o $(OBJS) $(LIBS) 2>&1 >>$(LOG)
+	@echo $(LD) $(LFLAGS) -o $@ $(OBJS) $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(OBJS) $(LIBS) 2>&1 >>$(LOG)
 	@echo Updating vector checksum
 	@$(CHECKSUM) $@ >>$(LOG)
 	@$(SIZE) $@ 2>&1 >>$(LOG)

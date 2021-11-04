@@ -14,7 +14,7 @@ Panel& GetPanel() { return _panel; }
 uint32_t PanelAccessor::_selected;
 
 // Output memory status
-static void memstats() {
+static void ShowMemstats() {
     const struct mallinfo mi = dlmallinfo();
 
     const String s = String::Format(STR("arena=%u, free chunks=%u, alloc=%u, "
@@ -161,7 +161,7 @@ void* UIThread(void*) {
         }
 
         if (now >= next_memstats) {
-            memstats();
+            ShowMemstats();
             next_memstats += Time::FromSec(5);
         }
 
