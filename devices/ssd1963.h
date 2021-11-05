@@ -146,7 +146,6 @@ public:
 
     // Set PWM brightness, only usable for modules that use the PWM
     static void SetBrightness(uint8_t b) {
-        Accessor::Select();
         Accessor::StartCommand(CMD_SET_PWM_CONF);
         Accessor::Write(0x0e);  // 300Hz @ 120MHz PLL
         Accessor::Write(b);
@@ -155,16 +154,13 @@ public:
         Accessor::Write(0);
         Accessor::Write(0);
         Accessor::EndCommand();
-        Accessor::Deselect();
     }
 
     static void AdjustCbs(uint8_t cont  = 0x40,
                           uint8_t brite = 0x80,
                           uint8_t sat   = 0x40) {
         uint8_t v[4] = { cont, brite, sat, 1 };
-        Accessor::Select();
         wcommand_barr(CMD_SET_POST_PROC, v, sizeof v);
-        Accessor::Deselect();
     }
 
     static void TestPattern();

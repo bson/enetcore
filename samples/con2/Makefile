@@ -70,7 +70,7 @@ TAGS:
 			find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
       done) | etags --language=c++ --declarations -
 
-.phony: etags clean release
+.phony: etags clean
 
 clean:
 	-rm -rf $(ODIR) TAGS
@@ -124,7 +124,7 @@ $(ODIR)/%.o: $(ODIR)/%.cxx $(ODIR_TOUCH)
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)
 
-$_TOUCH)/%.o: %.cxx $(ODIR_TOUCH)
+$(ODIR)/%.o: %.cxx $(ODIR_TOUCH)
 	@echo $<
 	@echo $(CC) $(CFLAGS) -MD -o $@ -c $< >>$(LOG)
 	@$(CC) $(CFLAGS) -MD -o $@ -c $< 2>&1 >>$(LOG)

@@ -140,10 +140,38 @@ enum {
     UART4_RECVQ_SIZE = 1024
 };
 
+// Panel is SRAM in bank 1
+#define PANEL_BANK Fsmc::Bank::BANK1
+
 enum {
-    FSMC_PANEL_BASE = 0x70000000, // Base address for bank 2
+    FSMC_PANEL_BASE = 0x60000000, // Base address for bank 1
     FSMC_PANEL_DATA = FSMC_PANEL_BASE + (1 << 16), // Data access
     FSMC_PANEL_CMD  = FSMC_PANEL_BASE              // Cmd access
+};
+
+
+// FSMC SRAM mode 1 timing
+enum {
+    PANEL_BUS_FREQ       = 10000000,  // 10MHz bus freq (5MHz write/read speed)      
+    PANEL_HCLK_PER_CYC   = HCLK/PANEL_BUS_FREQ,                 // HCLKs per bus cycle
+    PANEL_BUS_TURN_CLK   = PANEL_HCLK_PER_CYC/2,                // Bus turn HCLKs
+    PANEL_DATA_CLK       = (PANEL_HCLK_PER_CYC - PANEL_BUS_TURN_CLK), // Data cycle HCLKs
+    PANEL_DATA_SETUP_CLK = int(HCLK*4.5e-12)+1, // Data setup (actually address setup for data access)
+    PANEL_DATA_HOLD_CLK = PANEL_DATA_CLK - PANEL_DATA_SETUP_CLK // Data hold, HCLKs
+};
+
+// Timing specs from SSD1963 datasheet
+static_assert((float)PANEL_BUS_TURN_CLK / (float)HCLK >= 9e-12);   // >= 9ns bus turn
+static_assert((float)PANEL_DATA_CLK / (float)HCLK >= 9e-12);       // >= 9ns data cycle
+static_assert((float)PANEL_DATA_HOLD_CLK / (float)HCLK >= 1e-12);  // >= 1ns data hold
+static_assert((float)PANEL_DATA_SETUP_CLK / (float)HCLK >= 4e-12);  // >= 4ns data setup
+
+static_assert(PANEL_DATA_HOLD_CLK >= 1);
+static_assert(PANEL_DATA_HOLD_CLK <= 255);
+static_assert(PANEL_DATA_SETUP_CLK <= 15);
+
+enum {
+    I2C_BUS_SPEED = 100000,
 };
 
 // Enetcore configuration parameters

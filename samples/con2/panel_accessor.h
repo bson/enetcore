@@ -5,33 +5,20 @@ extern PinNegOutput<Gpio::Pin> _lcd_cs;
 
 class PanelAccessor {
 public:
-    static uint32_t _selected;
-
     [[__finline]] static void Init() {
-        Deselect();
-        _selected = 0;
-    }
-
-    [[__finline, __optimize]]
-    static void Select() {
-        if (!_selected)
-            _lcd_cs.Raise();
-        ++_selected;
-    }
-
-    [[__finline, __optimize]]
-    static void Deselect() {
-        if (!--_selected)
-            _lcd_cs.Lower();
+        _lcd_cs.Lower();
     }
 
     [[__finline, __optimize]]
     static void StartCommand(uint8_t byte) {
+        _lcd_cs.Raise();
         *(volatile uint16_t*)FSMC_PANEL_CMD = byte;
     }
 
     [[__finline, __optimize]]
-    static void EndCommand() { }
+    static void EndCommand() { 
+        _lcd_cs.Lower();
+    }
 
     [[__finline, __optimize]]
     static void Write(uint8_t byte) {

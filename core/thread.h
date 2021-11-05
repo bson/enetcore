@@ -46,11 +46,11 @@ private:
     };
 
     // These items are at fixed offsets into this structure.
-    PcbPrimitive   _pcb;        // [0x0]
+    PcbPrimitive   _pcb;        // SP [0x0]
     const char*    _name;       // Thread identifier string [0x4]
     volatile State _state;      // Thread state [0x8]
     uint8_t        _prio; // Thread priority - lowest is 0, highest 255 [0x9]
-    FPState*       _fpstate;    // Thread FP state [0xa]
+    FPState*       _fpstate;    // Thread FP state [12 0xc]
     // End of fixed offsets.
 
     const void* _waitob;        // Object thread is blocked on, if any

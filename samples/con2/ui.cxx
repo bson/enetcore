@@ -11,8 +11,6 @@
 extern EventObject _panel_tap;
 Panel& GetPanel() { return _panel; }
 
-uint32_t PanelAccessor::_selected;
-
 // Output memory status
 static void ShowMemstats() {
     const struct mallinfo mi = dlmallinfo();
@@ -121,6 +119,8 @@ void* UIThread(void*) {
     // XXX
     // _touch.Init();
     
+    _panel.SetBrightness(128);
+
 #if 1
     _panel.TestPattern();
 
@@ -136,28 +136,35 @@ void* UIThread(void*) {
     
     _panel.SetRgb(255, 255, 0);
 
-    Time next_memstats = Time::Now();
-    Time rearm_tap = Time::Now();
-    Time display = Time::Now();
+    const Time now = Time::Now();
+    Time next_memstats = now;
+    Time rearm_tap = now;
+    Time display = now;
 
     EnableTapIntr();
+    bool armed = true;
 
     for (;;) {
-        const Time next_wake = min<Time>(next_memstats, min<Time>(rearm_tap, display));
+        Time next_wake = min<Time>(next_memstats, display);
+        if (!armed)
+            next_wake = min<Time>(next_wake, rearm_tap);
 
         if (next_wake > Time::Now())
             _panel_tap.Wait(next_wake);
 
         const Time now = Time::Now();
 
-        if (now >= rearm_tap)
+        if (now >= rearm_tap) {
             EnableTapIntr();
+            armed = true;
+        }
 
         const uint state = _panel_tap.GetState();
         if (state) {
             rearm_tap = now + Time::FromMsec(TAP_DEBOUNCE_MSEC);
             HandleTap(state == 1 ? TapState::PRESSED : TapState::RELEASED);
             _panel_tap.Reset();
+            armed = false;
         }
 
         if (now >= next_memstats) {
