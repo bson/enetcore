@@ -59,7 +59,7 @@ enum {
     BASE_ADC2       = 0x40012100,
     BASE_ADC1       = 0x40012000,
     BASE_SDIO       = 0x40012C00,
-    BASE_SPI        = 0x40013000,
+    BASE_SPI1       = 0x40013000,
     BASE_SPI4       = 0x40013400,
     BASE_SYSCFG     = 0x40013800,
     BASE_EXTI       = 0x40013C00,

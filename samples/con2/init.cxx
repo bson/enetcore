@@ -58,6 +58,7 @@ Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
 
 Dac _dac(BASE_DAC);
 
+SpiBus _spi1(BASE_SPI1, APB2_CLK);
 
 #ifdef ENABLE_PANEL
 Panel _panel;
@@ -65,12 +66,13 @@ PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
 PinNegOutput<Gpio::Pin> _lcd_cs; // CS# for LCD controller
 
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
-// XXX
-//SpiDev _touch_dev(_spi0);
-//TouchController _touch(_touch_dev, 480, 272);
-#endif
+
+SpiDev _touch_dev(_spi1);
+TouchController _touch(_touch_dev, 480, 272);
+
 // Backlight
 PinNegOutput<Gpio::Pin> _panel_bl;
+#endif
 
 // ESP12E interface
 PinOutput<Gpio::Pin> _esp_boot_sel;
@@ -155,7 +157,7 @@ void ConfigurePins() {
     // 62 PD15  AF12  FSMC_D1        LCD_D1
     // 61 PD14  AF12  FSMC_D0        LCD_D0
     //
-    // #96 PB9  AF2   TIM4_CH4                 Panel backlight
+    // #96 PB9  AF2   TIM4_CH4                 Panel backlight, BL#
     // #96 PB9  AF3   TIM11_CH1
     // 96 PB9   out
     //
@@ -206,7 +208,8 @@ void ConfigurePins() {
         PINCONF(D,  0,  AF, 12, NONE, FAST),
         PINCONF(D, 15,  AF, 12, NONE, FAST),
         PINCONF(D, 14,  AF, 12, NONE, FAST),
-        PINCONF(B,  9, OUT,  0, NONE, MEDIUM),
+        //PINCONF(B,  9,  AF,  3, NONE, MEDIUM),   // TIM11_CH4
+        PINCONF(B,  9, OUT,  0, NONE, MEDIUM),     // Gpio B9
         PINCONF(A, 12,  IN,  0,  PUR, MEDIUM),
         PINCONF(B, 14,  AF,  5, NONE, MEDIUM),
         PINCONF(B, 15,  AF,  5, NONE, MEDIUM),

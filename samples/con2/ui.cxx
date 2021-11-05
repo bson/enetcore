@@ -8,7 +8,10 @@
 #include "uidecls.h"
 #include "ui/font/runes.inc"
 
+
+extern PinNegOutput<Gpio::Pin> _panel_bl;
 extern EventObject _panel_tap;
+
 Panel& GetPanel() { return _panel; }
 
 // Output memory status
@@ -63,7 +66,7 @@ static  void HandleTap(TapState state) {
                 
         DMSG("%s @ %d, %d", state == TapState::PRESSED ? "Press" : "Release", x, y);
 
-        if ((bool)state) {
+        if (state != TapState::PRESSED) {
             ui::tap::Clear();
             if (uibuilder::main_view.Tap(ui::Position(x, y))) {
                 ui::tap::_element->Highlight();
@@ -112,6 +115,8 @@ void* UIThread(void*) {
     DMSG("UI start");
 
     void Initialize();
+
+    _panel_bl.Raise();
 
     _panel.SetBackground(64, 64, 80);
     _panel.Init();
