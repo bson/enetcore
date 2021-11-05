@@ -11,6 +11,7 @@
 
 extern PinNegOutput<Gpio::Pin> _panel_bl;
 extern EventObject _panel_tap;
+extern TouchController _touch;
 
 Panel& GetPanel() { return _panel; }
 
@@ -46,8 +47,6 @@ static TapState _panel_state = TapState::RELEASED;
 // Called to handle tap on panel.  'press' is true if it's a press,
 // otherwise false on release.
 static  void HandleTap(TapState state) {
-// XXX
-#if 0
     if (state != _panel_state) {
         _panel_state = state;
 
@@ -65,7 +64,8 @@ static  void HandleTap(TapState state) {
         y /= POS_BOXCAR_AVG;
                 
         DMSG("%s @ %d, %d", state == TapState::PRESSED ? "Press" : "Release", x, y);
-
+// XXX
+#if 0
         if (state != TapState::PRESSED) {
             ui::tap::Clear();
             if (uibuilder::main_view.Tap(ui::Position(x, y))) {
@@ -76,8 +76,8 @@ static  void HandleTap(TapState state) {
                 ui::tap::Dispatch();
             }
         }
-    }
 #endif
+    }
 }
 
 
@@ -121,8 +121,7 @@ void* UIThread(void*) {
     _panel.SetBackground(64, 64, 80);
     _panel.Init();
 
-    // XXX
-    // _touch.Init();
+    _touch.Init();
     
     _panel.SetBrightness(128);
 

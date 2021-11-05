@@ -39,7 +39,8 @@ PinOutput<Gpio::Pin> _led; // Green LED
 
 Clock _clock(BASE_TIM5, APB1_TIMERCLK);
 SysTimer _systimer;
-Timer16 _tim6(BASE_TIM6, APB1_TIMERCLK);
+Timer16 _tim6(BASE_TIM6, APB1_TIMERCLK); // DAC sample clock
+Timer16 _tim11(BASE_TIM11, APB2_TIMERCLK); // LCD backlight PWM
 
 static const uint16_t _dma1_irqs[] = {
     INTR_DMA1_Stream0, INTR_DMA1_Stream1, INTR_DMA1_Stream2, INTR_DMA1_Stream3,
@@ -78,7 +79,7 @@ PinNegOutput<Gpio::Pin> _panel_bl;
 PinOutput<Gpio::Pin> _esp_boot_sel;
 PinNegOutput<Gpio::Pin> _esp_rst;
 
-//XXX INterrupt on PA2 ESP_INT (active low)
+//XXX Interrupt on PA2 ESP_INT (active low)
 PinNegOutput<Gpio::Pin> _esp_spi_cs0;
 
 // SSR switch
@@ -309,18 +310,22 @@ void hwinit() {
     // Power on/off peripherals
     ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                           | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
-    ClockTree::EnableAHB2(AHB2_RNGEN);
-    ClockTree::EnableAHB3(AHB3_FSMCEN);
-    ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
-                          | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
-    ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN);
     ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
                             | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
+
+    ClockTree::EnableAHB2(AHB2_RNGEN);
     ClockTree::EnableAHB2LP(AHB2_RNGEN);
+
+    ClockTree::EnableAHB3(AHB3_FSMCEN);
     ClockTree::EnableAHB3LP(AHB3_FSMCEN);
+
+    ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
+                          | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
     ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
                             | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
-    ClockTree::EnableAPB2LP(APB2_SYSCFGEN);
+
+    ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN | APB2_SPI1EN | APB2_TIM11EN);
+    ClockTree::EnableAPB2LP(APB2_SYSCFGEN | APB2_ADC1EN | APB2_SPI1EN | APB2_TIM11EN);
 
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();

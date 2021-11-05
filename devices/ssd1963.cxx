@@ -7,6 +7,9 @@
 #include "ui/font/runes.h"
 #include "devices/hsd04319w1_a.h" // LCD panel, defines PanelInfo
 
+#ifndef __SSD1963_CXX__
+#define __SSD1963_CXX__
+
 namespace ssd1963 {
 
 using namespace PanelInfo;
@@ -273,5 +276,7 @@ void Panel<Accessor>::TestPattern() {
 }
 
 };
+
+#endif // __SSD1963_CXX__
 
 #endif // _INLINE_CXX_

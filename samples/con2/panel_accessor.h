@@ -1,5 +1,5 @@
 #ifndef __PANEL_ACCESSOR_H__
-#define  __PANEL_ACCESSOR_H__
+#define __PANEL_ACCESSOR_H__
 
 extern PinNegOutput<Gpio::Pin> _lcd_cs;
 

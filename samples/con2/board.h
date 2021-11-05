@@ -62,8 +62,7 @@ extern SpiBus _spi1;
 typedef ssd1963::Panel<PanelAccessor> Panel;
 extern Panel _panel;
 template class ssd1963::Panel<PanelAccessor>;
-using namespace tsc2046;
-extern TouchController _touch;
+typedef tsc2046::TouchController TouchController;
 #endif
 
 #endif // __BOARD_H__

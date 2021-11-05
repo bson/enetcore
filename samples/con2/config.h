@@ -34,8 +34,6 @@
 #define TEXT_REGION_SIZE  ((uintptr_t)&_etext - TEXT_REGION_START)
 
 #ifdef ENABLE_PANEL
-///XXX
-//#define ENABLE_TSC2046
 #define UI_THREAD_TERM (UI_THREAD_STACK + THREAD_DATA_SIZE)
 #else
 #define UI_THREAD_TERM 0
