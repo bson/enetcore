@@ -33,6 +33,7 @@ typedef Stm32SpiDev SpiDev;
 
 extern NVic _nvic;
 
+extern Swo _swo;
 extern Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3;
 extern Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4;
 
@@ -55,8 +56,6 @@ extern SpiBus _spi1;
 #include "devices/tsc2046.h"
 #include "panel_accessor.h"
 #endif
-
-#define _console _usart3
 
 #ifdef ENABLE_PANEL
 typedef ssd1963::Panel<PanelAccessor> Panel;

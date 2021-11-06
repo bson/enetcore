@@ -6,9 +6,11 @@
 
 #include "core/ring.h"
 #include "core/mutex.h"
+#include "core/consumer.h"
 
 template <uint32_t SEND_BUF_SIZE = 128, uint32_t RECV_BUF_SIZE = 32>
-class Stm32Usart: public Stm32Dma::Peripheral {
+class Stm32Usart: public Stm32Dma::Peripheral,
+                  public Consumer<uint8_t> {
 public:
     enum class Register {
         USART_SR   = 0x00,
@@ -177,6 +179,11 @@ public:
 
     // Write C string
     void WriteCStr(const char* s) { Write((const uint8_t*)s, strlen(s)); }
+
+    // Consumer interface
+    void Apply(uint8_t c) { Write(&c, 1); }
+    void Apply(const uint8_t* buf, uint len) { Write(buf, len); }
+    void Apply(const String& s) { Write(s); }
 
     // Enable DMA TX
     void EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio) {

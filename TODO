@@ -217,14 +217,20 @@ Implement Stm32Eintr
 - Table based init
 - DEBUG: add checks
 
------ TODO
-
-Make ENABLE_PANEL work again
-
 Implement StmSpi
 - Bus
 - Device
 - Make compatible with Lpc Impl
+
+Implement SWO trace output (ITM async to TPIU)
+
+----- TODO
+
+Enable the backup regulator in Power
+- Set CSR.BRE, wait for CSR.BRR to get set
+- Otherwise backup SRAM is lost on Vbat
+
+Make ENABLE_PANEL work again
 
 Toggle SSR in main.cxx and measure to verify it works
   - _ssr_conduct.Raise(), _ssr_conduct.Lower()

@@ -4,9 +4,12 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
+#define ENABLE_PANEL
+#undef ENABLE_SWO
+#undef ENABLE_ESP12
+
 #undef ENABLE_ENET
 #undef ENABLE_USB
-#define ENABLE_PANEL
 #undef ENABLE_IP
 
 #define ENABLE_WFI

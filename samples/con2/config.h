@@ -4,6 +4,15 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#define _console _usart3
+
+#ifdef DEBUG
+#define _trace _usart3
+//#define _trace _swo
+#else
+#define _trace _usart3
+#endif
+
 // STM32F405 memory layout
 //
 //    0x0800 0000 Start Flash   1MB

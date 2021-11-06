@@ -21,8 +21,8 @@ void DMSG(const char* fmt, ...)
 {
 	va_list va;
 	va_start(va, fmt);
-	_console.Write(String::VFormat((const uchar*)fmt, va));
-	_console.Write(STR("\r\n"));
+	_trace.Apply(String::VFormat((const uchar*)fmt, va));
+	_trace.Apply(STR("\r\n"));
 	va_end(va);
 }
 #endif

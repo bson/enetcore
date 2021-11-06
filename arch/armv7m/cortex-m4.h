@@ -12,11 +12,11 @@ enum {
     CPUTAPID = 0x410fc241       // Cortex-M4 CPUID
 };
 
-enum {
-    NVIC_BASE     = 0xfffff000,   // CM4
-};
-
 extern "C" {
+
+#define DEV_CTL_REG_8(NAME)   extern volatile uint8_t NAME
+#define DEV_CTL_REG_16(NAME)  extern volatile uint16_t NAME
+#define DEV_CTL_REG(NAME)     extern volatile uint32_t NAME
 
 // ARM NVIC registers
 DEV_CTL_REG(ISER0);
@@ -82,6 +82,32 @@ DEV_CTL_REG(MMAR);
 DEV_CTL_REG(BFAR);
 DEV_CTL_REG(AFSR);
 
+// ARM ITM
+DEV_CTL_REG(ITM_LOCK);
+DEV_CTL_REG(ITM_TCR);
+DEV_CTL_REG(ITM_TPR);
+DEV_CTL_REG(ITM_TER);
+DEV_CTL_REG(ITM_STIM0);
+
+// ARM TPIU
+DEV_CTL_REG(TPIU_SSPSR);
+DEV_CTL_REG(TPIU_CSPSR);
+DEV_CTL_REG(TPIU_ACPR);
+DEV_CTL_REG(TPIU_SPPR);
+DEV_CTL_REG(TPIU_TYPE);
+DEV_CTL_REG(TPIU_FFMT);
+
+// ARM DEBUG
+DEV_CTL_REG(DBG_CR);
+DEV_CTL_REG(DBG_DEMCR);
+};
+
+#undef DEV_CTL_REG_8
+#undef DEV_CTL_REG_16
+#undef DEV_CTL_REG
+
+enum {
+    ITM_UNLOCK_KEY = 0xc5acce55
 };
 
 #ifdef __GNUC__

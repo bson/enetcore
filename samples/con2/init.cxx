@@ -61,6 +61,8 @@ Dac _dac(BASE_DAC);
 
 SpiBus _spi1(BASE_SPI1, APB2_CLK);
 
+Swo _swo;
+
 #ifdef ENABLE_PANEL
 Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
@@ -360,6 +362,11 @@ void hwinit() {
 #ifdef CLKOUTPIN
     // 12/2 = 6MHz on MCO1
     ClockTree::EnableMCO(ClockTree::Mco1Output::HSE, ClockTree::McoPrescaler::DIV2);
+#endif
+
+#ifdef DEBUG
+    // Enable SWO early
+    _swo.Enable(115200);
 #endif
 
 	// Initialize main thread and set up stacks

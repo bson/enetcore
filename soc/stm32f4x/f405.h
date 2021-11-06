@@ -5,6 +5,8 @@
 
 #include "arch/armv7m/nvic.h"
 #include "arch/armv7m/systick.h"
+#include "arch/armv7m/swo.h"
+
 #include "soc/stm32f4x/power.h"
 #include "soc/stm32f4x/clock_tree.h"
 #include "soc/stm32f4x/debug.h"

@@ -64,3 +64,22 @@ SYST_CSR = 0xe000e010;
 SYST_RVR = 0xe000e014;
 SYST_CVR = 0xe000e018;
 SYST_CALIB = 0xe000e01c;
+
+/* ITM */
+ITM_LOCK = 0xe0000fb0; /* LOCK, write 0xc5acce55 to unlock ITM regs */
+ITM_TCR  = 0xe0000e80; /* Trace control */
+ITM_TPR  = 0xe0000e40; /* Trace privilege */
+ITM_TER  = 0xe0000e00; /* Trace enable */
+ITM_STIM0 = 0xe0000000; /* 32x 32-bit trace ports 0-31 */
+
+/* TPIU */
+TPIU_SSPSR = 0xe0040000;
+TPIU_CSPSR = 0xe0040004;
+TPIU_ACPR  = 0xe0040010;
+TPIU_SPPR  = 0xe00400f0;
+TPIU_TYPE  = 0xe0040fc8;
+TPIU_FFMT  = 0xe0040304;
+
+/* DEBUG */
+DBG_DEMCR = 0xe000edfc;
+DBG_CR    = 0xe0042004;
