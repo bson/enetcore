@@ -71,7 +71,7 @@ public:
 
     // Initialize Thread system - must be called from main thread.
     // Returns its Thread.
-    static Thread& Bootstrap();
+    static void Bootstrap();
 
     static bool Bootstrapped() { return _bootstrapped; }
 

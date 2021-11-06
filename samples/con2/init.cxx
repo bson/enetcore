@@ -370,7 +370,7 @@ void hwinit() {
 #endif
 
 	// Initialize main thread and set up stacks
-	_main_thread = &Thread::Bootstrap();
+	Thread::Bootstrap();
 
     // Freeze WWDT while in breakpoint
     Debug::FreezeAPB1(Debug::APB1_WWDT_STOP);
@@ -436,12 +436,12 @@ void hwinit() {
 
     assert(IntEnabled());
 
-    Fsmc::ConfigureSRAM(PANEL_BANK, PANEL_DATA_SETUP_CLK, PANEL_DATA_HOLD_CLK, PANEL_BUS_TURN_CLK);
-
 #ifdef ENABLE_PANEL
+    Fsmc::ConfigureSRAM(PANEL_BANK, PANEL_DATA_SETUP_CLK,
+                        PANEL_DATA_HOLD_CLK, PANEL_BUS_TURN_CLK);
+
     // Release from reset
-// XXX
-//    _touch_dev.SetSSEL(&_t_cs);
+    _touch_dev.SetSSEL(&_t_cs);
 #endif
     _malloc_region.SetReserve(64);
 

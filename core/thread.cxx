@@ -119,7 +119,7 @@ Thread::~Thread()
 }
 
 
-Thread& Thread::Bootstrap()
+void Thread::Bootstrap()
 {
     assert(!IntEnabled());
     assert(!_curthread);
@@ -167,7 +167,7 @@ Thread& Thread::Bootstrap()
     // Add to scheduler
     _runq.PushBack(_curthread);
 
-    return *_curthread;
+    _main_thread = _curthread;
 }
 
 
