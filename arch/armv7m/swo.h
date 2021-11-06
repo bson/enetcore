@@ -5,7 +5,9 @@
 #define _SWO_H_
 
 #include "core/bits.h"
+#include "core/mutex.h"
 #include "core/consumer.h"
+#include "core/pstring.h"
 
 
 class Swo: public Consumer<uint8_t> {
@@ -36,9 +38,10 @@ class Swo: public Consumer<uint8_t> {
         TRCENA = 24,
     };
 
-public:
-    Swo() { }
+    mutable Mutex _lock;
 
+public:
+    // Global one-time enable and configuration
     void Enable(uint32_t bps) {
         const uint32_t prescaler = CCLK/bps - 1;
         assert(prescaler <= 0xffff);
@@ -50,7 +53,7 @@ public:
         // Enable all SWT/ITM/TPIU features
         DBG_DEMCR |= BIT(TRCENA);
 
-        // Configure test port 0
+        // Configure test stimulus port 0
         TPIU_CSPSR = (TPIU_CSPSR & ~0b1111) | 0b0001; // 1-bit port
         TPIU_SPPR = (TPIU_SPPR & ~0b11) | TPIU_SWO_NRZ;
         TPIU_ACPR = (TPIU_ACPR & ~0xffff) | prescaler;
@@ -68,11 +71,13 @@ public:
         ITM_LOCK = 0;
     }
 
-    static void Write(const uint8_t* buf, uint len) {
+    void Write(const uint8_t* buf, uint len) {
         assert(ITM_TCR & BIT(ITMENA));
 
+        Mutex::Scoped L(_lock);
+
         while (len--) {
-            while (!ITM_STIM0)
+            while (ITM_STIM0 & 0xff)
                 ;
 
             (volatile uint8_t&)ITM_STIM0 = *buf++;
