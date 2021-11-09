@@ -49,7 +49,7 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     x = uint(x) * _width / MAX_X;
     y = uint(y) * _height / MAX_Y;
 
-#if 0
+#if 1
     DMSG("X1: %x", vx1);
     DMSG("X2: %x", vx2);
     DMSG("Y1: %x", vy1);

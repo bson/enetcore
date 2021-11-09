@@ -18,7 +18,10 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
     assert(psc <= 256);
     assert(psc >= 2);
 
-    const uint32_t br = Util::ffs(psc) - 2;
+    uint32_t div = 256 >> 1;
+    uint16_t br;
+    for (br = 7; div > psc && br > 0; --br)
+        div >>= 1;
 
     // 0x7 - 8 bit transfer, SPI, CPOLA and CPHA according to SPI mode
     const uint32_t cpol = (mode & 2) ? 0 : BIT(CPOL);
@@ -32,7 +35,8 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
 
     const uint32_t tmp = reg(Register::DR);
 
-    DMSG("SpiBus: freq=%ukHz (%ukHz), prescaler = %u, br = %u", freq, _busclk/psc/1000, psc, br);
+    DMSG("SpiBus: freq=%uHz, speed %uHz, prescaler = %u, br = %u",
+         freq, _busclk/(1 << (br + 1)), psc, br);
 
     _mode = mode;
     _speed = freq;
@@ -46,13 +50,12 @@ void Stm32SpiBus::WaitIdle() {
 
 
 int Stm32SpiBus::SendRead(uint8_t code) {
-    WaitIdle();
+    while ((reg(Register::SR) & BIT(TXE)) == 0)
+        ;
 
-    // Clock out 0xff to facilitate read
     reg(Register::DR) = code;
 
-    // Wait for TX to finish
-    while (!(reg(Register::SR) & (BIT(TXE) | BIT(RXNE))))
+    while (reg(Register::SR) & BIT(RXNE) == 0)
         ;
     
     return reg(Register::DR);
@@ -73,8 +76,11 @@ void Stm32SpiBus::Send(const uint8_t* s, uint len) {
     }
 }
 
-void Stm32SpiBus::Send(uint8_t s) {
-    SendRead(s);
+void Stm32SpiBus::Send(uint8_t code) {
+    while ((reg(Register::SR) & BIT(TXE)) == 0)
+        ;
+
+    reg(Register::DR) = code;
 }
 
 

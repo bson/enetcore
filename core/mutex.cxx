@@ -103,8 +103,6 @@ void EventObject::Set(uint8_t new_state)
     }
 
     if (new_state && new_state != prev_state) {
-		if (_evob) _evob->Set();
-
 		if (_count) {
 			if (_mode == SELF_RESET)
 				Thread::WakeSingle(this);

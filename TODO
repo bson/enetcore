@@ -222,7 +222,7 @@ Implement StmSpi
 - Device
 - Make compatible with Lpc Impl
 
-Implement SWO trace output (ITM async to TPIU)
+Implement SWO trace output (ITM async to TPIU to TRACESWO)
 
 ----- TODO
 
@@ -270,6 +270,8 @@ Implement StmI2s (TBD - no use case, need test board)
 Implement Reset (under arch/armv7m, to use CM4 core software reset)
 
 Add MWait/MWaitFor with MWaitObject
+
+Rename cortex-m4 -> armv7m
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.

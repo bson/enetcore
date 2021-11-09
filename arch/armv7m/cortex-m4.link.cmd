@@ -66,7 +66,7 @@ SYST_CVR = 0xe000e018;
 SYST_CALIB = 0xe000e01c;
 
 /* ITM */
-ITM_LOCK = 0xe0000fb0; /* LOCK, write 0xc5acce55 to unlock ITM regs */
+ITM_LAR  = 0xe0000fb0; /* LOCK, write 0xc5acce55 to unlock ITM regs */
 ITM_TCR  = 0xe0000e80; /* Trace control */
 ITM_TPR  = 0xe0000e40; /* Trace privilege */
 ITM_TER  = 0xe0000e00; /* Trace enable */
@@ -77,8 +77,21 @@ TPIU_SSPSR = 0xe0040000;
 TPIU_CSPSR = 0xe0040004;
 TPIU_ACPR  = 0xe0040010;
 TPIU_SPPR  = 0xe00400f0;
-TPIU_TYPE  = 0xe0040fc8;
 TPIU_FFMT  = 0xe0040304;
+TPIU_FFSR  = 0xe0040300; /* Formatter and flush status */
+TPIU_FFCR  = 0xe0040304; /* Formatter and flush control */
+TPIU_FSCR  = 0xe0040308; /* Formatter synchronization counter */
+
+TPIU_TRIGGER     = 0xe0040ee8; /* TRIGGER register (RO, reset: 0x0) */
+TPIU_FIFO_data_0 = 0xe0040eec; /* Integration ETM Data (RO, reset: 0x--000000) */
+TPIU_ITATBCTR2   = 0xe0040ef0; /* ITATBCTR2 (RO, reset: 0x0) */
+TPIU_FIFO_data_1 = 0xe0040efc; /* Integration ITM Data (RO, reset: 0x--000000) */
+TPIU_ITATBCTR0   = 0xe0040ef8; /* ITATBCTR0 (RO, reset: 0x0) */
+TPIU_ITCTRL      = 0xe0040f00; /* Integration Mode Control, TPIU_ITCTRL (RW, reset: 0x0) */
+TPIU_CLAIMSET    = 0xe0040fa0; /* Claim tag set (RW, reset: 0xf) */
+TPIU_CLAIMCLR    = 0xe0040fa4; /* Claim tag clear (RW, reset: 0x0) */
+TPIU_DEVID       = 0xe0040fc8; /* TPIU_DEVID (RO, reset: 0xca0/0xca1) */
+TPIU_DEVTYPE     = 0xe0040fcc; /* TPIU_DEVTYPE (RO, reset: 0x11) */
 
 /* DEBUG */
 DBG_DEMCR = 0xe000edfc;

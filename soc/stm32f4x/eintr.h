@@ -78,7 +78,7 @@ public:
     }
 
     static void ClearPending(uint32_t pin) {
-        reg(Register::PR) &= ~BIT(pin);
+        reg(Register::PR) |= BIT(pin); // Bit is cleared by writing a '1' to it (!!!)
     }
 
     static void PostInterrupt(uint32_t pin) {

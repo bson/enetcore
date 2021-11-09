@@ -45,7 +45,7 @@ public:
     void Enable(uint32_t bps) {
         const uint32_t prescaler = CCLK/bps - 1;
         assert(prescaler <= 0xffff);
-        assert(TPIU_TYPE & BIT(11)); // UART/NRZ supported
+        assert(TPIU_DEVID & BIT(11)); // UART/NRZ supported
 
         // Enable TRACESWO pin, mode 0 = prescaled async/uart
         DBG_CR = (DBG_CR & ~((0b11 << TRACE_MODE) | BIT(TRACE_IOEN))) | BIT(TRACE_IOEN);
@@ -59,7 +59,7 @@ public:
         TPIU_ACPR = (TPIU_ACPR & ~0xffff) | prescaler;
 
         // Enable trace module
-        ITM_LOCK = ITM_UNLOCK_KEY;
+        ITM_LAR = ITM_UNLOCK_KEY;
         ITM_TCR &= ~BIT(ITMENA);
         while (ITM_TCR & BIT(BUSY))
             ;
@@ -68,7 +68,7 @@ public:
         ITM_TCR |= BIT(ITMENA);
         ITM_TPR = 0;
         ITM_TER |= BIT(PORT);
-        ITM_LOCK = 0;
+        ITM_LAR = 0;
     }
 
     void Write(const uint8_t* buf, uint len) {

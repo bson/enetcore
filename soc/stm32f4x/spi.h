@@ -81,8 +81,8 @@ class Stm32SpiBus {
     };
 
     [[__finline, __optimize]]
-    volatile uint32_t& reg(Register r) {
-        return *(volatile uint32_t*)(_base + (uint32_t)r);
+    volatile uint16_t& reg(Register r) {
+        return *(volatile uint16_t*)(_base + (uint32_t)r);
     }
 
 public:

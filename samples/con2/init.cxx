@@ -59,7 +59,7 @@ Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
 
 Dac _dac(BASE_DAC);
 
-SpiBus _spi1(BASE_SPI1, APB2_CLK);
+SpiBus _spi2(BASE_SPI2, APB2_CLK);
 
 Swo _swo;
 
@@ -67,10 +67,10 @@ Swo _swo;
 Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
 PinNegOutput<Gpio::Pin> _lcd_cs; // CS# for LCD controller
-
+Gpio::Pin _t_irq;
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 
-SpiDev _touch_dev(_spi1);
+SpiDev _touch_dev(_spi2);
 TouchController _touch(_touch_dev, 480, 272);
 
 // Backlight
@@ -216,7 +216,7 @@ void ConfigurePins() {
         PINCONF(A, 12,  IN,  0,  PUR, MEDIUM),
         PINCONF(B, 14,  AF,  5, NONE, MEDIUM),
         PINCONF(B, 15,  AF,  5, NONE, MEDIUM),
-        PINCONF(B, 12,  AF,  5, NONE, MEDIUM),
+        PINCONF(B, 12, OUT,  0, NONE, MEDIUM),
         PINCONF(B, 13,  AF,  5, NONE, MEDIUM),
         PINCONF(B,  0, ANALOG,0,NONE, LOW),
         PINCONF(B,  7, OUT,  0, NONE, LOW),
@@ -239,6 +239,7 @@ void ConfigurePins() {
     _ssr_conduct  = _gpio_c.GetPin(0);
 #ifdef ENABLE_PANEL
     _t_cs         = _gpio_b.GetPin(12);
+    _t_irq        = _gpio_a.GetPin(12);
     _lcd_cs       = _gpio_d.GetPin(7);
 #endif
 
@@ -257,13 +258,13 @@ static uint32_t _wwdt_mod;
 static void TouchInterrupt(void*) {
 #ifdef ENABLE_PANEL
     if (Eintr::Pending(12)) {
-        Eintr::DisableInt(12);
-        if (_t_cs.Test()) {
-            _panel_tap.Set(1);
-        } else {
-            _panel_tap.Set(2);
-        }
         Eintr::ClearPending(12);
+        Eintr::DisableInt(12);
+        if (_t_irq.Test()) {
+            _panel_tap.Set(2);  // Low->High
+        } else {
+            _panel_tap.Set(2);  // High->Low
+        }
     }
 #endif
 }
@@ -322,12 +323,12 @@ void hwinit() {
     ClockTree::EnableAHB3LP(AHB3_FSMCEN);
 
     ClockTree::EnableAPB1(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
-                          | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
+                          | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN | APB1_SPI2EN);
     ClockTree::EnableAPB1LP(APB1_DACEN | APB1_PWREN | APB1_UART4EN | APB1_USART3EN | APB1_TIM5EN
-                            | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN);
+                            | APB1_TIM3EN | APB1_TIM6EN | APB1_DACEN | APB1_SPI2EN);
 
-    ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN | APB2_SPI1EN | APB2_TIM11EN);
-    ClockTree::EnableAPB2LP(APB2_SYSCFGEN | APB2_ADC1EN | APB2_SPI1EN | APB2_TIM11EN);
+    ClockTree::EnableAPB2(APB2_SYSCFGEN | APB2_ADC1EN | APB2_TIM11EN);
+    ClockTree::EnableAPB2LP(APB2_SYSCFGEN | APB2_ADC1EN | APB2_TIM11EN);
 
     // Configure pins.  Don't do this before powering on GPIO.
     ConfigurePins();

@@ -24,10 +24,6 @@ CFLAGS += -Idevices $(VARIANT)  \
     -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
 	-fno-threadsafe-statics -fshort-enums
 
-ifeq ($(CONFIG),debug)
-AFLAGS += --defsym DELAY=2000
-endif
-
 LFLAGS  += -nostdlib --gc-sections -Tlink.cmd
 
 CPFLAGS = -O binary

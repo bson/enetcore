@@ -60,13 +60,6 @@ _reset:
     mov      r0, #1
     msr      primask, r0
 
-    /* delay loop */
-.ifdef DELAY
-    ldr     r0, =DELAY
-3:  subs    r0, r0, #1
-    bne     3b
-.endif
-
     /* Start main stack at top of internal RAM */
     /* May be redundant */
     ldr     r0, =__stack_top

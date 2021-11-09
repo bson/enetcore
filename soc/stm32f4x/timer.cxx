@@ -24,10 +24,10 @@ void Stm32Timer<Counter>::Interrupt(void* token) {
 template<typename Counter>
 void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t timebase, bool intr, bool trgo) {
     const uint32_t count = _timerclk / freq;
-    const Counter prescale = count / timebase;
+    const uint32_t prescale = count / timebase;
     const uint32_t full_count = count / prescale;
 
-    assert(prescale <= (Counter)~0);
+    assert(prescale <= 0xffff);
     assert(full_count <= (Counter)~0);
 
 //    DMSG("freq: %u, timebase: %u, timerclk: %u", freq, timebase, _timerclk);
@@ -53,13 +53,13 @@ void Stm32Timer<Counter>::RunTimerFreq(uint32_t freq, uint32_t timebase, bool in
 
 template<typename Counter>
 void Stm32Timer<Counter>::RunPwm(uint32_t freq) {
-    assert(PWM_PREC/freq <= (Counter)~0);
+    assert(PWM_PREC/freq <= (Counter)~0UL);
 
     const uint32_t count = _timerclk / freq;
-    const Counter prescale = count / PWM_PREC;
+    const uint32_t prescale = count / PWM_PREC;
     const uint32_t full_count = count / prescale;
 
-    assert(prescale <= (Counter)~0);
+    assert(prescale <= 0xffff);
     assert(full_count <= (Counter)~0);
 
     Thread::IPL G(IPL_CLOCK);
