@@ -79,8 +79,8 @@ public:
         _tx_size = nsamples;
         _tx_stream = stream;
         _tx_ch = dma_ch;
-        _tx_prio = prio;
-        _tx_word_size = Stm32Dma::WordSize::WORD16;
+        _prio = prio;
+        _word_size = Stm32Dma::WordSize::WORD16;
         _tx_active = false;
         _ipl = IPL_DAC;
             
@@ -89,11 +89,14 @@ public:
 
 private:
     // Transfer is complete, called in interrupt context
-    void DmaTxComplete() {  }
+    void DmaTxComplete() { }
+    void DmaRxComplete() { }
 
     // Enable or disable DMA (channel 0)
-    void DmaEnable() { reg(Register::CR) |= BIT(DMAEN1); }
-    void DmaDisable() { reg(Register::CR) &= ~BIT(DMAEN1); }
+    void DmaEnableTx() { reg(Register::CR) |= BIT(DMAEN1); }
+    void DmaDisableTx() { reg(Register::CR) &= ~BIT(DMAEN1); }
+    void DmaEnableRx() { }
+    void DmaDisableRx() { }
 };
 
 #endif // __DAC_H__

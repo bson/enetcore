@@ -66,16 +66,31 @@ int main() {
 
     DMSG("Main: blinking lights");
 
+    bool ssr = false;
+    int ssr_count = 0;
+
     Time wake = Time::Now();
     for (;;) {
+        if (++ssr_count >= 10) {
+            extern PinNegOutput<Gpio::Pin> _ssr_conduct;
+
+            ssr_count = 0;
+            if (ssr)
+                _ssr_conduct.Raise();
+            else
+                _ssr_conduct.Lower();
+
+            ssr = !ssr;
+        }
+
         _led.Raise();
         logDateTime();
-        wake += Time::FromMsec(500);
+        wake += Time::FromMsec(150);
         Thread::Sleep(wake);
 
         _led.Lower();
         logDateTime();
-        wake += Time::FromMsec(250);
+        wake += Time::FromMsec(500);
         Thread::Sleep(wake);
     }
 }

@@ -59,7 +59,9 @@ Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
 
 Dac _dac(BASE_DAC);
 
-SpiBus _spi2(BASE_SPI2, APB2_CLK);
+SpiBus _spi2(_dma1, BASE_SPI2, APB1_CLK,
+             DMA_STREAM_SPI2_TX, DMA_CHANNEL_SPI2_TX,
+             DMA_STREAM_SPI2_RX, DMA_CHANNEL_SPI2_RX);
 
 Swo _swo;
 
@@ -70,7 +72,7 @@ PinNegOutput<Gpio::Pin> _lcd_cs; // CS# for LCD controller
 Gpio::Pin _t_irq;
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 
-SpiDev _touch_dev(_spi2);
+SpiDev _touch_dev(_spi2, &_t_cs);
 TouchController _touch(_touch_dev, 480, 272);
 
 // Backlight
@@ -244,16 +246,12 @@ void ConfigurePins() {
 #endif
 
     const Stm32Eintr::EintrConf eintrconf[] = {
-//        EINTRCONF(A, 2, FALLING), // ESP_INT#
         EINTRCONF(A, 12, BOTH),   // T_INT#
         EINTRCONF(END, 0, BOTH)
     };
     Stm32Eintr::EintrConfig(eintrconf);
 }
 
-
-static uint8_t _reset_reason;
-static uint32_t _wwdt_mod;
 
 static void TouchInterrupt(void*) {
 #ifdef ENABLE_PANEL
@@ -263,12 +261,13 @@ static void TouchInterrupt(void*) {
         if (_t_irq.Test()) {
             _panel_tap.Set(2);  // Low->High
         } else {
-            _panel_tap.Set(2);  // High->Low
+            _panel_tap.Set(1);  // High->Low
         }
     }
 #endif
 }
 
+static uint8_t _reset_reason;
 
 // Hard system initialization.  Take control and prepare to run initializers.
 [[__externally_visible]]
@@ -282,10 +281,6 @@ void hwinit0() {
     // Clear all pending interrupts
     ICPR0 = ~0;
     ICPR1 = 0x1f;
-
-    // Save watchdog state
-//    volatile uint32_t *wwdt = (volatile uint32_t*)WWDT_BASE;
-//    _wwdt_mod = wwdt[0];
 
     // Set up FPU access
     Fpu::EnableAccess();
@@ -430,7 +425,7 @@ void hwinit() {
     RestoreInterrupts(0);
     SetIPL(0);
 
-    _usart3.EnableDmaTx(_dma1, DMA_STREAM_USART3, DMA_CHANNEL_USART3, DMA_PRIORITY_USART3);
+    _usart3.EnableDmaTx(_dma1, DMA_STREAM_USART3_TX, DMA_CHANNEL_USART3_TX, DMA_PRIORITY_USART3);
 
     // Turn LED back off
     _led.Lower();
@@ -440,9 +435,6 @@ void hwinit() {
 #ifdef ENABLE_PANEL
     Fsmc::ConfigureSRAM(PANEL_BANK, PANEL_DATA_SETUP_CLK,
                         PANEL_DATA_HOLD_CLK, PANEL_BUS_TURN_CLK);
-
-    // Release from reset
-    _touch_dev.SetSSEL(&_t_cs);
 #endif
     _malloc_region.SetReserve(64);
 
@@ -453,7 +445,7 @@ void hwinit() {
                                        Rtc::DayOfWeek::Saturday));
     }
 
-    DMSG("RCC_CSR: 0x%x  WWDT_MOD: 0x%x", _reset_reason, _wwdt_mod);
+    DMSG("RCC_CSR: 0x%x", _reset_reason);
     DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
     DMSG("APB1CLK: %d  APB2CLK: %d", APB1_CLK, APB2_CLK);
     DMSG("APB1TCLK: %d APB2TCLK: %d", APB1_TIMERCLK, APB2_TIMERCLK);

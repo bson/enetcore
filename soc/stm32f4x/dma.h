@@ -133,6 +133,12 @@ public:
         FTH = 0,
     };
 
+    enum Direction {
+        PTOM = 0b00,
+        MTOP = 0b01,
+        MTOM = 0b10
+    };
+
     [[__finline, __optimize]]
     volatile uint32_t& reg(Register r) {
         return *(volatile uint32_t*)(_base + (uint32_t)r);
@@ -178,36 +184,50 @@ public:
 
     class Peripheral {
     public:
-        const uint32_t _tx_dr;        // Peripheral data register address
+        const uint32_t _dr;  // Peripheral TX and RX data register address (common to RX and TX)
 
-        uint16_t _tx_size;      // Size of current or most recent transfer
+        uint16_t _tx_size;      // Size of current or most recent TX transfer
+        uint16_t _rx_size;      // Size of current or most recent RX transfer
+
         uint8_t  _tx_ch;
         uint8_t  _tx_stream;
-        Priority _tx_prio;
-        WordSize _tx_word_size;
         bool     _tx_active;
-        uint8_t  _ipl;
 
-        Peripheral(uint32_t txdr)
-            : _tx_dr(txdr),
-              _tx_prio(Priority::MEDIUM),
-              _tx_word_size(WordSize::BYTE),
+        uint8_t  _rx_ch;
+        uint8_t  _rx_stream;
+        bool     _rx_active;
+
+        Priority _prio;         // Priority, common TX and TX
+        WordSize _word_size;    // Word size, common to RX and TX
+
+        uint8_t  _ipl;          // DMA interrupt priority
+
+        Peripheral(uint32_t dr)
+            : _dr(dr),
+              _prio(Priority::MEDIUM),
+              _word_size(WordSize::BYTE),
               _tx_active(false),
+              _rx_active(false),
               _ipl(IPL_DMA) {
         }
 
         // Transfer is complete, called in interrupt context
         virtual void DmaTxComplete() = 0;
+        virtual void DmaRxComplete() = 0;
 
         // Enable or disable DMA
-        virtual void DmaEnable() = 0;
-        virtual void DmaDisable() = 0;
+        virtual void DmaEnableTx() = 0;
+        virtual void DmaDisableTx() = 0;
+
+        virtual void DmaEnableRx() = 0;
+        virtual void DmaDisableRx() = 0;
     };
 
 private:
     const uint32_t  _base;
-    Peripheral*     _handler[8];
     const uint16_t* _irq;
+    Peripheral*     _handler[8];
+    bool            _is_tx[8];  // Tracks whether stream is active for TX or RX
 
     static const uint32_t stream_to_tcif[8];
 
@@ -216,41 +236,14 @@ public:
         : _base(base), _irq(irqs) {
     };
 
-    // Transfer to peripheral
-    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords) {
-        assert(nwords <= 0xffff);
-        assert(nwords != 0);
-        assert(buf != NULL);
-        assert(p);
+    // Transfer to peripheral.
+    // If 'minc' is false, don't increment memory address - in other
+    // words, copy the word at *buf 'nwords' times.
+    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords,
+                      bool minc = true);
 
-        volatile uint32_t& cr = s_cr(p->_tx_stream);
-
-        NVic::SetIRQPriority(_irq[p->_tx_stream], p->_ipl);
-
-        Thread::IPL G(p->_ipl);
-
-        cr &= ~BIT(EN);
-        ClearTCIF(p->_tx_stream);
-
-        cr = (p->_tx_ch << CHSEL)
-            | ((uint32_t)p->_tx_prio << PL)
-            | ((uint32_t)p->_tx_word_size << MSIZE)
-            | ((uint32_t)p->_tx_word_size << PSIZE)
-            | (0b01 << DIR)
-            | BIT(MINC) | BIT(TCIE);
-
-        s_fcr(p->_tx_stream) = BIT(DMDIS);
-        s_par(p->_tx_stream) = p->_tx_dr;
-        s_m0ar(p->_tx_stream) = (uint32_t)buf;
-        s_ndtr(p->_tx_stream) = nwords;
-
-        _handler[p->_tx_stream] = p;
-
-        // Make it so
-        p->DmaEnable();
-        p->_tx_active = true;
-        cr |= BIT(EN);
-    }
+    // Transfer from peripheral
+    void PeripheralRx(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords);
 
     // Clear TCIF for stream
     void ClearTCIF(uint32_t stream);

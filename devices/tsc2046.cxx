@@ -31,15 +31,23 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     };
 
     Mutex::Scoped L(_lock);
-    SpiDev::AcquireBus G(_spi);
 
+    _spi.Acquire();
     _spi.Select();
-    _spi.Send(SAMPLE_X);
-    const int vx1 = _spi.SendRead(0);
-    const int vx2 = _spi.SendRead(SAMPLE_Y);
-    const int vy1 = _spi.SendRead(0);
-    const int vy2 = _spi.SendRead(IDLE);
+
+    static const uint8_t tx[] = {SAMPLE_X, 0, SAMPLE_Y, IDLE};
+    static uint8_t rx[4];
+
+    _spi.Transact(tx, sizeof tx, rx, sizeof rx);
+    Thread::WaitFor(&_spi);
+
+    const int vx1 = rx[0];
+    const int vx2 = rx[1];
+    const int vy1 = rx[2];
+    const int vy2 = rx[3];
+
     _spi.Deselect();
+    _spi.Release();
 
     x = max<int>((vx1 << 4) | (vx2 >> 4), MIN_X) - MIN_X;
     y = max<int>((vy1 << 4) | (vy2 >> 4), MIN_Y) - MIN_Y;
@@ -48,13 +56,6 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
 
     x = uint(x) * _width / MAX_X;
     y = uint(y) * _height / MAX_Y;
-
-#if 1
-    DMSG("X1: %x", vx1);
-    DMSG("X2: %x", vx2);
-    DMSG("Y1: %x", vy1);
-    DMSG("Y2: %x", vy2);
-#endif
 
     return vx1 != -1;
 }

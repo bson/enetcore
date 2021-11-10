@@ -3,6 +3,96 @@
 #include "soc/stm32f4x/dma.h"
 #include "arch/armv7m/nvic.h"
 
+void Stm32Dma::PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords, bool minc) {
+    assert(nwords <= 0xffff);
+    assert(nwords != 0);
+    assert(buf != NULL);
+    assert(p);
+
+    {
+        ScopedNoInt G;
+        while (_handler[p->_tx_stream])
+            Thread::WaitFor(_handler + p->_tx_stream);
+
+        _handler[p->_tx_stream] = p;
+    }
+
+    volatile uint32_t& cr = s_cr(p->_tx_stream);
+
+    NVic::SetIRQPriority(_irq[p->_tx_stream], p->_ipl);
+
+    Thread::IPL G(p->_ipl);
+
+    cr &= ~BIT(EN);
+    ClearTCIF(p->_tx_stream);
+
+    cr = (p->_tx_ch << CHSEL)
+        | ((uint32_t)p->_prio << PL)
+        | ((uint32_t)p->_word_size << MSIZE)
+        | ((uint32_t)p->_tx_size << PSIZE)
+        | (Direction::MTOP << DIR)
+        | (minc ? BIT(MINC) : 0)
+        | BIT(TCIE);
+
+    s_fcr(p->_tx_stream) = BIT(DMDIS);
+    s_par(p->_tx_stream) = p->_dr;
+    s_m0ar(p->_tx_stream) = (uint32_t)buf;
+    s_ndtr(p->_tx_stream) = nwords;
+
+    _handler[p->_tx_stream] = p;
+    _is_tx[p->_tx_stream] = true;
+
+    // Make it so
+    p->DmaEnableTx();
+    p->_tx_active = true;
+    cr |= BIT(EN);
+}
+
+// Transfer from peripheral
+void Stm32Dma::PeripheralRx(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
+    assert(nwords <= 0xffff);
+    assert(nwords != 0);
+    assert(buf != NULL);
+    assert(p);
+
+    {
+        ScopedNoInt G;
+        while (_handler[p->_rx_stream])
+            Thread::WaitFor(_handler + p->_rx_stream);
+
+        _handler[p->_rx_stream] = p;
+    }
+
+    volatile uint32_t& cr = s_cr(p->_rx_stream);
+
+    NVic::SetIRQPriority(_irq[p->_rx_stream], p->_ipl);
+
+    Thread::IPL G(p->_ipl);
+
+    cr &= ~BIT(EN);
+    ClearTCIF(p->_rx_stream);
+
+    cr = (p->_rx_ch << CHSEL)
+        | ((uint32_t)p->_prio << PL)
+        | ((uint32_t)p->_word_size << MSIZE)
+        | ((uint32_t)p->_rx_size << PSIZE)
+        | (Direction::PTOM << DIR)
+        | BIT(MINC)
+        | BIT(TCIE);
+
+    s_fcr(p->_rx_stream) = BIT(DMDIS);
+    s_par(p->_rx_stream) = p->_dr;
+    s_m0ar(p->_rx_stream) = (uint32_t)buf;
+    s_ndtr(p->_rx_stream) = nwords;
+
+    _is_tx[p->_tx_stream] = false;
+
+    // Make it so
+    p->DmaEnableRx();
+    p->_rx_active = true;
+    cr |= BIT(EN);
+}
+
 
 const uint32_t Stm32Dma::stream_to_tcif[8] = {
     BIT(TCIF0), BIT(TCIF1), BIT(TCIF2), BIT(TCIF3),
@@ -20,10 +110,18 @@ template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
         dma->reg(IFCR) |= tcif;
         dma->s_cr(STREAM) &= ~(BIT(EN) | BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
         if (handler) {
-            handler->_tx_active = false;
-            handler->DmaDisable();       // Remove DMA trigger
-            handler->DmaTxComplete();
+            if (dma->_is_tx[STREAM]) {
+                handler->_tx_active = false;
+                handler->DmaDisableTx();       // Remove DMA trigger
+                handler->DmaTxComplete();
+            } else {
+                handler->_rx_active = false;
+                handler->DmaDisableTx();
+                handler->DmaRxComplete();
+            }
         }
+        dma->_handler[STREAM] = NULL;
+        Thread::WakeSingle(dma->_handler + STREAM);
     }
 }
 

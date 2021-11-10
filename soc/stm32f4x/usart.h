@@ -197,8 +197,8 @@ public:
         _tx_dma = &dma;
         _tx_stream = stream;
         _tx_ch = ch;
-        _tx_prio = prio;
-        _tx_word_size = Stm32Dma::WordSize::BYTE;
+        _prio = prio;
+        _word_size = Stm32Dma::WordSize::BYTE;
         _tx_active = false;
 
         SetInterrupts(_ienable);
@@ -254,17 +254,22 @@ public:
         Thread::WakeSingle((void*)&_sendq);
     }
 
+    // NYI
+    void DmaRxComplete() { }
+
     // Enable disable DMA (attach, detach trigger)
-    void DmaEnable() {
+    void DmaEnableTx() {
         volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
         cr3 |= BIT(DMAT);
     }
 
-    void DmaDisable() {
+    void DmaDisableTx() {
         volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
         cr3 &= ~BIT(DMAT);
     }
 
+    void DmaEnableRx() { }
+    void DmaDisableRx() { }
 private:
 
     inline void StartTx() {

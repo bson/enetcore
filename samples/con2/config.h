@@ -130,10 +130,16 @@ enum {
 // DMA stream and channel usage
 enum {
     // DMA1
-    DMA_STREAM_USART3  = 3,
-    DMA_CHANNEL_USART3 = 4,
+    DMA_STREAM_USART3_TX  = 3,
+    DMA_CHANNEL_USART3_TX = 4,
+
     DMA_STREAM_DAC = 5,
-    DMA_CHANNEL_DAC = 7
+    DMA_CHANNEL_DAC = 7,
+
+    DMA_STREAM_SPI2_TX = 4,
+    DMA_CHANNEL_SPI2_TX = 0,
+    DMA_STREAM_SPI2_RX = 3,
+    DMA_CHANNEL_SPI2_RX = 0,
 
 #define DMA_PRIORITY_USART3  Stm32Dma::Priority::MEDIUM
 #define DMA_PRIORITY_DAC Stm32Dma::Priority::HIGH

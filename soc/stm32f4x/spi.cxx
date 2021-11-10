@@ -43,60 +43,30 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
 }
 
 
-void Stm32SpiBus::WaitIdle() {
-    while ((reg(Register::SR) & BIT(TXE)) == 0)
-        ;
-}
-
-
-int Stm32SpiBus::SendRead(uint8_t code) {
-    while ((reg(Register::SR) & BIT(TXE)) == 0)
-        ;
-
-    reg(Register::DR) = code;
-
-    while (reg(Register::SR) & BIT(RXNE) == 0)
-        ;
-    
-    return reg(Register::DR);
-}
-
-
-int Stm32SpiBus::Read() {
-    return SendRead(0xff);
-}
-
-
-void Stm32SpiBus::Send(const uint8_t* s, uint len) {
-    while (len--) {
-        while (!(reg(Register::SR) & BIT(TXE)))
-            ;
-
-        reg(Register::DR) = *s++;
-    }
-}
-
 void Stm32SpiBus::Send(uint8_t code) {
     while ((reg(Register::SR) & BIT(TXE)) == 0)
         ;
 
     reg(Register::DR) = code;
+
+    while (reg(Register::SR) & BIT(BSY))
+        ;
 }
 
 
-int Stm32SpiBus::ReadReply(uint interval, uint num_tries) {
-    while (num_tries--) {
-        const int tmp = Read();
-        if (tmp != -1) 
-            return tmp;
+void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
+                           uint8_t* rxbuf, uint32_t rxlen) {
+    while (reg(Register::SR) & BIT(BSY))
+        ;
 
-        if (interval)
-            Thread::Delay(interval);
-    }
+    // Empty RX DR, clear RXNE
+    const uint8_t tmp = reg(Register::DR);
 
-    return -1;
+    reg(Register::CR2) |= BIT(TXDMAEN) | BIT(RXDMAEN);
+
+    _dma.PeripheralRx(this, (void*)rxbuf, rxlen);
+    _dma.PeripheralTx(this, (const void*)txbuf, txlen);
 }
-
 
 #if 0
 bool Stm32SpiBus::ReadBuffer(void* buffer, uint len, CrcCCITT* crc) {
@@ -156,6 +126,13 @@ void Stm32SpiBus::Release(Stm32SpiDev *dev) {
 Stm32SpiDev::Stm32SpiDev(Stm32SpiBus& bus) :
     _bus(bus),
     _ssel(NULL),
+    _speed(100000),
+    _selected(false) {
+}
+
+Stm32SpiDev::Stm32SpiDev(Stm32SpiBus& bus, Output* ssel) :
+    _bus(bus),
+    _ssel(ssel),
     _speed(100000),
     _selected(false) {
 }

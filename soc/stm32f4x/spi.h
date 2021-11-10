@@ -4,11 +4,14 @@
 #ifndef __SPI_H__
 #define __SPI_H__
 
-//#include "soc/stm32f4x/crc.h"
+#include <stdint.h>
+#include "soc/stm32f4x/dma.h"
+
 
 // SPI bus
-class Stm32SpiBus {
-	uint32_t _base;
+class Stm32SpiBus: public Stm32Dma::Peripheral {
+	const uint32_t _base;
+    Stm32Dma& _dma;             // DMA controller
     uint32_t _speed = 0;        // Current bus speed
     uint32_t _busclk;           // SPI peripheral bus clock
     uint8_t  _mode = 0;         // Current SPI mode
@@ -86,9 +89,17 @@ class Stm32SpiBus {
     }
 
 public:
-	Stm32SpiBus(uint32_t base, uint32_t busclk)
-        : _base(base),
+	Stm32SpiBus(Stm32Dma& dma, uint32_t base, uint32_t busclk,
+                uint8_t txstream, uint8_t txch,
+                uint8_t rxstream, uint8_t rxch)
+        : Peripheral(_base + (uint32_t)Register::DR),
+          _base(base),
+          _dma(dma),
           _busclk(busclk) {
+        _tx_stream = txstream;
+        _tx_ch = txch;
+        _rx_stream = rxstream;
+        _rx_ch = rxch;
     }
 
 protected:
@@ -97,35 +108,47 @@ protected:
 	// Recomputes prescaler.  Mode is SPI mode.
 	void Configure(uint32_t mode, uint32_t freq);
 
-	// Send byte sequence
-	void Send(const uint8_t* s, uint len);
-
-	// Send byte
+	// Send single byte
 	void Send(uint8_t code);
 
-	// Read byte; returns -1 if no nothing received
-	int Read();
+    // Bus transaction.  Send txbuf, receiving rxbuf.
+    void Transact(const uint8_t* txbuf, uint32_t txlen,
+                  uint8_t* rxbuf, uint32_t rxlen);
 
-	// Read byte; returns -1 if no nothing received
-	int SendRead(uint8_t code);
-
-	// Send byte, repeating at interval, a given number of times until
-	// something is received; if so, return it.  Returns -1 if nothing
-	// was received.
-	int ReadReply(uint interval, uint num_tries);
-
-	// Read a given number of bytes, appending to buffer, computing CRC on the fly.
-	// Returns false if we had an error during the receive
-	//bool ReadBuffer(void* buffer, uint len, CrcCCITT* crc = NULL);
-
-    // Wait until idle
-    void WaitIdle();
-
-    // Acquire bus
+    // Device bus acquire
     void Acquire(class Stm32SpiDev* dev);
 
-    // Release bus
+    // Device bus release
     void Release(class Stm32SpiDev* dev);
+private:
+    // DMA TX complete
+    void DmaTxComplete() {
+        if (!_rx_active && _dev)
+            Thread::WakeSingle((void*)_dev);
+    }
+
+    // DMA RX complete
+    void DmaRxComplete() {
+        if (!_tx_active && _dev)
+            Thread::WakeSingle((void*)_dev);
+    }
+
+    // Enable disable DMA (attach, detach trigger)
+    void DmaEnableTx() {
+        reg(Register::CR2) |= BIT(TXDMAEN);
+    }
+
+    void DmaDisableTx() {
+        reg(Register::CR2) &= ~BIT(TXDMAEN);
+    }
+
+    void DmaEnableRx() {
+        reg(Register::CR2) |= BIT(RXDMAEN);
+    }
+
+    void DmaDisableRx() {
+        reg(Register::CR2) &= ~BIT(RXDMAEN);
+    }
 };
 
 
@@ -142,8 +165,10 @@ class Stm32SpiDev {
 	uint32_t     _speed;        // Speed setting
     uint8_t      _mode;         // SPI mode to use for device (0-3)
 	bool         _selected;     // Tracks whether currently selected
+
 public:
 	Stm32SpiDev(Stm32SpiBus& bus);
+	Stm32SpiDev(Stm32SpiBus& bus, Output* ssel);
 	
 	// Init is currently a no-op
     void Init() { }
@@ -153,22 +178,18 @@ public:
     void Acquire() { _bus.Acquire(this); }
     void Release() { _bus.Release(this); }
 
+    // Assert, deassert SS on _ssel
 	void Select();
 	void Deselect();
 
 	// These are delegated from bus - see SPI declaration for comments
-    void Send(const uint8_t* s, uint len) { _bus.Send(s, len); }
     void Send(const uint8_t code) { _bus.Send(code); }
-    int Read() { return _bus.Read(); }
-    int SendRead(uint8_t code) { return _bus.SendRead(code); }
-    int ReadReply(uint interval, uint num_tries) {
-		return _bus.ReadReply(interval, num_tries);
-	}
-#if 0
-    bool ReadBuffer(void* buffer, uint len, CrcCCITT* crc = NULL) {
-		return _bus.ReadBuffer(buffer, len, crc);
-	}
-#endif
+
+    void Transact(const uint8_t* txbuf, uint32_t txlen,
+                  uint8_t* rxbuf, uint32_t rxlen) {
+        _bus.Transact(txbuf, txlen, rxbuf, rxlen);
+    }
+
     class AcquireBus {
         Stm32SpiDev& _dev;
     public:
