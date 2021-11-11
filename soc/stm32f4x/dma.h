@@ -133,7 +133,7 @@ public:
         FTH = 0,
     };
 
-    enum Direction {
+    enum Direction: uint32_t {
         PTOM = 0b00 << DIR,
         MTOP = 0b01 << DIR,
         MTOM = 0b10 << DIR
@@ -169,14 +169,38 @@ public:
     volatile uint32_t& s_fcr(uint32_t stream) { return stream_reg(Register::S0FCR, stream); }
 
 public:
-    enum class Priority {
+    enum class Target: uint8_t {
+        // DMA1
+        SPI3_RX = 0, SPI2_RX, SPI2_TX, SPI3_TX, I2C1_RX, TIM7_UP, I2C1_TX,
+        TIM4_CH1, I2S3_EXT_RX, TIM4_CH2, I2S2_EXT_TX, TIM4_UP, TIM4_CH3,
+        TIM2_UP, TIM2_CH3, I2C3_RX, I2S2_EXT_RX, I2C3_TX, TIM2_CH1, TIM2_CH2, TIM2_CH4,
+        UART5_RX, USART3_RX, UART4_RX, USART3_TX, UART4_TX, USART2_RX, USART2_TX,
+        UART5_TX, TIM3_CH4, TIM3_UP, TIM3_CH1, TIM3_TRIG, TIM3_CH2, TIM3_CH3, TIM5_CH3,
+        TIM5_UP, TIM5_CH4, TIM5_TRIG, TIM5_CH1, TIM5_CH2, TIM6_UP, I2C2_RX, DAC1, DAC2,
+        I2C2_TX,
+
+        // DMA2
+        ADC1, TIM8_CH1, TIM8_CH2, TIM8_CH3, TIM1_CH1, TIM1_CH2, TIM1_CH3, DCMI, ADC2,
+        ADC3, CRYP_OUT, CRYP_IN, HASH_IN, SPI1_RX, SPI1_TX, USART1_RX, SDIO, USART1_TX,
+        USART6_RX, USART6_TX, TIM1_TRIG, TIM1_CH4, TIM1_COM, TIM1_UP, TIM8_UP, TIM8_CH4,
+        TIM8_TRIG, TIM8_COM,
+
+        NUM_TARGET,
+        END = 0xff
+    };
+
+    enum {
+        NUM_MAPPING = 3
+    };
+
+    enum class Priority: uint8_t {
         LOW = 0,
         MEDIUM = 1,
         HIGH = 2,
         VERY_HIGH = 3
     };
 
-    enum class WordSize {
+    enum class WordSize: uint8_t {
         BYTE   = 0,
         WORD16 = 1,
         WORD32 = 2
@@ -186,15 +210,18 @@ public:
     public:
         const uint32_t _dr;  // Peripheral TX and RX data register address (common to RX and TX)
 
-        uint8_t  _tx_ch;
-        uint8_t  _tx_stream;
+        const Target _tx_target; // TX target
+        const Target _rx_target; // RX target
+
+        uint8_t  _tx_stream:3;  // Assigned stream
+        uint8_t  _tx_ch:3;      // Assigned channel
         bool     _tx_active;
 
-        uint8_t  _rx_ch;
-        uint8_t  _rx_stream;
+        uint8_t  _rx_stream:3;  // Assigned stream
+        uint8_t  _rx_ch:3;      // Assigned channel
         bool     _rx_active;
 
-        Priority _prio;         // Priority, common TX and TX
+        Priority _prio;         // Priority, common to RX and TX
         WordSize _word_size;    // Word size, common to RX and TX
 
         uint8_t  _ipl;          // DMA interrupt priority
@@ -227,6 +254,11 @@ private:
     bool            _is_tx[8];  // Tracks whether stream is active for TX or RX
 
     static const uint32_t stream_to_tcif[8];
+
+    // Target to stream-channel table.  Each stream-channel pair is
+    // encoded in a byte with the stream in the high nybble and the
+    // channel in the low.  Each list is ended with a 0xff sentry.
+    static const uint8_t _target_sch[(int)Target::NUM_TARGET][NUM_MAPPING];
 
 public:
     Stm32Dma(uint32_t base, const uint16_t* irqs)
@@ -274,11 +306,13 @@ public:
     void Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords, bool minc);
     void ReleaseTx(Stm32Dma::Peripheral* p);
 
-    // Transfer from peripheral
     void AcquireRx(Stm32Dma::Peripheral* p);
     bool TryAcquireRx(Stm32Dma::Peripheral* p);
     void Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords);
     void ReleaseRx(Stm32Dma::Peripheral* p);
+
+    // Acquire both RX & TX.  Avoids deadlocking.
+    void AcquireRxTx(Stm32Dma::Peripheral* p);
 
     // Clear TCIF for stream
     void ClearTCIF(uint32_t stream);

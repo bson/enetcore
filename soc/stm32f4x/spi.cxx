@@ -64,8 +64,7 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
 
     reg(Register::CR2) |= BIT(TXDMAEN) | BIT(RXDMAEN);
 
-    _dma.AcquireTx(this);
-    _dma.AcquireRx(this);
+    _dma.AcquireRxTx(this);
     _dma.Receive(this, (void*)rxbuf, rxlen);
     _dma.Transmit(this, (const void*)txbuf, txlen, true);
     _dma.ReleaseRx(this);
