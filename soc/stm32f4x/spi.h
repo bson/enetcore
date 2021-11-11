@@ -96,10 +96,15 @@ public:
           _base(base),
           _dma(dma),
           _busclk(busclk) {
+        _word_size = Stm32Dma::WordSize::BYTE;
         _tx_stream = txstream;
         _tx_ch = txch;
         _rx_stream = rxstream;
         _rx_ch = rxch;
+        _tx_active = false;
+        _rx_active = false;
+        _prio = DMA_PRIORITY_SPI2; // XXX parameterize me
+        _ipl = IPL_DMA;            // XXX and me
     }
 
 protected:

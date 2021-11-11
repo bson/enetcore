@@ -56,7 +56,7 @@ int main() {
 
 #ifdef ENABLE_PANEL
     void* UIThread(void*);
-    _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
+//    _ui_thread = Thread::Create("ui", UIThread, NULL, UI_THREAD_STACK);
 #endif
 
     _tsense.SetUnit(_tsense.Unit::F);

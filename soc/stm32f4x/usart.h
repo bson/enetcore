@@ -107,7 +107,8 @@ private:
     bool _ienable;              // Enable interrupts
 
     // For DMA
-    Stm32Dma* _tx_dma;          // TX DMA is enabled if this != NULL
+    Stm32Dma* _dma;          // TX DMA is enabled if this != NULL
+    uint16_t _tx_size;       // Current DMA TX length
 
 public:
     Stm32Usart(const uintptr_t base)
@@ -115,7 +116,7 @@ public:
           _base(base),
           _ienable(false),
           _read_wait(0),
-          _tx_dma(NULL) {
+          _dma(NULL) {
     }
 
     template <typename T>
@@ -166,6 +167,9 @@ public:
                 while (_sendq.Headroom() && (p < data + len))
                     _sendq.PushBack(*p++);
 
+                if (_dma)
+                    _dma->AcquireTx(this);
+
                 StartTx();
             }
             if (p < data + len)
@@ -194,7 +198,7 @@ public:
         Thread::IPL G(IPL_UART);
 
         _ipl = IPL_UART;
-        _tx_dma = &dma;
+        _dma = &dma;
         _tx_stream = stream;
         _tx_ch = ch;
         _prio = prio;
@@ -227,11 +231,6 @@ public:
             StartTx();
     }
 
-	// Interrupt handler
-	static void Interrupt(void* token) {
-        ((Stm32Usart*)token)->HandleInterrupt();
-    }
-
 	// Enable interrupts
     void SetInterrupts(bool enable) {
         Mutex::Scoped L(_w_mutex);
@@ -241,10 +240,15 @@ public:
 
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         if (enable) {
-            cr1 |= (_tx_dma ? 0 : BIT(TXEIE)) | BIT(RXNEIE);
+            cr1 = (cr1 & ~BIT(TXEIE)) | (_dma ? 0 : BIT(TXEIE)) | BIT(RXNEIE);
         } else {
             cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
         }
+    }
+
+	// Interrupt handler
+	static void Interrupt(void* token) {
+        ((Stm32Usart*)token)->HandleInterrupt();
     }
 
     // DMA TX complete
@@ -259,13 +263,11 @@ public:
 
     // Enable disable DMA (attach, detach trigger)
     void DmaEnableTx() {
-        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
-        cr3 |= BIT(DMAT);
+        reg<volatile uint32_t>(Register::USART_CR3) |= BIT(DMAT);
     }
 
     void DmaDisableTx() {
-        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
-        cr3 &= ~BIT(DMAT);
+        reg<volatile uint32_t>(Register::USART_CR3) &= ~BIT(DMAT);
     }
 
     void DmaEnableRx() { }
@@ -273,19 +275,18 @@ public:
 private:
 
     inline void StartTx() {
-        if (_tx_dma) {
+        if (_dma) {
             if (!_sendq.Empty()) {
-                if (!_tx_active) {
-                    _tx_size = _sendq.Continuous();
-                    _tx_dma->PeripheralTx(this, _sendq.Buffer(), _tx_size);
-                }
+                if (!_tx_active)
+                    _dma->Transmit(this, _sendq.Buffer(), (_tx_size = _sendq.Continuous()),
+                                   true);
             } else {
                 _sendq.Clear();     // Normalize
+                _dma->ReleaseTx(this);
             }
 
             // Just in case we got here on a TXE interrupt, right after enabling DMA
-            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-            cr1 &= ~BIT(TXEIE);
+            reg<volatile uint32_t>(Register::USART_CR1) &= ~BIT(TXEIE);
             return;
         }
 

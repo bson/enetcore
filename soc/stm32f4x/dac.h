@@ -73,10 +73,9 @@ public:
                 Stm32Dma::Priority prio) {
         volatile uint32_t& cr = reg(Register::CR);
         cr &= ~BIT(EN1);
-        cr = /* BIT(BOFF1)  |*/ BIT(TEN1) | (uint32_t)t | BIT(DMAEN1);
-        cr |=  BIT(EN1);
+        cr =  BIT(BOFF1) | BIT(TEN1) | (uint32_t)t | BIT(DMAEN1);
+        cr |= BIT(EN1);
 
-        _tx_size = nsamples;
         _tx_stream = stream;
         _tx_ch = dma_ch;
         _prio = prio;
@@ -84,7 +83,9 @@ public:
         _tx_active = false;
         _ipl = IPL_DAC;
             
-        dma.PeripheralTx(this, data, nsamples);
+        dma.AcquireTx(this);
+        dma.Transmit(this, data, nsamples, true);
+        dma.ReleaseTx(this);
     }
 
 private:

@@ -134,9 +134,9 @@ public:
     };
 
     enum Direction {
-        PTOM = 0b00,
-        MTOP = 0b01,
-        MTOM = 0b10
+        PTOM = 0b00 << DIR,
+        MTOP = 0b01 << DIR,
+        MTOM = 0b10 << DIR
     };
 
     [[__finline, __optimize]]
@@ -186,9 +186,6 @@ public:
     public:
         const uint32_t _dr;  // Peripheral TX and RX data register address (common to RX and TX)
 
-        uint16_t _tx_size;      // Size of current or most recent TX transfer
-        uint16_t _rx_size;      // Size of current or most recent RX transfer
-
         uint8_t  _tx_ch;
         uint8_t  _tx_stream;
         bool     _tx_active;
@@ -234,16 +231,54 @@ private:
 public:
     Stm32Dma(uint32_t base, const uint16_t* irqs)
         : _base(base), _irq(irqs) {
+        memset(_handler, 0, sizeof _handler);
+        memset(_is_tx, 0, sizeof _is_tx);
     };
 
-    // Transfer to peripheral.
-    // If 'minc' is false, don't increment memory address - in other
-    // words, copy the word at *buf 'nwords' times.
-    void PeripheralTx(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords,
-                      bool minc = true);
+    // Peripheral transfers
+    //
+    // The device needs to first acquire the DMA stream, via the
+    // AcquireTx/Rx() calls.  These will block and return with the
+    // stream acquired; it is now in the possession of the specified
+    // peripheral. Because it blocks it can only be called from a thread
+    // context.
+    //
+    // Transmit/Receive can then be issued to perform transfers.  When
+    // complete, Peripheral::DmaTxComplete/RxComplete will be called
+    // in the DMA interrupt handler context. At this point the device
+    // can issue additional Receive/Transmit transfers on the stream.
+    // These can be called from an interrupt context, such as the
+    // aforementioned DmaTxComplete/RxComplete functions.
+    //
+    // When finished with the stream, the device must call
+    // ReleaseTx/ReleaseTx.  This will wake the next thread waiting to
+    // acquire the stream.
+    //
+    // For Transmit(), if 'minc' is false, don't increment memory
+    // address - in other words, copy the word at *buf 'nwords' times.
+    // this permits transmitting a single value to a peripheral.  This
+    // is mainly useful for large SPI reads where a '0' or 'ff' is
+    // clocked out while capturing Rx.
+    //
+    // TryAcquireTx/TryAcquireRx are like AcquireTx/AcquireTx, but
+    // won't block. They return true if the stream was acquired,
+    // otherwise false.
+    //
+    // Technically only the Acquire methods require the Peripheral*
+    // 'p' parameter.  But the others accept it to detect
+    // inconsistencies that would produce extremely difficult to track
+    // down bugs by asserting the peripheral is holding the stream.
+    //
+    void AcquireTx(Stm32Dma::Peripheral* p);
+    bool TryAcquireTx(Stm32Dma::Peripheral* p);
+    void Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords, bool minc);
+    void ReleaseTx(Stm32Dma::Peripheral* p);
 
     // Transfer from peripheral
-    void PeripheralRx(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords);
+    void AcquireRx(Stm32Dma::Peripheral* p);
+    bool TryAcquireRx(Stm32Dma::Peripheral* p);
+    void Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords);
+    void ReleaseRx(Stm32Dma::Peripheral* p);
 
     // Clear TCIF for stream
     void ClearTCIF(uint32_t stream);
