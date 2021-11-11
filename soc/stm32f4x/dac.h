@@ -48,8 +48,9 @@ class Stm32Dac: public Stm32Dma::Peripheral {
     }
 
 public:
-    Stm32Dac(uint32_t base)
-        : Peripheral(base + (uint32_t)Register::DHR12R1),
+    Stm32Dac(uint32_t base,
+             Stm32Dma::Target txtarg)
+        : Peripheral(base + (uint32_t)Register::DHR12R1, txtarg),
           _base(base) {
     }
 
@@ -76,14 +77,11 @@ public:
         cr =  BIT(BOFF1) | BIT(TEN1) | (uint32_t)t | BIT(DMAEN1);
         cr |= BIT(EN1);
 
-        _tx_stream = stream;
-        _tx_ch = dma_ch;
         _prio = prio;
         _word_size = Stm32Dma::WordSize::WORD16;
-        _tx_active = false;
         _ipl = IPL_DAC;
             
-        dma.AcquireTx(this);
+        dma.AssignTx(this);
         dma.Transmit(this, data, nsamples, true);
         dma.ReleaseTx(this);
     }

@@ -90,21 +90,17 @@ class Stm32SpiBus: public Stm32Dma::Peripheral {
 
 public:
 	Stm32SpiBus(Stm32Dma& dma, uint32_t base, uint32_t busclk,
-                uint8_t txstream, uint8_t txch,
-                uint8_t rxstream, uint8_t rxch)
-        : Peripheral(_base + (uint32_t)Register::DR),
+                Stm32Dma::Target txtarg
+                , Stm32Dma::Target rxtarg)
+        : Peripheral(_base + (uint32_t)Register::DR, txtarg, rxtarg),
           _base(base),
           _dma(dma),
           _busclk(busclk) {
         _word_size = Stm32Dma::WordSize::BYTE;
-        _tx_stream = txstream;
-        _tx_ch = txch;
-        _rx_stream = rxstream;
-        _rx_ch = rxch;
-        _tx_active = false;
-        _rx_active = false;
         _prio = DMA_PRIORITY_SPI2; // XXX parameterize me
         _ipl = IPL_DMA;            // XXX and me
+        _tx._active = false;
+        _rx._active = false;
     }
 
 protected:
@@ -128,13 +124,13 @@ protected:
 private:
     // DMA TX complete
     void DmaTxComplete() {
-        if (!_rx_active && _dev)
+        if (!_rx._active && _dev)
             Thread::WakeSingle((void*)_dev);
     }
 
     // DMA RX complete
     void DmaRxComplete() {
-        if (!_tx_active && _dev)
+        if (!_tx._active && _dev)
             Thread::WakeSingle((void*)_dev);
     }
 

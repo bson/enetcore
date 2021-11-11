@@ -1,8 +1,7 @@
-#include <stdint.h>
-
 // Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
+#include <stdint.h>
 #include "core/enetcore.h"
 #include "core/thread.h"
 #include "core/util.h"
@@ -64,7 +63,7 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
 
     reg(Register::CR2) |= BIT(TXDMAEN) | BIT(RXDMAEN);
 
-    _dma.AcquireRxTx(this);
+    _dma.AssignRxTx(this);
     _dma.Receive(this, (void*)rxbuf, rxlen);
     _dma.Transmit(this, (const void*)txbuf, txlen, true);
     _dma.ReleaseRx(this);

@@ -111,8 +111,11 @@ private:
     uint16_t _tx_size;       // Current DMA TX length
 
 public:
-    Stm32Usart(const uintptr_t base)
-        : Peripheral(base + (uint32_t)Register::USART_DR),
+    Stm32Usart(const uintptr_t base,
+               Stm32Dma::Target txtarg,
+               Stm32Dma::Target rxtarg)
+        : Peripheral(base + (uint32_t)Register::USART_DR,
+                     txtarg, rxtarg),
           _base(base),
           _ienable(false),
           _read_wait(0),
@@ -168,7 +171,7 @@ public:
                     _sendq.PushBack(*p++);
 
                 if (_dma)
-                    _dma->AcquireTx(this);
+                    _dma->AssignTx(this);
 
                 StartTx();
             }
@@ -176,7 +179,6 @@ public:
                 Thread::WaitFor((void*)&_sendq);
         }
     }
-
 
 	// Write string
 	void Write(const String& s) { Write(s.CStr(), s.Size()); }
@@ -199,11 +201,9 @@ public:
 
         _ipl = IPL_UART;
         _dma = &dma;
-        _tx_stream = stream;
-        _tx_ch = ch;
         _prio = prio;
         _word_size = Stm32Dma::WordSize::BYTE;
-        _tx_active = false;
+        _tx._active = false;
 
         SetInterrupts(_ienable);
     }
@@ -277,7 +277,7 @@ private:
     inline void StartTx() {
         if (_dma) {
             if (!_sendq.Empty()) {
-                if (!_tx_active)
+                if (!_tx._active)
                     _dma->Transmit(this, _sendq.Buffer(), (_tx_size = _sendq.Continuous()),
                                    true);
             } else {

@@ -186,6 +186,7 @@ public:
         TIM8_TRIG, TIM8_COM,
 
         NUM_TARGET,
+        NOT_USED = NUM_TARGET,
         END = 0xff
     };
 
@@ -210,29 +211,30 @@ public:
     public:
         const uint32_t _dr;  // Peripheral TX and RX data register address (common to RX and TX)
 
-        const Target _tx_target; // TX target
-        const Target _rx_target; // RX target
+        struct Assignment {
+            Target  _target;
+            uint8_t _stream:3;  // Assigned stream
+            uint8_t _ch:3;      // Assigned channel
+            bool    _active;    // Transfer active (used by peripheral)
+        };
 
-        uint8_t  _tx_stream:3;  // Assigned stream
-        uint8_t  _tx_ch:3;      // Assigned channel
-        bool     _tx_active;
-
-        uint8_t  _rx_stream:3;  // Assigned stream
-        uint8_t  _rx_ch:3;      // Assigned channel
-        bool     _rx_active;
+        Assignment _tx;
+        Assignment _rx;
 
         Priority _prio;         // Priority, common to RX and TX
         WordSize _word_size;    // Word size, common to RX and TX
 
         uint8_t  _ipl;          // DMA interrupt priority
 
-        Peripheral(uint32_t dr)
+        Peripheral(uint32_t dr, Target txtarg, Target rxtarg = Target::NOT_USED)
             : _dr(dr),
               _prio(Priority::MEDIUM),
               _word_size(WordSize::BYTE),
-              _tx_active(false),
-              _rx_active(false),
               _ipl(IPL_DMA) {
+            _tx._target = txtarg;
+            _rx._target = rxtarg;
+            _tx._active = false;
+            _rx._active = false;
         }
 
         // Transfer is complete, called in interrupt context
@@ -250,7 +252,7 @@ public:
 private:
     const uint32_t  _base;
     const uint16_t* _irq;
-    Peripheral*     _handler[8];
+    Peripheral*     _assignment[8];
     bool            _is_tx[8];  // Tracks whether stream is active for TX or RX
 
     static const uint32_t stream_to_tcif[8];
@@ -263,17 +265,18 @@ private:
 public:
     Stm32Dma(uint32_t base, const uint16_t* irqs)
         : _base(base), _irq(irqs) {
-        memset(_handler, 0, sizeof _handler);
+        memset(_assignment, 0, sizeof _assignment);
         memset(_is_tx, 0, sizeof _is_tx);
     };
 
     // Peripheral transfers
     //
     // The device needs to first acquire the DMA stream, via the
-    // AcquireTx/Rx() calls.  These will block and return with the
+    // AssignTx/Rx() calls.  These will block and return with the
     // stream acquired; it is now in the possession of the specified
     // peripheral. Because it blocks it can only be called from a thread
-    // context.
+    // context. The stream picked is the first available from the
+    // stream-channel pairs for the target in _tx_target, _rx_target.
     //
     // Transmit/Receive can then be issued to perform transfers.  When
     // complete, Peripheral::DmaTxComplete/RxComplete will be called
@@ -292,27 +295,30 @@ public:
     // is mainly useful for large SPI reads where a '0' or 'ff' is
     // clocked out while capturing Rx.
     //
-    // TryAcquireTx/TryAcquireRx are like AcquireTx/AcquireTx, but
+    // TryAssignTx/TryAssignRx are like AssignTx/AssignTx, but
     // won't block. They return true if the stream was acquired,
     // otherwise false.
     //
-    // Technically only the Acquire methods require the Peripheral*
+    // Technically only the Assign methods require the Peripheral*
     // 'p' parameter.  But the others accept it to detect
     // inconsistencies that would produce extremely difficult to track
     // down bugs by asserting the peripheral is holding the stream.
     //
-    void AcquireTx(Stm32Dma::Peripheral* p);
-    bool TryAcquireTx(Stm32Dma::Peripheral* p);
-    void Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nwords, bool minc);
-    void ReleaseTx(Stm32Dma::Peripheral* p);
+    void AssignTx(Peripheral* p);
+    bool TryAssignTx(Peripheral* p);
+    void Transmit(Peripheral* p, const void* buf, uint16_t nwords, bool minc);
+    void ReleaseTx(Peripheral* p);
 
-    void AcquireRx(Stm32Dma::Peripheral* p);
-    bool TryAcquireRx(Stm32Dma::Peripheral* p);
-    void Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords);
-    void ReleaseRx(Stm32Dma::Peripheral* p);
+    void AssignRx(Peripheral* p);
+    bool TryAssignRx(Peripheral* p);
+    void Receive(Peripheral* p, void* buf, uint16_t nwords);
+    void ReleaseRx(Peripheral* p);
 
-    // Acquire both RX & TX.  Avoids deadlocking.
-    void AcquireRxTx(Stm32Dma::Peripheral* p);
+    // Assign both RX & TX.  Avoids deadlocking.
+    void AssignRxTx(Stm32Dma::Peripheral* p);
+
+    // Underlying implementation
+    bool TryAssign(Peripheral* p, Peripheral::Assignment& asn, bool istx);
 
     // Clear TCIF for stream
     void ClearTCIF(uint32_t stream);

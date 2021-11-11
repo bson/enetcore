@@ -4,34 +4,50 @@
 #include "arch/armv7m/nvic.h"
 
 
-void Stm32Dma::AcquireTx(Stm32Dma::Peripheral* p) {
+void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
     assert(p);
 
     ScopedNoInt G;
-    while (!TryAcquireTx(p))
-        Thread::WaitFor(_handler + p->_tx_stream);
+    while (!TryAssignTx(p))
+        Thread::WaitFor(_assignment);
 }
 
 
-bool Stm32Dma::TryAcquireTx(Stm32Dma::Peripheral* p) {
+bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
+                          Stm32Dma::Peripheral::Assignment& asn,
+                          bool istx) {
     assert(p);
+    assert(asn._target < Target::NUM_TARGET);
 
     ScopedNoInt G;
-    if (_handler[p->_tx_stream] && _handler[p->_tx_stream] != p)
-        return false;
+    for (const uint8_t* sch = _target_sch[(uint)asn._target];
+         sch < _target_sch[(uint)asn._target] + NUM_MAPPING && *sch != 0xff;
+         ++sch) {
+        const uint8_t stream = *sch >> 4;
+        if (!_assignment[stream] || _assignment[stream] == p) {
+            const uint8_t ch = *sch & 0xf;
+            _assignment[stream] = p;
+            _is_tx[stream] = istx;
+            asn._stream = stream;
+            asn._ch = ch;
+            return true;
+        }
+    }
 
-    _handler[p->_tx_stream] = p;
-    _is_tx[p->_tx_stream] = true;
-    return true;
+    return false;
+}
+
+bool Stm32Dma::TryAssignTx(Stm32Dma::Peripheral* p) {
+    return TryAssign(p, p->_tx, true);
 }
 
 
 void Stm32Dma::ReleaseTx(Stm32Dma::Peripheral* p) {
-    assert(p == _handler[p->_tx_stream]);
+    assert(p == _assignment[p->_tx._stream]);
 
     ScopedNoInt G;
-    _handler[p->_tx_stream] = NULL;
-    Thread::WakeSingle(_handler + p->_tx_stream);
+    _assignment[p->_tx._stream] = NULL;
+    Thread::WakeAll(_assignment);
 }
 
 
@@ -39,19 +55,21 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
     assert(nwords <= 0xffff);
     assert(nwords != 0);
     assert(buf != NULL);
-    assert(p == _handler[p->_tx_stream]);
-    assert(!p->_tx_active);
+    assert(!p->_tx._active);
 
-    volatile uint32_t& cr = s_cr(p->_tx_stream);
+    const uint32_t stream = p->_tx._stream;
+    assert(p == _assignment[stream]);
 
-    NVic::SetIRQPriority(_irq[p->_tx_stream], p->_ipl);
+    volatile uint32_t& cr = s_cr(stream);
+
+    NVic::SetIRQPriority(_irq[stream], p->_ipl);
 
     Thread::IPL G(p->_ipl);
 
     cr &= ~BIT(EN);
-    ClearTCIF(p->_tx_stream);
+    ClearTCIF(stream);
 
-    cr = (p->_tx_ch << CHSEL)
+    cr = ((uint32_t)p->_tx._ch << CHSEL)
         | ((uint32_t)p->_prio << PL)
         | ((uint32_t)p->_word_size << MSIZE)
         | ((uint32_t)p->_word_size << PSIZE)
@@ -59,46 +77,29 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
         | (minc ? BIT(MINC) : 0)
         | BIT(TCIE);
 
-    s_fcr(p->_tx_stream) = BIT(DMDIS);
-    s_par(p->_tx_stream) = p->_dr;
-    s_m0ar(p->_tx_stream) = (uint32_t)buf;
-    s_ndtr(p->_tx_stream) = nwords;
+    s_fcr(stream) = BIT(DMDIS);
+    s_par(stream) = p->_dr;
+    s_m0ar(stream) = (uint32_t)buf;
+    s_ndtr(stream) = nwords;
 
     // Make it so
     p->DmaEnableTx();
-    p->_tx_active = true;
+    p->_tx._active = true;
     cr |= BIT(EN);
 }
 
 
-void Stm32Dma::AcquireRx(Stm32Dma::Peripheral* p) {
-    assert(p);
-
-    ScopedNoInt G;
-    while (!TryAcquireRx(p))
-        Thread::WaitFor(_handler + p->_rx_stream);
-}
-
-
-bool Stm32Dma::TryAcquireRx(Stm32Dma::Peripheral* p) {
-    assert(p);
-
-    ScopedNoInt G;
-    if (_handler[p->_rx_stream] && _handler[p->_rx_stream] != p)
-        return false;
-
-    _handler[p->_rx_stream] = p;
-    _is_tx[p->_rx_stream] = false;
-    return true;
+bool Stm32Dma::TryAssignRx(Stm32Dma::Peripheral* p) {
+    return TryAssign(p, p->_rx, false);
 }
 
 
 void Stm32Dma::ReleaseRx(Stm32Dma::Peripheral* p) {
-    assert(p == _handler[p->_rx_stream]);
+    assert(p == _assignment[p->_rx._stream]);
 
     ScopedNoInt G;
-    _handler[p->_rx_stream] = NULL;
-    Thread::WakeSingle(_handler + p->_rx_stream);
+    _assignment[p->_tx._stream] = NULL;
+    Thread::WakeAll(_assignment);
 }
 
 
@@ -106,19 +107,21 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
     assert(nwords <= 0xffff);
     assert(nwords != 0);
     assert(buf != NULL);
-    assert(p == _handler[p->_rx_stream]);
-    assert(!p->_rx_active);
+    assert(!p->_rx._active);
 
-    volatile uint32_t& cr = s_cr(p->_rx_stream);
+    const uint32_t stream = p->_rx._stream;
+    assert(p == _assignment[stream]);
 
-    NVic::SetIRQPriority(_irq[p->_rx_stream], p->_ipl);
+    volatile uint32_t& cr = s_cr(stream);
+
+    NVic::SetIRQPriority(_irq[stream], p->_ipl);
 
     Thread::IPL G(p->_ipl);
 
     cr &= ~BIT(EN);
-    ClearTCIF(p->_rx_stream);
+    ClearTCIF(stream);
 
-    cr = (p->_rx_ch << CHSEL)
+    cr = ((uint32_t)p->_rx._ch << CHSEL)
         | ((uint32_t)p->_prio << PL)
         | ((uint32_t)p->_word_size << MSIZE)
         | ((uint32_t)p->_word_size << PSIZE)
@@ -126,25 +129,25 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
         | BIT(MINC)
         | BIT(TCIE);
 
-    s_fcr(p->_rx_stream) = BIT(DMDIS);
-    s_par(p->_rx_stream) = p->_dr;
-    s_m0ar(p->_rx_stream) = (uint32_t)buf;
-    s_ndtr(p->_rx_stream) = nwords;
+    s_fcr(stream) = BIT(DMDIS);
+    s_par(stream) = p->_dr;
+    s_m0ar(stream) = (uint32_t)buf;
+    s_ndtr(stream) = nwords;
 
     // Make it so
     p->DmaEnableRx();
-    p->_rx_active = true;
+    p->_rx._active = true;
     cr |= BIT(EN);
 }
 
 
-void Stm32Dma::AcquireRxTx(Stm32Dma::Peripheral* p) {
-    if (p->_tx_stream > p->_rx_stream) {
-        AcquireTx(p);
-        AcquireRx(p);
+void Stm32Dma::AssignRxTx(Stm32Dma::Peripheral* p) {
+    if (p->_tx._target > p->_rx._target) {
+        AssignTx(p);
+        AssignRx(p);
     } else {
-        AcquireRx(p);
-        AcquireTx(p);
+        AssignRx(p);
+        AssignTx(p);
     }
 }
 
@@ -162,16 +165,16 @@ template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
 
     const uint32_t tcif = stream_to_tcif[STREAM];
     if (dma->reg(ISR) & tcif) {
-        Peripheral* handler = dma->_handler[STREAM];
+        Peripheral* handler = dma->_assignment[STREAM];
         dma->reg(IFCR) |= tcif;
         dma->s_cr(STREAM) &= ~(BIT(EN) | BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
         if (handler) {
             if (dma->_is_tx[STREAM]) {
-                handler->_tx_active = false;
+                handler->_tx._active = false;
                 handler->DmaDisableTx();       // Remove DMA trigger
                 handler->DmaTxComplete();
             } else {
-                handler->_rx_active = false;
+                handler->_rx._active = false;
                 handler->DmaDisableRx();
                 handler->DmaRxComplete();
             }
@@ -286,3 +289,4 @@ const uint8_t Stm32Dma::_target_sch[(int)Stm32Dma::Target::NUM_TARGET][Stm32Dma:
 
 #undef S
 #undef E
+#undef T

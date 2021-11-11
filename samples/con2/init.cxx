@@ -54,14 +54,15 @@ static const uint16_t _dma2_irqs[] = {
 Dma _dma1(BASE_DMA1, _dma1_irqs);
 Dma _dma2(BASE_DMA2, _dma2_irqs);
 
-Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3(BASE_USART3);
-Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4(BASE_UART4);
+Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE>
+_usart3(BASE_USART3, Dma::Target::USART3_TX, Dma::Target::USART3_RX);
 
-Dac _dac(BASE_DAC);
+Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE>
+_uart4(BASE_UART4, Dma::Target::UART4_TX, Dma::Target::UART4_RX);
 
-SpiBus _spi2(_dma1, BASE_SPI2, APB1_CLK,
-             DMA_STREAM_SPI2_TX, DMA_CHANNEL_SPI2_TX,
-             DMA_STREAM_SPI2_RX, DMA_CHANNEL_SPI2_RX);
+Dac _dac(BASE_DAC, Dma::Target::DAC1);
+
+SpiBus _spi2(_dma1, BASE_SPI2, APB1_CLK, Dma::Target::SPI2_TX, Dma::Target::SPI2_RX);
 
 Swo _swo;
 
