@@ -90,8 +90,8 @@ class Stm32SpiBus: public Stm32Dma::Peripheral {
 
 public:
 	Stm32SpiBus(Stm32Dma& dma, uint32_t base, uint32_t busclk,
-                Stm32Dma::Target txtarg
-                , Stm32Dma::Target rxtarg)
+                Stm32Dma::Target txtarg,
+                Stm32Dma::Target rxtarg)
         : Peripheral(_base + (uint32_t)Register::DR, txtarg, rxtarg),
           _base(base),
           _dma(dma),
@@ -110,7 +110,7 @@ protected:
 	void Configure(uint32_t mode, uint32_t freq);
 
 	// Send single byte
-	void Send(uint8_t code);
+	uint8_t Send(uint8_t code);
 
     // Bus transaction.  Send txbuf, receiving rxbuf.
     void Transact(const uint8_t* txbuf, uint32_t txlen,
@@ -121,6 +121,7 @@ protected:
 
     // Device bus release
     void Release(class Stm32SpiDev* dev);
+
 private:
     // DMA TX complete
     void DmaTxComplete() {

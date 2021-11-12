@@ -41,13 +41,13 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     _spi.Transact(tx, sizeof tx, rx, sizeof rx);
     Thread::WaitFor(&_spi);
 
+    _spi.Deselect();
+    _spi.Release();
+
     const int vx1 = rx[0];
     const int vx2 = rx[1];
     const int vy1 = rx[2];
     const int vy2 = rx[3];
-
-    _spi.Deselect();
-    _spi.Release();
 
     x = max<int>((vx1 << 4) | (vx2 >> 4), MIN_X) - MIN_X;
     y = max<int>((vy1 << 4) | (vy2 >> 4), MIN_Y) - MIN_Y;

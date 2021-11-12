@@ -23,13 +23,14 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
         div >>= 1;
 
     // 0x7 - 8 bit transfer, SPI, CPOLA and CPHA according to SPI mode
-    const uint32_t cpol = (mode & 2) ? 0 : BIT(CPOL);
-    const uint32_t cpha = (mode & 1) ? BIT(CPHA) : 0;
+    const uint32_t cpol = (mode == 2 || mode == 3) ? BIT(CPOL) : 0;
+    const uint32_t cpha = (mode == 1 || mode == 2) ? BIT(CPHA) : 0;
 
     while (reg(Register::SR) & BIT(BSY))
         ;
 
-    reg(Register::CR1) = cpol | cpha | BIT(MSTR) | (br << BR) | BIT(SPE);
+    reg(Register::CR1) = cpol | cpha | BIT(MSTR) | (br << BR)
+        | BIT(SSI) | BIT(SSM) | BIT(SPE);
     reg(Register::CR2) = 0;
 
     const uint32_t tmp = reg(Register::DR);
@@ -42,7 +43,7 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
 }
 
 
-void Stm32SpiBus::Send(uint8_t code) {
+uint8_t Stm32SpiBus::Send(uint8_t code) {
     while ((reg(Register::SR) & BIT(TXE)) == 0)
         ;
 
@@ -50,6 +51,8 @@ void Stm32SpiBus::Send(uint8_t code) {
 
     while (reg(Register::SR) & BIT(BSY))
         ;
+
+    return reg(Register::DR);
 }
 
 
@@ -61,7 +64,9 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
     // Empty RX DR, clear RXNE
     const uint8_t tmp = reg(Register::DR);
 
+    reg(Register::CR1) &= ~BIT(SPE);
     reg(Register::CR2) |= BIT(TXDMAEN) | BIT(RXDMAEN);
+    reg(Register::CR1) |= BIT(SPE);
 
     _dma.AssignRxTx(this);
     _dma.Receive(this, (void*)rxbuf, rxlen);
@@ -69,37 +74,6 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
     _dma.ReleaseRx(this);
     _dma.ReleaseTx(this);
 }
-
-#if 0
-bool Stm32SpiBus::ReadBuffer(void* buffer, uint len, CrcCCITT* crc) {
-    if (!len)
-        return true;
-
-    uint8_t* p = (uint8_t*)buffer;
-    bool ok = true;
-
-    _base[REG_DR] = 0xff;
-
-    while (len--) {
-        while (_base[REG_SR] & SR_BSY)
-            ;
-
-        if (!(_base[REG_SR] & SR_RNE))
-            ok = false;
-
-        const uint8_t tmp = _base[REG_DR];
-        if (len)
-            _base[REG_DR] = 0xff;
-
-        // Then during SPI clocking store the value read and update
-        // running Crc
-        *p++ = tmp;
-        crc->Update(tmp);
-    }
-
-    return ok;
-}
-#endif
 
 
 void Stm32SpiBus::Acquire(Stm32SpiDev* dev) {

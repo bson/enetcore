@@ -208,13 +208,17 @@ public:
     }
 
     [[__optimize]] void PopFront(size_type n) {
-        BoundsCheck(n-1);
-        _head = (_head + n) % N;
+        if (n) {
+            BoundsCheck(n-1);
+            _head = (_head + n) % N;
+        }
     }
 
     [[__optimize]] void PopFront(size_type n) volatile {
-        BoundsCheck(n-1);
-        _head = (_head + n) % N;
+        if (n) {
+            BoundsCheck(n-1);
+            _head = (_head + n) % N;
+        }
     }
 
     [[__optimize]] T PopBack() {

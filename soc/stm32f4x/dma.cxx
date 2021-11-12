@@ -14,8 +14,8 @@ void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
 
 
 bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
-                          Stm32Dma::Peripheral::Assignment& asn,
-                          bool istx) {
+                         Stm32Dma::Peripheral::Assignment& asn,
+                         bool istx) {
     assert(p);
     assert(asn._target < Target::NUM_TARGET);
 
@@ -93,12 +93,19 @@ bool Stm32Dma::TryAssignRx(Stm32Dma::Peripheral* p) {
     return TryAssign(p, p->_rx, false);
 }
 
+void Stm32Dma::AssignRx(Stm32Dma::Peripheral* p) {
+    assert(p);
+
+    ScopedNoInt G;
+    while (!TryAssignRx(p))
+        Thread::WaitFor(_assignment);
+}
 
 void Stm32Dma::ReleaseRx(Stm32Dma::Peripheral* p) {
     assert(p == _assignment[p->_rx._stream]);
 
     ScopedNoInt G;
-    _assignment[p->_tx._stream] = NULL;
+    _assignment[p->_rx._stream] = NULL;
     Thread::WakeAll(_assignment);
 }
 
