@@ -9,11 +9,15 @@
 
 
 void Stm32SpiBus::DmaTxComplete() {
+    _dma.ReleaseTx(this);
+
     if (!_rx._active && _dev)
         Thread::WakeAll((void*)_dev);
 }
 
 void Stm32SpiBus::DmaRxComplete() {
+    _dma.ReleaseRx(this);
+
     if (!_tx._active && _dev)
         Thread::WakeAll((void*)_dev);
 }
@@ -86,8 +90,6 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
     _dma.AssignRxTx(this);
     _dma.Receive(this, (void*)rxbuf, rxlen);
     _dma.Transmit(this, (const void*)txbuf, txlen, true);
-    _dma.ReleaseRx(this);
-    _dma.ReleaseTx(this);
 }
 
 
