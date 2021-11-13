@@ -62,7 +62,9 @@ _uart4(BASE_UART4, Dma::Target::UART4_TX, Dma::Target::UART4_RX);
 
 Dac _dac(BASE_DAC, Dma::Target::DAC1);
 
-SpiBus _spi2(_dma1, BASE_SPI2, APB1_CLK, Dma::Target::SPI2_TX, Dma::Target::SPI2_RX);
+SpiBus _spi2(BASE_SPI2, APB1_CLK,
+             _dma1, Dma::Target::SPI2_TX, Dma::Target::SPI2_RX,
+             DMA_PRIORITY_SPI2, IPL_DMA);
 
 Swo _swo;
 

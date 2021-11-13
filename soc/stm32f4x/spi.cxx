@@ -8,6 +8,21 @@
 #include "soc/stm32f4x/spi.h"
 
 
+void Stm32SpiBus::DmaTxComplete() {
+    if (!_rx._active && _dev)
+        Thread::WakeAll((void*)_dev);
+}
+
+void Stm32SpiBus::DmaRxComplete() {
+    if (!_tx._active && _dev)
+        Thread::WakeAll((void*)_dev);
+}
+
+void Stm32SpiBus::DmaEnableTx() { reg(Register::CR2) |= BIT(TXDMAEN); }
+void Stm32SpiBus::DmaDisableTx() { reg(Register::CR2) &= ~BIT(TXDMAEN); }
+void Stm32SpiBus::DmaEnableRx() { reg(Register::CR2) |= BIT(RXDMAEN); }
+void Stm32SpiBus::DmaDisableRx() { reg(Register::CR2) &= ~BIT(RXDMAEN); }
+
 void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
     // Ignore if already configured correctly
     if (mode == _mode && freq == _speed)
@@ -30,7 +45,7 @@ void Stm32SpiBus::Configure(uint32_t mode, uint32_t freq) {
         ;
 
     reg(Register::CR1) = cpol | cpha | BIT(MSTR) | (br << BR)
-        | BIT(SSI) | BIT(SSM) | BIT(SPE);
+        | BIT(SSM) | BIT(SSI) | BIT(SPE);
     reg(Register::CR2) = 0;
 
     const uint32_t tmp = reg(Register::DR);
@@ -66,7 +81,7 @@ void Stm32SpiBus::Transact(const uint8_t* txbuf, uint32_t txlen,
 
     reg(Register::CR1) &= ~BIT(SPE);
     reg(Register::CR2) |= BIT(TXDMAEN) | BIT(RXDMAEN);
-    reg(Register::CR1) |= BIT(SPE);
+    reg(Register::CR1) |= BIT(MSTR) | BIT(SPE);
 
     _dma.AssignRxTx(this);
     _dma.Receive(this, (void*)rxbuf, rxlen);

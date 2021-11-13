@@ -89,16 +89,16 @@ class Stm32SpiBus: public Stm32Dma::Peripheral {
     }
 
 public:
-	Stm32SpiBus(Stm32Dma& dma, uint32_t base, uint32_t busclk,
-                Stm32Dma::Target txtarg,
-                Stm32Dma::Target rxtarg)
-        : Peripheral(_base + (uint32_t)Register::DR, txtarg, rxtarg),
+	Stm32SpiBus(uint32_t base, uint32_t busclk,
+                Stm32Dma& dma, Stm32Dma::Target txtarg, Stm32Dma::Target rxtarg,
+                Stm32Dma::Priority dmaprio, uint8_t dmaipl)
+        : Peripheral(base + (uint32_t)Register::DR, txtarg, rxtarg),
           _base(base),
           _dma(dma),
           _busclk(busclk) {
         _word_size = Stm32Dma::WordSize::BYTE;
-        _prio = DMA_PRIORITY_SPI2; // XXX parameterize me
-        _ipl = IPL_DMA;            // XXX and me
+        _prio = dmaprio;
+        _ipl = dmaipl;
         _tx._active = false;
         _rx._active = false;
     }
@@ -124,33 +124,16 @@ protected:
 
 private:
     // DMA TX complete
-    void DmaTxComplete() {
-        if (!_rx._active && _dev)
-            Thread::WakeSingle((void*)_dev);
-    }
+    void DmaTxComplete();
 
     // DMA RX complete
-    void DmaRxComplete() {
-        if (!_tx._active && _dev)
-            Thread::WakeSingle((void*)_dev);
-    }
+    void DmaRxComplete();
 
     // Enable disable DMA (attach, detach trigger)
-    void DmaEnableTx() {
-        reg(Register::CR2) |= BIT(TXDMAEN);
-    }
-
-    void DmaDisableTx() {
-        reg(Register::CR2) &= ~BIT(TXDMAEN);
-    }
-
-    void DmaEnableRx() {
-        reg(Register::CR2) |= BIT(RXDMAEN);
-    }
-
-    void DmaDisableRx() {
-        reg(Register::CR2) &= ~BIT(RXDMAEN);
-    }
+    void DmaEnableTx();
+    void DmaDisableTx();
+    void DmaEnableRx();
+    void DmaDisableRx();
 };
 
 

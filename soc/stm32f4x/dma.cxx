@@ -4,15 +4,6 @@
 #include "arch/armv7m/nvic.h"
 
 
-void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
-    assert(p);
-
-    ScopedNoInt G;
-    while (!TryAssignTx(p))
-        Thread::WaitFor(_assignment);
-}
-
-
 bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
                          Stm32Dma::Peripheral::Assignment& asn,
                          bool istx) {
@@ -37,8 +28,18 @@ bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
     return false;
 }
 
+
 bool Stm32Dma::TryAssignTx(Stm32Dma::Peripheral* p) {
     return TryAssign(p, p->_tx, true);
+}
+
+
+void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
+    assert(p);
+
+    ScopedNoInt G;
+    while (!TryAssignTx(p))
+        Thread::WaitFor(_assignment);
 }
 
 
@@ -172,18 +173,18 @@ template <uint32_t STREAM, Stm32Dma::Register ISR, Stm32Dma::Register IFCR>
 
     const uint32_t tcif = stream_to_tcif[STREAM];
     if (dma->reg(ISR) & tcif) {
-        Peripheral* handler = dma->_assignment[STREAM];
+        Peripheral* device = dma->_assignment[STREAM];
         dma->reg(IFCR) |= tcif;
         dma->s_cr(STREAM) &= ~(BIT(EN) | BIT(TCIE) | BIT(HTIE) | BIT(TEIE) | BIT(DMEIE));
-        if (handler) {
+        if (device) {
             if (dma->_is_tx[STREAM]) {
-                handler->_tx._active = false;
-                handler->DmaDisableTx();       // Remove DMA trigger
-                handler->DmaTxComplete();
+                device->_tx._active = false;
+                device->DmaDisableTx();
+                device->DmaTxComplete();
             } else {
-                handler->_rx._active = false;
-                handler->DmaDisableRx();
-                handler->DmaRxComplete();
+                device->_rx._active = false;
+                device->DmaDisableRx();
+                device->DmaRxComplete();
             }
         }
     }

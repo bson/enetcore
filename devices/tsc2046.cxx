@@ -35,8 +35,8 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     _spi.Acquire();
     _spi.Select();
 
-    static const uint8_t tx[] = {SAMPLE_X, 0, SAMPLE_Y, IDLE};
-    static uint8_t rx[4];
+    static const uint8_t tx[] = {SAMPLE_X, 0, SAMPLE_Y, 0, IDLE};
+    uint8_t rx[] = { 0, 0, 0, 0, 0 };
 
     _spi.Transact(tx, sizeof tx, rx, sizeof rx);
     Thread::WaitFor(&_spi);
