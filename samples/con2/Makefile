@@ -17,7 +17,7 @@ ifeq ($(CONFIG),opt)
 CFLAGS = -Os -DTRACE -DCHECK_BOUNDS=1 -funsigned-char
 endif
 ifeq ($(CONFIG),debug)
-CFLAGS = -g -O0 -DTRACE -DDEBUG -funsigned-char
+CFLAGS = -g3 -O0 -DTRACE -DDEBUG -funsigned-char
 AFLAGS = --defsym DEBUG=1
 endif
 ifeq ($(CONFIG),release)

@@ -170,7 +170,7 @@ public:
                 while (_sendq.Headroom() && (p < data + len))
                     _sendq.PushBack(*p++);
 
-                if (_dma)
+                if (_dma && !_tx._active)
                     _dma->AssignTx(this);
 
                 StartTx();

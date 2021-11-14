@@ -3,6 +3,7 @@
 
 #include "core/enetcore.h"
 #include "devices/tsc2046.h"
+#include "core/arithmetic.h"
 #include "board.h"
 
 namespace tsc2046 {
@@ -36,28 +37,31 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     _spi.Select();
 
     static const uint8_t tx[] = {SAMPLE_X, 0, SAMPLE_Y, 0, IDLE};
-    uint8_t rx[] = { 0, 0, 0, 0, 0 };
+    uint16_t rx[] = { 0, 0, 0 };
 
-    _spi.Transact(tx, sizeof tx, rx, sizeof rx);
+    static_assert(sizeof rx - 1 >= sizeof tx);
+
+    _spi.Transact(tx, sizeof tx, (uint8_t*)rx + 1, sizeof tx);
     Thread::WaitFor(&_spi);
 
     _spi.Deselect();
     _spi.Release();
 
-    const int vx1 = rx[0];
-    const int vx2 = rx[1];
-    const int vy1 = rx[2];
-    const int vy2 = rx[3];
+    if (!rx[1])
+        return false;
 
-    x = max<int>((vx1 << 4) | (vx2 >> 4), MIN_X) - MIN_X;
-    y = max<int>((vy1 << 4) | (vy2 >> 4), MIN_Y) - MIN_Y;
+    const int vx = (BE16(rx[1]) & 0x7fff) >> 4;
+    const int vy = (BE16(rx[2]) & 0x7fff) >> 4;
+
+    x = max<int>(vx, MIN_X) - MIN_X;
+    y = max<int>(vy, MIN_Y) - MIN_Y;
     x = MAX_X - min<int>(x, MAX_X);
     y = MAX_Y - min<int>(y, MAX_Y);
 
     x = uint(x) * _width / MAX_X;
     y = uint(y) * _height / MAX_Y;
 
-    return vx1 != -1;
+    return true;
 }
 
 }; // ns tsc2046

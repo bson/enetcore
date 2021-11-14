@@ -26,11 +26,15 @@ template <typename T> inline T exch(T& a, const T& b) { const T tmp = a; a = b; 
 #define Htonl Swap32
 #define LE16(V) uint16_t(V)
 #define LE32(V) uint32_t(V)
+#define BE16 Swap16
+#define BE32 Swap32
 #else
 #define Htons(V) uint16_t(V)
 #define Htonl(V) uint32_t(V)
 #define LE16 Swap16
 #define LE32 Swap32
+#define BE16(V) uint16_t(V)
+#define BE16(V) uint32_t(V)
 #endif
 
 #define Ntohs Htons
