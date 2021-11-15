@@ -157,19 +157,17 @@ enum {
 
 // Panel is SRAM in bank 1
 #define PANEL_BANK Fsmc::Bank::BANK1
-//#define PANEL_BANK Fsmc::Bank::BANK2
 
 enum {
-    FSMC_PANEL_BASE = 0x60000000, // Base address for bank 1
-//    FSMC_PANEL_BASE = 0x70000000, // Base address for bank 2
-    FSMC_PANEL_DATA = FSMC_PANEL_BASE + (1 << 17), // Data access (A16)
-    FSMC_PANEL_CMD  = FSMC_PANEL_BASE              // Cmd access
+    FSMC_PANEL_BASE = 0x60000000, // Base address for bank 1, sub bank 1 (NE1)
+    FSMC_PANEL_DATA = FSMC_PANEL_BASE | BIT(17), // Data access (A16)
+    FSMC_PANEL_CMD  = FSMC_PANEL_BASE            // Cmd access
 };
 
 
 // FSMC SRAM mode 1 timing
 enum {
-    PANEL_BUS_FREQ       = 10000000,  // 10MHz bus freq (5MHz write/read speed)      
+    PANEL_BUS_FREQ       = 20000000,            // 20MHz
     PANEL_HCLK_PER_CYC   = HCLK/PANEL_BUS_FREQ,                 // HCLKs per bus cycle
     PANEL_BUS_TURN_CLK   = PANEL_HCLK_PER_CYC/2,                // Bus turn HCLKs
     PANEL_DATA_CLK       = (PANEL_HCLK_PER_CYC - PANEL_BUS_TURN_CLK), // Data cycle HCLKs

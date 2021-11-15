@@ -71,7 +71,6 @@ Swo _swo;
 #ifdef ENABLE_PANEL
 Panel _panel;
 PinNegOutput<Gpio::Pin> _t_cs; // Touch controller SPI CS#
-PinNegOutput<Gpio::Pin> _lcd_cs; // CS# for LCD controller
 Gpio::Pin _t_irq;
 EventObject _panel_tap(0, EventObject::MANUAL_RESET);
 
@@ -145,7 +144,7 @@ void ConfigurePins() {
     // 26 PA3   out                  ESP_SPI_CS0#
     //
     // 58 PD11  AF12  FSMC_A16       LCD_RS    Panel 8080 bus
-    // 88 PD7   AF12  FSMC_CE2#      LCD_CS#
+    // 88 PD7   AF12  FSMC_NE1       LCD_CS#
     // 86 PD5   AF12  FSMC_WE#       LCD_WR#
     // 85 PD4   AF12  FSMC_OE#       LCD_RD#
     // 57 PD10  AF12  FSMC_D15       LCD_D15
@@ -196,8 +195,7 @@ void ConfigurePins() {
         PINCONF(A,  5,  AF,  5, NONE, MEDIUM),
         PINCONF(A,  3, OUT,  0, NONE, MEDIUM),
         PINCONF(D, 11,  AF, 12, NONE, FAST),
-        //PINCONF(D,  7,  AF, 12, NONE, FAST),
-        PINCONF(D,  7, OUT,  0, NONE, FAST),
+        PINCONF(D,  7,  AF, 12, NONE, FAST),
         PINCONF(D,  5,  AF, 12, NONE, FAST),
         PINCONF(D,  4,  AF, 12, NONE, FAST),
         PINCONF(D, 10,  AF, 12, NONE, FAST),
@@ -245,7 +243,6 @@ void ConfigurePins() {
 #ifdef ENABLE_PANEL
     _t_cs         = _gpio_b.GetPin(12);
     _t_irq        = _gpio_a.GetPin(12);
-    _lcd_cs       = _gpio_d.GetPin(7);
 #endif
 
     const Stm32Eintr::EintrConf eintrconf[] = {
