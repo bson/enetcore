@@ -83,6 +83,7 @@ define da
 disassemble
 end
 
+# Actual init
 
 target extended-remote localhost:3333
 
@@ -99,3 +100,6 @@ set output-radix 16
 set print pretty
 
 set print thread-events off
+
+#monitor stm32f4fx.tpiu config internal - uart on 168000000 12000000 
+#monitor stm32f4fx.tpiu enable

@@ -5,7 +5,6 @@
 #define _SWO_H_
 
 #include "core/bits.h"
-#include "core/mutex.h"
 #include "core/consumer.h"
 #include "core/pstring.h"
 
@@ -37,8 +36,6 @@ class Swo: public Consumer<uint8_t> {
         // DBG_DEMCR
         TRCENA = 24,
     };
-
-    mutable Mutex _lock;
 
 public:
     // Global one-time enable and configuration
@@ -74,12 +71,9 @@ public:
     void Write(const uint8_t* buf, uint len) {
         assert(ITM_TCR & BIT(ITMENA));
 
-        Mutex::Scoped L(_lock);
-
         while (len--) {
             while (ITM_STIM0 & 0xff)
                 ;
-
             (volatile uint8_t&)ITM_STIM0 = *buf++;
         }
     }

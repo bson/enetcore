@@ -97,7 +97,7 @@ enum {
     BASE_HASH       = 0x50060400,
     BASE_RNG        = 0x50060800,
 
-    BASE_FSMC       = 0xA0000000
+    BASE_FSMC       = 0xa0000000
 };
 
 

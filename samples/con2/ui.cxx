@@ -123,7 +123,7 @@ void* UIThread(void*) {
 
     _touch.Init();
     
-    _panel.SetBrightness(128);
+    //_panel.SetBrightness(128);
 
 #if 1
     _panel.TestPattern();

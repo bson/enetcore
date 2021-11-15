@@ -12,28 +12,24 @@ public:
     }
 
     [[__finline, __optimize]]
-    static void StartCommand(uint8_t byte) {
+    static void StartCommand(uint16_t cmd) {
         _lcd_cs.Raise();
-        *(volatile uint16_t*)FSMC_PANEL_CMD = byte;
-        _lcd_cs.Lower();
+        *(volatile uint16_t*)FSMC_PANEL_CMD = cmd;
     }
 
     [[__finline, __optimize]]
     static void EndCommand() { 
-    }
-
-    [[__finline, __optimize]]
-    static void Write(uint8_t byte) {
-        _lcd_cs.Raise();
-        *(volatile uint16_t*)FSMC_PANEL_DATA = byte;
         _lcd_cs.Lower();
     }
 
     [[__finline, __optimize]]
-    static uint8_t Read() {
-        _lcd_cs.Raise();
+    static void Write(uint16_t data) {
+        *(volatile uint16_t*)FSMC_PANEL_DATA = data;
+    }
+
+    [[__finline, __optimize]]
+    static uint16_t Read() {
         return *(volatile uint16_t*)FSMC_PANEL_DATA;
-        _lcd_cs.Lower();
     }
 };
 

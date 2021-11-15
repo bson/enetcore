@@ -50,16 +50,16 @@ bool TouchController::ReadPosition(uint16_t& x, uint16_t& y) {
     if (!rx[1])
         return false;
 
-    const int vx = (BE16(rx[1]) & 0x7fff) >> 4;
-    const int vy = (BE16(rx[2]) & 0x7fff) >> 4;
+    int vx = (BE16(rx[1]) & 0x7fff) >> 4;
+    int vy = (BE16(rx[2]) & 0x7fff) >> 4;
 
-    x = max<int>(vx, MIN_X) - MIN_X;
-    y = max<int>(vy, MIN_Y) - MIN_Y;
-    x = MAX_X - min<int>(x, MAX_X);
-    y = MAX_Y - min<int>(y, MAX_Y);
+    vx = max<int>(vx, MIN_X) - MIN_X;
+    vy = max<int>(vy, MIN_Y) - MIN_Y;
+    vx = MAX_X - min<int>(vx, MAX_X);
+    vy = MAX_Y - min<int>(vy, MAX_Y);
 
-    x = uint(x) * _width / MAX_X;
-    y = uint(y) * _height / MAX_Y;
+    x = uint(vx) * _width / MAX_X;
+    y = uint(vy) * _height / MAX_Y;
 
     return true;
 }

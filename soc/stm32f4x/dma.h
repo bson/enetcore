@@ -215,7 +215,7 @@ public:
             Target  _target;
             uint8_t _stream:3;  // Assigned stream
             uint8_t _ch:3;      // Assigned channel
-            bool    _active;    // Transfer active (used by peripheral)
+            volatile bool _active; // Transfer active (used by peripheral)
         };
 
         Assignment _tx;

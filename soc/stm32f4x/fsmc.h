@@ -6,10 +6,10 @@
 class Stm32Fsmc {
 public:
     enum class Bank {
-        BANK1 = 0,
-        BANK2 = 8,
-        BANK3 = 16,
-        BANK4 = 14
+        BANK1 = 0x00,
+        BANK2 = 0x08,
+        BANK3 = 0x10,
+        BANK4 = 0x18
     };
 
 private:
@@ -118,7 +118,7 @@ public:
         assert(data_hold >= 1 && data_hold <= 255);
 
         reg(b, Register::BCR) &= ~BIT(MBKEN);
-        reg(b, Register::BCR) = BIT(WREN) | (Width::WORD16 << MWID) | (Type::SRAM << MTYP)
+        reg(b, Register::BCR) = BIT(WREN) | (Width::WORD16 << MWID) | (Type::PSRAM << MTYP)
             | BIT(7);
         reg(b, Register::BTR) = (bus_turn << BUSTURN) | (data_setup << ADDSET)
             | (data_hold << DATAST);

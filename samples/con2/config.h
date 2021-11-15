@@ -157,10 +157,12 @@ enum {
 
 // Panel is SRAM in bank 1
 #define PANEL_BANK Fsmc::Bank::BANK1
+//#define PANEL_BANK Fsmc::Bank::BANK2
 
 enum {
     FSMC_PANEL_BASE = 0x60000000, // Base address for bank 1
-    FSMC_PANEL_DATA = FSMC_PANEL_BASE + (1 << 16), // Data access
+//    FSMC_PANEL_BASE = 0x70000000, // Base address for bank 2
+    FSMC_PANEL_DATA = FSMC_PANEL_BASE + (1 << 17), // Data access (A16)
     FSMC_PANEL_CMD  = FSMC_PANEL_BASE              // Cmd access
 };
 

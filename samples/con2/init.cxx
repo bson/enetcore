@@ -310,9 +310,11 @@ void hwinit() {
 
     // Power on/off peripherals
     ClockTree::EnableAHB1(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                          | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
+                          | AHB1_GPIODEN | AHB1_GPIOEEN | AHB1_DMA2EN | AHB1_DMA1EN
+                          | AHB1_CCMDATARAMEN);
     ClockTree::EnableAHB1LP(AHB1_BKPSRAMEN | AHB1_GPIOAEN | AHB1_GPIOBEN | AHB1_GPIOCEN
-                            | AHB1_DMA2EN | AHB1_DMA1EN | AHB1_CCMDATARAMEN);
+                            | AHB1_GPIODEN | AHB1_GPIOEEN | AHB1_DMA2EN | AHB1_DMA1EN
+                            | AHB1_CCMDATARAMEN);
 
     ClockTree::EnableAHB2(AHB2_RNGEN);
     ClockTree::EnableAHB2LP(AHB2_RNGEN);
@@ -365,7 +367,8 @@ void hwinit() {
 
 #ifdef DEBUG
     // Enable SWO early
-    _swo.Enable(115200);
+//    _swo.Enable(12000000);
+//    _swo.Write((const uint8_t*)"SWO Trace Enabled\r\n", 19);
 #endif
 
 	// Initialize main thread and set up stacks
