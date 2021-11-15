@@ -188,8 +188,8 @@ private:
     }
 
     static void data16(uint16_t v) {
-        Accessor::Write(v >> 16);
-        Accessor::Write(v);
+        Accessor::Write((v >> 16) & 0xff);
+        Accessor::Write(v & 0xff);
     }
 
     static uint8_t rcommand(uint8_t cmd) {

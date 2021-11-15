@@ -68,7 +68,7 @@ TAGS:
 	@(for dir in . $(ARCH) $(SOCDIR) $(COREDIR) $(ENETCORE)/$(TOOLSET) $(UIDIR) \
 		$(ENETCORE)/audio; do                        \
 			find $$dir -name '*.h' ; find $$dir -name '*.cxx';  \
-      done) | etags --language=c++ --declarations -
+      done) | sed -e "/fat_src\\.cxx/d" | etags --language=c++ --declarations -
 
 .phony: etags clean
 
