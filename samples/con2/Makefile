@@ -5,8 +5,9 @@ VPATH=.
 ENETCORE = enetcore
 TOOLSET ?= gnuc
 
-TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10-2020-q4-major
-TOOLVER ?= 10.2.1
+#TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10-2020-q4-major
+TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10.3-2021.10
+TOOLVER ?= 10.3.1
 
 CONFIG ?= debug
 
@@ -74,6 +75,8 @@ TAGS:
 
 clean:
 	-rm -rf $(ODIR) TAGS
+
+$(SRCS): $(ODIR)/uidecls.h
 
 ifeq ($(CONFIG),release)
 $(ODIR)/image: $(ODIR)/uidecls.h $(FATAOBJS) $(FATOBJ) link.cmd $(ODIR_TOUCH) TAGS

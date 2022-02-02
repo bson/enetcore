@@ -117,7 +117,8 @@ uint8_t* AllocThreadStack(uint size) {
 }
 
 Thread* AllocThreadContext() { 
-    return new (Platform::_iram_region.GetMem(Util::Align<size_t>(sizeof(Thread), 4))) Thread();
+    return new (Platform::_iram_region.GetMem(Util::Align<size_t>(sizeof(Thread), 4)))
+        Thread();
 }
 
 void ConfigurePins() {

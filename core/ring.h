@@ -77,7 +77,7 @@ public:
     [[__optimize]] bool Empty() const volatile { return _head == _tail; }
 
     // Make _head <= _tail
-
+    // Deprecated.  Don't use.
     void Flatten() {
         AssertNotInterrupt();
 
@@ -243,8 +243,10 @@ public:
     }
 
     void DeleteEntries() {
+        AssertNotInterrupt();
         for (uint i = _head; i != _tail; i = (i + 1) % N)
             delete _v[i];
+        Clear();
     }
 
 };

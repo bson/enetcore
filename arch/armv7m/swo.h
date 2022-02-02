@@ -4,6 +4,7 @@
 #ifndef _SWO_H_
 #define _SWO_H_
 
+#include <stdint.h>
 #include "core/bits.h"
 #include "core/consumer.h"
 #include "core/pstring.h"

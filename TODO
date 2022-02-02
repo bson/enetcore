@@ -1,3 +1,61 @@
+----- TODO
+
+Make ENABLE_PANEL work again
+
+
+
+Test HSI config
+
+Fix SWO/Openocd
+
+Add peripheral-specific DMA stream selection ordering (overrides default).
+
+Enable the backup regulator in Power
+- Set CSR.BRE, wait for CSR.BRR to get set
+- Otherwise backup SRAM is lost on Vbat
+
+Add ESP12E serial support
+
+Remove SPI to ESP12, use UART only
+- Board rev
+
+Clock rollover: allow fractional HZ (e.g. 0.1)
+
+Add DMA memmove()?
+
+Implement StmWdt
+
+Implement StmCrc
+
+Implement StmSdio
+
+Fat release build
+
+Implement a "logout" feature in BKPSRAM
+
+Why doesn't the LSE OSC start up?  LSI works fine.
+
+Implement StmI2c (TBD - no use case, need test board)
+
+Implement StmUsbDev (TBD - no use case, need test board)
+
+Implement StmI2s (TBD - no use case, need test board)
+
+Implement Reset (under arch/armv7m, to use CM4 core software reset)
+
+Add MWait/MWaitFor with MWaitObject
+
+Rename cortex-m4 -> armv7m
+
+Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
+set up pendsv_handler as a fast exception handler.
+
+- Make DHCP support a compile time option
+
+Clean up genfont.py and call it something else
+
+Implement StmEthernet (TBD - no use case, need test board, F407 only)
+
 ----- DONE
 
 Add StmPower to manage system power settings
@@ -233,55 +291,3 @@ DMA stream acquisition - block if active
 Toggle SSR in main.cxx and measure to verify it works
   - _ssr_conduct.Raise(), _ssr_conduct.Lower()
 
------ TODO
-
-Enable the backup regulator in Power
-- Set CSR.BRE, wait for CSR.BRR to get set
-- Otherwise backup SRAM is lost on Vbat
-
-Make ENABLE_PANEL work again
-
-Add ESP12E serial support
-
-FP: set/clear access to FP coprocessor (CP10,CP11) on csw
-
-Hash processor
-- Clean support for hardware hashing vs soft
-- Clean support for hardware CRC vs soft
-
-Clock rollover: allow fractional HZ (e.g. 0.1)
-
-Add DMA memmove()?
-
-Implement StmWdt
-
-Implement StmCrc
-
-Implement StmSdio
-
-Fat release build
-
-Implement a "logout" feature in BKPSRAM
-
-Why doesn't the LSE OSC start up?  LSI works fine.
-
-Implement StmI2c (TBD - no use case, need test board)
-
-Implement StmEthernet (TBD - no use case, need test board, F407 only)
-
-Implement StmUsbDev (TBD - no use case, need test board)
-
-Implement StmI2s (TBD - no use case, need test board)
-
-Implement Reset (under arch/armv7m, to use CM4 core software reset)
-
-Add MWait/MWaitFor with MWaitObject
-
-Rename cortex-m4 -> armv7m
-
-Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
-set up pendsv_handler as a fast exception handler.
-
-- Make DHCP support a compile time option
-
-Clean up genfont.py and call it something else

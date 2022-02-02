@@ -1,5 +1,10 @@
+// Copyright (c) 2021 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __STM32_CLOCK_TREE_H__
 #define __STM32_CLOCK_TREE_H__
+
+#include <stdint.h>
 
 class Stm32ClockTree {
     // Register byte offsets
@@ -203,8 +208,8 @@ public:
         if (config.pll_clk_source != PllClkSource::OFF) {
             VREG(RCC_PLLCFGR) = (config.pll_periph_div << PLLQ)
                 | ((uint32_t)config.pll_sysclk_div << PLLP)
-                | (config.pll_vco_mult << PLLN)
-                | (config.pll_vco_div << PLLM)
+                | ((uint32_t)config.pll_vco_mult << PLLN)
+                | ((uint32_t)config.pll_vco_div << PLLM)
                 | ((uint32_t)config.pll_clk_source << PLLSRC);
             VREG(RCC_CR) |= BIT(PLLON);
             while ((VREG(RCC_CR) & BIT(PLLRDY)) == 0)
