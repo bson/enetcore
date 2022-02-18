@@ -2,7 +2,7 @@
 
 Make ENABLE_PANEL work again
 
-
+Create startup code entirely in C.
 
 Test HSI config
 

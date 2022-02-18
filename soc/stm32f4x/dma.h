@@ -190,8 +190,10 @@ public:
         END = 0xff
     };
 
+    static_assert(Target::NUM_TARGET < Target::END);
+
     enum {
-        NUM_MAPPING = 3
+        NUM_MAPPING = 3         // Max number of stream-channel options for any target
     };
 
     enum class Priority: uint8_t {
@@ -271,38 +273,57 @@ public:
 
     // Peripheral transfers
     //
-    // The device needs to first acquire the DMA stream, via the
-    // AssignTx/Rx() calls.  These will block and return with the
-    // stream acquired; it is now in the possession of the specified
-    // peripheral. Because it blocks it can only be called from a thread
-    // context. The stream picked is the first available from the
-    // stream-channel pairs for the target in _tx_target, _rx_target.
+    // The device needs to first acquire a DMA stream-channel pair,
+    // via the AssignTx/Rx() calls.  These will block and return with
+    // a stream acquired when one becomes available; the device is now
+    // in possession of the selected stream+channel. Because these
+    // calls block they can only be called from a thread context. The
+    // stream picked is the first available from the stream-channel
+    // pairs for the target in the Peripheral's _tx._target and
+    // _rx._target.
     //
-    // Transmit/Receive can then be issued to perform transfers.  When
-    // complete, Peripheral::DmaTxComplete/RxComplete will be called
-    // in the DMA interrupt handler context. At this point the device
-    // can issue additional Receive/Transmit transfers on the stream.
-    // These can be called from an interrupt context, such as the
-    // aforementioned DmaTxComplete/RxComplete functions.
+    // TBD: Optionally a device can declare a preferred s-ch selection
+    // order by setting it in the Peripheral.  This can be used to
+    // control which DMA resource(s) each device will contend over.
+    //
+    // TBD: Exclusive access can be obtained by specifying a single
+    // s-ch, then acquiring it up front and never releasing.  This
+    // will prevent any other peripheral from using the same s-ch.
+    //
+    // Once acquired, Transmit/Receive functions are used to perform
+    // transfers.  When complete, the Peripheral::DmaTxComplete and
+    // DmaRxComplete callbacks will be called in the DMA interrupt
+    // handler context. At this point the device can issue additional
+    // Receive/Transmit transfers on the stream.  These can be called
+    // from an interrupt context, such as the aforementioned
+    // DmaTxComplete/RxComplete functions to reduce thread context
+    // switch overhead.
     //
     // When finished with the stream, the device must call
     // ReleaseTx/ReleaseTx.  This will wake the next thread waiting to
-    // acquire the stream.
+    // acquire the stream.  These can be called in an interrupt
+    // context, such as in DmaTxComplete or DmaRxComplete.
     //
-    // For Transmit(), if 'minc' is false, don't increment memory
+    // For Transmit(), if 'minc' is false, don't increment the memory
     // address - in other words, copy the word at *buf 'nwords' times.
     // this permits transmitting a single value to a peripheral.  This
     // is mainly useful for large SPI reads where a '0' or 'ff' is
-    // clocked out while capturing Rx.
+    // clocked out while capturing Rx.  This way the DMA can keep
+    // feeding a single repeating byte or word on the MOSI pin.
     //
     // TryAssignTx/TryAssignRx are like AssignTx/AssignTx, but
     // won't block. They return true if the stream was acquired,
     // otherwise false.
     //
-    // Technically only the Assign methods require the Peripheral*
-    // 'p' parameter.  But the others accept it to detect
-    // inconsistencies that would produce extremely difficult to track
-    // down bugs by asserting the peripheral is holding the stream.
+    // Technically only the Assign methods require the Peripheral* 'p'
+    // parameter.  But the others accept it to detect inconsistencies
+    // that would produce extremely difficult to track down bugs by
+    // asserting the peripheral is holding the stream.  In a fat
+    // single-file production build they're optimized out of
+    // existence.
+    //
+    // TBD a function NYI can be used to perform memory-to-memory
+    // copies.
     //
     void AssignTx(Peripheral* p);
     bool TryAssignTx(Peripheral* p);
