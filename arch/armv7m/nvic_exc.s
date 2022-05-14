@@ -2,7 +2,7 @@
 @@@
 @@@ Copyright (c) 2018-2021 Jan Brittenson
 @@@ See LICENSE for details.
-	
+    
 .syntax    unified
 .text
 .force_thumb
@@ -22,7 +22,7 @@
 @@@    SP+0x00 - R0
 
 .align
-	
+    
 .func exc_handler
 .global exc_handler
 
@@ -54,23 +54,23 @@ pendsv_handler:
 @@@ Save thread state 
 
     mrs    r0, psp                 @ R0 = PSP
-	stmfd  r0!, {r4-r11}           @ Save R11-R4 on thread stack
+    stmfd  r0!, {r4-r11}           @ Save R11-R4 on thread stack
     ldr    r1, =_ZN6Thread10_curthreadE @ Thread::_curthread
     ldr    r1, [r1]
     str    r0, [r1, #PCBOFF]       @ Save thread PSP
     
 @@@ Call handler 
-	
+    
     push   {lr}                    @ Save exception LR across handler call
-	ldr    r1, =_ZN6Thread20ContextSwitchHandlerEPv+1 @ Thread::ContextSwitchHandler
+    ldr    r1, =_ZN6Thread20ContextSwitchHandlerEPv+1 @ Thread::ContextSwitchHandler
     blx    r1                      @ Call handler 
 
 @@@ Load up new thread context and return to it 
 
     ldr    r1, =_ZN6Thread10_curthreadE @ Thread::_curthread
     ldr    r1, [r1]
-	ldr    r0, [r1, #PCBOFF]       @ R0 = saved PSP
-	ldmfd  r0!, {r4-r11}           @ Restore R4-R11
+    ldr    r0, [r1, #PCBOFF]       @ R0 = saved PSP
+    ldmfd  r0!, {r4-r11}           @ Restore R4-R11
     msr    psp, r0                 @ Restore thread PSP
     pop    {pc}                    @ PC = EXC_RETURN 
 

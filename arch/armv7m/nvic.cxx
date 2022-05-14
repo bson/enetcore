@@ -58,7 +58,7 @@ void NVic::Init(IRQHandler handler, uint8_t prio) {
 
 void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* token,
                              bool fast) {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
     assert(prio && prio < IPL_NUM);
     assert(handler);
 
@@ -78,7 +78,7 @@ void NVic::InstallIRQHandler(uint irq, IRQHandler handler, uint8_t prio, void* t
 }
 
 void NVic::InstallSystemHandler(uint id, IRQHandler handler, uint8_t prio, bool fast) {
-	assert(id < 16);
+    assert(id < 16);
     assert(prio && prio < IPL_NUM);
 
     prio *= IPL_QUANTUM;
@@ -105,7 +105,7 @@ void NVic::InstallSystemHandler(uint id, IRQHandler handler, uint8_t prio, bool 
 
 
 void NVic::InstallCSWHandler(uint id, uint8_t prio) {
-	assert(id < 16);
+    assert(id < 16);
     assert(prio && prio < IPL_NUM);
 
     prio *= IPL_QUANTUM;
@@ -127,7 +127,7 @@ void NVic::InstallCSWHandler(uint id, uint8_t prio) {
 
 
 void NVic::SetIRQPriority(uint irq, uint8_t prio) {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
     assert(prio < IPL_NUM);
 
     prio *= IPL_QUANTUM;
@@ -142,7 +142,7 @@ void NVic::SetIRQPriority(uint irq, uint8_t prio) {
 
 void NVic::EnableIRQ(uint irq)
 {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
 
     volatile uint32_t* iser = &ISER0 + irq/32;
     *iser = 1 << (irq & 31);
@@ -150,7 +150,7 @@ void NVic::EnableIRQ(uint irq)
 
 void NVic::DisableIRQ(uint irq)
 {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
 
     volatile uint32_t* icer = &ICER0 + irq/32;
     *icer = 1 << (irq & 31);
@@ -158,7 +158,7 @@ void NVic::DisableIRQ(uint irq)
 
 bool NVic::PendingIRQ(uint irq)
 {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
 
     const volatile uint32_t* ispr = &ISPR0 + irq/32;
     return *ispr & (1 << (irq & 31));
@@ -166,7 +166,7 @@ bool NVic::PendingIRQ(uint irq)
 
 void NVic::ClearPendingIRQ(uint irq)
 {
-	assert(irq < INT_NUM);
+    assert(irq < INT_NUM);
 
     volatile uint32_t* icpr = &ICPR0 + irq/32;
     *icpr = 1 << (irq & 31);

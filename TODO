@@ -1,5 +1,10 @@
 ----- TODO
 
+See if it's possible to declare a __ccm macro to relocate specific functions
+to CCM when available
+- Section-per-function
+- Static initializer to copy the sections to CCM
+
 Make ENABLE_PANEL work again
 
 Create startup code entirely in C.
