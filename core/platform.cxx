@@ -6,7 +6,6 @@
 
 namespace Platform {
 
-[[__noinit]] // Explicitly initialized
 Region _malloc_region(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
 
 Region _iram_region(IRAM_REGION_SIZE, (uint8_t*)IRAM_REGION_START);

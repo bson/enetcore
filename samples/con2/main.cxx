@@ -73,7 +73,6 @@ int main() {
     for (;;) {
         if (++ssr_count >= 10) {
             extern PinNegOutput<Gpio::Pin> _ssr_conduct;
-
             ssr_count = 0;
             if (ssr)
                 _ssr_conduct.Raise();

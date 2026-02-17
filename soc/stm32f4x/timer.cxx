@@ -109,7 +109,7 @@ inline void Stm32Timer<Counter>::HandleInterrupt() {
 }
 
 void Clock::Start() {
-    ScopedNoInt G();
+    ScopedNoInt G;
 
     Stm32Timer::RunTimerFreq(CLOCK_HZ, TIMEBASE);
 }
@@ -120,7 +120,7 @@ void Clock::Tick()
 }
 
 uint64_t Clock::GetTime() {
-    ScopedNoInt G();
+    ScopedNoInt G;
 
     // Because clock interrupts are low priority we may have had an ARR event
     // that has not yet been processed.  So handle it here now.

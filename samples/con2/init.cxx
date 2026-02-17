@@ -89,7 +89,7 @@ PinNegOutput<Gpio::Pin> _esp_rst;
 PinNegOutput<Gpio::Pin> _esp_spi_cs0;
 
 // SSR switch
-PinOutput<Gpio::Pin> _ssr_conduct;
+PinNegOutput<Gpio::Pin> _ssr_conduct;
 
 
 // Flash the LED a certain number of times to indicate a fault,

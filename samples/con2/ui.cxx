@@ -87,7 +87,7 @@ void Initialize() {
 
     DMSG("UI init");
 
-    uibuilder::main_view.Initialize(&uibuilder::main_view_conf, topleft);
+//    uibuilder::main_view.Initialize(&uibuilder::main_view_conf, topleft);
 }
 
 

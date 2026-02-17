@@ -6,8 +6,9 @@ ENETCORE = enetcore
 TOOLSET ?= gnuc
 
 #TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10-2020-q4-major
-TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10.3-2021.10
-TOOLVER ?= 10.3.1
+#TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10.3-2021.10
+TOOLCHAIN=/opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi
+TOOLVER ?= 13.3.1
 
 CONFIG ?= debug
 
@@ -30,7 +31,7 @@ ODIR ?= build_$(CONFIG)
 CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno
 
 AFLAGS +=-ahls
-LFLAGS=-Map $(ODIR)/image.map
+LFLAGS=-Map $(ODIR)/image.map -N -z noexecstack
 
 # Project components
 SRCS += main.cxx ui.cxx init.cxx startup.s

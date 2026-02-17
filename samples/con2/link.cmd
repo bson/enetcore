@@ -2,21 +2,19 @@ ENTRY(_startup)
 
 MEMORY 
 {
-	flash (rx)			: ORIGIN = 0x08000000, LENGTH = 1024K
-	ram (rwx)			: ORIGIN = 0x20000000, LENGTH = 128K
-    ccmram (rwx)        : ORIGIN = 0x10000000, LENGTH = 64K
+	flash (rx!w)	: ORIGIN = 0x08000000, LENGTH = 1024K
+	ram (rw)		: ORIGIN = 0x20000000, LENGTH = 128K
+    ccmram (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-_eiram  = 0x20000000 + 128K;
+_eiram  = ORIGIN(ram) + LENGTH(ram);
 
 /* Symbol needed by NVic for stack vector */
 __stack_top = ORIGIN(ram) + LENGTH(ram);
 
 SECTIONS
 {
-	. = ORIGIN(flash);
-	
-	.text :
+	.text ORIGIN(flash) (READONLY) :
 	{
 		KEEP(*(.startup))
 		*(.text)
@@ -44,10 +42,6 @@ No need to keep dtors if main() never returns
 		*(.rodata)					/* all .rodata sections (constants, strings, etc.)  */
 		*(.rodata*)					/* all .rodata* sections (constants, strings, etc.)  */
 
-/* We only use thumb2 mode, do we need this glue? */
-/*		*(.glue_7)
-		*(.glue_7t)
-*/
 		KEEP(*(.eh_frame*))
 
 		. = ALIGN(4);
@@ -70,32 +64,23 @@ No need to keep dtors if main() never returns
 		KEEP(*(.fini_array))
 		__fini_array_end = .;
 
-	} >flash							/* put all the above into FLASH */
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-    .ARM.extab :
-    {
-            *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > flash
-
-    __exidx_start = .;
-    .ARM.exidx : {
+        __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } >flash
+        __exidx_end = .;
 
-    __exidx_end = .;
 
-    . = ALIGN (4);
-    _etext = .;
+        . = ALIGN (4);
+        __copy_table_start = .;
+        LONG (_etext)
+        LONG (_data)
+        LONG (_edata - _data)
+        __copy_table_end = .;
 
-    .copy.table :
-    {
-            . = ALIGN(4);
-            __copy_table_start = .;
-            LONG (_etext)
-            LONG (_data)
-            LONG (_edata - _data)
-            __copy_table_end = .;
-    } > flash
+        _etext = .;
+
+	} >flash = 0xff							/* put all the above into FLASH */
 
     . = ORIGIN(ram);
 
