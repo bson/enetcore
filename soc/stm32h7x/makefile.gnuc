@@ -1,0 +1,9 @@
+SOC_SRCS = timer.cxx dma.cxx adc.cxx spi.cxx
+
+SRCS += $(addprefix $(SOCDIR)/stm32h7x/,$(SOC_SRCS))
+
+ODIR_TREE += $(ODIR)/$(SOCDIR)/stm327hx
+
+ARCH=$(ENETCORE)/arch/armv7m
+
+include $(ARCH)/makefile.$(TOOLSET)
