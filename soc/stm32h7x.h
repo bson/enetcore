@@ -21,7 +21,8 @@ enum { CCLK_MAX = 480000000 };
 
 // On-chip STM32H7 peripherals
 enum { 
-    // Core
+    // XXX create an stm32h7x.link.cmd for these, so they can be used
+    // XXX in the main link.cmd
 
     BASE_ITCM          = 0x00000000,
     BASE_FLASHB1       = 0x08000000, // Flash Bank 1, 1MiB
@@ -347,6 +348,7 @@ extern void WaitForInterrupt();
 
 // Peripheral clocking (power enable) bits.
 // All undefined bits are reserved, and must retain the reset values.
+// Reset bits are the same
 enum {
     // AHB1; reset 0x0000 0000
     AHB1_USB2OTGHSULPIEN = (1 << 28),
@@ -371,6 +373,10 @@ enum {
     AHB2_DCMIEN          = (1 << 0),
 
     // AHB3; reset 0x0000 0000
+    AHB3_AXISRAMLPEN     = (1 << 31), // AHB3 sleep clock only (AHB3LPENR)
+    AHB3_ITCMLPEN        = (1 << 30), // AHB3 sleep clock only
+    AHB3_DTCM2LPEN       = (1 << 29), // AHB3 sleep clock only
+    AHB3_DTCM1LPEN       = (1 << 28), // AHB3 sleep clock only
     AHB3_SDMCC1EN        = (1 << 16),
     AHB3_QSPIEN          = (1 << 14),
     AHB3_FMCEN           = (1 << 12),
@@ -379,6 +385,7 @@ enum {
     AHB3_MDMAEN          = (1 << 0),
 
     // AHB4; reset 0x0000 0000
+    AHB4_SRAM4LPEN       = (1 << 29), // AHB4 sleep clock only (AHB4LPENR)
     AHB4_BKPRAMEN        = (1 << 28),
     AHB4_HSEMEN          = (1 << 25),
     AHB4_ADC3EN          = (1 << 24),

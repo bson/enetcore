@@ -3,7 +3,6 @@
 
 #include "core/bits.h"
 
-#error not yet updated for STM32H7
 
 class Stm32Gpio {
     enum class Register {

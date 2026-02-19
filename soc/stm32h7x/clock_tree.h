@@ -6,99 +6,303 @@
 
 #include <stdint.h>
 
+#error not yet updated for STM32H7
+
+
 class Stm32ClockTree {
     // Register byte offsets
     enum {
-        RCC_CR       = 0x00,
-        RCC_PLLCFGR  = 0x04,
-        RCC_CFGR     = 0x08,
-        RCC_CIR      = 0x0c,
-        RCC_AHB1RSTR = 0x10,
-        RCC_AHB2RSTR = 0x14,
-        RCC_AHB3RSTR = 0x18,
-        RCC_APB1RSTR = 0x20,
-        RCC_APB2RSTR = 0x24,
-        RCC_AHB1ENR = 0x30,
-        RCC_AHB2ENR = 0x34,
-        RCC_AHB3ENR = 0x38,
-        RCC_APB1ENR = 0x40,
-        RCC_APB2ENR = 0x44,
-        RCC_AHB1LPENR = 0x50,
-        RCC_AHB2LPENR = 0x54,
-        RCC_AHB3LPENR = 0x58,
-        RCC_APB1LPENR = 0x60,
-        RCC_APB2LPENR = 0x64,
-        RCC_BDCR    = 0x70,
-        RCC_CSR     = 0x74,
-        RCC_SSCGR   = 0x80,
-        RCC_PLLI2SCFGR = 0x84
+        RCC_CR          = 0x00,
+        RCC_HSICFGR     = 0x04, // HSI configuration
+        RCC_CRRCR       = 0x08, // Clock recovery CR
+        RCC_CSICFGR     = 0x0c, // CSI configuration
+        RCC_CFGR        = 0x10, // Clock configuration
+        RCC_D1CFGR      = 0x18, // D1 config
+        RCC_D2CFGR      = 0x1c, // D2 config
+        RCC_D3CFGR      = 0x20, // D3 config
+        RCC_PLLCKSELR   = 0x28, // PLL clock source sel
+        RCC_PLLCFGR     = 0x2c, // PLL conf
+        RCC_PLL1DIVR    = 0x30, // PLL1 dividers conf
+        RCC_PLL1FRACR   = 0x34, // PLL1 fractional div
+        RCC_PLL2DIVR    = 0x38, // PLL2 dividers conf
+        RCC_PLL2FRACR   = 0x3c, // PLL2 fractional div
+        RCC_PLL3DIVR    = 0x40, // PLL3 dividers conf
+        RCC_PLL3FRACR   = 0x44, // PLL3 fractional div
+        RCC_D1CCIPR     = 0x4c, // D1 kernel clock conf
+        RCC_D2CCIP1R    = 0x50, // D2 kernel clock conf reg 1
+        RCC_D2CCIP2R    = 0x54, // D2 kernel clock conf reg 2
+        RCC_D3CCIPR     = 0x58, // D3 kernel clock conf
+        RCC_CIER        = 0x60, // Clock source intr ena reg
+        RCC_CIFR        = 0x64, // Clock source intr flag reg
+        RCC_CICR        = 0x68, // Clock source intr clear reg
+        RCC_BDCR        = 0x70, // Backup domain ctrl reg
+        RCC_CSR         = 0x74, // Clock control and stature reg
+        RCC_AHB3RSTR    = 0x7c, // AHB3 reset (same as AHB3*EN bits)
+        RCC_AHB1RSTR    = 0x80, // AHB1 peripheral reset (same as AHB1*EN bits)
+        RCC_AHB2RSTR    = 0x84, // AHB2 peripheral reset (same as AHB2*EN bits)
+        RCC_AHB4RSTR    = 0x88, // AHB4 peripheral reset (same AS AHB4*EN bits)
+        RCC_APB3RSTR    = 0x8c, // APB3 peripheral reset (same as APB3*EN bits)
+        RCC_APB1LRSTR   = 0x90, // APB1 peripheral reset (same as APB1L*EN bits)
+        RCC_APB1HRSTR   = 0x94, // APB1 peripheral reset (same as APB1H*EN bits)
+        RCC_APB2RSTR    = 0x98, // APB2 peripheral reset (same as APB2*EN bits)
+        RCC_APB4RSTR    = 0x9c, // APB4 peripheral reset (same as APB4*EN bits)
+        RCC_GCR         = 0xa0, // Global control
+        RCC_D3AMR       = 0xa8, // D3 autonomous mode reg
+        RCC_RSR         = 0xd0, // Reset status reg
+        RCC_AHB3ENR     = 0xd4, // AHB3 clock reg, AHB3*EN
+        RCC_AHB1ENR     = 0xd8, // AHB1 clock reg, AHB1*EN
+        RCC_AHB2ENR     = 0xdc, // AHB2 clock reg, AHB2*EN
+        RCC_AHB4ENR     = 0xe0, // AHB4 clock reg, AHB4*EN
+        RCC_APB3ENR     = 0xe4, // APB3 clock reg, APB3*EN
+        RCC_APB1LENR    = 0xe8, // APB1L clock reg, APB1L*EN
+        RCC_APB1HENR    = 0xec, // APB1H clock reg, APB1H*EN
+        RCC_APB2ENR     = 0xf0, // APB2 clock reg, APB2*EN
+        RCC_APB4ENR     = 0xf4, // APB4 clock reg, APB4*EN
+        RCC_AHB3LPENR   = 0xfc, // AHB3 sleep clock reg
+        RCC_AHB1LPENR   = 0x100, // AHB1 sleep clock reg (uses AHB1*EN)
+        RCC_AHB2LPENR   = 0x104, // AHB2 sleep clock reg (uses AHB2*EN)
+        RCC_AHB4LPENR   = 0x0x108, // AHB4 sleep clock reg (uses AHB4*EN)
+        RCC_APB3LPENR   = 0x10c, // APB3 sleep clock reg (uses APB3*EN)
+        RCC_APB1LLPENR  = 0x110, // APB1L sleep clock reg (uses APB1L*EN)
+        RCC_APB1HLPENR  = 0x114, // APB1H sleep clock reg (uses APB1H*EN)
+        RCC_APB2LPENR   = 0x118, // APB2 sleep clock reg (uses APB2*EN)
+        RCC_APB4LPENR   = 0x11c, // APB4 sleep clock reg (uses APB4*EN)
+
     };
 
     // Register bits
     enum {
         // RCC_CR
-        PLLI2SRDY = 27,
-        PLLI2SON = 26,
-        PLLRDY = 25,
-        PLLON = 24,
+        PLL3RDY = 29,
+        PLL3ON = 28,
+        PLL2RDY = 27,
+        PLL2ON = 26,
+        PLL1RDY = 25,
+        PLL1ON = 24,
+        HSECSSON = 19,          // New in H7
+        HSEBYP = 18,            // New in H7
         HSERDY = 17,
         HSEON = 16,
-        HSIRDY = 1,
+        D2CKRDY = 15,           // D2 clock ready
+        D1CKRDY = 14,           // D1 clock ready
+        HSI48RDY = 13,          // HSI48 clock ready
+        HSI45ON = 12,           // HSI48 clock enable
+        CSIKERON = 9,           // CSI clock enable in Stop mode
+        CSIRDY = 8,             // CSI clock ready
+        CSION = 7,              // CSI clock enable
+        HSIDIVF = 5,            // HSI divider changed flag
+        HSIDIV = 3,             // HSI divider, 2-bit field
+        HSIRDY = 2,
+        HSIKERON = 1,           // HSI enable in Stop mode
         HSION = 0,
 
-        // RCC_PLLCFGR
-        PLLQ = 24,
-        PLLSRC = 22,
-        PLLP = 16,
-        PLLN = 6,
-        PLLM = 0,
+        // RCC_HSICFGR
+        HSITRIM = 24,           // HSI trimming, 7-bit field
+        HSICAL = 0,             // HSI clock calibration, 12-bit field
+
+        // RCC_CSICFG
+        CSITRIM = 24,           // CSI clock trimming, 6 bits
+        CSICAL = 0,             // CSI clock calibration, 10 bits
 
         // RCC_CFGR
-        MCO2 = 30,
-        MCO2PRE = 27,
-        MCO1PRE = 24,
-        I2SSRC = 23,
-        MCO1 = 21,
-        RTCPRE = 16,
-        PPRE2 = 13,
-        PPRE1 = 10,
-        HPRE = 4,
-        SWS = 2,
-        SW = 0,
+        MCO2 = 29,              // 3-bit clock output 2
+        MCO2PRE = 25,           // 4-bit MCO2 prescaler
+        MCO1 = 22,              // 3-bit clock output 1
+        MCO1PRE = 18,           // 4-bit MCO1 prescaler
+        TIMPRE = 15,            // Timing clock prescale from kernel clock, for APB1,APB2 timers
+        HRTIMSEL = 14,          // HRTIM prescaler selection (0: same as other timers, 1: CPU clock)
+        RTCPRE = 8,             // 6-bit HSE division factor for RTC clock (must be < 1MHz)
+        STOPKERWUCK = 7,        // Kernel clock selection after wake up from system Stop (0 HSI, 1 CSI)
+        STOPWUCK = 6,           // System clock selection after a wake up from system Stop
+        SWS = 3,                // 3-bit System clock switch status
+        SW = 0,                 // 3-bit System clock switch (SysClkSource)
+
+        // RCC_D1CFGR
+        D1CPRE = 8,             // 4-bit D1 domain Core bus ck prescaler (sys_ck/1, 2, 4... 512)
+        D1PPRE = 4,             // 3-bit D1 domain APB3 bus ck prescaler (rcc_pclk3), specific values
+        HPRE = 0,               // 4-bit D1 domain AHB bus ck prescaler
+
+        // RCC_D2CFGR
+        D2PPRE2 = 8,            // 3-bit D2 domain APB2 bus ck prescaler; rcc_pclk2 = rcc_hclk1/n
+        D2PPRE1 = 4,            // 3-bit D2 domain APB1 bus ck prescaler; rcc_pclk1 = rcc_hclk1/n
+        
+        // RCC_D3CFGR
+        D3PPRE = 3,             // 3-bit D3 domain APB4 bus ck prescaler; rcc_pclk4 = rcc_hclk4/n
+
+        // RCC_PLLCKSELR
+        DIVM3 = 20,             // 6-bit prescaler for PLL3
+        DIVM2 = 12,             // 6-bit prescaler for PLL2
+        DIVM1 = 4,              // 6-bit prescaler for PLL1
+        PLLSRC = 0,             // 2-bit PLLx clock source sel (PllClkSource)
+
+        // RCC_PLLCFGR
+        DIVR3EN = 24,           // PLL3 DIVR divider output enable
+        DIVQ3EN = 23,           // PLL3 DIVQ divider output enable
+        DIVP3EN = 22,           // PLL3 DIVP divider output enable
+        DIVR2EN = 21,           // PLL2 DIVR divider output enable
+        DIVQ2EN = 20,           // PLL2 DIVQ divider output enable
+        DIVP2EN = 19,           // PLL2 DIVP divider output enable
+        DIVR1EN = 18,           // PLL1 DIVR divider output enable
+        DIVQ1EN = 17,           // PLL1 DIVQ divider output enable
+        DIVP1EN = 16,           // PLL1 DIVP divider output enable
+
+        PLL3RGE = 10,           // 2-bit PLL3 input freq range, PllInputRange
+        PLL3VCOSEL = 9,         // PLL3 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
+        PLL3FRACGEN = 8,        // PLL3 frac latch ena
+        
+        PLL2RGE = 6,            // 2-bi2 PLL3 input freq range, PllInputRange
+        PLL2VCOSEL = 5,         // PLL2 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
+        PLL2FRACGEN = 4,        // PLL2 frac latch ena
+        
+        PLL2RGE = 2,            // 2-bi2 PLL3 input freq range, PllInputRange
+        PLL2VCOSEL = 1,         // PLL2 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
+        PLL2FRACGEN = 0,        // PLL2 frac latch ena
+        
+        // RCC_PLL1DIVR, RCC_PLL2DIVR, RCC_PLL2DIVR
+        DIVR = 24,             // 7-bit PLL1/2/3 DIVR div fac (0 => 1 ... 127 -> 128)
+        DIVQ = 16,             // 7-bit PLL1/2/3 DIVQ div fac (0 => 1 ... 127 -> 128)
+        DIVP = 9,              // 7-bit PLL1/2/3 DIVP div fac (0 => 1 ... 127 -> 128)
+        DIVN = 0,              // 9-bit PLL1/2/3 multiplier (3 => 4 ... 511 -> 512)
+
+        // RCC_PLL1FRACR, RCC_PLL2FRACR, RCC_PLL3FRACR
+        FRACN = 2,             // 13-bit PLL1/2/3 fractional multiplier
+
+        // RCC_D1CCIPR
+        CKPERSEL = 28,          // 2-bit per_ck ck src sel (0: hsi_ker_ck, 1: csi_ker_ck, 2_he_ck, 3: off)
+        SDMMCSEL = 16,          // SDMMC kernel ck src sel (0: pll1_q_ck, 1: pll2_r_clk)
+        QSPISEL = 4, // 2-bit QSPI kernel ck src srl (0:rcc_hclk3, 1:pll1_q_ck, 2:pll2_r_ck, 3:per_ck)
+        FMCSEL = 0, // 2-bit FMC kernel ck src sel (0:rcc_hclk3, 1:pll1_q_clk, 2:pll2_r_clk, 3:per_ck)
+
+        // RCC_D2CCIP1R
+        SWPSEL = 31,            // SWPMI kernel ck src sel (0: pclk, 1: hsi_ker_ck)
+        FDCANSEL = 28, // 2-bit FDCAN kernel ck src sel (0: cse_ck, 1: pll1_q_ck, 2: pll2_q_ck, 3: off)
+        DFSDM1SEL = 24,         // DFSDM1 kernel ck src sel (0: rcc_pclk2, 1: sys_ck)
+        SPDIFSEL = 20, // 2-bit SPDIFRX kernel ck src sel (0: pll1_q_clk, 1: pll2_r_ck, 2: pll3_r_ck, 3: hsi_ker_ck)
+        SPI45SEL = 16, // 3-bit SPI4,5 ck sel (0: APB ck, 1: pll2_q_ck, 2: pll3_q_ck, 3: hsi_ker_ck, 5: hse_ck, others: off)
+        SPI123SEL = 12, // 3-bit SPI/I2S 1,2,3 ck sel (0: pll1_q, 1: pll2_p, 2: pll3_p, 3: I2S_CKIN, 4: per_ck, others: off)
+        SAI23SEL = 6,           // 3-bit SAI2,3 kernel clock source sel
+        SAI1SEL = 0,            // 3-bit SAI1 and DFSDM1 kernel *Aclk* clock source sel
+
+        // RCC_D2CCIP1R
+        LPTIM1SEL = 28,         // 3-bit clock source for LPTIM1
+        CECSEL = 22,            // 2-bit HDMI-CEC clock source sel 
+        USBSEL = 20,            // 2-bit UBOTG1,2 clock source sel
+        I2C123SEL = 13,         // 2-bit I2C1,2,3 clock sel
+        RNGSEL = 8,             // 2-bit RNG kernel clock source sel
+        USART16SEL = 3,         // 3-bit USART1,6 clock source sel
+        USART234567SEL = 0,     // 3-bit USART2,3; UART 4,5,7/8 (APB) kernel ck src sel
+        
+        // RCC_D3CCIPR
+        SPI6SEL = 28,           // 3-bit SPI6 kernel ck src sel
+        SAI4BSEL = 24,          // 3-bit sub-block B of SAI4 kernel ck src sel
+        SAI4ASEL = 21,          // 3-bit sub-block A of SAI4 kernel ck src sel
+        ADCSEL = 16,            // 2-bit SAR ADC kernel ck src sel
+        LPTIM345SEL = 13,       // 3-bit LPTIM3,4,5 kernel ck src sel
+        LPTIM2SEL = 10,         // 3-bit LPTIM2 kernel ck src sel
+        I2C4SEL = 8,            // 2-bit I2C2 kernel ck src sel
+        LPUART1SEL = 0,         // 3-bit LPUART1 kernel ck src sel
+
+        // RCC_CIER
+        LSECSSIE = 9,           // LSE clock security system IE
+        PLL3RDYIE = 8,          // PLL3 ready IE
+        PLL2RDYIE = 7,          // PLL2 ready IE
+        PLL1RDYIE = 6,          // PLL1 ready IE
+        HSI48RDYIE = 5,         // HSI48 ready IE
+        CSIRDYIE = 4,           // CSI ready IE
+        HSERDYIE = 3,           // HSE ready IE
+        HSIRDYIE = 2,           // HSI ready IE
+        LSERDYIE = 1,           // LSE ready IE
+        LSIRDYIE = 0,           // LSI ready IE
+        
+        // RCC_CIFR
+        HSECSSF = 10,           // HSE clock security intr flag
+        LSECSSF = 9,            // LSE clock security system F
+        PLL3RDYF = 8,           // PLL3 ready F
+        PLL2RDYF = 7,           // PLL2 ready F
+        PLL1RDYF = 6,           // PLL1 ready F
+        HSI48RDYF = 5,          // HSI48 ready F
+        CSIRDYF = 4,            // CSI ready F
+        HSERDYF = 3,            // HSE ready F
+        HSIRDYF = 2,            // HSI ready F
+        LSERDYF = 1,            // LSE ready F
+        LSIRDYF = 0,            // LSI ready F
+
+        // RCC_CICR
+        HSECSSSC = 10,          // HSE clock security intr flag
+        LSECSSSC = 9,           // LSE clock security system clear
+        PLL3RDYSC = 8,          // PLL3 ready clear
+        PLL2RDYSC = 7,          // PLL2 ready clear
+        PLL1RDYSC = 6,          // PLL1 ready clear
+        HSI48RDYSC = 5,         // HSI48 ready clear
+        CSIRDYSC = 4,           // CSI ready clear
+        HSERDYSC = 3,           // HSE ready clear
+        HSIRDYSC = 2,           // HSI ready clear
+        LSERDYSC = 1,           // LSE ready clear
+        LSIRDYSC = 0,           // LSI ready clear
 
         // RCC_BDCR
-        BDRST = 16,
-        RTCEN = 15,
-        RTCSEL = 8,
-        LSEBYP = 2,
-        LSERDY = 1,
-        LSEON = 0,
+        BDRST = 16,             // Backup domain software reset
+        RTCEN = 15,             // RTC clock enable
+        RTCSEL = 8,             // 2-bit RTC clock source selection RtcClkSource
+        LSECSSD = 6,            // LSE clock security system failure detection
+        LSECSSON = 5,           // LSE clock sec sys ena
+        LSEDRV = 3,             // 2-bit LSE osc driving capability
+        LSEBYP = 2,             // LSE osc bypass
+        LSERDY = 1,             // LSE osc ready
+        LSEON = 0,              // LSE osc on
 
         // RCC_CSR
         LSIRDY = 1,
         LSION = 0,
 
-        // PWR_CR
-        DBP = 8
+        // RCC_GCR
+        WW1RSC = 0,             // WWDG1 reset scope control (set to 1 before enabling WWDG1)
+
+        // RCC_D3AMR
+        SRAM4AMEN = 29,         // SRAM4 autonomous mode enable
+        BKPRAMAMEN = 28,        // Backup RAM AMEN
+        ADC3AMEN = 24,          // ADC3 AMEN
+        SAI4AMEN = 41,          // SAI4 AMEN
+        CRCAMEN = 19,           // CRC AMEN
+        RTCAMEN = 16,           // RTC AMEN
+        VREFAMEN = 15,          // VREF AMEN
+        COMP12AMEN = 14,        // COMP12 AMEN
+        LPTIM5AMEN = 12,        // LPTIM5 AMEN
+        LPTIM4AMEN = 11,        // LPTIM4 AMEN
+        LPTIM3AMEN = 10,        // LPTIM3 AMEN
+        LPTIM2AMEN = 9,         // LPTIM2 AMEN
+        I2C4AMEN = 7,           // I2C4 AMEN
+        SPI6AMEN = 5,           // SPI6 AMEN
+        LPUART1AMEN = 3,        // LPUART1 AMEN
+        BDMAAMEN = 0,           // BDMA AMEN
+
+        // RCC_RSR
+        LPWRRSTF = 30,          //  Reset due to ill D1 DStandy or CPU CStop flag
+        WWDG1RST = 28,          //  Window Watchdog
+        IWDG1RSTF = 26,         //  Independent Watchdog
+        SFTRSTF = 24,           //  System reset from CPU
+        PORRSTF = 23,           //  POR/PDR
+        PINRSTF = 22,           //  Pin
+        BORRSTF = 21,           //  BOR
+        D2RSTF = 20,            //  D2 domain power switch
+        D1RSTF = 19,            //  D1 domain power switch
+        CPURSTF = 17,           //  CPU reset
+        RMVF = 16,              //  Clear all reset flags
     };
     
-    // Various constants
-    enum {
-        MAX_FREQ = 168000000,
-        HSI_FREQ = 16000000
-    };
-
 public:
     // Clock sources
     enum class SysClkSource {
         HSI = 0,
-        HSE = 1,
-        PLL = 2
+        CSI = 1,
+        HSE = 2,
+        PLL1 = 3
     };
 
     enum class PllClkSource {
         HSI = 0,
-        HSE = 1,
+        CSI = 1,
+        HSE = 2,
         OFF
     };
 
@@ -106,7 +310,14 @@ public:
         OFF = 0,
         LSE = 1,
         LSI = 2,
-        HSE = 3
+        HSE = 3                 // Divided by RTCPRE
+    };
+
+    enum class PllInputRange {
+        RANGE_1_2_MHZ = 0,      // 1-2 MHz
+        RANGE_2_4_MHZ = 1,      // 2-4 MHz
+        RANGE_4_8_MHZ = 2,      // 4-8 MHz
+        RANGE_8_16_MHZ = 3      // 8-16 MHz
     };
 
     // PLL prescaler
@@ -127,10 +338,10 @@ public:
         DIV64  = 12,
         DIV128 = 13,
         DIV256 = 14,
-        DIV511 = 15
+        DIV512 = 15
     };
 
-    // APB1,2 prescalers
+    // APB1,2,3,4 prescalers
     enum class ApbPrescale {
         DIV1  = 0,
         DIV2  = 4,
@@ -139,31 +350,62 @@ public:
         DIV16 = 7
     };
 
-    enum class I2sSource {
-        PLLI2S = 0,
-        I2S_CKIN_PIN = 1
+
+    // BASE_PWR (PWR_CR1 at offset 0)
+    enum {
+        DBP = 8
     };
+    
+    // HSE/HSI/CSI/pll1_p_ck -> sys_ck
+    //
+    // sys_ck -> D1CPRE -> sys_d1pre_ck (max 480MHz)
+    //   sys_d1cpre_ck -> CPU clocks
+    //   sys_d1cpre_ck -> DIV8 -> systick
+    //   sys_d1cpre_ck/rcc_timy_ker_ck -> HRTIMSEL -> HRTIM prescaler
+    //
+    //   sys_d1cpre_ck -> HPRE (/1...512) -> hpre_ck (max 240MHz)
+    //
+    //      hpre_ck -> rcc_aclk (AXI per clk)
+    //      hpre_ck -> hclk3 (AHB3 per clk)
+    //      hpre_ck -> D1PPRE -> rcc_pclk3 (APB3 per clk)
+    //      hpre_ck -> rcc_hlk1,2   (AHB1, AHB2 per clk)
+    //      hpre_ck -> D2PPRE1 -> rcc_pclk1, rcc_timx_ker_ck (APB1 per clk, timers prescale clk)
+    //      hpre_ck -> D2PPRE2 -> rcc_pclk2, rcc_timy_ker_ck (APB2 per clk, timers prescale clk)
+    //      hpre_ck -> rcc_hclk4, rcc_fclk_d3 (AHB4 per clk)
+    //      hpre_ck -> D3PPRE  -> rcc_pclk4 (APB4 per clk)
+
+    // Various constants
+    enum {
+        MAX_FREQ = 480000000,
+        D1CPRE_MAX  = 480000000,    // Output of D1CPRE
+        HPRE_MAX = 240000000,       // Output of HPRE
+        RTC_MAX = 1000000           // RTC clock
         
-    enum class PllSysClkDiv {
-        DIV2 = 0,
-        DIV4 = 1,
-        DIV6 = 2,
-        DIV8 = 3
+    };
+
+    struct PllConfig {
+        PllClkSource  source;   // Clock source
+        PllInputRange frange;   // Input frequency range
+        uint8_t       divm;     // 0-63; PLL input prescaler, 0=disabled, 1=bypass, 2-63
+        uint8_t       divr;     // 1-128; determines pll[123]_r_ck
+        uint8_t       divq;     // 1-128; determines pll[123]_q_ck
+        uint8_t       divp;     // 1-128 (PLL1: 2-128), even; determines pll[123]_p_ck
+        uint16_t      divn;     // 4-512; PLL multiplier
+        uint16_t      fracn;    // 0-(2^13-1) fractional multiplier (ignored, disabled)
     };
 
     struct Config {
-        PllClkSource pll_clk_source;
-        uint16_t     pll_vco_mult:9;
-        uint8_t      pll_vco_div:6;
-        PllSysClkDiv pll_sysclk_div;
-        uint8_t      pll_periph_div:4;  // 2-15
-        SysClkSource sys_clk_source;
-        HclkPrescale hclk_prescale;
-        ApbPrescale  apb1_prescale;
-        ApbPrescale  apb2_prescale;
-        RtcClkSource rtc_clk_source;
-        uint8_t      rtc_clk_div:5; // 2-31
-        I2sSource    i2s_source;
+        PllConfig     pll_conf[3];
+        SysClkSource  sys_clk;     // sys_ck source, will be started and switched to, then previous stopped
+        uint32_t      d1cpre_freq; // sys_d1cpre_ck frequency, determines D1CPRE prescaler
+        uint32_t      ahb_freq;    // AHB peripheral freq, determines HPRE prescaler
+        uint32_t      apb1_freq;   // APB1 peripheral frequency, determines D2PPRE1 ApbPrescaler
+        uint32_t      apb2_freq;   // APB2 peripheral frequency, determines D2PPRE2 ApbPrescaler
+        uint32_t      apb3_freq;   // APB3 peripheral frequency, determines D1PPRE ApbPrescaler
+        uint32_t      apb4_freq;   // APB4 peripheral frequency, determines D3PPRE ApbPrescaler
+
+        RtcClkSource  rtcsel;       // RTC clk source
+        uint8_t       rtcpre:6;     // 2-63
     };
 
     enum class Mco2Output {
@@ -284,33 +526,54 @@ public:
     static void EnableAHB1(uint32_t flags) { VREG(RCC_AHB1ENR) |= flags; }
     static void EnableAHB2(uint32_t flags) { VREG(RCC_AHB2ENR) |= flags; }
     static void EnableAHB3(uint32_t flags) { VREG(RCC_AHB3ENR) |= flags; }
-    static void EnableAPB1(uint32_t flags) { VREG(RCC_APB1ENR) |= flags; }
+    static void EnableAHB4(uint32_t flags) { VREG(RCC_AHB4ENR) |= flags; }
+
+    static void EnableAPB1L(uint32_t flags) { VREG(RCC_APB1LENR) |= flags; }
+    static void EnableAPB1H(uint32_t flags) { VREG(RCC_APB1HENR) |= flags; }
     static void EnableAPB2(uint32_t flags) { VREG(RCC_APB2ENR) |= flags; }
+    static void EnableAPB3(uint32_t flags) { VREG(RCC_APB3ENR) |= flags; }
+    static void EnableAPB4(uint32_t flags) { VREG(RCC_APB4ENR) |= flags; }
 
     static void DisableAHB1(uint32_t flags) { VREG(RCC_AHB1ENR) &= ~flags; }
     static void DisableAHB2(uint32_t flags) { VREG(RCC_AHB2ENR) &= ~flags; }
     static void DisableAHB3(uint32_t flags) { VREG(RCC_AHB3ENR) &= ~flags; }
-    static void DisableAPB1(uint32_t flags) { VREG(RCC_APB1ENR) &= ~flags; }
+    static void DisableAHB4(uint32_t flags) { VREG(RCC_AHB4ENR) &= ~flags; }
+
+    static void DisableAPB1L(uint32_t flags) { VREG(RCC_APB1LENR) &= ~flags; }
+    static void DisableAPB1H(uint32_t flags) { VREG(RCC_APB1HENR) &= ~flags; }
     static void DisableAPB2(uint32_t flags) { VREG(RCC_APB2ENR) &= ~flags; }
+    static void DisableAPB3(uint32_t flags) { VREG(RCC_APB3ENR) &= ~flags; }
+    static void DisableAPB4(uint32_t flags) { VREG(RCC_APB4ENR) &= ~flags; }
 
     // Peripheral enable/disable, low power
     static void EnableAHB1LP(uint32_t flags) { VREG(RCC_AHB1LPENR) |= flags; }
     static void EnableAHB2LP(uint32_t flags) { VREG(RCC_AHB2LPENR) |= flags; }
     static void EnableAHB3LP(uint32_t flags) { VREG(RCC_AHB3LPENR) |= flags; }
-    static void EnableAPB1LP(uint32_t flags) { VREG(RCC_APB1LPENR) |= flags; }
+    static void EnableAHB4LP(uint32_t flags) { VREG(RCC_AHB4LPENR) |= flags; }
+
+    static void EnableAPB1LLP(uint32_t flags) { VREG(RCC_APB1LLPENR) |= flags; }
+    static void EnableAPB1HLP(uint32_t flags) { VREG(RCC_APB1HLPENR) |= flags; }
     static void EnableAPB2LP(uint32_t flags) { VREG(RCC_APB2LPENR) |= flags; }
+    static void EnableAPB3LP(uint32_t flags) { VREG(RCC_APB3LPENR) |= flags; }
+    static void EnableAPB4LP(uint32_t flags) { VREG(RCC_APB4LPENR) |= flags; }
 
     static void DisableAHB1LP(uint32_t flags) { VREG(RCC_AHB1LPENR) &= ~flags; }
     static void DisableAHB2LP(uint32_t flags) { VREG(RCC_AHB2LPENR) &= ~flags; }
     static void DisableAHB3LP(uint32_t flags) { VREG(RCC_AHB3LPENR) &= ~flags; }
-    static void DisableAPB1LP(uint32_t flags) { VREG(RCC_APB1LPENR) &= ~flags; }
+    static void DisableAHB4LP(uint32_t flags) { VREG(RCC_AHB4LPENR) &= ~flags; }
+
+    static void DisableAPB1LLP(uint32_t flags) { VREG(RCC_APB1LLPENR) &= ~flags; }
+    static void DisableAPB1HLP(uint32_t flags) { VREG(RCC_APB1HLPENR) &= ~flags; }
     static void DisableAPB2LP(uint32_t flags) { VREG(RCC_APB2LPENR) &= ~flags; }
+    static void DisableAPB3LP(uint32_t flags) { VREG(RCC_APB3LPENR) &= ~flags; }
+    static void DisableAPB4LP(uint32_t flags) { VREG(RCC_APB4LPENR) &= ~flags; }
 
     // Reset cause word
-    static uint32_t ResetCause() { return VREG(RCC_CSR) & ~3; }
+    static uint32_t ResetCause() { return VREG(RCC_RSR); }
 
     // Check if LSE or LSI is running (indicates power loss if off)
-    static bool CheckPowerLoss() { return (VREG(RCC_BDCR) & (BIT(LSERDY) | BIT(LSIRDY))) == 0; }
+    static bool CheckPowerLoss() {
+        return ((VREG(RCC_BDCR) & BIT(LSERDY)) == 0 || (VREG(RCC_CSR) & BIT(LSIRDY)) == 0; }
 
     class RtcAccess {
     public:
