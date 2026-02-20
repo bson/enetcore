@@ -217,7 +217,7 @@ public:
     }
 
     // Set up for async use.  8 bits no parity.  1 or 2 stop bits.
-    void InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timer_freq) {
+    void InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timer_freq, bool rtscts) {
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         volatile uint32_t& cr2 = reg<volatile uint32_t>(Register::USART_CR2);
         volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
@@ -236,7 +236,7 @@ public:
         // TX threshold 3/4
         // RX threshold 3/4
         // Interrupt on TX/RX either empty or at threshold
-        // Disable CTS
+        // CTS in input, RTS is output
 
         cr1 &= ~BIT(UE);
 
@@ -250,6 +250,8 @@ public:
                 | BIT(ADDM7) | BIT(DIS_NSS) | BIT(SLVEN) | (3 << STOP));
 
         cr3 = (FT_3_4 << TXFTCFG) | BIT(RXFTIE) | (FT_3_4 << RXFTCFG) | BIT(TXFTIE);
+        if (rtscts)
+            cr3 |= BIT(CTSE) | BIT(RSTE);
 
         cr1 |= (stopbit << STOP);
 
