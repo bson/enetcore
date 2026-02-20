@@ -6,13 +6,10 @@
 
 #include <stdint.h>
 
-#error not yet updated for STM32H7
-
-
 class Stm32ClockTree {
     // Register byte offsets
     enum {
-        RCC_CR          = 0x00,
+        RCC_CR          = 0x00, // Source control reg
         RCC_HSICFGR     = 0x04, // HSI configuration
         RCC_CRRCR       = 0x08, // Clock recovery CR
         RCC_CSICFGR     = 0x0c, // CSI configuration
@@ -291,19 +288,33 @@ class Stm32ClockTree {
     };
     
 public:
-    // Clock sources
+    // sys_ck sources
     enum class SysClkSource {
         HSI = 0,
         CSI = 1,
         HSE = 2,
-        PLL1 = 3
+        PLL1 = 3                // pll1_p_ck
     };
+
+    // HSI frequencies (divider values)
+    enum class HsiFreq {
+        FREQ_64MHZ = 0,         // DIV 0 => 64MHz
+        FREQ_32MHZ = 1,
+        FREQ_16MHZ = 2,
+        FREQ_8MHZ = 3
+    };
+
+    // CSI is always 4MHz
+    enum { CSI_FREQ = 4000000 };
+
+    // If using HSI, this is the desired frequency
+    enum { HSI_FREQ = 8000000 };
 
     enum class PllClkSource {
         HSI = 0,
         CSI = 1,
         HSE = 2,
-        OFF
+        OFF = 3
     };
 
     enum class RtcClkSource {
@@ -376,36 +387,27 @@ public:
 
     // Various constants
     enum {
-        MAX_FREQ = 480000000,
-        D1CPRE_MAX  = 480000000,    // Output of D1CPRE
-        HPRE_MAX = 240000000,       // Output of HPRE
-        RTC_MAX = 1000000           // RTC clock
+        CPU_MAX  = 480000000,      // Max CPU clock
+        AHB_MAX = 240000000,       // Max AHB
+        RTC_MAX = 1000000          // RTC clock
         
     };
 
-    struct PllConfig {
-        PllClkSource  source;   // Clock source
-        PllInputRange frange;   // Input frequency range
-        uint8_t       divm;     // 0-63; PLL input prescaler, 0=disabled, 1=bypass, 2-63
-        uint8_t       divr;     // 1-128; determines pll[123]_r_ck
-        uint8_t       divq;     // 1-128; determines pll[123]_q_ck
-        uint8_t       divp;     // 1-128 (PLL1: 2-128), even; determines pll[123]_p_ck
-        uint16_t      divn;     // 4-512; PLL multiplier
-        uint16_t      fracn;    // 0-(2^13-1) fractional multiplier (ignored, disabled)
-    };
-
     struct Config {
-        PllConfig     pll_conf[3];
-        SysClkSource  sys_clk;     // sys_ck source, will be started and switched to, then previous stopped
-        uint32_t      d1cpre_freq; // sys_d1cpre_ck frequency, determines D1CPRE prescaler
+        PllClkSource  pll1_clk;    // PLL1 clock source
+        bool          hsi48_ena;   // Enable HSI48 OSC (NYI)
+        bool          lsi_ena;     // Enable LSI
+        uint32_t      hse_freq;    // If HSE is used, this is its frequency
+
+        uint32_t      cpu_freq;    // Desired CPU clock
         uint32_t      ahb_freq;    // AHB peripheral freq, determines HPRE prescaler
         uint32_t      apb1_freq;   // APB1 peripheral frequency, determines D2PPRE1 ApbPrescaler
         uint32_t      apb2_freq;   // APB2 peripheral frequency, determines D2PPRE2 ApbPrescaler
         uint32_t      apb3_freq;   // APB3 peripheral frequency, determines D1PPRE ApbPrescaler
         uint32_t      apb4_freq;   // APB4 peripheral frequency, determines D3PPRE ApbPrescaler
 
-        RtcClkSource  rtcsel;       // RTC clk source
-        uint8_t       rtcpre:6;     // 2-63
+        RtcClkSource  rtc_clk;     // RTC clk source
+        uint8_t       rtcpre:6;    // 2-63
     };
 
     enum class Mco2Output {
@@ -433,58 +435,238 @@ public:
 
 #define VREG(offset) (*((volatile uint32_t*)(BASE_RCC+(offset))))
 
-    // Reset startup init, assumes we're running off the HSI, with HSE and PLL disabled.
+    // Assumes running on HSI at start.
+    // Starts HSI, HSI48, CSI or LSI as needed, if used as a clock source.
     // LSE may be running.
+
+    // sys_freq, ahb_freq, apb*_freq are the main inputs:
+    //   vco_freq = 2*sys_freq
+    //   D1CPRE = sys_freq/cpu_freq - this must be an integer multiple
+    //   HPRE = cpu_freq/ahb_freq
+    //   D[123]PPRE = ahb_freq/apb*_freq
+    // PLL1 is configured to produce sys_freq on pll1_p_ck
+    //   Source = HSI/LSI/HSE, if HSE hse_freq is used
+    //   osc_freq = HSI ? HSI_FREQ
+    //            : CSI ? CSI_FREQ
+    //            : HSE ? hse_freq
+    //
+    //   PLL1 DIVM = 1
+    //   PLL1 DIVP = VCO_FREQ/sys_freq
+    //   PLL1 DIVQ, DIVR = 0 (off)
+    //   PLL1 DIVN = vco_freq / osc_freq
+
+    // Example:
+    //   cpu_freq = 200
+    //   ahb_freq = 100
+    //   apb*_freq = 20
+    //   source = HSI
+    // Gives:
+    //   sys_freq = cpu_freq = 200 (VCOH)
+    //   vco_freq = 2 * 200 = 400
+    //   HSI switched to VCOL (400 < 420)
+    //   PLL1 DIVM = 1
+    //   PLL1 DIVN = vco_freq/osc_freq = 400/4 = 100
+    //   PLL1 DIVP = vco_freq/sys_freq = 400/200 = 2 (fixed)
+    //   D1CPRE = cpu_freq/sys_freq = 200/200 = 1
+    //   HPRE = cpu_freq/ahb_freq = 200/100 = 2
+    //   D*PRE = ahb_freq/apb*freq = 100/20 = 5
+    //
+
+    // Startup sequence, integer mode (RM0433 fig 48, p. 348)
+    //
+    //  1. Select clock source (RCC_CKSELR.PLLSRC) - shared for all PLLs
+    //  2. Set pre-divider DIVM1 (RCC_CKSELR)
+    //  3. PLL1 config:
+    //     RCC_PLLCFGR:
+    //       PLL1VCOSEL = VCOL (150-420)/VCOH (192-960)
+    //       PLL1RGE = range
+    //       PLL1FRACEN = 0
+    //       DIVP1EN = 1
+    //       DIVQ1EN = 0
+    //       DIVR1EN = 0
+    //     RCC_PLL1DIVR:
+    //       DIVN1 = vco_freq/osc_freq
+    //       DIVP1 = vco_freq/sys_freq
+    //       DIVQ1 = DIVR1 = 0
+    //  4. Enable PLL1 (RCC_CR.PLL1ON=1)
+    //  5. Wait until RCC_CR.PLL1RDY = 1
+    //
+    // Configure AHB, APB clocks:
+    //   
+    // Set sys_ck to use pll1_p_ck
+
+    static void StartPll(int num, PllInputRange range, uint16_t divm, int vcol, uint16_t divn,
+                        uint16_t divp, uint16_t divq, uint16_t divr) {
+        assert(divp <= 128);
+        assert(divq <= 128);
+        assert(divr <= 128);
+        assert(divn >= 4 && divn <= 512);
+
+        --num;
+
+        // Turn off
+        VREG(RCC__CR) &= ~BIT(num * 2 + PLL1ON);
+
+        VREG(RCC_PLLCKSELR) &= ~(0b11111 << (DIVM1 + num * 8));
+        VREG(RCC_PLLCKSELR) |= (uint32_t)divm << (DIVM1 + num * 8);
+
+        const uint32_t cfgval = (range << 2) | (vcol << 1);
+        VREG(RCC_PLLCFGR) &= ~(0b1111 << (4 * num));
+        VREG(RCC_PLLCFGR) |= cfgval << (4 * num);
+
+        const uint32_t diven = ((divr != 0) << 2) | ((divq != 0) << 1) | (divp != 0);
+        VREG(RCC_PLLCFGR) &= ~(0b111 << (DIVP1EN + num * 3));
+        VREG(RCC_PLLCFGR) |= diven << (DIVP1EN + num * 3);
+
+        volatile uint32_t& divr_reg = num == 2 ? VREG(RCC_PLL3DIVR)
+            : num == 1 ? VREG(RCC_PLL2DIVR) : VREG(RCC_PLL1DIVR);
+        const uint32_t div = ((divr-1) << DIVR1) | ((divq-1) << DIVQ1) | ((divp-1) << DIVP1)
+            | ((divn - 1) << DIVN1);
+        divr_reg = div;
+
+        // Turn on
+        VREG(RCC__CR) |= BIT(num * 2 + PLL1ON);
+
+        // Wait to stabilize
+        while ((RCC_CR & BIT(num * 2 + PLL1RDY)) == 0)
+            ;
+    }
+
+
+    // Return PLL range value for a frequency
+    static PllInputRange range_for_freq(uint32_t f) {
+        assert(f >= 1000000 && f <= 16000000);
+        f /= 1000000;
+        if (f <= 2) return PllInputRange::RANGE_1_2_MHZ;
+        if (f <= 4) return PllInputRange::RANGE_2_4_MHZ;
+        if (f <= 8) return PllInputRange::RANGE_4_8_MHZ;
+        return PllInputRange::RANGE_8_16_MHZ;
+    }
+
+
+    // Find highest bit set
+    static uint32_t fhs(uint32_t val) {
+        assert(val != 0);
+
+        for (int bitnum = 31; bitnum >= 0; --bitnum) {
+            if (val & BIT(31))
+                return bitnum;
+            val <<= 1;
+        }
+
+        // Not reached
+        return 0;
+    }
+
+
     static void Configure(const Config& config) {
-        assert(config.pll_periph_div >= 2);
+        uin32_t osc_freq;
+        switch (config.pll1_clk) {
+        case HSI: osc_freq = HSI_FREQ; break;
+        case HSE: osc_freq = config.hse_freq; break;
+        case CSI: osc_freq = CSI_FREQ; break;
+        default: osc_freq = 0; break;
+        }
+
+        assert(osc_freq != 0);
+        assert(config.cpu_freq <= MAX_CPU_FREQ);
+        assert(config.ahb_freq <= MAX_AHB_FREQ && config.ahb_freq <= config.cpu_freq);
+        assert(config.apb1_freq <= config.ahb_freq);
+        assert(config.apb2_freq <= config.ahb_freq);
+        assert(config.apb3_freq <= config.ahb_freq);
+        assert(config.apb4_freq <= config.ahb_freq);
+
+        // These should be multiples
+        assert((config.cpu_freq % osc_freq) == 0);
+        assert((config.cpu_freq % config.ahb_freq) == 0);
+
+        const uint32_t sys_freq = config.cpu_freq;
+        const uint32_t vco_freq = 2 * sys_freq;
+        const int vcol = vco_freq < 420000000;
+        const uint16_t pll1_divn = vco_freq / osc_freq;
+        const uint16_t pll1_divp = vco_freq / sys_freq;
+        const uint16_t d1cpre = config.cpu_freq / sys_freq;
+        const uint16_t hpre = config.cpu_freq / config.ahb_freq;
+        const uint16_t d2ppre1 = config.ahb_freq / apb1_freq;
+        const uint16_t d2ppre2 = config.ahb_freq / apb2_freq;
+        const uint16_t d1ppre = config.ahb_freq / apb3_freq;
+        const uint16_t d3ppre = config.ahb_freq / apb4_freq;
+
+        assert(vco_freq >= 150000000 && vco_freq <= 960000000);
+        assert(d1cpre >= 0 && d1cpre <= 512);
+        assert(hpre >= 1 && hpre <= 512);
+        assert(d1ppre >= 1 && d1ppre <= 16);
+        assert(d2ppre1 >= 1 && d2ppre1 <= 16);
+        assert(d2ppre2 >= 1 && d2ppre2 <= 16);
+        assert(d3ppre >= 1 && d3ppre <= 16);
+        assert(pll1_divn >= 4 && pll1_div <= 512);
+        assert(pll1_divp >= 2 && pll1_divp <= 128);
+
 
         // Start HSE if used as source
-        if (config.pll_clk_source == PllClkSource::HSE || config.sys_clk_source == SysClkSource::HSE
-            || config.rtc_clk_source == RtcClkSource::HSE) {
+        if (config.pll_clk == PllClkSource::HSE || config.rtc_clk == RtcClkSource::HSE) {
             VREG(RCC_CR) |= BIT(HSEON);
             while ((VREG(RCC_CR) & BIT(HSERDY)) == 0)
                 ;
         }
 
-        // Start the main PLL if wanted
-        if (config.pll_clk_source != PllClkSource::OFF) {
-            VREG(RCC_PLLCFGR) = (config.pll_periph_div << PLLQ)
-                | ((uint32_t)config.pll_sysclk_div << PLLP)
-                | ((uint32_t)config.pll_vco_mult << PLLN)
-                | ((uint32_t)config.pll_vco_div << PLLM)
-                | ((uint32_t)config.pll_clk_source << PLLSRC);
-            VREG(RCC_CR) |= BIT(PLLON);
-            while ((VREG(RCC_CR) & BIT(PLLRDY)) == 0)
-                ;
+        // If HSI is used, drop it to 8MHz before using it as a PLL source
+        if (config.pll_clk == PllClkSource::HSI || config.rtc_clk == RtcClkSource::HSI) {
+            VREG(RCC_CR) &= ~(0b11 << HSIDIV);
+            VREG(RCC_CR) |= HsiFreq::FREQ_8MHZ << HSIDIV;
         }
 
-        // Set prescalers for AHB, APB1, APB2
-        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(0b1111 << HPRE) & ~(0b111 << PPRE1) & ~(0b111 << PPRE2))
-            | ((uint32_t)config.hclk_prescale << HPRE)
-            | ((uint32_t)config.apb1_prescale << PPRE1)
-            | ((uint32_t)config.apb2_prescale << PPRE2);
+        // Set clock source for PLLs
+        VREG(RCC_PLLCKSELR) = config.pll_clk;
+
+        // Start PLL1
+        StartPll(1, range_for_freq(osc_freq), 1, vcol, divn, divp, 0, 0);
+
+        // These default to unprescaled, so set them before switching over the system clock
+
+        // Set prescalers for CPU, AHB, APB3
+        // D1CPRE (CPU), HPRE (AHB), D1PPRE (APB3)
+        const uint32_t d1cpre_val = d1cpre ? (0b1000 | fhs(d1cpre) - 1) : 0;
+        const uint32_t d1ppre_val = d1ppre ? (0b100 | fhs(d1ppre) -1) : 0;
+        const uint32_t hpre_val = hpre ? (0b1000 | fhs(hpre) - 1) : 0;
+        VREG(RCC_D1CFGR) = (d1cpre_val << D1CPRE) | (d1ppre_val << D1PPRE) | (hpre_val << HPRE);
+        
+        // Set prescalers for APB2, APB1
+        const uint32_t d2ppre2_val = d2ppre2 ? (0b100 | fhs(d2ppre2) - 1) : 0;
+        const uint32_t d2ppre1_val = d2ppre1 ? (0b100 | fhs(d2ppre1) - 1) : 0;
+        VREG(RCC_D2CFGR) = (d2ppre2_val << D2PPRE2) | (d2ppre1_val << D2PPRE1);
+
+        // Set prescalers for APB4
+        const uint32_t d3ppre_val = d3ppre ? (fhs(d3ppre) - 1) : 0;
+        VREG(RCC_D3CFGR) = (d3ppre_val << D3PPRE);
 
         // Set the system clock source
-        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << SW))
-            | ((uint32_t)config.sys_clk_source << SW);
-        while ((VREG(RCC_CFGR) & (3 << SWS)) != ((uint32_t)config.sys_clk_source << SWS))
+        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(7 << SW)) | ((uint32_t)config.sys_clk << SW);
+        while ((VREG(RCC_CFGR) & (7 << SWS)) != ((uint32_t)config.sys_clk << SWS))
             ;
 
         // Maybe enable RTC clock
-        if ((uint32_t)config.rtc_clk_source != (VREG(RCC_BDCR) >> RTCSEL) & 3) {
+        if ((uint32_t)config.rtc_clk != (VREG(RCC_BDCR) >> RTCSEL) & 3) {
+            *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
 
-            switch (config.rtc_clk_source) {
+            switch (config.rtc_clk) {
             case RtcClkSource::LSE:
+                VREG(RCC_CSR) &= ~BIT(LSION);
                 VREG(RCC_BDCR) |= BIT(LSEON);
                 while ((VREG(RCC_BDCR) & BIT(LSERDY)) == 0)
                     ;
                 break;
+
             case RtcClkSource::HSE:
-                assert(config.rtc_clk_div >= 2);
-                VREG(RCC_CFGR)= (VREG(RCC_CFGR) & ~(31 << RTCPRE))
-                    | (config.rtc_clk_div << RTCPRE);
+                assert(config.rtc >= 2);
+                VREG(RCC_BDCR) &= ~BIT(LSEON);
+                VREG(RCC_CSR) &= ~BIT(LSION);
+                VREG(RCC_CFGR)= (VREG(RCC_CFGR) & ~(1b111111 << RTCPRE))
+                    | (config.rtcpre << RTCPRE);
                 break;
+
             case RtcClkSource::LSI:
+                VREG(RCC_BDCR) &= ~BIT(LSEON);
                 VREG(RCC_CSR) |= BIT(LSION);
                 while ((VREG(RCC_CSR) & BIT(LSIRDY)) == 0)
                     ;
@@ -497,7 +679,7 @@ public:
             *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
 
             VREG(RCC_BDCR) = (VREG(RCC_BDCR) & ~(3 << RTCSEL))
-                | ((uint32_t)config.rtc_clk_source << RTCSEL);
+                | ((uint32_t)config.rtc_clk << RTCSEL);
 
             VREG(RCC_BDCR) |= BIT(RTCEN);
 
@@ -505,9 +687,17 @@ public:
         }
 
         // Stop HSI if unused
-        if (config.pll_clk_source != PllClkSource::HSI
-            && config.sys_clk_source != SysClkSource::HSI)
+        if (config.pll_clk != PllClkSource::HSI)
             VREG(RCC_CR) &= ~BIT(HSION);
+
+        // Start/stop HSI48
+        if (config.hsi48_ena && !(VREG(RCC_CR) & BIT(HSI48ON))) {
+            VREG(RCC_CR) |= BIT(HSI48ON);
+            while (!(VREG(RCC_CR) & BIT(HSI48RDY)))
+                ;
+        } else if (!config.hsi48_ena && (VREG(RCC_CR) & BIT(HSI48ON))) {
+            VREG(RCC_CR) &= ~BIT(HSI48ON);
+        }
     }
 
     // Output clock on MCO1, MCO2, with given divider
