@@ -8,86 +8,162 @@
 #include "core/mutex.h"
 #include "core/consumer.h"
 
-#error not yet updated for STM32H7
 
 template <uint32_t SEND_BUF_SIZE = 128, uint32_t RECV_BUF_SIZE = 32>
 class Stm32Usart: public Stm32Dma::Peripheral,
                   public Consumer<uint8_t> {
 public:
     enum class Register {
-        USART_SR   = 0x00,
-        USART_DR   = 0x04,
-        USART_BRR  = 0x08,
-        USART_CR1  = 0x0c,
-        USART_CR2  = 0x10,
-        USART_CR3  = 0x14,
-        USART_GTPR = 0x18
+        USART_CR1  = 0x00,
+        USART_CR2  = 0x04,
+        USART_CR3  = 0x08,
+        USART_BRR  = 0x0c,
+        USART_GTPR = 0x10,
+        USART_RTOR = 0x14,
+        USART_RQR  = 0x18,
+        USART_ISR  = 0x1c,
+        USART_ICR  = 0x20,
+        USART_RDR  = 0x24,
+        USART_TDR  = 0x28,
+        USART_PRESC = 0x2c
     };
 
     enum {
-        // USART_SR
-        CTS   = 9,
-        LBD   = 8,
-        TXE   = 7,
-        TC    = 6,
-        RXNE  = 5,
-        IDLE  = 4,
-        ORE   = 3,
-        NF    = 2,
-        FE    = 1,
-        PE    = 0,
-
-        // USART_DR is a simple 8 bit data register
-
-        // USART_BRR - Q12.4 fixed-point value
-        DIV_MANT = 4,
-        DIV_FRAC = 0,
-
         // USART_CR1
-        OVER8  = 15,
-        UE     = 13,
-        M      = 12,
-        WAKE   = 11,
-        PCE    = 10,
-        PS     = 9,
-        PEIE   = 8,
-        TXEIE  = 7,
-        TCIE   = 6,
-        RXNEIE = 5,
+        RXFFIE = 31,
+        FXFEIE = 30,
+        FIFOEN = 29,
+        M1 = 28,
+        EOBIE = 27,
+        RTOIE = 26,
+        DEAT = 21,
+        DEDT = 16,
+        OVER8 = 15,
+        CMIE = 14,
+        MME = 13,
+        M0 = 12,
+        WAKE = 11,
+        PCE = 10,
+        PS = 9,
+        PEIE = 8,
+        TXFNFIE = 7,
+        TCIE = 6,
+        RXFNEIE = 5,
         IDLEIE = 4,
-        TE     = 3,
-        RE     = 2,
-        RWU    = 1,
-        SBK    = 0,
+        TE = 3,
+        RE = 2,
+        UESM = 1,
+        UE = 0,
 
         // USART_CR2
+        ADD = 24,
+        RTOEN = 23,
+        ABRMOD = 21,
+        ABREN = 20,
+        MSBFIRST = 19,
+        DATAINV = 18,
+        TXINV = 17,
+        RXINV = 16,
+        SWAP = 15,
         LINEN = 14,
-        STOP  = 12,
+        STOP = 12,
         CLKEN = 11,
-        CPOL  = 10,
-        CPHA  = 9,
-        LBCL  = 8,
+        CPOL = 10,
+        CPHA = 9,
+        LBCL = 8,
         LBDIE = 6,
-        LBDL  = 5,
-        ADD   = 0,
+        LBDL = 5,
+        ADDM7 = 4,
+        DIS_NSS = 3,
+        SLVEN = 0,
 
         // USART_CR3
+        TXFTCFG = 29,
+        RXFTIE = 28,
+        RXFTCFG = 25,
+        TCBGTIE = 24,
+        TXFIE = 23,
+        WUFIE = 22,
+        WUS = 20,
+        SCARCNT = 17,
+        DEP = 15,
+        DEM = 15,
+        DDRE = 13,
+        OVRDIS = 12,
         ONEBIT = 11,
-        CTSIE  = 10,
-        CTSE   = 9,
-        RTSE   = 8,
-        DMAT   = 7,
-        DMAR   = 6,
-        SCEN   = 5,
-        NACK   = 4,
-        HDSEL  = 3,
-        IRLP   = 2,
-        IREN   = 1,
-        EIE    = 0,
+        CTSIE = 10,
+        CTSE = 9,
+        RTSE = 8,
+        DMAT = 7,
+        DMAR = 6,
+        SCEN = 5,
+        NACK = 4,
+        HDSEL = 3,
+        IRLP = 2,
+        IREN = 1,
+        EIE = 0,
 
         // USART_GTPR
         GT  = 8,
         PSC = 0
+
+        // USART_RTOR
+        BLEN = 24,
+        RTO = 0,
+
+        // USART_RQR
+        TXFRQ = 4,
+        RXFRQ = 3,
+        MMRQ = 2,
+        SBKRQ = 1,
+        ABRRQ = 0,
+
+        // USART_ISR
+        TXFT = 27,
+        RXFT = 26,
+        TCBGT = 25,
+        RXFF = 24,
+        TXFE = 23,
+        REACK = 22,
+        TEACK = 21,
+        WUF = 20,
+        RWU = 19,
+        SBKF = 18,
+        CMF = 17,
+        BUSY = 16,
+        ABRF = 15,
+        ABRE = 14,
+        UDR = 13,
+        EOBF = 12,
+        RTOF = 11,
+        CTS = 10,
+        CTSIF = 9,
+        LBDF = 8,
+        TXFXF = 7,
+        TC = 6,
+        RXFNE = 5,
+        IDLE = 4,
+        ORE = 3,
+        NE = 2,
+        FE = 1,
+        PE = 0,
+
+        // USART_ICR
+        WUCF = 20,
+        CMCF = 17,
+        UDRCF = 13,
+        EOBCF = 12,
+        RTOCF = 11,
+        CTSCF = 9,
+        LBDCF = 8,
+        TCBGTCF = 7,
+        TCCF = 6,
+        TXFECF = 5,
+        IDLECF = 4,
+        ORECF = 3,
+        NECF = 2,
+        FECF = 1,
+        PECF = 0,
     };
 
     enum StopBits {
@@ -96,6 +172,16 @@ public:
         SB_2   = 2,            // 2
         SB_1_5 = 3             // 1.5
     };
+
+    enum FifoThreshold {
+        FT_1_8    = 0,          // 1/8 of its depth available (TX) or in use (RX)
+        FT_1_4    = 1,          // 1/4
+        FT_1_2    = 2,          // 1/2
+        FT_3_4    = 3,          // 3/4
+        FT_7_8    = 4,          // 7/8
+        FT_EMPTY  = 5           // 8/8 empty (TX) or full (RX)
+    };
+
 
 private:
     typedef Ring<SEND_BUF_SIZE> SendQ;
@@ -116,7 +202,8 @@ public:
     Stm32Usart(const uintptr_t base,
                Stm32Dma::Target txtarg,
                Stm32Dma::Target rxtarg)
-        : Peripheral(base + (uint32_t)Register::USART_DR,
+        : Peripheral(base + (uint32_t)Register::USART_TDR,
+                     base + (uint32_t)Register::USART_RDR,
                      txtarg, rxtarg),
           _base(base),
           _ienable(false),
@@ -130,34 +217,45 @@ public:
     }
 
     // Set up for async use.  8 bits no parity.  1 or 2 stop bits.
-    void InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timerclk) {
-        // BRR is Q12.4, so
-        // BRR*16 = clk/(16*baud)   => BRR = clk/baud
-        // XXX Simple truncatation, maybe use Q12.5 and round manually, but probably good enough (<< 1% error)
-        const uint32_t brr = timerclk/baudrate;
-        assert(brr <= 0xffff);
+    void InitAsync(uint32_t baudrate, StopBits stopbit, uint32_t timer_freq) {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        volatile uint32_t& cr2 = reg<volatile uint32_t>(Register::USART_CR2);
+        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
+        volatile uint32_t& brr = reg<volatile uint32_t>(Register::USART_BRR);
+        volatile uint32_t& presc = reg<volatile uint32_t>(Register::USART_PRESC);
+
+
+        uint32_t brr_val = timer_freq/(16*baudrate);
+        assert(brr_val <= 0xffff);
+
 
         Thread::IPL G(IPL_UART);
 
-        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
-        cr1 &= ~(BIT(PEIE) | BIT(TXEIE) | BIT(TCIE) | BIT(RXNEIE) | BIT(TE) | BIT(RE)
-                 | BIT(SBK) | BIT(RWU) | BIT(M) | BIT(UE) | BIT(PCE) | BIT(IDLEIE)
-                 | BIT(OVER8));
+        // Basically, no parity, 8 data bits, little endian, 1 stop bit
+        // FIFO enable
+        // TX threshold 3/4
+        // RX threshold 3/4
+        // Interrupt on TX/RX either empty or at threshold
+        // Disable CTS
 
-        volatile uint32_t& cr2 = reg<volatile uint32_t>(Register::USART_CR2);
-        cr2 &= ~(BIT(LINEN) | (3 << STOP) | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL)
-                 | BIT(LBDIE) | 0xf);
+        cr1 &= ~BIT(UE);
 
-        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
-        cr3 = (cr3 & ~(BIT(CTSIE) | BIT(CTSE) | BIT(RTSE) | BIT(DMAT) | BIT(DMAR) | BIT(SCEN)
-                       | BIT(NACK) | BIT(HDSEL) | BIT(IRLP) | BIT(IREN) | BIT(EIE)))
-            | BIT(ONEBIT);
-    
-        reg<volatile uint32_t>(Register::USART_BRR) = brr;
+        cr1 &= ~(BIT(RXFFIE) | BIT(TXFEIE) | BIT(M1) | BIT(M0) | BIT(EOBIE) | BIT(RTOIE) | BIT(OVER8) 
+                 | BIT(MME) | BIT(WAKE) | BIT(PCE) | BIT(PS) | BIT(PEIE) | BIT(TXFNFIE) 
+                 | BIT(TCIE) | BIT(RXFNEIE) | BIT(IDLEIE) | BIT(TE) | BIT(RE) | BIT(UESM));
+        cr1 |= BIT(FIFOEN);
 
-        cr2 |= (uint32_t)stopbit << STOP;
-    
-        cr1 &= ~BIT(OVER8);
+        cr &= ~(BIT(ABREN) | BIT(MSBFIRST) | BIT(DATAINV) | BIT(RXINV) | BIT(SWAP) | BIT(LINEN) 
+                | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL) | BIT(LBDIE) | BIT(LBDL) 
+                | BIT(ADDM7) | BIT(DIS_NSS) | BIT(SLVEN) | (3 << STOP));
+
+        cr3 = (FT_3_4 << TXFTCFG) | BIT(RXFTIE) | (FT_3_4 << RXFTCFG) | BIT(TXFTIE);
+
+        cr1 |= (stopbit << STOP);
+
+        presc = 0;
+        brr = brr_val;
+
         cr1 |= BIT(UE);
         cr1 |= BIT(TE) | BIT(RE);
     }
@@ -242,9 +340,11 @@ public:
 
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         if (enable) {
-            cr1 = (cr1 & ~BIT(TXEIE)) | (_dma ? 0 : BIT(TXEIE)) | BIT(RXNEIE);
+            cr1 = (cr1 & ~BIT(TXFEIE)) | (_dma ? 0 : BIT(TXFEIE)) | BIT(RXFFIE);  // FIFO empty/full IE
+            cr3 = (cr3 & ~BIT(TXFTIE)) | (_dma ? 0 : BIT(TXFTIE)) | BIT(RXFTIE); // FIFO at threshold IE
         } else {
-            cr1 &= ~(BIT(TXEIE) | BIT(RXNEIE));
+            cr1 &= ~(BIT(TXFEIE) | BIT(RXFFIE));
+            cr3 &= ~(BIT(TXFTIE) | BIT(RXFTIE));
         }
     }
 
@@ -277,6 +377,11 @@ public:
 private:
 
     inline void StartTx() {
+        volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
+        volatile uint32_t& isr = reg<volatile uint32_t>(Register::USART_ISR);
+        volatile uint32_t& tdr = reg<volatile uint32_t>(Register::USART_TDR);
+
         if (_dma) {
             if (!_sendq.Empty()) {
                 if (!_tx._active)
@@ -288,7 +393,8 @@ private:
             }
 
             // Just in case we got here on a TXE interrupt, right after enabling DMA
-            reg<volatile uint32_t>(Register::USART_CR1) &= ~BIT(TXEIE);
+            cr1 &= ~BIT(TXFEIE);
+            cr3 &= ~BIT(TXFTIE);
             return;
         }
 
@@ -297,36 +403,42 @@ private:
         // The TXE interrupt is a bit... unusual.  When TXE is high it interrupts continuously
         // and if we don't have anything to send the only way to make it stop is to disable
         // interrupts.  This makes for some rather messy code.
-        volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-        if (sr & BIT(TXE)) {
-            volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        if (isr & BIT(TXFT)) {
             if (!_sendq.Empty()) {
-                volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
-                dr = _sendq.PopFront();
-                if (_ienable)
-                    cr1 |= BIT(TXEIE);
+                while (!_send.Empty() && (isr & BIT(TXFNF)))
+                    // While something to TX and FIFO not full: keep stuffing
+                    tdr = _sendq.PopFront();
+                    
+                if (_ienable) {
+                    cr1 |= BIT(TXFEIE);
+                    cr3 |= BIT(TXFTIE);
+                }
             } else {
-                cr1 &= ~BIT(TXEIE);
+                // Nothing to send, disable if TXFIFO is empty
+                if (isr & BIT(TXFE)) {
+                    cr1 &= ~BIT(TXFEIE);
+                    cr3 &= ~BIT(TXFTIE);
+                }
             }
         }
     }
 
     inline void HandleInterrupt() {
-        volatile uint32_t& sr = reg<volatile uint32_t>(Register::USART_SR);
-    
-        if (sr & BIT(TXE)) {
+        volatile uint32_t& isr = reg<volatile uint32_t>(Register::USART_ISR);
+        volatile uint32_t& rdr = reg<volatile uint32_t>(Register::USART_RDR);
+
+        if (isr & BIT(TXFT)) {
             StartTx();
             if (_sendq.Empty())
                 Thread::WakeSingle((void*)&_sendq);
         }
 
-        if (sr & BIT(RXNE)) {
-            volatile uint32_t& dr = reg<volatile uint32_t>(Register::USART_DR);
-            const uint8_t c = (uint8_t)dr;
-            if (_recvq.Headroom()) {
-                _recvq.PushBack(c);
-                if (_read_wait)
-                    Thread::WakeSingle((void*)&_recvq);
+        if (isr & BIT(RXFNE)) {
+            while (_recvq.Headroom() && (isr & BIT(RXFNE)))
+                _recvq.PushBack(rdr);
+
+            if (_read_wait)
+                Thread::WakeSingle((void*)&_recvq);
             }
         }
     }

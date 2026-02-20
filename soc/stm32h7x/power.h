@@ -1,22 +1,16 @@
 #ifndef __STM32_POWER_H__
 #define __STM32_POWER_H___
 
-#error not yet updated for STM32H7
 
 class Stm32Power {
-    enum {
-        VOS = (1 << 14)
-    };
 
 public:
-    // Not thread or interrupt safe.
+    // Not thread or interrupt safe.  Enable voltage scaling.
     static void EnableVos() {
-        *(volatile uint32_t*)BASE_PWR |= VOS;
     }
 
-    // Not thread or interrupt safe.
+    // Not thread or interrupt safe.  Disable voltage scaling.
     static void DisableVos() {
-        *(volatile uint32_t*)BASE_PWR &= ~VOS;
     }
 };
 

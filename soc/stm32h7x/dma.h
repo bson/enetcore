@@ -213,7 +213,8 @@ public:
 
     class Peripheral {
     public:
-        const uint32_t _dr;  // Peripheral TX and RX data register address (common to RX and TX)
+        const uint32_t _tdr;  // Peripheral TX data register address
+        const uint32_t _rdr;  // Peripheral RX data register address
 
         struct Assignment {
             Target  _target;
@@ -230,8 +231,9 @@ public:
 
         uint8_t  _ipl;          // DMA interrupt priority
 
-        Peripheral(uint32_t dr, Target txtarg, Target rxtarg = Target::NOT_USED)
-            : _dr(dr),
+        Peripheral(uint32_t tdr, uin32_t rdr, Target txtarg, Target rxtarg = Target::NOT_USED)
+            : _tdr(tdr),
+              _rdr(rdr)
               _prio(Priority::MEDIUM),
               _word_size(WordSize::BYTE),
               _ipl(IPL_DMA) {

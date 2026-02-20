@@ -82,7 +82,7 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
         | BIT(TCIE);
 
     s_fcr(stream) = BIT(DMDIS);
-    s_par(stream) = p->_dr;
+    s_par(stream) = p->_tdr;
     s_m0ar(stream) = (uint32_t)buf;
     s_ndtr(stream) = nwords;
 
@@ -141,7 +141,7 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
         | BIT(TCIE);
 
     s_fcr(stream) = BIT(DMDIS);
-    s_par(stream) = p->_dr;
+    s_par(stream) = p->_rdr;
     s_m0ar(stream) = (uint32_t)buf;
     s_ndtr(stream) = nwords;
 
