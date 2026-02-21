@@ -10,6 +10,7 @@
 
 // Basic flash support.  No erase or write support.
 class Stm32Flash {
+    // All registers that end with '1' replicate for bank 2 at offset 0x100
     enum Register {
         ACR = 0x00,
         KEYR1 = 0x04,
@@ -38,20 +39,35 @@ class Stm32Flash {
 
 public:
     enum {
-        // FLASH_ACR, reset 0x0000 0000
-        WRHIGHFREQ = 4,
-        LATENCY = 0,
+        SECTOR_SIZE = 128*1024,
+        BANK_SIZE = 1024*1024 - SECTOR_SIZE,
     };
 
     enum {
-        BANK0 = 0x000,
-        BANK1 = 0x100
+        // FLASH_ACR, reset 0x0000 0000
+        WRHIGHFREQ = 4,
+        LATENCY = 0,
+
+        // FLASH_SR1/2
+        QW1 = 2,
+    };
+
+    enum {
+        BANK1 = 0x000,
+        BANK2 = 0x100
    };
 
 private:
+    // Bank-specific register
     static volatile uint32_t& reg(const Bank bank, const Register r) {
         return *((volatile uint32_t*)(BASE_FLASH + uint32_t(bank) + uint32_t(r)));
     }
+
+    // Common register
+    static volatile uint32_t& creg(const Register r) {
+        return *((volatile uint32_t*)(BASE_FLASH + uint32_t(r)));
+    }
+
 
 public:
     class Access {
@@ -80,6 +96,17 @@ public:
         }
 
     };
+
+    // Initialize
+    static void Init() {
+        reg(Register::ACR) = Bitfield(reg(Register::ACR))
+            .f(2, WRHIGHFREQ, 2); // Max WS... XXX fixme
+    }
+
+    // Current bank
+    static Bank GetBank() const {
+        return creg(Register::OPTSR_CUR) & BIT(SWAP_BANK_OPT) ? Bank::BANK2 : Bank::BANK1;
+    }
 
     static void Latency(Bank bank, uint32_t latency) {
         reg(Register::ACR) = Bitfield(reg(Bank::BANK0, Register::ACR))
