@@ -10,15 +10,15 @@
 
 
 template <typename T = uint32_t>
-class BitfieldT {
+class Bitfield {
     const T _val;
 
 public:
-    BitfieldT<T>(const T& val = 0)
+    Bitfield<T>(const T& val = 0)
         : _val(val)
     { }
 
-    BitfieldT<T>(const volatile T& val = 0)
+    Bitfield<T>(const volatile T& val = 0)
         : _val(val)
     { }
 
@@ -43,8 +43,8 @@ public:
         return Bitfield<T>((_val & ~(T(mask) << bit0)) | ((T(val) & T(mask)) << bit0));
     }
 
-    BitfieldT<T>(const BitfieldT<T>&) = delete;
-    BitfieldT<T>& operator=(const BitfieldT<T>&) = delete;
+    Bitfield<T>(const Bitfield<T>&) = delete;
+    Bitfield<T>& operator=(const Bitfield<T>&) = delete;
 };
 
 #endif // __BITFIELD_H__
