@@ -260,6 +260,8 @@ public:
             volatile bool _active; // Transfer active
         };
 
+        uint32_t    _stream_cand; // List of four candidate streams, low to high byte
+
         Assignment _tx;
         Assignment _rx;
 
@@ -270,8 +272,9 @@ public:
         bool     _trbuff;       // Buffered transfer
 
         Peripheral(uint32_t tdr, uin32_t rdr, Target txtarg, Target rxtarg = Target::NOT_USED,
-                   uint16_t rdop = 1, uint16_t wrop = 1)
+                   uint32_t stream_cand, uint16_t rdop = 1, uint16_t wrop = 1)
             : _prio(Priority::MEDIUM),
+              _stream_cand(stream_cand),
               _word_size(WordSize::BYTE),
               _ipl(IPL_DMA),
               _trbuff(false) {

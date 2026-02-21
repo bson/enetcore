@@ -189,23 +189,24 @@ private:
     typedef Ring<RECV_BUF_SIZE> RecvQ;
 
     const uintptr_t _base;
-    SendQ _sendq;
-    RecvQ _recvq;
-    mutable Mutex _w_mutex;
-    uint8_t _read_wait;         // Readers waiting
-    bool _ienable;              // Enable interrupts
+    SendQ           _sendq;
+    RecvQ           _recvq;
+    mutable Mutex   _w_mutex;
+    uint8_t         _read_wait; // Readers waiting
+    bool            _ienable;   // Enable interrupts
 
     // For DMA
-    Stm32Dma* _dma;          // TX DMA is enabled if this != NULL
-    uint16_t _tx_size;       // Current DMA TX length
+    Stm32Dma*       _dma;       // TX DMA is enabled if this != NULL
+    uint16_t        _tx_size;   // Current DMA TX length
 
 public:
     Stm32Usart(const uintptr_t base,
                Stm32Dma::Target txtarg,
-               Stm32Dma::Target rxtarg)
+               Stm32Dma::Target rxtarg,
+               uint32_t streams)
         : Peripheral(base + (uint32_t)Register::USART_TDR,
                      base + (uint32_t)Register::USART_RDR,
-                     txtarg, rxtarg),
+                     txtarg, rxtarg, streams),
           _base(base),
           _ienable(false),
           _read_wait(0),

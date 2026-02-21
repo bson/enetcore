@@ -87,8 +87,10 @@ class Stm32Dac: public Stm32Dma::Peripheral {
 
 public:
     Stm32Dac(uint32_t base,
-             Stm32Dma::Target txtarg)
-        : Peripheral(base + (uint32_t)Register::DHR12R1, txtarg),
+             Stm32Dma::Target tx_targ,
+             Stm32Dma::Target rx_targ,
+             uint32_t streams)
+        : Peripheral(base + (uint32_t)Register::DHR12R1, tx_targ, rx_targ, streams),
           _base(base) {
     }
 
