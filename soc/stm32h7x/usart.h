@@ -7,6 +7,7 @@
 #include "core/ring.h"
 #include "core/mutex.h"
 #include "core/consumer.h"
+#include "core/bitfield.h"
 
 
 template <uint32_t SEND_BUF_SIZE = 128, uint32_t RECV_BUF_SIZE = 32>
@@ -240,20 +241,26 @@ public:
 
         cr1 &= ~BIT(UE);
 
-        cr1 &= ~(BIT(RXFFIE) | BIT(TXFEIE) | BIT(M1) | BIT(M0) | BIT(EOBIE) | BIT(RTOIE) | BIT(OVER8) 
-                 | BIT(MME) | BIT(WAKE) | BIT(PCE) | BIT(PS) | BIT(PEIE) | BIT(TXFNFIE) 
-                 | BIT(TCIE) | BIT(RXFNEIE) | BIT(IDLEIE) | BIT(TE) | BIT(RE) | BIT(UESM));
-        cr1 |= BIT(FIFOEN);
+        cr1 = Bitfield<uint32_t>(cr1)
+            .cbit(RXFFIE).cbit(RXFEIE).cbit(M1).cbit(M0).cbit(EOBIE).cbit(RTOIE)
+            .cbit(OVER8).cbit(MME).cbit(WAKE).cbit(PCE).cbit(PS).cbit(PEIE).cbit(TXFNFIE)
+            .cbit(TcIE).cbit(RXFNEIE).cbit(IDLEIE).cbit(TE).cbit(RE).bit(UESM)
+            .value();
 
-        cr &= ~(BIT(ABREN) | BIT(MSBFIRST) | BIT(DATAINV) | BIT(RXINV) | BIT(SWAP) | BIT(LINEN) 
-                | BIT(CLKEN) | BIT(CPOL) | BIT(CPHA) | BIT(LBCL) | BIT(LBDIE) | BIT(LBDL) 
-                | BIT(ADDM7) | BIT(DIS_NSS) | BIT(SLVEN) | (3 << STOP));
+        cr2 = Bitfield<uint32_t>(cr2)
+            .cbit(ABREN).cbit(MSBFIRST).cbit(DATAINV).cbit(RXINV).cbit(SWAP).cbit(LINEN) 
+            .cbit(CLKEN).cbit(CPOL).cbit(CPHA).cbit(LBCL).cbit(LBDIE).cbit(LBDL) 
+            .cbit(ADDM7).cbit(DIS_NSS).cbit(SLVEN).f(2, STOP, stopbit)
+            .value();
 
-        cr3 = (FT_3_4 << TXFTCFG) | BIT(RXFTIE) | (FT_3_4 << RXFTCFG) | BIT(TXFTIE);
-        if (rtscts)
-            cr3 |= BIT(CTSE) | BIT(RSTE);
-
-        cr1 |= (stopbit << STOP);
+        cr3 = Bitfield<uint32_t>(cr3)
+            .f(3, TXFTCFG, FT_3_4)
+            .bit(RXFTIE)
+            .f(3, RXFTCFG, FT_3_4)
+            .bit(TXFTIE)
+            .bit(CTSE, rtscts)
+            .bit(RTSE, rtscts)
+            .value();
 
         presc = 0;
         brr = brr_val;
@@ -344,12 +351,27 @@ public:
         _ienable = enable;
 
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
+        volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
         if (enable) {
-            cr1 = (cr1 & ~BIT(TXFEIE)) | (_dma ? 0 : BIT(TXFEIE)) | BIT(RXFFIE);  // FIFO empty/full IE
-            cr3 = (cr3 & ~BIT(TXFTIE)) | (_dma ? 0 : BIT(TXFTIE)) | BIT(RXFTIE); // FIFO at threshold IE
+            cr1 = Bitfield<uint32_t>(cr1)
+                .bit(TXFEIE, _dma)
+                .bit(RXFFIE)
+                .value();
+
+            cr3 = Bitfield<uint32_t>(cr3)
+                .bit(TXFTIE, _dma)
+                .bit(RXFTIE)
+                .value();
         } else {
-            cr1 &= ~(BIT(TXFEIE) | BIT(RXFFIE));
-            cr3 &= ~(BIT(TXFTIE) | BIT(RXFTIE));
+            cr1 = Bitfield<uint32_t>(cr1)
+                .cbit(TXFEIE)
+                .cbit(RXFFIE)
+                .value();
+
+            cr3 = Bitfield<uint32_t>(cr3)
+                .cbit(TXFTIE)
+                .cbit(RXFTIE)
+                .value();
         }
     }
 
@@ -449,8 +471,8 @@ private:
     }
 
 
-    Stm32Usart(const Stm32Usart&);
-    Stm32Usart& operator=(const Stm32Usart&);
+    Stm32Usart(const Stm32Usart&) = delete;
+    Stm32Usart& operator=(const Stm32Usart&) = delete;
 };
 
 #endif // __STM32_USART_H__

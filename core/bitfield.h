@@ -26,9 +26,13 @@ public:
     // Set a bit
     Bitfield<T> bit(int n) const { return Bitfield<T>(_val | BIT(n)); }
 
+    // Clear a bit
+    Bitfield<T> cbit(int n) const { return Bitfield<T>(_val & ~BIT(n)); }
+
     // Set a bit to a value
     Bitfield<T> bit(int n, bool v) const { return Bitfield<T>(_val | (v ? BIT(n) : 0)); }
     Bitfield<T> bit(int n, int v) const { return Bitfield<T>(_val | (v ? BIT(n) : 0)); }
+
 
     // Set a field to a value
     Bitfield<T> f(int bits, int bit0, int val) const {
