@@ -21,6 +21,7 @@ bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
     uint32_t cand = p->_stream_cand;
     for (const int i = 0; i < sizeof p->_stream_cand; i++) {
         const uint8_t stream = cand;
+        cand >>= 8;
         if (stream != 0xff) {
             assert(_assignment[stream] != p); // Not watertight, but a good assertion
 
