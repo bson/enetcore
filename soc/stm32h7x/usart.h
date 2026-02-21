@@ -294,9 +294,11 @@ public:
     void Apply(const String& s) { Write(s); }
 
     // Enable DMA TX
-    void EnableDmaTx(Stm32Dma& dma, uint8_t stream, uint8_t ch, Stm32Dma::Priority prio) {
+
+    // XXX requires DMA_SxCR.TRBUFF to be set
+
+    void EnableDmaTx(Stm32Dma& dma, uint8_t stream, Stm32Dma::Priority prio) {
         assert(stream <= 7);
-        assert(ch <= 7);
 
         Mutex::Scoped L(_w_mutex);
         Thread::IPL G(IPL_UART);
@@ -306,6 +308,7 @@ public:
         _prio = prio;
         _word_size = Stm32Dma::WordSize::BYTE;
         _tx._active = false;
+        _trbuff = true;
 
         SetInterrupts(_ienable);
     }

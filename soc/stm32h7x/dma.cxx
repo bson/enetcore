@@ -3,6 +3,9 @@
 #include "soc/stm32h7x/dma.h"
 #include "arch/armv7m/nvic.h"
 
+// XXX currently maps DMA1 to DMAMUX1
+// Add transparent support for DMA (ch 8-15) by increating size of Assignment _stream
+// Add mapping with DMAMUX2 and BDMA, by encoding it as the high bit of Target
 
 bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
                          Stm32Dma::Peripheral::Assignment& asn,
@@ -19,11 +22,9 @@ bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
         assert(_assignment[stream] != p); // Not watertight, but a good assertion
 
         if (!_assignment[stream]) {
-            const uint8_t ch = *sch & 0xf;
             _assignment[stream] = p;
             _is_tx[stream] = istx;
             asn._stream = stream;
-            asn._ch = ch;
             return true;
         }
     }
@@ -49,7 +50,12 @@ void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
 void Stm32Dma::ReleaseTx(Stm32Dma::Peripheral* p) {
     assert(p == _assignment[p->_tx._stream]);
 
+    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * p->_rx._stream);
+
     ScopedNoInt G;
+
+    mux_rgxcr = 0;
+
     _assignment[p->_tx._stream] = NULL;
     Thread::WakeAll(_assignment);
 }
@@ -73,8 +79,7 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
     cr &= ~BIT(EN);
     ClearTCIF(stream);
 
-    cr = ((uint32_t)p->_tx._ch << CHSEL)
-        | ((uint32_t)p->_prio << PL)
+    cr = ((uint32_t)p->_prio << PL)
         | ((uint32_t)p->_word_size << MSIZE)
         | ((uint32_t)p->_word_size << PSIZE)
         | Direction::MTOP
@@ -82,13 +87,27 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
         | BIT(TCIE);
 
     s_fcr(stream) = BIT(DMDIS);
-    s_par(stream) = p->_tdr;
+    if (p->_trbuff)
+        s_fcr(stream) |= BIT(TRBUFF);
+    s_par(stream) = p->_tx._dr;
     s_m0ar(stream) = (uint32_t)buf;
     s_ndtr(stream) = nwords;
 
     // Make it so
     p->DmaEnableTx();
     p->_tx._active = true;
+
+    // Configure DMAMUX
+    volatile uint32_t& mux_cxcr = *(volatile uint32_t*)(DMAMUX1_BASE + 0x04 * stream);
+    volatile uint32_t& mux_cfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_CFR);
+    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * stream);
+    volatile uint32_t& mux_rgcfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RGCFR);
+
+    mux_cxcr    = 0;
+    mux_cfr     = BIT(stream);
+    mux_rgxcr   = (uint32_t(p->_tx._n_ops) << GNBREQ) | (0b01 << GPOL) | BIT(GE);
+    mux_rgcfr   = BIT(stream);
+    
     cr |= BIT(EN);
 }
 
@@ -108,7 +127,12 @@ void Stm32Dma::AssignRx(Stm32Dma::Peripheral* p) {
 void Stm32Dma::ReleaseRx(Stm32Dma::Peripheral* p) {
     assert(p == _assignment[p->_rx._stream]);
 
+    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * p->_rx._stream);
+
     ScopedNoInt G;
+
+    mux_rgxcr   = 0;
+
     _assignment[p->_rx._stream] = NULL;
     Thread::WakeAll(_assignment);
 }
@@ -132,8 +156,7 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
     cr &= ~BIT(EN);
     ClearTCIF(stream);
 
-    cr = ((uint32_t)p->_rx._ch << CHSEL)
-        | ((uint32_t)p->_prio << PL)
+    cr = ((uint32_t)p->_prio << PL)
         | ((uint32_t)p->_word_size << MSIZE)
         | ((uint32_t)p->_word_size << PSIZE)
         | Direction::PTOM
@@ -141,13 +164,27 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
         | BIT(TCIE);
 
     s_fcr(stream) = BIT(DMDIS);
-    s_par(stream) = p->_rdr;
+    if (p->_trbuff)
+        s_fcr(stream) |= BIT(TRBUFF);
+    s_par(stream) = p->_tx._dr;
     s_m0ar(stream) = (uint32_t)buf;
     s_ndtr(stream) = nwords;
 
     // Make it so
     p->DmaEnableRx();
     p->_rx._active = true;
+
+    // Configure DMAMUX
+    volatile uint32_t& mux_cxcr = *(volatile uint32_t*)(DMAMUX1_BASE + 0x04 * stream);
+    volatile uint32_t& mux_cfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_CFR);
+    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * stream);
+    volatile uint32_t& mux_rgcfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RGCFR);
+
+    mux_cxcr    = 0;
+    mux_cfr     = BIT(stream);
+    mux_rgxcr   = (uint32_t(p->_tx._n_ops) << GNBREQ) | (0b01 << GPOL) | BIT(GE);
+    mux_rgcfr   = BIT(stream);
+    
     cr |= BIT(EN);
 }
 
