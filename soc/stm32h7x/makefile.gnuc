@@ -1,4 +1,4 @@
-SOC_SRCS = timer.cxx dma.cxx adc.cxx spi.cxx
+SOC_SRCS = timer.cxx dma.cxx adc.cxx spi.cxx eeprom.cxx # ethernet.cxx
 
 SRCS += $(addprefix $(SOCDIR)/stm32h7x/,$(SOC_SRCS))
 
