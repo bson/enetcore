@@ -16,22 +16,23 @@ bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
     assert(p);
     assert(asn._target < Target::NUM_TARGET);
     assert(!asn._active);
+    assert(p->_stream_cand != 0);
 
     ScopedNoInt G;
     uint32_t cand = p->_stream_cand;
-    for (const int i = 0; i < sizeof p->_stream_cand; i++) {
+    while (cand && (cand & 0xff) != 0xff) {
         const uint8_t stream = cand;
-        cand >>= 8;
-        if (stream != 0xff) {
-            assert(_assignment[stream] != p); // Not watertight, but a good assertion
 
-            if (!_assignment[stream]) {
-                _assignment[stream] = p;
-                _is_tx[stream] = istx;
-                asn._stream = stream;
-                return true;
-            }
+        assert(_assignment[stream] != p); // Not watertight, but a good assertion
+
+        if (!_assignment[stream]) {
+            _assignment[stream] = p;
+            _is_tx[stream] = istx;
+            asn._stream = stream;
+            return true;
         }
+
+        cand >>= 8;
     }
 
     return false;
