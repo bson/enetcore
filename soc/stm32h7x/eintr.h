@@ -4,16 +4,14 @@
 #include "soc/stm32h7x/syscfg.h"
 #include "core/bits.h"
 
-#error not yet updated for STM32H7
-
 class Stm32Eintr {
     enum class Register {
-        IMR = 0x00,
-        EMR = 0x04,
-        RTSR = 0x08,
-        FTSR = 0x0c,
-        SWIER = 0x10,
-        PR = 0x14
+        RTSR1   = 0x00,
+        FTSR1   = 0x04,
+        SWIER1  = 0x08,
+        CPUIMR1 = 0x80,         // EXTI are in the low 15 bits of CPUIMR1
+        CPUEMR1 = 0x84,
+        CPUPR1  = 0x88,
     };
 
     static volatile uint32_t& reg(Register r) { 
@@ -51,39 +49,39 @@ public:
             pins_used |= bit;
 #endif
             Stm32SysCfg::ConfigureExti(config->port, config->pin);
-            reg(Register::IMR) &= ~bit;
-            reg(Register::EMR) &= ~bit;
+            reg(Register::CPUIMR1) &= ~bit;
+            reg(Register::CPUEMR1) &= ~bit;
 
             if (config->trigger == Trigger::RISING || config->trigger == Trigger::BOTH)
-                reg(Register::RTSR) |= bit;
+                reg(Register::RTSR1) |= bit;
 
             if (config->trigger == Trigger::FALLING || config->trigger == Trigger::BOTH)
-                reg(Register::FTSR) |= bit;
+                reg(Register::FTSR1) |= bit;
 
-            reg(Register::PR) &= ~bit;
-            reg(Register::IMR) |= bit;
+            reg(Register::CPUPR1) &= ~bit;
+            reg(Register::CPUIMR1) |= bit;
             ++config;
         }
     }
 
     static void EnableInt(uint32_t pin) {
-        reg(Register::IMR) |= BIT(pin);
+        reg(Register::CPUIMR1) |= BIT(pin);
     }
 
     static void DisableInt(uint32_t pin) {
-        reg(Register::IMR) &= ~BIT(pin);
+        reg(Register::CPUIMR1) &= ~BIT(pin);
     }
 
     static bool Pending(uint32_t pin) {
-        return reg(Register::PR) & BIT(pin);
+        return reg(Register::CPUPR1) & BIT(pin);
     }
 
     static void ClearPending(uint32_t pin) {
-        reg(Register::PR) |= BIT(pin); // Bit is cleared by writing a '1' to it (!!!)
+        reg(Register::CPUPR1) |= BIT(pin); // Bit is cleared by writing a '1' to it (!!!)
     }
 
     static void PostInterrupt(uint32_t pin) {
-        reg(Register::SWIER) |= BIT(pin);
+        reg(Register::SWIER1) |= BIT(pin);
     }
 };
 

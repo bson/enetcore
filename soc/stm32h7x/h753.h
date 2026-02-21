@@ -1,5 +1,5 @@
-#ifndef __F405_H__
-#define __F405_H__
+#ifndef __H753_H__
+#define __H753_H__
 
 #include "soc/stm32h7x.h"
 
@@ -22,10 +22,11 @@
 //#include "soc/stm32h7x/adc.h"
 //#include "soc/stm32h7x/dac.h"
 //#include "soc/stm32h7x/fsmc.h"
-//#include "soc/stm32h7x/eintr.h"
+#include "soc/stm32h7x/eintr.h"
 //#include "soc/stm32h7x/spi.h"
 
 #include "soc/stm32h7x/crc.h"
 //#include "soc/stm32h7x/i2c.h"
+//#include "soc/stm32h7x/eth.h
 
-#endif // __F405_H__
+#endif // __H753_H__
