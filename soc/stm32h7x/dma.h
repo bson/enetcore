@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __DMA_H__
 #define __DMA_H__
 

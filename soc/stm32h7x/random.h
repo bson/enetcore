@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __STM32_RANDOM_H__
 #define __STM32_RANDOM_H__
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Jan Brittenson
+// Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __STM32_USART_H__

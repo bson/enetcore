@@ -1,4 +1,4 @@
-// Copyright (c)  Jan Brittenson
+// Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef __STM32H7X_H__

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #include "core/enetkit.h"
 #include "core/thread.h"
 #include "soc/stm32h7x/dma.h"

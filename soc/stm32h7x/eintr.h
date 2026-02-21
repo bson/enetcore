@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __EINTR_H__
 #define __EINTR_H__
 

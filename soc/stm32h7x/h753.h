@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __H753_H__
 #define __H753_H__
 
@@ -28,5 +31,6 @@
 #include "soc/stm32h7x/crc.h"
 //#include "soc/stm32h7x/i2c.h"
 //#include "soc/stm32h7x/eth.h
+//#include "soc/sdmmc.h"
 
 #endif // __H753_H__

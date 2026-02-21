@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __STM32_POWER_H__
 #define __STM32_POWER_H___
 
