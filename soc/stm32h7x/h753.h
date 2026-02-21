@@ -16,7 +16,7 @@
 #include "soc/stm32h7x/gpio.h"
 #include "soc/stm32h7x/usart.h"
 #include "soc/stm32h7x/random.h"
-//#include "soc/stm32h7x/timer.h"
+#include "soc/stm32h7x/timer.h"
 //#include "soc/stm32h7x/backup.h"
 //#include "soc/stm32h7x/rtc.h"
 //#include "soc/stm32h7x/adc.h"

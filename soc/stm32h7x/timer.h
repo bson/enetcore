@@ -1,38 +1,49 @@
 #ifndef __STM32_TIMER_H__
 #define __STM32_TIMER_H__
 
-#error not yet updated for STM32H7
 
 // There are four kinds of timers:
-//  General purpose 1
-//     TIM2, 3, 4, 5
+//
+//  AC Advanced Control
+//     TIM1,TIM8
+//     On APB2 (XXX)
+//     16-bit
+//     Similar to GP1
+//     Adds repetition rate (RCR) and dead-time detection and insertion
+//
+//  GP1 General purpose 1
+//     TIM2/3/4/5
 //     TIM2 and 5 are 32-bit
 //     4 CCRs
 //     These are all on APB1
 //     Count up, down, or up-down
 //     Supports quadrature encoding
 //
-//  General purpose 2
-//     TIM9-14
+//  GP2 General purpose 2
+//     TIM12/13/14
+//     All 16-bit
+//     2 CCRs
+//     TIM9-11 on APB2 (XXX)
+//     TIM12-14 on APB1 (XXX)
+//
+//  GP3 General purpose 3
+//     TIM16/17
 //     All 16-bit
 //     2 CCRs
 //     TIM9-11 on APB2
 //     TIM12-14 on APB1
 //
-//  Basic timer
+//  GP4 General Purpose 4
+//     TIM15
+//     All 16 bit
+//
+//  BT Basic
 //     TIM6,7
 //     16-bit
 //     Up count only, reload, ARR
 //     No CCRs
 //     On APB1
 //     Mainly intended to drive DAC (directly connected)
-//
-//  Advanced control timer
-//     TIM1,TIM8
-//     On APB2
-//     16-bit
-//     Similar to GP1
-//     Adds repetition rate (RCR) and dead-time detection and insertion
 //
 // In general all except Basic Timer can be used as an Stm32Timer for its
 // basic uses.
@@ -48,31 +59,37 @@ class Stm32Timer {
     const uint32_t _timerclk;
 public:
     enum class Register {
-        TIM_CR1   = 0x00,
-        TIM_CR2   = 0x04,
-        TIM_SMCR  = 0x08,
-        TIM_DIER  = 0x0c,
-        TIM_SR    = 0x10,
-        TIM_EGR   = 0x14,
-        TIM_CCMR1 = 0x18,
-        TIM_CCMR2 = 0x1c,
-        TIM_CCER  = 0x20,
-        TIM_CNT   = 0x24,
-        TIM_PSC   = 0x28,
-        TIM_ARR   = 0x2c,
-        TIM_CCR1  = 0x34,
-        TIM_CCR2  = 0x38,
-        TIM_CCR3  = 0x3c,
-        TIM_CCR4  = 0x40,
-        TIM_DCR   = 0x48,
-        TIM_DMAR  = 0x4c,
-        // These are specific to these two timers
-        TIM2_OR   = 0x50,
-        TIM5_OR   = 0x50
+        TIM_CR1   = 0x00,       // All
+        TIM_CR2   = 0x04,       // AC, GP1, GP3, GP4, BT
+        TIM_SMCR  = 0x08,       // AC, GP1, GP4
+        TIM_DIER  = 0x0c,       // All
+        TIM_SR    = 0x10,       // All
+        TIM_EGR   = 0x14,       // All
+        TIM_CCMR1 = 0x18,       // AC, GP1, GP2, GP3, GP4
+        TIM_CCMR2 = 0x1c,       // AC, GP1
+        TIM_CCER  = 0x20,       // AC, GP1, GP2, GP3, GP4
+        TIM_CNT   = 0x24,       // All
+        TIM_PSC   = 0x28,       // All
+        TIM_ARR   = 0x2c,       // All
+        TIM_RCR   = 0x30,       // AC, GP3, GP4
+        TIM_CCR1  = 0x34,       // AC, GP1, GP2, GP3, GP4
+        TIM_CCR2  = 0x38,       // AC, GP1, GP4
+        TIM_CCR3  = 0x3c,       // AC, GP1
+        TIM_CCR4  = 0x40,       // AC, GP1
+        TIM_BDTR  = 0x44,       // AC, GP3, GP4
+        TIM_DCR   = 0x48,       // AC, GP1, GP3, GP4
+        TIM_DMAR  = 0x4c,       // AC, GP1, GP3, GP4
+        TIM_CCMR3 = 0x54,       // AC
+        TIM_CCR5  = 0x58,       // AC
+        TIM_CCR6  = 0x5c,       // AC
+        TIM_AF1   = 0x60,       // AC, GP1, GP3, GP4
+        TIM_AF2   = 0x64,       // AC
+        TIM_TISEL = 0x68,       // AC, GP1, GP2, GP3, GP4
     };
 
     enum {
         // TIM_CR1
+        UIFREMAP = 11,
         CKD    = 8,
         ARPE   = 7,
         CMS    = 5,
@@ -82,24 +99,25 @@ public:
         UDIS   = 1,
         CEN    = 0,
 
-        // TIM_SR
-        CC4OF = 12,
-        CC3OF = 11,
-        CC2OF = 10,
-        CC1OF = 9,
-        TIF   = 6,
-        CC4IF = 4,
-        CC3IF = 3,
-        CC2IF = 2,
-        CC1IF = 1,
-        UIF   = 0,
-        
         // TIM_CR2
+        MMS2   = 20,
+        OIS6   = 18,
+        OIS5   = 16,
+        OIS4   = 14,
+        OIS3   = 12,
+        OIS2N  = 11,
+        OIS2   = 10,
+        OIS1N  = 9,
+        OIS1   = 8,
         TI1S   = 7,
         MMS    = 4,
         CCDS   = 3,
+        CCUS   = 2,
+        CCPC   = 1,
 
         // TIM_SMCR
+        TS2    = 20,
+        SMS2   = 16,
         ETP    = 15,
         ECE    = 14,
         ETPS   = 12,
@@ -116,15 +134,37 @@ public:
         CC2DE  = 10,
         CC1DE  = 9,
         UDE    = 8,
+        BIE    = 7,
         TIE    = 6,
+        COMIE  = 5,
         CC4IE  = 4,
         CC3IE  = 3,
         CC2IE  = 2,
         CC1IE  = 1,
         UIE    = 0,
 
+        // TIM_SR
+        CC6IF  = 17,
+        CC5IF  = 16,
+        SBIF   = 13,
+        CC4OF  = 12,
+        CC3OF  = 11,
+        CC2OF  = 10,
+        CC1OF  = 9,
+        B2IF   = 8,
+        BIF    = 7,
+        TIF    = 6,
+        CC4IF  = 4,
+        CC3IF  = 3,
+        CC2IF  = 2,
+        CC1IF  = 1,
+        UIF    = 0,
+
         // TIM_EGR
+        B2G    = 8,
+        BG     = 7,
         TG     = 6,
+        COMG   = 5,
         CC4G   = 4,
         CC3G   = 3,
         CC2G   = 2,
@@ -143,41 +183,102 @@ public:
         OC1FE  = 2,
         CC1S   = 0,
 
-        // TIM_CCMR1 (input compare mode)
+        // TIM_CCMR1 (input capture mode)
         IC2F   = 12,
         IC2PSC = 10,
-        //CCS2S  = 8,
+        CCS2S  = 8,
         IC1F   = 4,
         IC1PSC = 2,
-        //CC1S   = 0,
+        CC1S   = 0,
+
+        // TIM_CCMR2 (input capture mode)
+        IC4F   = 12,
+        IC4PSC = 10,
+        CC4S   = 8,
+        IC3F   = 3,
+        IC3PSC = 2,
+        CC3S   = 0,
 
         // TIM_CCMR2 (output compare mode)
-
-        // TIM_CCMR2 (input compare mode)
-
-        // TIM_CCER
+        CC6P   = 21,
+        CC6E   = 20,
+        CC5P   = 17,
+        CC5E   = 16,
         CC4NP  = 15,
         CC4P   = 13,
         CC4E   = 12,
         CC3NP  = 11,
+        CC3NE  = 10,
         CC3P   = 9,
         CC3E   = 8,
         CC2NP  = 7,
+        CC2NE  = 6,
         CC2P   = 5,
-        C2E    = 4,
+        CC2E   = 4,
         CC1NP  = 3,
+        CC1NE  = 2,
         CC1P   = 1,
         CC1E   = 0,
+
+        // TIM1, TIM8 (AC)  TIM_CCMR3 (output compare mode only)
+        OC6CE  = 15,
+        OC6M2  = 24,
+        OC6M   = 12,
+        OC6PE  = 11,
+        OC6FE  = 10,
+        O5CE   = 7,
+        OC5M2  = 16,
+        OC5M   = 4,
+        OC5PE  = 3,
+        OC5FE  = 2,
+
+        // TIM_CCR5
+        GC5C3  = 31,
+        GC5C2  = 30,
+        GC5C1  = 29,
+        CCR    = 0,
+
+        // TIM_AF1
+        // Not all timers have all bits/fields
+        ETRSEL    = 14,
+        BKCMP2P   = 11,
+        BKCMP1P   = 10,
+        BKINP     = 9,
+        BKDF1BK0E = 8,
+        BKCMP2E   = 2,
+        BKCMP1E   = 1,
+        BKINE     = 0,
+
+        // TIM_AF2
+        // TIM1, TIM8 only
+        BK2CMP2P   = 11,
+        BK2CMP1P   = 10,
+        BK2INP     = 9,
+        BK2DF1BK1E = 8,
+        BK2CMP2E   = 2,
+        BK2CMP1E   = 1,
+        BK2INE     = 0,
+
+        // TIM_CCER
+        // Subset of TIM_CCMR2
+
+        // TIM_BDTR
+        BK2P   = 25,
+        BK2E   = 24,
+        BK2F   = 20,
+        BKF    = 16,
+        MOE    = 15,
+        AOE    = 14,
+        BKP    = 13,
+        BKE    = 12,
+        OSSR   = 11,
+        OSSI   = 10,
+        LOCK   = 8,
+        DTG    = 0,
 
         // TIM_DCR
         DBL    = 8,
         DBA    = 0,
-
-        // TIM2_OR
-        ITR1_RMP = 10,
-
-        // TIM5_OR
-        IT4_RMP  = 6
     };
 
     enum {
