@@ -1,5 +1,18 @@
 ----- TODO
 
+Port to STM32H753
+
+Implement StmEthernet for H753
+
+Implement LAN8720A PHY
+
+Replace header file #ifdef's with #pragma once
+
+DMA peripherals should have a fixed DMA stream assigned since DMAMUX can now
+assign any request to any stream.
+
+Add DMA2 and DMAMUX2 if there is a use case.
+
 See if it's possible to declare a __ccm macro to relocate specific functions
 to CCM when available
 - Section-per-function
@@ -13,8 +26,6 @@ Test HSI config
 
 Fix SWO/Openocd
 
-Add peripheral-specific DMA stream selection ordering (overrides default).
-
 Enable the backup regulator in Power
 - Set CSR.BRE, wait for CSR.BRR to get set
 - Otherwise backup SRAM is lost on Vbat
@@ -26,19 +37,13 @@ Remove SPI to ESP12, use UART only
 
 Clock rollover: allow fractional HZ (e.g. 0.1)
 
-Add DMA memmove()?
+Add MDMA memmove() for large blocks (IOBuffer?)?
 
 Implement StmWdt
 
-Implement StmCrc
-
 Implement StmSdio
 
-Fat release build
-
 Implement a "logout" feature in BKPSRAM
-
-Why doesn't the LSE OSC start up?  LSI works fine.
 
 Implement StmI2c (TBD - no use case, need test board)
 
@@ -46,253 +51,14 @@ Implement StmUsbDev (TBD - no use case, need test board)
 
 Implement StmI2s (TBD - no use case, need test board)
 
-Implement Reset (under arch/armv7m, to use CM4 core software reset)
+Implement Reset (under arch/armv7m, to use CM4/CM7 core software reset)
 
 Add MWait/MWaitFor with MWaitObject
-
-Rename cortex-m4 -> armv7m
 
 Nvic::InstallCSWHandler() could simply call InstallSystemHandler() and
 set up pendsv_handler as a fast exception handler.
 
-- Make DHCP support a compile time option
+Add static IP config
+  - make DHCP support a compile time option
 
 Clean up genfont.py and call it something else
-
-Implement StmEthernet (TBD - no use case, need test board, F407 only)
-
------ DONE
-
-Add StmPower to manage system power settings
-  Specify VOS
-
-Add StmClockTree to configure system clock tree
-  Source selection:
-    HSI (16MHz)
-    HSE - specify crystal frequency
-  PLL enable:
-    Select output multiplier (ratio?)
-  SYSCLK becomes HSI/HSE/PLL
-  HCLK (AHB) prescaler (enum) max 168MHz
-  APB1 domain prescaler (enum) relative to HCLK max 42MHz
-  APB2 domain prescaler (enum) relative to HCLK max 84MHz
-  RTC clock source (enum)
-    LSI
-    LSE
-    HSE
-    OFF
-
-  Configure structure:
-     source, xtal_freq,
-     use_pll,
-       pll_vco_mult (9 bits),
-       pll_vco_div (6 bits),
-       pll_sysclk_div (2,4,6,8),
-       pll_periph_div (4 bits, 2-15)
-     HCLK_prescaler (1,2,4,8,16,64,128,256,511),
-     APB1_prescaler (1,2,4,8,16),
-     APB2_prescaler (1,2,4,8,16),
-     rtc_clock_source
-
-  Methods:
-    Init(const Configure&)
-    Return SYSCLK freq
-    Return HCLK freq (AHB, core, memory, DMA)
-    Return APBx peripheral freq
-    Return APBx timer freq
-    (Maybe return as a const Clocks&)
-    Peripheral clock enable: AHB1, AHB2, AHB3, APB1, APB2
-       Define mask values, e.g. AHB2_xxx, APB1_xxx
-       Always enable AHB1 memory clock
-    Peripheral clock enable for low power mode (Sleep)
-    Output source clock on MCO1/MC02
-       HSI, HSE, LSE, PLL, OFF
-       Prescaler (2,3,4,5)
-    Return reset cause (RCC_CSR)
-    TBD: calibrate HSI using LSE (via TIM5 ch 4)
-
-  SYSCLK = HSI,HSE, or PLL
-  HCLK = SYSCLK/HCLK_prescaler
-  APBx_periph = HCLK/APBx_prescaler
-  APBx_timer = HCLK*(APBx_prescaler == 1 ? 1 : 2)
-
-  VCO = source_freq/PLLM*PLLN  (source_freq/pll_div*pll_mult)
-  SYSCLK = VCO/PLLP
-  Periph_clock = VCO/PLLQ
-  VCO: 192-432MHz
-  Periph_clk = 48MHz
-
-  SYSTICK can use either HCLK/8 or the core Cortex clock (effectively HCLK?)
-
-  1. Enable osc
-  2. Wait for it
-  3. Select as source - it can't be selected if not available
-
-  When changing from HSE, stop it
-  RTC source can't be changed once set without a power domain reset
-
-  PLL needs to be enabled for RNG, SDIO
-  Always enable PLL, "use_pll" means use it as SYSCLK instead of source
-  Setup up RNG, USB OTG FS, SDIO for 48MHz (PLL PLLQ); USB requires 48MHz
-  
-Add StmFlash to configure flash subsystem
-
-Implement StmSysCfg
-- IO compensation cell enable/disable
-
-Implement StmGpio
-- StmGpio::Config for pin config
-- enums for ports, e.g. PORT_A = 0, PORT_B = 1, etc
-- Post config, for each pin:
-   - Port, bit
-   - Input/Output/Analog/AF
-   - PUR, PDR, Float
-- LpcGpio compatible
-
-
-Implement StmSerial
-
-Implement StmRandom
-- Init()
-- Random()
-
-Implement Stm32Timer(s)
-- 16 bit
-- 32 bit
-Differences between timers
-TIM2-5
-    "General purpose timer"
-    Prescaler TIM_PSC 16-bit
-    Counter TIM_CNT   16/32-bit
-    Auto reload TIM_ARR 16/32-bit
-    4x capture/compare 16/32-bit
-    Run off bus timer clock
-    Upcount
-      CNT from 0 to ARR, then resets CNT
-      Generates overflow event
-    Downcount
-      CNT from ARR to 0, reset reload from ARR
-      Generates underflow event
-    Up-down counting
-      CNT from 0 ARR
-      Generates overflow event
-      CNT from ARR 0
-      Generates underflow event
-    Events can be disabled during register writes to avoid spurious interrupts or updated
-    Timers can prescale for TIM2
-    TIM2-4 can use external trigger
-    Can be set to pause on debug (see DBG_TIMx_STOP)
-
-Implement Clock, Stm32SysTimer (see old SysTick impl) to dedicate a 32-bit timer as a system timer (TIM5)
-
-Add device power-on (clock enable) during hwinit
-
-Add missing pin instances and initialize them
-
-Add defs for APBx_TIMERCLK as it may not match the bus clock
-
-DBG: stop timers during debugging
-
-Add mapping for battery-backed SRAM 
-
-Make it all compile again!
-
-Move application out of enetcore tree
-Make enetcore a submodule of application
-
-Refactor chip support
-- Move LPC in under nxp/lpc407x and nxp/lpc (common)
-- Move stuff under arm into arm/cm4, cm0, cm7, etc
-- Much of what's in board.h (e.g. skyblue/board.h) belongs in the application config.h
-- Make more hardware support optional (e.g. SD, FAT)
-
-Further flatten soc/stm32/stm32f4x_xxx.h -> soc/stm32f4x/xxx.h and set SOCDIR=soc in the
-makefile.  Move stm32f4x.h to soc/.
-
-Include only soc and change #includes to e.g. stm32f4x/usart.h
-
-stm32f4x.h should include set ARMDIR=arch/armv7m
-
-Rename SOCDIR -> SOC
-Rename ARMDIR -> ARCH
-
-Enable hard fp support
-
-Create gdbinit for con2
-
-Add CCM data RAM to linker
-
-Debug and fix RTC startup
-
-Debug and fix timing and clock support
-
-Add DMA support - Stm32Dma?
- - For USART
-Per-channel interrupt delegation
-One peripheral at a time per channel
-Stm32Dma::Peripheral implemented by users
-  - Completed callback (in interrupt context)
-
-Add support for PopMultiple() in Ring, use in DMA
-
-Is Ring<>::PopFront broken?  Shouldn't it return the item that was popped?
-
-Implement StmRtc
-
-Fix GDB walking off the end of the stack.  It SHOULD stop when it sees a zero FP.
-
-Make UART TX by non-DMA optional again
-
-Fix UART DMA TX
-
-Enable I and D flash caching in FLASH_SCR
-
-Add trigger out enable to Stm32Timer
- - Use in Sampler
-
-Implement temp sensor
-
-Fix enetcore support in openocd
-
-Add UniqueID to SysConfig
-
-Add PWM function to timer similar to LpcPwm
-
-Implement external pin interrupt.  Mapping is implemented in SysCfg.
-- Enable interrupt on EXTI?
-
-Implement StmAdc
-
-Flag threads as using FPU and lazy save them
-- Track the current FP state owner
-- If switching to a new FP-flagged thread, check if it's the current owner
-  - If not, save old state to its owner
-  - Load new state and update the owner
-
-Implement StmDac
-- With DMA
-
-Implement StmFsmc
-
-Refactor Panel<> to use accessor, implement FSMC accessor
-
-Implement Stm32Eintr
-- Table based init
-- DEBUG: add checks
-
-Implement StmSpi
-- Bus
-- Device
-- Make compatible with Lpc Impl
-
-Implement SWO trace output (ITM async to TPIU to TRACESWO)
-
-Implement RX DMA
-
-Implement SPI DMA
-
-DMA stream acquisition - block if active
-
-Toggle SSR in main.cxx and measure to verify it works
-  - _ssr_conduct.Raise(), _ssr_conduct.Lower()
-

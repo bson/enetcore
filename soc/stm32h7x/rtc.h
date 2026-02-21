@@ -1,14 +1,16 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __RTC_H__
 #define __RTC_H__
 
 #include "core/bits.h"
-
-#error not yet updated for STM32H7
+#include "core/bitfield.h"
 
 class Stm32Rtc {
     enum class Register {
-        TR = 0x00,
-        DR = 0x04,
+        TR = 0x00,              // Time reg
+        DR = 0x04,              // Date reg
         CR = 0x08,
         ISR = 0x0c,
         PRER = 0x10,
@@ -17,15 +19,18 @@ class Stm32Rtc {
         ALRMAR = 0x1c,
         ALRMBR = 0x20,
         WPR = 0x24,
-        SSR = 0x28,
+        SSR = 0x28,             // Subsecond reg
         SHIFTR = 0x2c,
         TSTR = 0x30,
+        TDSR = 0x34,
         TSSR = 0x38,
         CALR = 0x3c,
-        TAFCR = 0x40,
+        TAMPCR = 0x40,
         ALRMASSR = 0x44,
         ALRMBSSR = 0x48,
-        BKP0R = 0x50
+        OR = 0x4c,              // Option reg
+        BKP0R = 0x50,
+        NBKPxR = 32             // 32 backup regs, BKP0R-BKP31R
     };
 
     enum {
@@ -48,6 +53,7 @@ class Stm32Rtc {
         DU = 0,
 
         // CR
+        ITSE = 24,
         COE = 23,
         OSEL = 21,
         POL = 20,
@@ -63,14 +69,16 @@ class Stm32Rtc {
         WUTE = 10,
         ALRBE = 9,
         ALRAE = 8,
-        DCE = 7,
         FMT = 6,
         BYPSHAD = 5,
         REFCKON = 4,
         TSEDGE = 3,
-        WCKSEL = 0,
+        WUCKSEL = 0,
 
         // ISR
+        ITSF = 17,
+        RECALPF = 16,
+        TAMP3F = 15,
         TAMP2F = 14,
         TAMP1F = 13,
         TSOVF = 12,
@@ -91,35 +99,45 @@ class Stm32Rtc {
         PREDIV_A = 16,
         PREDIV_S = 0,
 
-        // WUTR
         // CALIBR
         DCS = 7,
         DC = 0,
 
         // ALRMAR,ALRMBR
-        MSK4 = 31,
-        WDSEL = 30,
-        // DT = 28,
-        // DU = 24,
-        MSK3 = 23,
-        // PM = 22,
-        // HT = 20,
-        // HU = 16,
-        MSK2 = 15,
-        // MNT = 12,
-        // MNU = 8,
-        MSK1 = 7,
-        // ST = 4,
-        // SU = 0,
+        A_MSK4 = 31,
+        A_WDSEL = 30,
+        A_DT = 28,
+        A_DU = 24,
+        A_MSK3 = 23,
+        A_PM = 22,
+        A_HT = 20,
+        A_HU = 16,
+        A_MSK2 = 15,
+        A_MNT = 12,
+        A_MNU = 8,
+        A_MSK1 = 7,
+        A_ST = 4,
+        A_SU = 0,
+
+        // SHIFTR
+        ADD1S = 31,
+        SUBFS = 0,
 
         // TSTR
-        // PM = 22
-        // HT = 20
-        // HU = 16
-        // MNT = 12
-        // MNU = 8
-        // ST = 4
-        // SU = 0
+        TS_PM = 22,
+        TS_HT = 20,
+        TS_HU = 16,
+        TS_MNT = 12,
+        TS_MNU = 8,
+        TS_ST = 4,
+        TS_SU = 0,
+
+        // TSDR
+        TS_WDU = 13,
+        TS_MT = 12,
+        TS_MU = 8,
+        TS_DT = 4,
+        TS_DU = 0,
 
         // CALR
         CALP = 15,
@@ -127,26 +145,38 @@ class Stm32Rtc {
         CALW16 = 13,
         CALM = 0,
 
-        // TAFCR
-        ALARMOUTTYPE = 18,
-        TSINSEL = 17,
-        TAMP1INSEL = 16,
+        // TAMPCR
+        TAMP3MF = 24,
+        TAMP3NOERASE = 23,
+        TAMP3IE = 22,
+        TAMP2MF = 21,
+        TAMP2NOERASE = 20,
+        TAMP2IE = 19,
+        TAMP1MF = 18,
+        TAMP1NOERASE = 17,
+        TAMP1IE = 16,
         TAMPPUDIS = 15,
         TAMPPRCH = 13,
         TAMPFLT = 11,
-        TAMPFREQ = 8,
+        TAMPFREQ = 10,
         TAMPTS = 7,
+        TAMP3TRG = 6,
+        TAMP3E = 5,
         TAMP2TRG = 4,
         TAMP2E = 3,
         TAMPIE = 2,
         TAMP1ETRG = 1,
         TAMP1E = 0,
 
+        // OR
+        RTC_OUT_RMP = 1,
+        RTC_ALARM_TYPE = 0,
+
         // ALRMASSR, ALRMBSSR
         MASKSS = 24,
         SS = 0,
 
-        // PWR_CR
+        // BASE_PWR.CR
         DBP = 8
     };
        
@@ -183,7 +213,23 @@ public:
         }
     };
 
-    // Assumes a 32768Hz RTC CLK
+
+    // RAII for write access
+    class Access {
+    public:
+        Access() {
+            *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
+            vreg(Register::WPR) = 0xca;
+            vreg(Register::WPR) = 0x53;
+        }
+        ~Access() {
+            *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP);
+            vreg(Register::WPR) = 0xff;
+        }
+    };
+
+
+    // Assumes a 32kHz RTC CLK
     static void SetDateTime(const DateTime& date_time) {
         assert(date_time.year >= EPOCH + 1 && date_time.year <= EPOCH + 99);
         assert(date_time.month >= 1 && date_time.month <= 12);
@@ -192,49 +238,43 @@ public:
         assert(date_time.min >= 0 && date_time.min <= 59);
         assert(date_time.sec >= 0 && date_time.sec <= 59);
 
-        *(volatile uint32_t*)BASE_PWR |= BIT(DBP);
-
-        vreg(Register::WPR) = 0xca;
-        vreg(Register::WPR) = 0x53;
+        Access a_();
 
         vreg(Register::ISR) |= BIT(INIT);
         while ((vreg(Register::ISR) & BIT(INITF)) == 0)
             ;
 
-        vreg(Register::PRER) = 256-1;
-        vreg(Register::PRER) = ((128-1) << PREDIV_A) | (vreg(Register::PRER) & 0x7fff);
+        vreg(Register::PRER) = Bitfield(vreg(Register::PRER))
+            .f(7, PREDIV_A, 128-1);
 
-        vreg(Register::DR) =
-            (((date_time.year - EPOCH) / 10) << YT)
-            | (((date_time.year - EPOCH) % 10) << YU)
-            | ((date_time.month / 10) << MT)
-            | ((date_time.month % 10) << MU)
-            | ((date_time.day / 10) << DT)
-            | ((date_time.day % 10) << DU)
-            | ((uint32_t)date_time.dow << WDU);
+        vreg(Register::DR) = Bitfield(vreg(Register::DR))
+            .f(4, YT, (date_time.year - EPOCH) / 10)
+            .bit(MT, date_time.month >= 10)
+            .f(4, MU, date_time.month % 10)
+            .bit(DT, date_time.day >= 10)
+            .f(4, DU, date_time.day % 10)
+            .f(3, WDU, date_time.dow);
 
-        vreg(Register::TR) =
-            ((date_time.hour / 10) << HT)
-            | ((date_time.hour % 10) << HU)
-            | ((date_time.min / 10) << MNT)
-            | ((date_time.min % 10) << MU)
-            | ((date_time.sec / 10) << ST)
-            | ((date_time.sec % 10) << SU);
+        vreg(Register::TR) = Bitfield(vreg(Register::TR))
+            .f(2, HT, date_time.hour / 10)
+            .f(4, HU, date_time.hour % 10)
+            .f(3, MNT, date_time.min / 10)
+            .f(4, MU, date_time.min % 10)
+            .f(3, ST, date_time.sec / 10)
+            .f(4, SU, date_time.sec % 10);
 
         vreg(Register::CR) &= ~BIT(FMT);  // 24h
-
-        vreg(Register::WPR) = 0xff;
 
         vreg(Register::ISR) &= ~BIT(INIT);
 
         while ((vreg(Register::ISR) & BIT(INITS)) == 0)
             ;
-        *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP);
     }
 
     static DateTime GetDateTime() {
         while ((vreg(Register::ISR) & BIT(RSF)) == 0)
             ;
+
         const uint32_t dr = vreg(Register::DR);
         const uint32_t tr = vreg(Register::TR);
 
@@ -247,27 +287,21 @@ public:
                         DayOfWeek((dr >> WDU) & 7));
     }
 
-    // Enter daylight savings (summer time)
+    // Enter daylight savings (enter summer time)
     static void EnterSummerTime() {
         vreg(Register::CR) |= ADD1H;
     }
 
-    // Exit daylight savings (summer time)
+    // Exit daylight savings (enter winter time)
     static void EnterWinterTime() {
         vreg(Register::CR) |= SUB1H;
     }
 
-    // Return backup register N
+    // Backup register N accessor
     static uint32_t& BackupReg(uint32_t n) {
-        assert(n <= 19);
+        assert(n < NBKPxR);
         return *(uint32_t*)(BASE_RTC + (uint32_t)Register::BKP0R + 4*n);
     }
-
-    class Access {
-    public:
-        Access() { *(volatile uint32_t*)BASE_PWR |= BIT(DBP); }
-        ~Access() { *(volatile uint32_t*)BASE_PWR &= ~BIT(DBP); }
-    };
 };
 
 #endif // __RTC_H__

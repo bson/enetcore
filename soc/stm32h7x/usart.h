@@ -241,26 +241,23 @@ public:
 
         cr1 &= ~BIT(UE);
 
-        cr1 = Bitfield<uint32_t>(cr1)
+        cr1 = Bitfield(cr1)
             .cbit(RXFFIE).cbit(RXFEIE).cbit(M1).cbit(M0).cbit(EOBIE).cbit(RTOIE)
             .cbit(OVER8).cbit(MME).cbit(WAKE).cbit(PCE).cbit(PS).cbit(PEIE).cbit(TXFNFIE)
-            .cbit(TcIE).cbit(RXFNEIE).cbit(IDLEIE).cbit(TE).cbit(RE).bit(UESM)
-            .value();
+            .cbit(TcIE).cbit(RXFNEIE).cbit(IDLEIE).cbit(TE).cbit(RE).bit(UESM);
 
-        cr2 = Bitfield<uint32_t>(cr2)
+        cr2 = Bitfield(cr2)
             .cbit(ABREN).cbit(MSBFIRST).cbit(DATAINV).cbit(RXINV).cbit(SWAP).cbit(LINEN) 
             .cbit(CLKEN).cbit(CPOL).cbit(CPHA).cbit(LBCL).cbit(LBDIE).cbit(LBDL) 
-            .cbit(ADDM7).cbit(DIS_NSS).cbit(SLVEN).f(2, STOP, stopbit)
-            .value();
+            .cbit(ADDM7).cbit(DIS_NSS).cbit(SLVEN).f(2, STOP, stopbit);
 
-        cr3 = Bitfield<uint32_t>(cr3)
+        cr3 = Bitfield(cr3)
             .f(3, TXFTCFG, FT_3_4)
             .bit(RXFTIE)
             .f(3, RXFTCFG, FT_3_4)
             .bit(TXFTIE)
             .bit(CTSE, rtscts)
-            .bit(RTSE, rtscts)
-            .value();
+            .bit(RTSE, rtscts);
 
         presc = 0;
         brr = brr_val;
@@ -353,25 +350,21 @@ public:
         volatile uint32_t& cr1 = reg<volatile uint32_t>(Register::USART_CR1);
         volatile uint32_t& cr3 = reg<volatile uint32_t>(Register::USART_CR3);
         if (enable) {
-            cr1 = Bitfield<uint32_t>(cr1)
+            cr1 = Bitfield(cr1)
                 .bit(TXFEIE, _dma)
-                .bit(RXFFIE)
-                .value();
+                .bit(RXFFIE);
 
-            cr3 = Bitfield<uint32_t>(cr3)
+            cr3 = Bitfield(cr3)
                 .bit(TXFTIE, _dma)
-                .bit(RXFTIE)
-                .value();
+                .bit(RXFTIE);
         } else {
-            cr1 = Bitfield<uint32_t>(cr1)
+            cr1 = Bitfield(cr1)
                 .cbit(TXFEIE)
-                .cbit(RXFFIE)
-                .value();
+                .cbit(RXFFIE);
 
-            cr3 = Bitfield<uint32_t>(cr3)
+            cr3 = Bitfield(cr3)
                 .cbit(TXFTIE)
-                .cbit(RXFTIE)
-                .value();
+                .cbit(RXFTIE);
         }
     }
 
