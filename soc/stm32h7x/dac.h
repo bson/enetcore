@@ -1,7 +1,8 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __DAC_H__
 #define __DAC_H__
-
-#error not yet updated for STM32H7
 
 // Simplified DAC interface. Uses only channel 1.
 
@@ -20,11 +21,26 @@ class Stm32Dac: public Stm32Dma::Peripheral {
         DHR8RD = 0x28,
         DOR1 = 0x2c,
         DOR2 = 0x30,
-        SR = 0x34
+        SR = 0x34,
+        CCR = 0x38,
+        MCR = 0x3c,
+        SHSR1 = 0x40,
+        SHSR2 = 0x44,
+        SHHR = 0x48,
+        SHRR = 0x4c
     };
 
     enum {
         // CR
+        CEN2 = 30,
+        DMAUDRIE2 = 29,
+        DMAEN2 = 28,
+        MAMP2 = 24,
+        WAVE2 = 22,
+        TSEL2 = 18,
+        TEN2 = 17,
+        EN2 = 16,
+        CEN1 = 14,
         DMAUDRIE1 = 13,
         DMAEN1 = 12,
         MAMP = 8,
@@ -39,8 +55,28 @@ class Stm32Dac: public Stm32Dma::Peripheral {
         SWTRIG1 = 0,
 
         // SR
+        BWST2 = 31,
+        CAL_FLAG2 = 30,
         DMAUDR2 = 29,
-        DMAUDR1 = 13
+        BWST1 = 15,
+        CAL_FLAG1 = 14,
+        DMAUDR1 = 13,
+
+        // CCR
+        OTRIM2 = 16,
+        OTRIM1 = 0,
+
+        // MCR
+        MODE2 = 16,
+        MODE1 = 0,
+
+        // SHHR
+        THOLD2 = 16,
+        THOLD1 = 0,
+
+        // SHRR
+        TREFRESH2 = 16,
+        TREFRESH1 = 0,
     };
 
     uint32_t _base;
@@ -61,14 +97,20 @@ public:
     }
 
     enum class Trigger {
-        TIM6_TRGO = 0b000 << TSEL1,
-        TIM8_TRGO = 0b001 << TSEL1,
-        TIM7_TRGO = 0b010 << TSEL1,
-        TIM5_TRGO = 0b011 << TSEL1,
-        TIM2_TRGO = 0b100 << TSEL1,
-        TIM4_TRGO = 0b101 << TSEL1,
-        EXTI9     = 0b110 << TSEL1,
-        SWTRIG    = 0b111 << TSEL1
+        SWTRIG = 0,
+        TIM1   = 1,
+        TIM2   = 2,
+        TIM4   = 3,
+        TIM5   = 4,
+        TIM6   = 5,
+        TIM7   = 6,
+        TIM8   = 7,
+        TIM15  = 8,
+        HRTIM1_DACTRG1 = 9,
+        HRTIM1_DACTRG2 = 10,
+        LPTIM1 = 11,
+        LPTIM2 = 12,
+        EXTI9  = 13,
     };
 
     void Output(const uint16_t* data, uint32_t nsamples, Trigger t,
@@ -76,7 +118,11 @@ public:
                 Stm32Dma::Priority prio) {
         volatile uint32_t& cr = reg(Register::CR);
         cr &= ~BIT(EN1);
-        cr =  BIT(BOFF1) | BIT(TEN1) | (uint32_t)t | BIT(DMAEN1);
+        cr = Bitfield(cr)
+            .bit(BOFF1)
+            .bit(TEN1)
+            .f(4, TSEL1, uint32_t(t))
+            .bit(DMAEN1);
         cr |= BIT(EN1);
 
         _prio = prio;

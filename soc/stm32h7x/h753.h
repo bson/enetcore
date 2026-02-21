@@ -32,7 +32,8 @@
 //#include "soc/stm32h7x/i2c.h"
 //#include "soc/stm32h7x/ethernet.h
 //#include "soc/sdmmc.h"
-// #include "eeprom.h"
+#include "eeprom.h"
+//#include "soc/stm32h7x/usb_dev.h"
 
 //#include "soc/hash.h"
 //#include "soc/crypt.h"
