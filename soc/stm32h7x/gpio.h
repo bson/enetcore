@@ -82,8 +82,8 @@ public:
                 | ((uint32_t)pinconf->speed << (pinconf->pin*2));
 
             volatile uint32_t& otyper = reg<volatile uint32_t>(pinconf->port, Register::GPIO_OTYPER);
-            otyper = (otyper & ~(1 << pinconf->pin))
-                | ((pinconf->type >= Type::OD_PUR ? 1 : 0) << pinconf->pin);
+            otyper |= (otyper & ~BIT(pinconf->pin))
+                | (pinconf->type >= Type::OD_PUR ? BIT(pinconf->pin) : 0);
 
             volatile uint32_t& pupdr = reg<volatile uint32_t>(pinconf->port, Register::GPIO_PUPDR);
             pupdr = (pupdr & ~(3 << pinconf->pin*2))

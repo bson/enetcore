@@ -3,8 +3,6 @@
 
 #include "core/bits.h"
 
-#error not yet updated for STM32H7
-
 class Stm32Random {
     enum class Register {
         RNG_CR = 0x00,
@@ -14,6 +12,7 @@ class Stm32Random {
 
     enum {
         // RNG_CR
+        CED   = 5,              // Clock error det.
         IE    = 3,
         RNGEN = 2,
 
