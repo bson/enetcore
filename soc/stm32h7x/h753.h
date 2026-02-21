@@ -13,7 +13,7 @@
 #include "soc/stm32h7x/power.h"
 #include "soc/stm32h7x/clock_tree.h"
 #include "soc/stm32h7x/debug.h"
-//#include "soc/stm32h7x/flash.h"
+#include "soc/stm32h7x/flash.h"
 #include "soc/stm32h7x/syscfg.h"
 #include "soc/stm32h7x/dma.h"
 #include "soc/stm32h7x/gpio.h"
@@ -30,7 +30,7 @@
 
 #include "soc/stm32h7x/crc.h"
 //#include "soc/stm32h7x/i2c.h"
-//#include "soc/stm32h7x/eth.h
+//#include "soc/stm32h7x/ethernet.h
 //#include "soc/sdmmc.h"
 
 //#include "soc/hash.h"

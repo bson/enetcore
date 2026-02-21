@@ -1,41 +1,97 @@
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
 #ifndef __STM32_FLASH_H__
 #define __STM32_FLASH_H__
 
 #include "core/bits.h"
+#include "core/bitfield.h"
 
-#error not yet updated for STM32H7
 
 // Basic flash support.  No erase or write support.
 class Stm32Flash {
     enum Register {
-        FLASH_ACR = 0x00
+        ACR = 0x00,
+        KEYR1 = 0x04,
+        OPTKEYR = 0x08,
+        CR1 = 0x0c,
+        SR1 = 0x10,
+        CCR1 = 0x14,
+        OPTCR = 0x18,
+        OPTSR_CUR = 0x1c,
+        OPTSR_PRG = 0x20,
+        OPTCCR = 0x24,
+        PRAR_CUR1 = 0x28,
+        PRAR_PRG1 = 0x2c,
+        SCAR_CUR1 = 0x30,
+        SCAR_PRG1 = 0x34,
+        WPSN_CUR1R = 0x38,
+        WPSN_PRG1R = 0x3C,
+        BOOT_CURR = 0x40,
+        BOOT_PRGR = 0x44,
+        CRCCR1 = 0x50,
+        CRCADD1R = 0x54,
+        CRCEADD1R = 0x58,
+        CRCDATAR = 0x5C,
+        RCC_FA1R = 0x60,
     };
 
 public:
     enum {
         // FLASH_ACR, reset 0x0000 0000
-        DCRST   = 12,
-        ICRST   = 11,
-        DCEN    = 10,
-        ICEN    = 9,
-        PRFTEN  = 8,
+        WRHIGHFREQ = 4,
         LATENCY = 0,
     };
 
+    enum {
+        BANK0 = 0x000,
+        BANK1 = 0x100
+   };
+
 private:
-    template <typename T>
-    static T& reg(const Register r) { return *((T*)(BASE_FLASH+(uint32_t)r)); }
+    static volatile uint32_t& reg(const Bank bank, const Register r) {
+        return *((volatile uint32_t*)(BASE_FLASH + uint32_t(bank) + uint32_t(r)));
+    }
 
 public:
-    static void Latency(uint32_t latency) {
-        reg<volatile uint32_t>(Register::FLASH_ACR) |= BIT(DCRST) | BIT(ICRST);
-        reg<volatile uint32_t>(Register::FLASH_ACR) = (reg<const uint32_t>(Register::FLASH_ACR) & ~(3 << LATENCY))
-            | BIT(DCEN) | BIT(ICEN) | BIT(PRFTEN) | (latency << LATENCY);
+    class Access {
+        Bank _bank;
+
+    public:
+        Access(Bank bank)
+            : _bank(bank)
+        {
+            // CR1
+            reg(bank, Register::KEYR1) = 0x45670123;
+            reg(bank, Register::KEYR1) = 0xcdef89ab;
+
+            // OPTCR
+            reg(bank, Register::OPTKEYR) = 0x08192a3b;
+            reg(bank, Register::OPTKEYR) = 0x4c5d6e7f;;
+
+        }
+
+        ~Access() {
+            // CR1
+            reg(_bank, Register::KEYR1) = 0;
+
+            // OPTCR
+            reg(_bank, Register::OPTKEYR) = 0;;
+        }
+
+    };
+
+    static void Latency(Bank bank, uint32_t latency) {
+        reg(Register::ACR) = Bitfield(reg(Bank::BANK0, Register::ACR))
+            .f(0, LATENCY, latency);
+        reg(Register::ACR) = Bitfield(reg(Bank::BANK1, Register::ACR))
+            .f(0, LATENCY, latency);
     }
 
-    static void EnableIDCaching() {
-        reg<volatile uint32_t>(Register::FLASH_ACR) |= BIT(ICEN) | BIT(DCEN);
-    }
+    // Cortex-M7 has unified cache management
+    static void EnableIDCaching() { }
+
+    // XXX add programming
 };
 
 #endif // __STM32_FLASH_H__
