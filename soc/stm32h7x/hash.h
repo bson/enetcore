@@ -70,8 +70,10 @@ public:
     }
 
 
+    enum { HASH_BUF_NELEM = 128 };
+
 private:
-    typedef Ring<SEND_BUF_SIZE, uint32_t> SendQ;
+    typedef Ring<HASH_BUF_NELEM, uint32_t> SendQ;
 
     mutable Mutex   _w_mutex;
     SendQ           _sendq;
@@ -92,30 +94,47 @@ public:
 
 
     // Start digest.  If key is provided, calculate HMAC, otherwise hash
-    // data only.  keylen is in uint32_t's.  Len should be 0 and key
+    // data only.  keylen is in uint32_t's.  keylen should be 0 and key
     // NULL if no key is supplied.
     // Fills in digest of length len (words).
     void Calculate(uint32_t *digest, const int len,
-                   Algorithm algo = MD5, const uint32_t* key = NULL, int keylen = 0) {
+                   Algorithm algo = MD5,
+                   const uint32_t* inner_key = NULL, int inner_keylen = 0,
+                   const uint32_t outer_key = NULL, int outer_keylen = 0) {
         assert(len >= 4 && len <= 8);
+
+        const bool hmac_mode = inner_key && inner_keylen && outer_key && outer_keylen;
 
         volatile uint32_t& cr  = reg(Register::CR);
         volatile uint32_t& sr  = reg(Register::SR);
         volatile uint32_t& str = reg(Register::STR);
+        volatile uint32_t& din = reg(Register::DIN);
 
         Mutex::Scoped L(_w_mutex);
         Thread::IPL G(IPL_HASH);
 
         cr = Bitfield(cr)
             .cbit(INIT)
-            .bit(MODE, keylen != 0)
-            .bit(LKEY, keylen && (keylen * 4 <= 64)) // Present and 64 bytes or less
+            .bit(MODE, hmac_mode)
+            .bit(LKEY, hmac_mode && (keylen * 4 <= 64)) // Present and 64 bytes or less
             .bit(ALGO1, (uint32_t)algo & BIT(1))
             .bit(ALGO0, (uint32_t)algo & BIT(0))
             .f(2, DATATYPE, 0);          // Data is 32-bit words
         
         cr |= BIT(INIT);
 
+        if (hmac_mode) {
+            // Provide HMAC inner key
+            while (inner_keylen--)
+                din = *inner_key++;
+            str = Bitfield(str)
+                .f(5, NBLW, 0);
+            str |= BIT(DCAL);
+            while ((sr & DINIS) == 0)
+                ;
+        }
+
+        // Feed message
         if (_dma && !_tx._active)
             _dma->AssignTx(this);
 
@@ -124,7 +143,17 @@ public:
         while (!_send.Empty())
             Thread::WaitFor((void*)&_sendq);
 
-        // Calculate
+        // In HMAC mode, provide outer key
+        if (hmac_mode) {
+            while ((sr & DINIS) == 0)
+                ;
+            while (inner_keylen--)
+                din = *inner_key++;
+        }
+
+        // Calculate hash
+        str = Bitfield(str)
+            .f(5, NBLW, 0);
         str |= BIT(DCAL);
 
         while ((sr & BIT(DCIS)) == 0)
