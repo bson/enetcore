@@ -13,40 +13,19 @@
 #define _trace _usart3
 #endif
 
-#error Fix up memory layout for H753
-
-
-// STM32F405 memory layout
-//
-//    0x0800 0000 Start Flash   1MB
-//     end image                         _etext
-//    0x080F FFFF End Flash
-//
-//    0x1000 0000  CCM RAM 64k  - unused for now
-//    0x1000 FFFF
-//
-//    0x2000 0000  SRAM 112k  MALLOC_START             _bss_end
-//    0x2001 BFFF
-//    0x2001 C000  SRAM 16k   IRAM_START
-//    0x2001 FFFF             IRAM_START + IRAM_SIZE   __stack_top
-//
-//    The last two adjacent SRAM sections are combined into a 128k region
-//
-// The existing main stack (MSP) is inside IRAM, and set aside
-// setting a reserve equal to MAIN_THREAD_STACK plus INTR_THREAD_STACK.
-// Thread data structures are allocated using the IRAM region as well.
-// 
+// Use SRAM1+SRAM2 as 256k IRAM
+// Use SRAM4 as 64k Ethernet buffer
 
 // A lot of #define's here unfortunately, resolve symbols later
 
 #define THREAD_DATA_SIZE  ((sizeof(Thread) + 3) & ~3) // sizeof (Thread), aligned
 
 // all flash sections
-#define TEXT_REGION_START (0x08000000)
+#define TEXT_REGION_START (BASE_FLASHB1)
 #define TEXT_REGION_SIZE  ((uintptr_t)&_etext - TEXT_REGION_START)
 
 // Main (default) internal RAM region, contains thread stacks.
-#define IRAM_REGION_SIZE (MAIN_THREAD_STACK + INTR_THREAD_STACK + 2*THREAD_DATA_SIZE + 8 + UI_THREAD_TERM)
+#define IRAM_REGION_SIZE (MAIN_THREAD_STACK + INTR_THREAD_STACK + 2*THREAD_DATA_SIZE + 8)
 #define IRAM_REGION_START ((uintptr_t)&__stack_top - IRAM_REGION_SIZE)
 
 #define MALLOC_REGION_START ((uintptr_t)&_bss_end)
@@ -214,9 +193,6 @@ enum { HASHTABLE_EVICTION_DEPTH = 10 };
 
 enum { MAIN_THREAD_STACK = 2048};
 enum { INTR_THREAD_STACK = 2048 };
-
-enum { UI_THREAD_STACK = 2048 };
-enum { UI_THREAD_PRIORITY = 205 };
 
 enum { THREAD_DEFAULT_STACK = 2048 }; // Default thread stack size
 enum { THREAD_DEFAULT_PRIORITY = 50 }; // Default thread priority
