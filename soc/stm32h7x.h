@@ -6,6 +6,8 @@
 
 #define STM32H7X
 
+#include <stdint.h>
+
 #define CORTEX_M 7
 
 #define HAVE_HW_CRC
@@ -15,41 +17,102 @@
 #include "core/assert.h"
 #include "core/bits.h"
 
+#define _h7x_addrof(SYM) ((uintptr_t)&(SYM))
+
+extern int ADDR_ITCM;
+static constexpr uintptr_t BASE_ITCM = _h7x_addrof(ADDR_ITCM);
+
+extern int ADDR_FLASHB1;
+static constexpr uintptr_t BASE_FLASHB1 = _h7x_addrof(ADDR_FLASHB1);
+
+extern int ADDR_FLASHB2;
+static constexpr uintptr_t BASE_FLASHB2 = _h7x_addrof(ADDR_FLASHB2);
+
+
+/* RAM */
+
+extern int ADDR_DTCM;
+static constexpr uintptr_t BASE_DTCM = _h7x_addrof(ADDR_DTCM);
+
+extern int ADDR_SRAM1;
+static constexpr uintptr_t BASE_SRAM1 = _h7x_addrof(ADDR_SRAM1);
+
+extern int ADDR_SRAM2;
+static constexpr uintptr_t BASE_SRAM2 = _h7x_addrof(ADDR_SRAM2);
+
+extern int ADDR_SRAM3;
+static constexpr uintptr_t BASE_SRAM3 = _h7x_addrof(ADDR_SRAM3);
+
+extern int ADDR_SRAM4;
+static constexpr uintptr_t BASE_SRAM4 = _h7x_addrof(ADDR_SRAM4);
+
+extern int ADDR_BKPSRAM;
+static constexpr uintptr_t BASE_BKPSRAM = _h7x_addrof(ADDR_BKPSRAM);
+
+extern int ADDR_SRAM;
+static constexpr uintptr_t BASE_AXI_SRAM = _h7x_addrof(ADDR_AXI_SRAM);
+
+extern int ADDR_RAM;
+static constexpr uintptr_t BASE_QSPI_RAM = _h7x_addrof(ADDR_QSPI_RAM);
+
+
+/* FMC banks */
+extern int ADDR_FMCB1;
+static constexpr uintptr_t BASE_FMCB1 = _h7x_addrof(ADDR_FMCB1);
+
+extern int ADDR_FMCB2;
+static constexpr uintptr_t BASE_FMCB2 = _h7x_addrof(ADDR_FMCB2);
+
+extern int ADDR_FMCB3;
+static constexpr uintptr_t BASE_FMCB3 = _h7x_addrof(ADDR_FMCB3);
+
+extern int ADDR_FMCB4;
+static constexpr uintptr_t BASE_FMCB4 = _h7x_addrof(ADDR_FMCB4);
+
+extern int ADDR_FMCB5;
+static constexpr uintptr_t BASE_FMCB5 = _h7x_addrof(ADDR_FMCB5);
+
+extern int ADDR_FMCB6;
+static constexpr uintptr_t BASE_FMCB6 = _h7x_addrof(ADDR_FMCB6);
+
+
 
 // Max CCLK = 480MHz
 enum { CCLK_MAX = 480000000 };
 
 // On-chip STM32H7 peripherals
+/* STM32H753 base addresses */
+
+
+
+
+BASE_ITCM     = 0x00000000;
+BASE_FLASHB1  = 0x08000000; /* Flash Bank 1; 1MiB */
+BASE_FLASHB2  = 0x08100000; /* Flash Bank 2; 1MiB */
+
+/* RAM */
+
+BASE_DTCM     = 0x20000000; /* 128kiB */
+
+BASE_SRAM1    = 0x30000000; /* 128kiB */
+BASE_SRAM2    = 0x30020000; /* 128kiB */
+BASE_SRAM3    = 0x30040000; /* 32kiB */
+BASE_SRAM4    = 0x38000000; /* 64kiB */
+BASE_BKPSRAM  = 0x38800000; /* 4kiB */
+
+BASE_AXI_SRAM = 0x24000000; /* 512kiB */
+
+BASE_QSPI_RAM = 0x90000000;
+
+/* FMC banks */
+BASE_FMCB1    = 0x60000000; /* FMC bank 1: NOR/PSRAM/SRAM */
+BASE_FMCB2    = 0x70000000; /* FMC bank 2: NOR/PSRAM/SRAM */
+BASE_FMCB3    = 0x80000000; /* FMC bank 3: NAND flash */
+BASE_FMCB4    = 0x90000000; /* FMC bank 4: NAND flash */
+BASE_FMCB5    = 0xc0000000; /* FMC bank 5: SDRAM */
+BASE_FMCB6    = 0xd0000000; /* FMC bank 6: SDRAM */
+
 enum { 
-    // XXX create an stm32h7x.link.cmd for these, so they can be used
-    // XXX in the main link.cmd
-
-    BASE_ITCM          = 0x00000000,
-    BASE_FLASHB1       = 0x08000000, // Flash Bank 1, 1MiB
-    BASE_FLASHB2       = 0x08100000, // Flash Bank 2, 1MiB
-
-    // RAM
-
-    BASE_DTCM          = 0x20000000, // 128kiB
-
-    BASE_SRAM1         = 0x30000000, // 128kiB
-    BASE_SRAM2         = 0x30020000, // 128kiB
-    BASE_SRAM3         = 0x30040000, // 32kiB
-    BASE_SRAM4         = 0x38000000, // 64kiB
-    BASE_BKPSRAM       = 0x38800000, // 4kiB
-
-    BASE_AXI_SRAM      = 0x24000000, // 512kiB
-
-    BASE_QSPI_RAM      = 0x90000000,
-
-    // FMC banks
-    BASE_FMCB1         = 0x60000000, // FMC bank 1: NOR/PSRAM/SRAM
-    BASE_FMCB2         = 0x70000000, // FMC bank 2: NOR/PSRAM/SRAM
-    BASE_FMCB3         = 0x80000000, // FMC bank 3: NAND flash
-    BASE_FMCB4         = 0x90000000, // FMC bank 4: NAND flash
-    BASE_FMCB5         = 0xc0000000, // FMC bank 5: SDRAM
-    BASE_FMCB6         = 0xd0000000, // FMC bank 6: SDRAM
-
     // APB1
 
     BASE_TIM2         = 0x40000000,

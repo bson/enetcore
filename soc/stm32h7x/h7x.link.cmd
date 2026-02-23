@@ -1,0 +1,27 @@
+/* STM32H753 base addresses */
+
+ADDR_ITCM     = 0x00000000;
+ADDR_FLASHB1  = 0x08000000; /* Flash Bank 1; 1MiB */
+ADDR_FLASHB2  = 0x08100000; /* Flash Bank 2; 1MiB */
+
+/* RAM */
+
+ADDR_DTCM     = 0x20000000; /* 128kiB */
+
+ADDR_SRAM1    = 0x30000000; /* 128kiB */
+ADDR_SRAM2    = 0x30020000; /* 128kiB */
+ADDR_SRAM3    = 0x30040000; /* 32kiB */
+ADDR_SRAM4    = 0x38000000; /* 64kiB */
+ADDR_BKPSRAM  = 0x38800000; /* 4kiB */
+
+ADDR_AXI_SRAM = 0x24000000; /* 512kiB */
+
+ADDR_QSPI_RAM = 0x90000000;
+
+/* FMC banks */
+ADDR_FMCB1    = 0x60000000; /* FMC bank 1: NOR/PSRAM/SRAM */
+ADDR_FMCB2    = 0x70000000; /* FMC bank 2: NOR/PSRAM/SRAM */
+ADDR_FMCB3    = 0x80000000; /* FMC bank 3: NAND flash */
+ADDR_FMCB4    = 0x90000000; /* FMC bank 4: NAND flash */
+ADDR_FMCB5    = 0xc0000000; /* FMC bank 5: SDRAM */
+ADDR_FMCB6    = 0xd0000000; /* FMC bank 6: SDRAM */
