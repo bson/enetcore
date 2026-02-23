@@ -1,0 +1,35 @@
+# -*- Makefile -*-
+# Peripherals found on this board
+
+SRCS += 
+
+VARIANT=-DSTMF=1 -DSTM=753
+CPUID=cm7
+
+SOCDIR=$(ENETCORE)/soc
+include $(SOCDIR)/stm32h7x/makefile.$(TOOLSET)
+
+TARGET=arm-none-eabi
+
+CC   = $(TOOLDIR)/$(TARGET)-g++
+LD   = $(TOOLDIR)/$(TARGET)-ld
+AR   = $(TOOLDIR)/$(TARGET)-ar
+AS   = $(TOOLDIR)/$(TARGET)-as
+SIZE = $(TOOLDIR)/$(TARGET)-size
+
+CHECKSUM = true
+
+CFLAGS += -Idevices $(VARIANT)  \
+    -fwrapv -freg-struct-return -fno-stack-limit -ffunction-sections \
+    -fdata-sections -ffreestanding -fno-rtti -fno-exceptions \
+	-fno-threadsafe-statics -fshort-enums
+
+LFLAGS  += -nostdlib --gc-sections -Tlink.cmd
+
+CPFLAGS = -O binary
+HEXFLAGS = -O ihex
+ODFLAGS	= -x --syms
+
+SRCS += $(addprefix $(ENETCORE)/devices/,$(HARDWARE_SRCS))
+
+ODIR_TREE += $(ODIR)/$(ENETCORE) $(ODIR)/$(ENETCORE)/devices

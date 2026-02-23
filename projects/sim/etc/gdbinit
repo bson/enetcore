@@ -1,0 +1,105 @@
+
+# Enable enetcore thread/RTOS support in openocd.  OpenOCD doesn't
+# handle this too well, and RTOS support in OOCD is a work in progress
+# (it will randomly decide threads have exited and you get stuck
+# requiring you to relaunch openocd because something, either oocd or
+# gdb, doesn't think there is a "live" thread to debug).
+define m
+mon stm32f4x.cpu configure -rtos enetcore
+end
+
+# Print backtraces for all threads
+define btall
+thread apply all bt
+end
+
+# Reconnect
+define recon
+target extended-remote localhost:3333
+end
+
+# Mask interrupts while single stepping on Cortex-M, but doesn't
+# currently appear to work correctly in openocd.
+define hook-step
+mon cortex_m maskisr on
+end
+define hookpost-step
+mon cortex_m maskisr off
+end
+
+# Write debug image.  Reset first so the CPU is in a known state and not running
+# off a PLL.
+define wi
+monitor reset halt
+monitor flash write_image erase build_debug/image 0 elf
+file build_debug/image
+end
+
+# Write image and run
+define wir
+wi
+cont
+end
+
+# Reset
+define r 
+monitor reset halt
+end
+
+# Reset/refresh image
+define f
+file build_debug/image
+end
+
+# Print exception on stack
+define ex
+p/x *(EX*)$sp
+end
+
+# Exception unwind - destructive, but sometimes useful to get a stack backtrace
+define eu
+set $pc = ((EX*)$sp)->pc
+set $control &= ~2
+set $sp = $sp + 8*4
+end
+
+define ebt
+printf "xSPR: 0x%x\n", $xPSR
+set $saved_pc = $pc
+set $saved_sp = $sp
+set $pc = ((EX*)$sp)->pc
+set $sp = $sp + 8
+bt
+set $pc = $saved_pc
+set $sp = $saved_sp
+end
+
+# Stack dump
+define sd
+p/x *(uint32_t*)$sp@((&__stack_top - $sp)/4)
+end
+
+define da
+disassemble
+end
+
+# Actual init
+
+target extended-remote localhost:3333
+
+set remote hardware-breakpoint-limit 6
+set remote hardware-watchpoint-limit 4
+
+set mem inaccessible-by-default off
+
+monitor reset halt
+
+set $pc = 0x400
+
+set output-radix 16
+set print pretty
+
+set print thread-events off
+
+#monitor stm32f4fx.tpiu config internal - uart on 168000000 12000000 
+#monitor stm32f4fx.tpiu enable

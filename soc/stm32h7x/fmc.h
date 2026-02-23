@@ -1,9 +1,7 @@
-#ifndef __FSMC_H__
-#define __FSMC_H__
+#ifndef __FSM_H__
+#define __FSM_H__
 
 #include "core/bits.h"
-
-#error not yet updated for STM32H7
 
 class Stm32Fsmc {
 public:
@@ -16,34 +14,45 @@ public:
 
 private:
     enum class Register {
-        BCR  = 0x0000,
         BCR1 = 0x0000,
         BCR2 = 0x0008,
         BCR3 = 0x0010,
         BCR4 = 0x0018,
-        BTR  = 0x0004,
         BTR1 = 0x0004,
         BTR2 = 0x000c,
         BTR3 = 0x0014,
         BTR4 = 0x001c,
-        BWTR  = 0x0104,
         BWTR1 = 0x0104,
         BWTR2 = 0x010c,
         BWTR3 = 0x0114,
         BWTR4 = 0x011c,
-        PCR2 = 0x0060,
-        PCR3 = 0x0080,
-        PCR4 = 0x00a0,
-        SR2 = 0x0064,
-        SR3 = 0x0084,
-        SR4 = 0x00a4,
-        PMEM2 = 0x0068,
-        PMEM3 = 0x0088
+
+        // NAND flash (write FIFO)
+        PCR = 0x0080,
+        SR  = 0x0084,
+        PMEM = 0x0088,
+        PATT = 0x008c,
+        ECCR = 0x0094,
+
+        // SDRAM controller
+        SDCR1 = 0x0140,
+        SDCR2 = 0x0144,
+        SDTR1 = 0x0148,
+        SDTR2 = 0x014c,
+        SDCMR = 0x0150,
+        SDRTR = 0x0154,
+        SDSR = 0x0158,
+
     };
 
     enum {
         // BCRx
+        FMCEN = 31,
+        BMAP = 24,
+        WFDIS = 21,
+        CCLKEN = 20,
         CBURSTRW = 19,
+        CPSIZE = 16,
         ASYNCWAIT = 15,
         EXTMOD = 14,
         WAITEN = 13,
@@ -60,8 +69,8 @@ private:
 
         // BTRx, BWTRx
         ACCMOD = 28,
-        DATLAT = 24,
-        CLKDIV = 20,
+        DATLAT = 24,            // SPRAM only, not SRAM/NOR
+        CLKDIV = 20,            // SPRAM only, not SRAM/NOR
         BUSTURN = 16,
         DATAST = 8,
         ADDHLD = 4,
@@ -73,7 +82,6 @@ private:
         TCLR = 9,
         ECCEN = 6,
         PWID = 4,
-        PTYP = 3,
         PBKEN = 2,
         PWAITEN = 1,
 
@@ -119,14 +127,30 @@ public:
         assert(data_setup <= 15);
         assert(data_hold >= 1 && data_hold <= 255);
 
-        reg(b, Register::BCR) &= ~BIT(MBKEN);
-        reg(b, Register::BCR) = BIT(WREN) | (Width::WORD16 << MWID) | (Type::PSRAM << MTYP)
-            | BIT(7);
-        reg(b, Register::BTR) = (bus_turn << BUSTURN) | (data_setup << ADDSET)
-            | (data_hold << DATAST);
-        reg(b, Register::BCR) |= BIT(MBKEN);
+        volatile uint32_t& b_bcr = reg(b, Register::BCR1); // Bank BCR
+        volatile uint32_t& b_btr = reg(b, Register::BTR1); // Bank BTR
+        volatile uint32_t& bcr1 = reg(Register::BCR1);     // BCR1
+
+        b_bcr = Bitfield(b_bcr)
+            .cbit(MBKEN);
+
+        b_bcr = Bitfield(b_bcr)
+            .bit(WREN)
+            .f(2, MWID, Width::WORD16)
+            .bit(2, MTYPE, Type::SRAM); // F405 used Type::PSRAM?!
+
+        b_btr = Bitfield(b_btr)
+            .f(4, BUSTURN, bus_turn)
+            .f(4, ADDSET, data_setup)
+            .f(8, DATAST, data_hole);
+
+        b_bcr = Bitfield(b_bcr)
+            .bit(MBKEN);
+
+        bcr1 = Bitfield(bcr1)
+            .bit(FMCEN);
     }
 };
 
 
-#endif // __FSMC_H__
+#endif // __FSM_H__

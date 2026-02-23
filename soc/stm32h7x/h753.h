@@ -24,7 +24,7 @@
 #include "soc/stm32h7x/rtc.h"
 //#include "soc/stm32h7x/adc.h"
 #include "soc/stm32h7x/dac.h"
-//#include "soc/stm32h7x/fsmc.h"
+#include "soc/stm32h7x/fmc.h"
 #include "soc/stm32h7x/eintr.h"
 //#include "soc/stm32h7x/spi.h"
 

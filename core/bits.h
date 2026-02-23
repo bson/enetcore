@@ -4,6 +4,24 @@
 #ifndef _BITS_H_
 #define _BITS_H_
 
+#include <stdint.h>
+
+// Find highest bit set
+template <typename T = uint32_t>
+static T fhs(T val) {
+    assert(val != 0);
+
+    for (int bitnum = sizeof(T) * 8 - 1; bitnum >= 0; --bitnum) {
+        if (val & BIT(sizeof(T) * 8 - 1 ))
+            return bitnum;
+        val <<= 1;
+    }
+
+    // Not reached
+    return 0;
+}
+
+
 #define BIT(N) (1 << (N))
 
 enum {

@@ -42,6 +42,14 @@ enum {
 
     BASE_QSPI_RAM      = 0x90000000,
 
+    // FMC banks
+    BASE_FMCB1         = 0x60000000, // FMC bank 1: NOR/PSRAM/SRAM
+    BASE_FMCB2         = 0x70000000, // FMC bank 2: NOR/PSRAM/SRAM
+    BASE_FMCB3         = 0x80000000, // FMC bank 3: NAND flash
+    BASE_FMCB4         = 0x90000000, // FMC bank 4: NAND flash
+    BASE_FMCB5         = 0xc0000000, // FMC bank 5: SDRAM
+    BASE_FMCB6         = 0xd0000000, // FMC bank 6: SDRAM
+
     // APB1
 
     BASE_TIM2         = 0x40000000,

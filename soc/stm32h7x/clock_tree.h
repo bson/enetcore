@@ -5,6 +5,7 @@
 #define __STM32_CLOCK_TREE_H__
 
 #include <stdint.h>
+#include "core/bits.h"
 
 class Stm32ClockTree {
     // Register byte offsets
@@ -541,21 +542,6 @@ public:
         if (f <= 4) return PllInputRange::RANGE_2_4_MHZ;
         if (f <= 8) return PllInputRange::RANGE_4_8_MHZ;
         return PllInputRange::RANGE_8_16_MHZ;
-    }
-
-
-    // Find highest bit set
-    static uint32_t fhs(uint32_t val) {
-        assert(val != 0);
-
-        for (int bitnum = 31; bitnum >= 0; --bitnum) {
-            if (val & BIT(31))
-                return bitnum;
-            val <<= 1;
-        }
-
-        // Not reached
-        return 0;
     }
 
 
