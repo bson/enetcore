@@ -131,6 +131,9 @@ public:
         volatile uint32_t& b_btr = reg(b, Register::BTR1); // Bank BTR
         volatile uint32_t& bcr1 = reg(Register::BCR1);     // BCR1
 
+        bcr1 = Bitfield(bcr1)
+            .bit(FMCEN);
+
         b_bcr = Bitfield(b_bcr)
             .cbit(MBKEN);
 
@@ -146,9 +149,6 @@ public:
 
         b_bcr = Bitfield(b_bcr)
             .bit(MBKEN);
-
-        bcr1 = Bitfield(bcr1)
-            .bit(FMCEN);
     }
 };
 

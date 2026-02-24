@@ -124,7 +124,7 @@ enum {
 };
 
 // External SRAM in bank 1
-#define XSRAM_BANK Fsmc::Bank::BANK1
+#define XSRAM_BANK Fmc::Bank::BANK1
 
 enum {
     XSRAM_BASE = BASE_FMCB1, // Base address for bank 1, sub bank 1 (NE1)

@@ -4,6 +4,22 @@
 #ifndef __H753_H__
 #define __H753_H__
 
+enum class H753MemSize {
+    SIZE_FLASHB1  = 1024*1024,
+    SIZE_FLASHB2  = 1024*1024,
+
+    SIZE_DTCM     = 128*1024,
+
+    SIZE_SRAM1    = 128*1024,
+    SIZE_SRAM2    = 128*1024,
+    SIZE_SRAM3    = 32*1024,
+    SIZE_SRAM4    = 64*1024,
+    SIZE_BKPSRAM  = 4*1024,
+
+    SIZE_AXI_SRAM = 512*1024,
+};
+
+
 #include "soc/stm32h7x.h"
 
 #include "arch/armv7m/nvic.h"
