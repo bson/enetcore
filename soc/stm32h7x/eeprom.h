@@ -5,9 +5,9 @@
 #define _STm32_EEPROM_H_
 
 #include <stdint.h>
-#include "stm32h7x.h"
-#include "bits.h"
-#include "flash.h"
+#include "soc/stm32h7x.h"
+#include "core/bits.h"
+#include "soc/stm32h7x/flash.h"
 
 
 // Writing of EEPROM for settings storage.

@@ -1,10 +1,12 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
 #ifndef _BITS_H_
 #define _BITS_H_
 
 #include <stdint.h>
+
+#define BIT(N) (1 << (N))
 
 // Find highest bit set
 template <typename T = uint32_t>
@@ -20,9 +22,6 @@ static T fhs(T val) {
     // Not reached
     return 0;
 }
-
-
-#define BIT(N) (1 << (N))
 
 enum {
     BIT0  = BIT(0),

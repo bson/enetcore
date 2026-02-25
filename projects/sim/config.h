@@ -107,10 +107,10 @@ enum {
 enum {
     // DMA1
     DMA_STREAM_UART7_TX = 0xffffff00, // Always 0
-    DMA_TARGET_UART7_TX = Stm32Dma::Target::uart7_tx_dma,
+#define DMA_TARGET_UART7_TX Stm32Dma::Target::uart7_tx_dma
 
     DMA_STREAM_UART5_TX = 0xffffff00, // Always 0
-    DMA_TARGET_UART5_TX = Stm32Dma::Target::uart5_tx_dma,
+#define DMA_TARGET_UART5_TX Stm32Dma::Target::uart5_tx_dma
 
 #define DMA_PRIORITY_UART7  Stm32Dma::Priority::MEDIUM
 #define DMA_PRIORITY_UART7  Stm32Dma::Priority::MEDIUM
@@ -126,9 +126,8 @@ enum {
 // External SRAM in bank 1
 #define XSRAM_BANK Fmc::Bank::BANK1
 
-enum {
-    XSRAM_BASE = BASE_FMCB1, // Base address for bank 1, sub bank 1 (NE1)
-};
+ // Base address for bank 1, sub bank 1 (NE1)
+#define XSRAM_BASE BASE_FMCB1
 
 
 // FMC SRAM mode 1 timing

@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include "core/bits.h"
+#include "core/bitfield.h"
 
 class Stm32ClockTree {
     // Register byte offsets
@@ -59,13 +60,12 @@ class Stm32ClockTree {
         RCC_AHB3LPENR   = 0xfc, // AHB3 sleep clock reg
         RCC_AHB1LPENR   = 0x100, // AHB1 sleep clock reg (uses AHB1*EN)
         RCC_AHB2LPENR   = 0x104, // AHB2 sleep clock reg (uses AHB2*EN)
-        RCC_AHB4LPENR   = 0x0x108, // AHB4 sleep clock reg (uses AHB4*EN)
+        RCC_AHB4LPENR   = 0x108, // AHB4 sleep clock reg (uses AHB4*EN)
         RCC_APB3LPENR   = 0x10c, // APB3 sleep clock reg (uses APB3*EN)
         RCC_APB1LLPENR  = 0x110, // APB1L sleep clock reg (uses APB1L*EN)
         RCC_APB1HLPENR  = 0x114, // APB1H sleep clock reg (uses APB1H*EN)
         RCC_APB2LPENR   = 0x118, // APB2 sleep clock reg (uses APB2*EN)
         RCC_APB4LPENR   = 0x11c, // APB4 sleep clock reg (uses APB4*EN)
-
     };
 
     // Register bits
@@ -84,7 +84,7 @@ class Stm32ClockTree {
         D2CKRDY = 15,           // D2 clock ready
         D1CKRDY = 14,           // D1 clock ready
         HSI48RDY = 13,          // HSI48 clock ready
-        HSI45ON = 12,           // HSI48 clock enable
+        HSI48ON = 12,           // HSI48 clock enable
         CSIKERON = 9,           // CSI clock enable in Stop mode
         CSIRDY = 8,             // CSI clock ready
         CSION = 7,              // CSI clock enable
@@ -148,13 +148,13 @@ class Stm32ClockTree {
         PLL3VCOSEL = 9,         // PLL3 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
         PLL3FRACGEN = 8,        // PLL3 frac latch ena
         
-        PLL2RGE = 6,            // 2-bi2 PLL3 input freq range, PllInputRange
+        PLL2RGE = 6,            // 2-bi2 PLL2 input freq range, PllInputRange
         PLL2VCOSEL = 5,         // PLL2 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
         PLL2FRACGEN = 4,        // PLL2 frac latch ena
         
-        PLL2RGE = 2,            // 2-bi2 PLL3 input freq range, PllInputRange
-        PLL2VCOSEL = 1,         // PLL2 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
-        PLL2FRACGEN = 0,        // PLL2 frac latch ena
+        PLL1RGE = 2,            // 2-bi2 PLL1 input freq range, PllInputRange
+        PLL1VCOSEL = 1,         // PLL1 VCO range selection (0: wide = 192-960MHz, 1: medium = 150-420Mhz)
+        PLL1FRACGEN = 0,        // PLL1 frac latch ena
         
         // RCC_PLL1DIVR, RCC_PLL2DIVR, RCC_PLL2DIVR
         DIVR = 24,             // 7-bit PLL1/2/3 DIVR div fac (0 => 1 ... 127 -> 128)
@@ -506,12 +506,12 @@ public:
         --num;
 
         // Turn off
-        VREG(RCC__CR) &= ~BIT(num * 2 + PLL1ON);
+        VREG(RCC_CR) &= ~BIT(num * 2 + PLL1ON);
 
         VREG(RCC_PLLCKSELR) &= ~(0b11111 << (DIVM1 + num * 8));
         VREG(RCC_PLLCKSELR) |= (uint32_t)divm << (DIVM1 + num * 8);
 
-        const uint32_t cfgval = (range << 2) | (vcol << 1);
+        const uint32_t cfgval = ((uint32_t)range << 2) | (vcol << 1);
         VREG(RCC_PLLCFGR) &= ~(0b1111 << (4 * num));
         VREG(RCC_PLLCFGR) |= cfgval << (4 * num);
 
@@ -521,12 +521,12 @@ public:
 
         volatile uint32_t& divr_reg = num == 2 ? VREG(RCC_PLL3DIVR)
             : num == 1 ? VREG(RCC_PLL2DIVR) : VREG(RCC_PLL1DIVR);
-        const uint32_t div = ((divr-1) << DIVR1) | ((divq-1) << DIVQ1) | ((divp-1) << DIVP1)
-            | ((divn - 1) << DIVN1);
+        const uint32_t div = ((divr-1) << DIVR) | ((divq-1) << DIVQ) | ((divp-1) << DIVP)
+            | ((divn - 1) << DIVN);
         divr_reg = div;
 
         // Turn on
-        VREG(RCC__CR) |= BIT(num * 2 + PLL1ON);
+        VREG(RCC_CR) |= BIT(num * 2 + PLL1ON);
 
         // Wait to stabilize
         while ((RCC_CR & BIT(num * 2 + PLL1RDY)) == 0)
@@ -546,17 +546,17 @@ public:
 
 
     static void Configure(const Config& config) {
-        uin32_t osc_freq;
+        uint32_t osc_freq;
         switch (config.pll1_clk) {
-        case HSI: osc_freq = HSI_FREQ; break;
-        case HSE: osc_freq = config.hse_freq; break;
-        case CSI: osc_freq = CSI_FREQ; break;
+        case PllClkSource::HSI: osc_freq = HSI_FREQ; break;
+        case PllClkSource::HSE: osc_freq = config.hse_freq; break;
+        case PllClkSource::CSI: osc_freq = CSI_FREQ; break;
         default: osc_freq = 0; break;
         }
 
         assert(osc_freq != 0);
-        assert(config.cpu_freq <= MAX_CPU_FREQ);
-        assert(config.ahb_freq <= MAX_AHB_FREQ && config.ahb_freq <= config.cpu_freq);
+        assert(config.cpu_freq <= CPU_FREQ_MAX);
+        assert(config.ahb_freq <= AHB_FREQ_MAX && config.ahb_freq <= config.cpu_freq);
         assert(config.apb1_freq <= config.ahb_freq);
         assert(config.apb2_freq <= config.ahb_freq);
         assert(config.apb3_freq <= config.ahb_freq);
@@ -573,10 +573,10 @@ public:
         const uint16_t pll1_divp = vco_freq / sys_freq;
         const uint16_t d1cpre = config.cpu_freq / sys_freq;
         const uint16_t hpre = config.cpu_freq / config.ahb_freq;
-        const uint16_t d2ppre1 = config.ahb_freq / apb1_freq;
-        const uint16_t d2ppre2 = config.ahb_freq / apb2_freq;
-        const uint16_t d1ppre = config.ahb_freq / apb3_freq;
-        const uint16_t d3ppre = config.ahb_freq / apb4_freq;
+        const uint16_t d2ppre1 = config.ahb_freq / config.apb1_freq;
+        const uint16_t d2ppre2 = config.ahb_freq / config.apb2_freq;
+        const uint16_t d1ppre = config.ahb_freq / config.apb3_freq;
+        const uint16_t d3ppre = config.ahb_freq / config.apb4_freq;
 
         assert(vco_freq >= 150000000 && vco_freq <= 960000000);
         assert(d1cpre >= 0 && d1cpre <= 512);
@@ -585,28 +585,29 @@ public:
         assert(d2ppre1 >= 1 && d2ppre1 <= 16);
         assert(d2ppre2 >= 1 && d2ppre2 <= 16);
         assert(d3ppre >= 1 && d3ppre <= 16);
-        assert(pll1_divn >= 4 && pll1_div <= 512);
+        assert(pll1_divn >= 4 && pll1_divn <= 512);
         assert(pll1_divp >= 2 && pll1_divp <= 128);
 
 
         // Start HSE if used as source
-        if (config.pll_clk == PllClkSource::HSE || config.rtc_clk == RtcClkSource::HSE) {
+        if (config.pll1_clk == PllClkSource::HSE || config.rtc_clk == RtcClkSource::HSE) {
             VREG(RCC_CR) |= BIT(HSEON);
             while ((VREG(RCC_CR) & BIT(HSERDY)) == 0)
                 ;
         }
 
         // If HSI is used, drop it to 8MHz before using it as a PLL source
-        if (config.pll_clk == PllClkSource::HSI || config.rtc_clk == RtcClkSource::HSI) {
-            VREG(RCC_CR) &= ~(0b11 << HSIDIV);
-            VREG(RCC_CR) |= HsiFreq::FREQ_8MHZ << HSIDIV;
+        if (config.pll1_clk == PllClkSource::HSI) {
+            VREG(RCC_CR) = Bitfield(VREG(RCC_CR))
+                .f(2, HSIDIV, (uint32_t)HsiFreq::FREQ_8MHZ);
         }
 
         // Set clock source for PLLs
-        VREG(RCC_PLLCKSELR) = config.pll_clk;
+        VREG(RCC_PLLCKSELR) = Bitfield(VREG(RCC_PLLCKSELR))
+            .f(2, PLLSRC, (uint32_t)config.pll1_clk);
 
         // Start PLL1
-        StartPll(1, range_for_freq(osc_freq), 1, vcol, divn, divp, 0, 0);
+        StartPll(1, range_for_freq(osc_freq), 1, vcol, pll1_divn, pll1_divp, 0, 0);
 
         // These default to unprescaled, so set them before switching over the system clock
 
@@ -627,8 +628,10 @@ public:
         VREG(RCC_D3CFGR) = (d3ppre_val << D3PPRE);
 
         // Set the system clock source
-        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(7 << SW)) | ((uint32_t)config.sys_clk << SW);
-        while ((VREG(RCC_CFGR) & (7 << SWS)) != ((uint32_t)config.sys_clk << SWS))
+        VREG(RCC_CFGR) = Bitfield(VREG(RCC_CFGR))
+            .f(3, SW, (uint32_t)SysClkSource::PLL1);
+
+        while ((VREG(RCC_CFGR) & (7 << SWS)) != (uint32_t)SysClkSource::PLL1)
             ;
 
         // Maybe enable RTC clock
@@ -644,11 +647,11 @@ public:
                 break;
 
             case RtcClkSource::HSE:
-                assert(config.rtc >= 2);
+                assert(config.rtcpre >= 2);
                 VREG(RCC_BDCR) &= ~BIT(LSEON);
                 VREG(RCC_CSR) &= ~BIT(LSION);
-                VREG(RCC_CFGR)= (VREG(RCC_CFGR) & ~(1b111111 << RTCPRE))
-                    | (config.rtcpre << RTCPRE);
+                VREG(RCC_CFGR) = Bitfield(VREG(RCC_CFGR))
+                    .f(6, RTCPRE, (uint32_t)config.rtcpre);
                 break;
 
             case RtcClkSource::LSI:
@@ -673,7 +676,7 @@ public:
         }
 
         // Stop HSI if unused
-        if (config.pll_clk != PllClkSource::HSI)
+        if (config.pll1_clk != PllClkSource::HSI)
             VREG(RCC_CR) &= ~BIT(HSION);
 
         // Start/stop HSI48
@@ -749,7 +752,8 @@ public:
 
     // Check if LSE or LSI is running (indicates power loss if off)
     static bool CheckPowerLoss() {
-        return ((VREG(RCC_BDCR) & BIT(LSERDY)) == 0 || (VREG(RCC_CSR) & BIT(LSIRDY)) == 0; }
+        return (VREG(RCC_BDCR) & BIT(LSERDY)) == 0 || (VREG(RCC_CSR) & BIT(LSIRDY)) == 0;
+    }
 
     class RtcAccess {
     public:

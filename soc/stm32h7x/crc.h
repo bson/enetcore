@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 #include "compiler.h"
-#include "bits.h"
+#include "core/bits.h"
 
 class Crc {
     volatile uint32_t* _base;

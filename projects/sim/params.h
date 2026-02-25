@@ -13,7 +13,7 @@
 
 enum { 
     CPU_FREQ      = 200000000,
-    AHB_FRQ       = 100000000,
+    AHB_FREQ      = 100000000,
     APB1_FREQ     =  20000000,   // APB1
     APB2_FREQ     =  20000000,   // APB2
     APB3_FREQ     =  20000000,   // APB3 

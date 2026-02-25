@@ -192,7 +192,7 @@ public:
         CCS2S  = 8,
         IC1F   = 4,
         IC1PSC = 2,
-        CC1S   = 0,
+        //CC1S   = 0, same as OCM above
 
         // TIM_CCMR2 (input capture mode)
         IC4F   = 12,
@@ -307,7 +307,7 @@ public:
         return *((volatile uint32_t*)(_base + (uint32_t)r)); 
     }
 
-    volatile uint32_t& r_ccr(CCR ccr) {
+    volatile uint32_t& r_ccr(const Register ccr) {
         return *((volatile uint32_t*)(_base + (uint32_t)Register::TIM_CCR1
                                       + (uint32_t)ccr * 4));
     }
@@ -328,7 +328,7 @@ public:
     void RunPwm(uint32_t freq);
 
     // Enable PWM output for a CCR.
-    void ConfigurePwm(CCR ccr, PwmPolarity pol);
+    void ConfigurePwm(const Register ccr, PwmPolarity pol);
 
     // Use a CCR previously set up with ConfigurePwm to output a PWM
     // signal with a duty.  Duty is in units of 1/PWM_PREC and the
@@ -336,7 +336,7 @@ public:
     // represents a brief pulse of 1/PWM_PREC, or ~0.1% of the period.
     // To completely shut off the output, set the duty to a value >
     // PWM_PREC; this will cause the CCR to never match the count.
-    void SetPwmDuty(CCR ccr, uint32_t duty) {
+    void SetPwmDuty(const Register ccr, uint32_t duty) {
         assert(duty <= PWM_OFF);
         r_ccr(ccr) = duty * reg(Register::TIM_ARR) / PWM_PREC;
     }

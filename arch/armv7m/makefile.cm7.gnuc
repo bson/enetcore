@@ -1,0 +1,8 @@
+# gcc settings for Cortex-M7
+
+CFLAGS += -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
+       -mthumb -Wa,-mimplicit-it=always -march=armv7e-m+vfpv4-sp-d16
+
+AFLAGS += -mcpu=cortex-m7 -mapcs-32 -mimplicit-it=thumb -mthumb
+
+LIBS +=  $(TOOLDIR)/../lib/gcc/$(TARGET)/$(TOOLVER)/thumb/v7e-m+fp/hard/libgcc.a

@@ -39,30 +39,34 @@ extern int ADDR_FMCB5;
 extern int ADDR_FMCB6;
 }
 
-static constexpr uintptr_t BASE_ITCM = _h7x_addrof(ADDR_ITCM);
-static constexpr uintptr_t BASE_FLASHB1 = _h7x_addrof(ADDR_FLASHB1);
-static constexpr uintptr_t BASE_FLASHB2 = _h7x_addrof(ADDR_FLASHB2);
+#define BASE_ITCM     (_h7x_addrof(ADDR_ITCM))
+#define BASE_FLASHB1  (_h7x_addrof(ADDR_FLASHB1))
+#define BASE_FLASHB2  (_h7x_addrof(ADDR_FLASHB2))
 
 /* RAM */
-static constexpr uintptr_t BASE_DTCM = _h7x_addrof(ADDR_DTCM);
-static constexpr uintptr_t BASE_SRAM1 = _h7x_addrof(ADDR_SRAM1);
-static constexpr uintptr_t BASE_SRAM2 = _h7x_addrof(ADDR_SRAM2);
-static constexpr uintptr_t BASE_SRAM3 = _h7x_addrof(ADDR_SRAM3);
-static constexpr uintptr_t BASE_SRAM4 = _h7x_addrof(ADDR_SRAM4);
-static constexpr uintptr_t BASE_BKPSRAM = _h7x_addrof(ADDR_BKPSRAM);
-static constexpr uintptr_t BASE_AXI_SRAM = _h7x_addrof(ADDR_AXI_SRAM);
-static constexpr uintptr_t BASE_QSPI_RAM = _h7x_addrof(ADDR_QSPI_RAM);
+#define BASE_DTCM     (_h7x_addrof(ADDR_DTCM))
+#define BASE_SRAM1    (_h7x_addrof(ADDR_SRAM1))
+#define BASE_SRAM2    (_h7x_addrof(ADDR_SRAM2))
+#define BASE_SRAM3    (_h7x_addrof(ADDR_SRAM3))
+#define BASE_SRAM4    (_h7x_addrof(ADDR_SRAM4))
+#define BASE_BKPSRAM  (_h7x_addrof(ADDR_BKPSRAM))
+#define BASE_AXI_SRAM (_h7x_addrof(ADDR_AXI_SRAM))
+#define BASE_QSPI_RAM (_h7x_addrof(ADDR_QSPI_RAM))
 
 /* FMC banks */
-static constexpr uintptr_t BASE_FMCB1 = _h7x_addrof(ADDR_FMCB1);
-static constexpr uintptr_t BASE_FMCB2 = _h7x_addrof(ADDR_FMCB2);
-static constexpr uintptr_t BASE_FMCB3 = _h7x_addrof(ADDR_FMCB3);
-static constexpr uintptr_t BASE_FMCB4 = _h7x_addrof(ADDR_FMCB4);
-static constexpr uintptr_t BASE_FMCB5 = _h7x_addrof(ADDR_FMCB5);
-static constexpr uintptr_t BASE_FMCB6 = _h7x_addrof(ADDR_FMCB6);
+#define BASE_FMCB1    (_h7x_addrof(ADDR_FMCB1))
+#define BASE_FMCB2    (_h7x_addrof(ADDR_FMCB2))
+#define BASE_FMCB3    (_h7x_addrof(ADDR_FMCB3))
+#define BASE_FMCB4    (_h7x_addrof(ADDR_FMCB4))
+#define BASE_FMCB5    (_h7x_addrof(ADDR_FMCB5))
+#define BASE_FMCB6    (_h7x_addrof(ADDR_FMCB6))
 
 // Max CPU CK = 480MHz
-enum { CPU_FREQ_MAX = 480000000 };
+// Max AHB CK = 240MHz
+enum {
+    CPU_FREQ_MAX = 480000000,
+    AHB_FREQ_MAX = 240000000,
+};
 
 enum { 
     // APB1
@@ -360,7 +364,7 @@ enum {
     INTR_WWDG1_RST      = 143,
     INTR_CRS            = 144,
     INTR_RAMECC1_2_3    = 145,  // RAM ECC intr for RAMECC1-3
-    INTR_SAI4           = SAI4,
+    //INTR_SAI4           = SAI4,
     // 147-148 unused
     INTR_WKUP           = 149,  // WKUP0-5 pins
 

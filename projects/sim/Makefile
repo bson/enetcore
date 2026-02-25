@@ -77,6 +77,26 @@ TAGS:
 clean:
 	-rm -rf $(ODIR) TAGS
 
+ifeq ($(CONFIG),release)
+$(ODIR)/image: $(FATAOBJS) $(FATOBJ) link.cmd $(ODIR_TOUCH) TAGS
+	@echo Linking $@
+	@echo $(LD) $(LFLAGS) -o $@ $(FATAOBJS) $(ODIR)/fat_src.o $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(FATAOBJS) $(ODIR)/fat_src.o $(LIBS) 2>&1 >>$(LOG)
+	@echo Updating vector checksum
+	@$(CHECKSUM) $@ >>$(LOG)
+	@$(SIZE) $@ 2>&1 >>$(LOG)
+	@$(SIZE) $@
+else
+$(ODIR)/image: $(OBJS) link.cmd  $(ODIR_TOUCH) TAGS
+	@echo Linking $@
+	@echo $(LD) $(LFLAGS) -o $@ $(OBJS) $(LIBS) >>$(LOG)
+	@$(LD) $(LFLAGS) -o $@ $(OBJS) $(LIBS) 2>&1 >>$(LOG)
+	@echo Updating vector checksum
+	@$(CHECKSUM) $@ >>$(LOG)
+	@$(SIZE) $@ 2>&1 >>$(LOG)
+	@$(SIZE) $@
+endif
+
 $(ODIR)/buildinfo.cxx: $(ODIR_TOUCH)
 	@echo Generating $@
 	@echo "extern const char _build_branch[] = \"`git rev-parse --abbrev-ref HEAD`\";" >$@

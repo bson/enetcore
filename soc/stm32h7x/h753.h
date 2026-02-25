@@ -47,11 +47,11 @@ enum class H753MemSize {
 #include "soc/stm32h7x/crc.h"
 //#include "soc/stm32h7x/i2c.h"
 //#include "soc/stm32h7x/ethernet.h
-//#include "soc/sdmmc.h"
-#include "eeprom.h"
+//#include "soc/stm32j7x/sdmmc.h"
+#include "soc/stm32h7x/eeprom.h"
 //#include "soc/stm32h7x/usb_dev.h"
 
-#include "soc/hash.h"
-//#include "soc/crypt.h"
+#include "soc/stm32h7x/hash.h"
+//#include "soc/stm32h7x/crypt.h"
 
 #endif // __H753_H__
