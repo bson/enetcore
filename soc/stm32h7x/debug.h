@@ -4,6 +4,7 @@
 #ifndef __STM32_DEBUG_H__
 #define __STM32_DEBUG_H__
 
+#include <stdint.h>
 #include "core/bits.h"
 
 class Stm32Debug {
@@ -44,7 +45,7 @@ public:
     };
         
     static volatile uint32_t& reg(uint32_t offset) {
-        return *(volatile_uint32_t*)(BASE_DBGMCU + offset);
+        return *(volatile uint32_t*)(BASE_DBGMCU + offset);
     }
 
     // Peripheral freeze-on-debug is only set once, during init, hence

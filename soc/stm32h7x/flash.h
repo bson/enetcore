@@ -44,15 +44,18 @@ public:
     };
 
     enum {
-        // FLASH_ACR, reset 0x0000 0000
+        // ACR, reset 0x0000 0000
         WRHIGHFREQ = 4,
         LATENCY = 0,
 
-        // FLASH_SR1/2
+        // SR1/2
         QW1 = 2,
+
+        // OPTSR_CUR
+        SWAP_BANK_OPT = 31,
     };
 
-    enum {
+    enum class Bank {
         BANK1 = 0x000,
         BANK2 = 0x100
    };
@@ -99,26 +102,24 @@ public:
 
     // Initialize
     static void Init() {
-        reg(Register::ACR) = Bitfield(reg(Register::ACR))
+        creg(Register::ACR) = Bitfield(creg(Register::ACR))
             .f(2, WRHIGHFREQ, 2); // Max WS... XXX fixme
     }
 
     // Current bank
-    static Bank GetBank() const {
+    static Bank GetBank() {
         return creg(Register::OPTSR_CUR) & BIT(SWAP_BANK_OPT) ? Bank::BANK2 : Bank::BANK1;
     }
 
     static void Latency(Bank bank, uint32_t latency) {
-        reg(Register::ACR) = Bitfield(reg(Bank::BANK0, Register::ACR))
+        reg(Bank::BANK1, Register::ACR) = Bitfield(reg(Bank::BANK1, Register::ACR))
             .f(0, LATENCY, latency);
-        reg(Register::ACR) = Bitfield(reg(Bank::BANK1, Register::ACR))
+        reg(Bank::BANK2, Register::ACR) = Bitfield(reg(Bank::BANK2, Register::ACR))
             .f(0, LATENCY, latency);
     }
 
     // Cortex-M7 has unified cache management
     static void EnableIDCaching() { }
-
-    // XXX add programming
 };
 
 #endif // __STM32_FLASH_H__

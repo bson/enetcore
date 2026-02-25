@@ -55,9 +55,8 @@ public:
 
     // RMII if true, otherwise MII 
     static void EthRmii(bool enable) {
-        volatile uint32_t& pmcr *(volatile uint32_t*)(BASE_SYSCFG + SYSCFG_OMCR);
-
-        pmcr = (pmcr & (~0b111 << EPIS)) | ((enable ? 0b100 : 0) << EPIS);
+        reg(Register::PMCR) = Bitfield(reg(Register::PMCR))
+            .f(3, EPIS, enable ? 0b100 : 0);
     }
 
 
@@ -65,16 +64,14 @@ public:
     // one 32-bit and one 64-bit.
     [[__finline]] static uint32_t UniqueID32() { return *(uint32_t*)0x1ff1e800; }
     [[__finline]] static uint64_t UniqueID64() { return *(uint32_t*)0x1ff1e804; }
-
-    // Flash size, in kB
-    [[__finline]] static uint32_t UniqueID32() { return *(uint32_t*)0x1ff1e880; }
+    [[__finline]] static const uint32_t* UniqueID96() { return (const uint32_t*)0x1ff1e880; }
 
     // Package:
     //   0 = LQFP100,
     //   2 = TQFP144,
     //   5 = TQFP176/UFBGA176,
     //   8 = LQFP208, TFBGA240
-    [[__finline]] static uint8_t UniqueID32() { return *(uint8_t*)(BASE_SYSCFG + PKGR) & 0xf; }
+    [[__finline]] static uint8_t Package() { return reg(Register::PKGR) & 0xf; }
 };
 
 

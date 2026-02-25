@@ -199,6 +199,8 @@ enum {
     BASE_HSEM         = 0x58026400,
     BASE_RAMECC3      = 0x58027000,
 
+    BASE_DBGMCU       = 0x5C001000,
+
     BASE_FMC_MEM      = 0x60000000 // FMC address space
 };
 

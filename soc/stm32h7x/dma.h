@@ -202,36 +202,32 @@ public:
 public:
     enum class Target: uint8_t {
         // Note: the value is the DMA request MUX input
-        enum {
-            reserved_0 = 0, dmamux1_req_gen0 = 1, dmamux1_req_gen1 = 2, dmamux1_req_gen2 = 3,
-            dmamux1_req_gen3 = 4, dmamux1_req_gen4 = 5, dmamux1_req_gen5 = 6, dmamux1_req_gen6 = 7,
-            dmamux1_req_gen7 = 8, adc1_dma = 9, adc2_dma = 10, TIM1_CH1 = 11, TIM1_CH2 = 12,
-            TIM1_CH3 = 13, TIM1_CH4 = 14, TIM1_UP = 15, TIM1_TRIG = 16, TIM1_COM = 17, TIM2_CH1 = 18,
-            TIM2_CH2 = 19, TIM2_CH3 = 20, TIM2_CH4 = 21, TIM2_UP = 22, TIM3_CH1 = 23, TIM3_CH2 = 24,
-            TIM3_CH3 = 25, TIM3_CH4 = 26, TIM3_UP = 27, TIM3_TRIG = 28, TIM4_CH1 = 29, TIM4_CH2 = 30, 
-            TIM4_CH3 = 31, TIM4_UP = 32, i2c1_rx_dma = 33, i2c1_tx_dma = 34, i2c2_rx_dma = 35,
-            i2c2_tx_dma = 36, spi1_rx_dma = 37, spi1_tx_dma = 38, spi2_rx_dma = 39, spi2_tx_dma = 40, 
-            usart1_rx_dma = 41, usart1_tx_dma = 42, usart2_rx_dma = 43, usart2_tx_dma = 44,
-            usart3_rx_dma = 45, usart3_tx_dma = 46, TIM8_CH1 = 47, TIM8_CH2 = 48, TIM8_CH3 = 49, 
-            TIM8_CH4 = 50, TIM8_UP = 51, TIM8_TRIG = 52, TIM8_COM = 53, Reserved_54 = 54, TIM5_CH1 = 55,
-            TIM5_CH2 = 56, TIM5_CH3 = 57, TIM5_CH4 = 58, TIM5_UP = 59, TIM5_TRIG = 60, spi3_rx_dma = 61,
-            spi3_tx_dma = 62, uart4_rx_dma = 63, uart4_tx_dma = 64, uart5_rx_dma = 65, 
-            uart5_tx_dma = 66, dac_ch1_dma = 67, dac_ch2_dma = 68, TIM6_UP = 69, TIM7_UP = 70,
-            usart6_rx_dma = 71, usart6_tx_dma = 72, i2c3_rx_dma = 73, i2c3_tx_dma = 74, dcmi_dma = 75,
-            cryp_in_dma = 76, cryp_out_dma = 77, hash_in_dma = 78, uart7_rx_dma = 79, uart7_tx_dma = 80,
-            uart8_rx_dma = 81, uart8_tx_dma = 82, spi4_rx_dma = 83, spi4_tx_dma = 84, spi5_rx_dma = 85,
-            spi5_tx_dma = 86, sai1a_dma = 87, sai1b_dma = 88, sai2a_dma = 89, sai2b_dma = 90, 
-            swpmi_rx_dma = 91, swpmi_tx_dma = 92, spdifrx_dat_dma = 93, spdifrx_ctrl_dma = 94,
-            HR_REQ_ = 95, HR_REQ_2 = 96, HR_REQ_3 = 97, HR_REQ_4 = 98, HR_REQ_5 = 99, HR_REQ_6 = 100,
-            dfsdm1_dma0 = 101, dfsdm1_dma1 = 102, dfsdm1_dma2 = 103, dfsdm1_dma3 = 104, TIM15_CH1 = 105,
-            TIM15_UP = 106, TIM15_TRIG = 107, TIM15_COM = 108, TIM16_CH1 = 109, TIM16_UP = 110,
-            TIM17_CH1 = 111, TIM17_UP = 112, sai3_a_dma = 113, sai3_b_dma = 114, adc3_dma = 115
-            NUM_TARGET,
-            NOT_USED = NUM_TARGET,
-        };
+        reserved_0 = 0, dmamux1_req_gen0 = 1, dmamux1_req_gen1 = 2, dmamux1_req_gen2 = 3,
+        dmamux1_req_gen3 = 4, dmamux1_req_gen4 = 5, dmamux1_req_gen5 = 6, dmamux1_req_gen6 = 7,
+        dmamux1_req_gen7 = 8, adc1_dma = 9, adc2_dma = 10, TIM1_CH1 = 11, TIM1_CH2 = 12,
+        TIM1_CH3 = 13, TIM1_CH4 = 14, TIM1_UP = 15, TIM1_TRIG = 16, TIM1_COM = 17, TIM2_CH1 = 18,
+        TIM2_CH2 = 19, TIM2_CH3 = 20, TIM2_CH4 = 21, TIM2_UP = 22, TIM3_CH1 = 23, TIM3_CH2 = 24,
+        TIM3_CH3 = 25, TIM3_CH4 = 26, TIM3_UP = 27, TIM3_TRIG = 28, TIM4_CH1 = 29, TIM4_CH2 = 30, 
+        TIM4_CH3 = 31, TIM4_UP = 32, i2c1_rx_dma = 33, i2c1_tx_dma = 34, i2c2_rx_dma = 35,
+        i2c2_tx_dma = 36, spi1_rx_dma = 37, spi1_tx_dma = 38, spi2_rx_dma = 39, spi2_tx_dma = 40, 
+        usart1_rx_dma = 41, usart1_tx_dma = 42, usart2_rx_dma = 43, usart2_tx_dma = 44,
+        usart3_rx_dma = 45, usart3_tx_dma = 46, TIM8_CH1 = 47, TIM8_CH2 = 48, TIM8_CH3 = 49, 
+        TIM8_CH4 = 50, TIM8_UP = 51, TIM8_TRIG = 52, TIM8_COM = 53, Reserved_54 = 54, TIM5_CH1 = 55,
+        TIM5_CH2 = 56, TIM5_CH3 = 57, TIM5_CH4 = 58, TIM5_UP = 59, TIM5_TRIG = 60, spi3_rx_dma = 61,
+        spi3_tx_dma = 62, uart4_rx_dma = 63, uart4_tx_dma = 64, uart5_rx_dma = 65, 
+        uart5_tx_dma = 66, dac_ch1_dma = 67, dac_ch2_dma = 68, TIM6_UP = 69, TIM7_UP = 70,
+        usart6_rx_dma = 71, usart6_tx_dma = 72, i2c3_rx_dma = 73, i2c3_tx_dma = 74, dcmi_dma = 75,
+        cryp_in_dma = 76, cryp_out_dma = 77, hash_in_dma = 78, uart7_rx_dma = 79, uart7_tx_dma = 80,
+        uart8_rx_dma = 81, uart8_tx_dma = 82, spi4_rx_dma = 83, spi4_tx_dma = 84, spi5_rx_dma = 85,
+        spi5_tx_dma = 86, sai1a_dma = 87, sai1b_dma = 88, sai2a_dma = 89, sai2b_dma = 90, 
+        swpmi_rx_dma = 91, swpmi_tx_dma = 92, spdifrx_dat_dma = 93, spdifrx_ctrl_dma = 94,
+        HR_REQ_ = 95, HR_REQ_2 = 96, HR_REQ_3 = 97, HR_REQ_4 = 98, HR_REQ_5 = 99, HR_REQ_6 = 100,
+        dfsdm1_dma0 = 101, dfsdm1_dma1 = 102, dfsdm1_dma2 = 103, dfsdm1_dma3 = 104, TIM15_CH1 = 105,
+        TIM15_UP = 106, TIM15_TRIG = 107, TIM15_COM = 108, TIM16_CH1 = 109, TIM16_UP = 110,
+        TIM17_CH1 = 111, TIM17_UP = 112, sai3_a_dma = 113, sai3_b_dma = 114, adc3_dma = 115,
+        NUM_TARGET,
+        NOT_USED = NUM_TARGET,
     };
-
-    static_assert(Target::NUM_TARGET < Target::END);
 
     enum {
         NUM_MAPPING = 3         // Max number of stream-channel options for any target
