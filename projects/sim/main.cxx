@@ -1,8 +1,7 @@
 // Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
-#include "board.h"
-#include "core/enetkit.h"
+#include "core/enetcore.h"
 #include "core/util.h"
 
 extern PinOutput<Gpio::Pin> _card_led;

@@ -4,7 +4,7 @@
 #ifndef __H753_H__
 #define __H753_H__
 
-enum class H753MemSize {
+enum H753MemSize {
     SIZE_FLASHB1  = 1024*1024,
     SIZE_FLASHB2  = 1024*1024,
 
@@ -35,9 +35,10 @@ enum class H753MemSize {
 #include "soc/stm32h7x/syscfg.h"
 #include "soc/stm32h7x/dma.h"
 #include "soc/stm32h7x/gpio.h"
+#include "soc/stm32h7x/timer.h"
+extern Clock _clock;
 #include "soc/stm32h7x/usart.h"
 #include "soc/stm32h7x/random.h"
-#include "soc/stm32h7x/timer.h"
 #include "soc/stm32h7x/backup.h"
 #include "soc/stm32h7x/rtc.h"
 //#include "soc/stm32h7x/adc.h"

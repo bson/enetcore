@@ -690,15 +690,18 @@ public:
     }
 
     // Output clock on MCO1, MCO2, with given divider
-    static void EnableMCO(Mco1Output clk, McoPrescaler div) {
-        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << MCO1) & ~(7 << MCO1PRE))
-            | ((uint32_t)clk << MCO1)
-            | ((uint32_t)div << MCO1PRE);
+    static void EnableMCO(Mco1Output clk, uint8_t div) {
+        assert(div >= 1 && div <= 15);
+        VREG(RCC_CFGR) = Bitfield(VREG(RCC_CFGR))
+            .f(3, MCO1, (uint32_t)clk)
+            .f(4, MCO1PRE, div);
     }
-    static void EnableMCO(Mco2Output clk, McoPrescaler div) {
-        VREG(RCC_CFGR) = (VREG(RCC_CFGR) & ~(3 << MCO2) & ~(7 << MCO2PRE))
-            | ((uint32_t)clk << MCO2)
-            | ((uint32_t)div << MCO2PRE);
+
+    static void EnableMCO(Mco2Output clk, uint8_t div) {
+        assert(div >= 1 && div <= 15);
+        VREG(RCC_CFGR) = Bitfield(VREG(RCC_CFGR))
+            .f(3, MCO2, (uint32_t)clk)
+            .f(4, MCO2PRE, div);
     }
 
     // Enable/disable peripheral clocks

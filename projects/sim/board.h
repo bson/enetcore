@@ -23,10 +23,11 @@ typedef Stm32Timer<uint16_t> Timer16;
 typedef Stm32Random Random;
 typedef Stm32Debug Debug;
 typedef Stm32Eintr Eintr;
+typedef Stm32Fmc Fmc;
 
 extern Clock _clock;
 extern NVic _nvic;
-extern Swo _swo;
+//extern Swo _swo;
 extern Uart<UART7_SENDQ_SIZE, UART7_RECVQ_SIZE> _uart7;
 extern Uart<UART5_SENDQ_SIZE, UART5_SENDQ_SIZE> _uart5;
 

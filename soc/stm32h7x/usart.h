@@ -4,6 +4,7 @@
 #ifndef __STM32_USART_H__
 #define __STM32_USART_H__
 
+#include "core/time.h"
 #include "core/ring.h"
 #include "core/mutex.h"
 #include "core/consumer.h"

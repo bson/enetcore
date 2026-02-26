@@ -5,6 +5,9 @@
 #define __PSTRING_H__
 
 #include "core/lookup3.h"
+#include "core/freelist.h"
+#include "core/platform.h"
+#include "core/trace.h"
 
 #pragma GCC system_header
 

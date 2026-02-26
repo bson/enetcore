@@ -35,7 +35,8 @@ Gpio _gpio_c(Gpio::Port::C);
 Gpio _gpio_d(Gpio::Port::D);
 Gpio _gpio_e(Gpio::Port::E);
 
-PinOutput<Gpio::Pin> _led; // Green LED
+PinOutput<Gpio::Pin> _card_led; // SD card LED - also use it for a generic LED
+//PinInput<Gpio::Pin> _card_det;  // SD card detect input
 
 Clock _clock(BASE_TIM5, APB2_FREQ);
 SysTimer _systimer;
@@ -55,12 +56,12 @@ Dma _dma1(BASE_DMA1, _dma1_irqs);
 Dma _dma2(BASE_DMA2, _dma2_irqs);
 
 Uart<UART5_SENDQ_SIZE, UART5_RECVQ_SIZE>
-_sart5(BASE_UART5, Dma::Target::uart5_tx_dma, Dma::Target::uart5_rx_dma, 0xffffff01);
+_uart5(BASE_UART5, Dma::Target::uart5_tx_dma, Dma::Target::uart5_rx_dma, 0xffffff01);
 
-Uart<UART7_SENDQ_SIZE, UART7_SENDQ_SIZE>
+Uart<UART7_SENDQ_SIZE, UART7_RECVQ_SIZE>
 _uart7(BASE_UART7, Dma::Target::uart7_tx_dma, Dma::Target::uart7_rx_dma, 0xffffff00);
 
-Swo _swo;
+//Swo _swo;
 
 // Flash the card LED a certain number of times to indicate a fault,
 // followed by a pause, where the number of pulses indicares a cause.
@@ -251,7 +252,7 @@ void ConfigurePins() {
     Stm32Gpio::PortConfig(pinconf);
 
     _card_led = _gpio_d.GetPin(3);
-    _card_act = _gpio_a.GetPin(15);
+//    _card_det = _gpio_a.GetPin(15);
 }
 
 
@@ -277,10 +278,10 @@ void hwinit0() {
     memset((void*)MALLOC_REGION_START, 0, MALLOC_REGION_SIZE);
     memset((void*)IRAM_REGION_START, 0, IRAM_REGION_SIZE - MAIN_THREAD_STACK);
 
-    memset(BASE_SRAM1, 0, SIZE_SRAM1);
-    memset(BASE_SRAM2, 0, SIZE_SRAM2);
-    memset(BASE_SRAM3, 0, SIZE_SRAM3);
-    memset(BASE_SRAM4, 0, SIZE_SRAM4);
+    memset((void*)BASE_SRAM1, 0, SIZE_SRAM1);
+    memset((void*)BASE_SRAM2, 0, SIZE_SRAM2);
+    memset((void*)BASE_SRAM3, 0, SIZE_SRAM3);
+    memset((void*)BASE_SRAM4, 0, SIZE_SRAM4);
 
     // Explicitly initialize before static initializers are run
     _malloc_region.Init(MALLOC_REGION_SIZE, (uint8_t*)MALLOC_REGION_START);
@@ -296,7 +297,10 @@ void hwinit() {
     if (AHB_FREQ > 144000000)
         Power::EnableVos();
 
-    Flash::Latency(uint32_t((AHB_FREQ+1000000)/30000000));
+#if 0
+    Flash::Latency(Flash::Bank1, uint32_t((AHB_FREQ+1000000)/30000000));
+    Flash::Latency(Flash::Bank2, uint32_t((AHB_FREQ+1000000)/30000000));
+#endif
 
     // Power on/off peripherals
     ClockTree::EnableAHB1(AHB1_DMA1EN | AHB1_DMA2EN | AHB1_ETH1RXEN | AHB1_ETH1TXEN | AHB1_ETH1MACEN);
@@ -306,16 +310,17 @@ void hwinit() {
     ClockTree::EnableAHB2(AHB2_SRAM3EN | AHB2_SRAM2EN | AHB2_SRAM1EN | AHB2_RNGEN);
     ClockTree::EnableAHB2LP(AHB2_SRAM3EN | AHB2_SRAM2EN | AHB2_SRAM1EN | AHB2_RNGEN);
 
-    ClockTree::EnableAHB3(AHB3_SDMMC1EN | AHB3_FMCEN | AHB3_DMA2EN);
-    ClockTree::EnableAHB3LP(AHB3_SDMMC1EN | AHB3_FMCEN | AHB3_DMA2EN);
+    ClockTree::EnableAHB3(AHB3_SDMMC1EN | AHB3_FMCEN);
+    ClockTree::EnableAHB3LP(AHB3_SDMMC1EN | AHB3_FMCEN);
 
-    ClockTree::EnableAHB4(HB4_BKPRAMEN, AHB4_CRCEN, AHB4_GPIOAEN, AHB4_GPIOBEN, AHB4_GPIOCEN,
-                          AHB4_GPIODEN, AHB4_GPIOEEN, AHB4_GPIOFEN, AHB4_GPIOGEN);
-    ClockTree::EnableAHB4LP(AHB4_SRAM4LPEN | AHB4_BKPRAMEN | AHB4_CRCEN | AHB4_GPIOAEN | AHB4_GPIOBEN
-                            | AHB4_GPIOCEN | AHB4_GPIODEN | AHB4_GPIOEEN | AHB4_GPIOFEN | AHB4_GPIOGEN);
+    ClockTree::EnableAHB4(AHB4_BKPRAMEN | AHB4_CRCEN | AHB4_GPIOAEN | AHB4_GPIOBEN | AHB4_GPIOCEN
+                          | AHB4_GPIODEN | AHB4_GPIOEEN | AHB4_GPIOFEN | AHB4_GPIOGEN);
+    ClockTree::EnableAHB4LP(AHB4_SRAM4LPEN | AHB4_BKPRAMEN | AHB4_CRCEN | AHB4_GPIOAEN
+                            | AHB4_GPIOBEN | AHB4_GPIOCEN | AHB4_GPIODEN | AHB4_GPIOEEN
+                            | AHB4_GPIOFEN | AHB4_GPIOGEN);
 
-    ClockTree::EnableAPB1L(APB1L_UART7EN | APB1L_UART5EN | APB1L_ATIM5EN);
-    ClockTree::EnableAPB1LLP(APB1L_UART7EN | APB1L_UART5EN | APB1L_ATIM5EN);
+    ClockTree::EnableAPB1L(APB1L_UART7EN | APB1L_UART5EN | APB1L_TIM5EN);
+    ClockTree::EnableAPB1LLP(APB1L_UART7EN | APB1L_UART5EN | APB1L_TIM5EN);
 
     ClockTree::EnableAPB3(APB3_WWDG1EN);
     ClockTree::EnableAPB2LP(APB3_WWDG1EN);
@@ -346,7 +351,7 @@ void hwinit() {
         .apb2_freq = 20000000,
         .apb3_freq = 20000000,
         .apb4_freq = 20000000,
-        .rtc_clk   = ClockTRee::RtcClkSource::LSI,
+        .rtc_clk   = ClockTree::RtcClkSource::LSI,
         .rtcpre    = 1,         // RTC prescaler
     };
 
@@ -354,7 +359,7 @@ void hwinit() {
     ClockTree::Configure(clkconf);
 
     // 8/8 = 1MHz on MCO1
-    ClockTree::EnableMCO(ClockTree::Mco1Output::HSI, ClockTree::McoPrescaler::DIV8);
+    ClockTree::EnableMCO(ClockTree::Mco1Output::PLL, 8);
 
 #ifdef DEBUG
     // Enable SWO early
@@ -366,7 +371,7 @@ void hwinit() {
 	Thread::Bootstrap();
 
     // Freeze WWDT while in breakpoint
-    Debug::FreezeAPB1(Debug::APB1_WWDT_STOP);
+    Debug::FreezeAPB1(Debug::WWDG1);
 
 	// Initialize NVIC after threading, because the handler expect threads
     NVic::Init(Unexpected_Interrupt, IPL_UNEXP);
@@ -393,8 +398,8 @@ void hwinit() {
 
 	// Install IRQ handlers
 	NVic::RouteIRQ(INTR_TIM5, Clock::Interrupt, IPL_CLOCK, &_clock);
-	NVic::RouteIRQ(INTR_UART7, _usart3.Interrupt, IPL_UART, &_uart7);
-	NVic::RouteIRQ(INTR_UART5, _usart5.Interrupt, IPL_UART, &_uart5);
+	NVic::RouteIRQ(INTR_UART7, _uart7.Interrupt, IPL_UART, &_uart7);
+	NVic::RouteIRQ(INTR_UART5, _uart5.Interrupt, IPL_UART, &_uart5);
 
     // XXX enable caching
     //Flash::EnableIDCaching();
@@ -402,18 +407,18 @@ void hwinit() {
     // Turn on proper assert handling
     _assert_stop = false;
 
-    _dac.Enable();
+    //_dac.Enable();
 
-	_uart7.InitAsync(115200, _uart7.StopBits::SB_1, APB1_FREQ);
+	_uart7.InitAsync(115200, _uart7.StopBits::SB_1, APB1_FREQ, false);
 	_uart7.SetInterrupts(true);
 
-	_uart5.InitAsync(19200, _uart5.StopBits::SB_1, APB1_FREQ);
+	_uart5.InitAsync(19200, _uart5.StopBits::SB_1, APB1_FREQ, false);
 	_uart5.SetInterrupts(true);
 
     _clock.Start();
 
     // Stop timers while stopped in a breakpoint
-    Debug::FreezeAPB1(Debug::APB1_TIM5_STOP);
+    Debug::FreezeAPB1(Debug::TIM5);
 
     _uart7.Write("\r\nWelcome to Enetcore\r\n");
     _uart7.SyncDrain();
@@ -422,8 +427,8 @@ void hwinit() {
     RestoreInterrupts(0);
     SetIPL(0);
 
-    _uart7.EnableDmaTx(_dma1, DMA_STREAM_UART7_TX, DMA_PRIORITY_UART7);
-    _uart5.EnableDmaTx(_dma1, DMA_STREAM_UART5_TX, DMA_PRIORITY_UART5);
+    _uart7.EnableDmaTx(_dma1, (uint8_t)DMA_STREAM_UART7_TX, DMA_PRIORITY_UART7);
+    _uart5.EnableDmaTx(_dma1, (uint8_t)DMA_STREAM_UART5_TX, DMA_PRIORITY_UART5);
 
     // Turn LED back off
     _card_led.Lower();
@@ -431,7 +436,7 @@ void hwinit() {
     assert(IntEnabled());
 
     // External SRAM
-    Stm32Fmc::ConfigureSRAM(XSRAM_BANK, DATA_SETUP_CLK, DATA_HOLD_CLK, BUS_TURN_CLK);
+    Stm32Fmc::ConfigureSRAM(XSRAM_BANK, DATA_SETUP_CLK1, DATA_HOLD_CLK1, BUS_TURN_CLK1);
 
     _malloc_region.SetReserve(64);
 
@@ -443,7 +448,7 @@ void hwinit() {
     }
 
     DMSG("RCC_CSR: 0x%x", _reset_reason);
-    DMSG("CCLK: %d  HCLK: %d", CCLK, HCLK);
+    DMSG("CCLK: %d  HCLK: %d", CPU_FREQ, AHB_FREQ);
     DMSG("APB1CLK: %d  APB2CLK: %d", APB1_FREQ, APB2_FREQ);
     DMSG("APB3CLK: %d  APB4CLK: %d", APB3_FREQ, APB4_FREQ);
 

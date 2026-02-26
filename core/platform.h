@@ -4,6 +4,8 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
+#include "core/trace.h"
+#include "core/dlmalloc.h"
 
 #define abort() (panic("ABORT"), (void)0)
 

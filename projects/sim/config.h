@@ -115,7 +115,7 @@ enum {
 #define DMA_TARGET_UART5_TX Stm32Dma::Target::uart5_tx_dma
 
 #define DMA_PRIORITY_UART7  Stm32Dma::Priority::MEDIUM
-#define DMA_PRIORITY_UART7  Stm32Dma::Priority::MEDIUM
+#define DMA_PRIORITY_UART5  Stm32Dma::Priority::MEDIUM
 };
 
 enum {

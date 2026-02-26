@@ -17,6 +17,7 @@ enum {
     APB1_FREQ     =  20000000,   // APB1
     APB2_FREQ     =  20000000,   // APB2
     APB3_FREQ     =  20000000,   // APB3 
+    APB4_FREQ     =  20000000,   // APB4
     CLOCK_TICK    = APB2_FREQ,   // System clock (TIM5) tick
     CLOCK_HZ      = 1,           // Reload frequency for system clock
 };

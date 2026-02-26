@@ -1,6 +1,8 @@
 #ifndef __CONSUMER_H__
 #define __CONSUMER_H__
 
+#include "core/pstring.h"
+
 template <typename T>
 class Consumer {
 public:

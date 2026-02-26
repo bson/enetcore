@@ -154,7 +154,7 @@ enum {
     BASE_DMA2D        = 0x52001000,
     BASE_FLASH        = 0x52002000, // Control regs
     BASE_JPEG         = 0x52003000,
-    BASE_FSMC         = 0x52004000,
+    BASE_FMC          = 0x52004000,
     BASE_QUADSPI      = 0x52005000,
     BASE_SDMMC1       = 0x52007000,
     BASE_SDMMC1_DELAY = 0x52008000,
@@ -406,7 +406,7 @@ enum {
     AHB3_ITCMLPEN        = (1 << 30), // AHB3 sleep clock only
     AHB3_DTCM2LPEN       = (1 << 29), // AHB3 sleep clock only
     AHB3_DTCM1LPEN       = (1 << 28), // AHB3 sleep clock only
-    AHB3_SDMCC1EN        = (1 << 16),
+    AHB3_SDMMC1EN        = (1 << 16),
     AHB3_QSPIEN          = (1 << 14),
     AHB3_FMCEN           = (1 << 12),
     AHB3_JPGDECEN        = (1 << 5),

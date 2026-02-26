@@ -3,7 +3,7 @@
 
 #include "core/bits.h"
 
-class Stm32Fsmc {
+class Stm32Fmc {
 public:
     enum class Bank {
         BANK1 = 0x00,
@@ -113,11 +113,11 @@ private:
     };
 
     static volatile uint32_t& reg(Register r) {
-        return *(volatile uint32_t*)(BASE_FSMC + (uint32_t)r);
+        return *(volatile uint32_t*)(BASE_FMC + (uint32_t)r);
     }
 
     static volatile uint32_t& reg(Bank b, Register r) {
-        return *(volatile uint32_t*)(BASE_FSMC + (uint32_t)r + (uint32_t)b);
+        return *(volatile uint32_t*)(BASE_FMC + (uint32_t)r + (uint32_t)b);
     }
 
 public:

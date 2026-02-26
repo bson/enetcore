@@ -5,6 +5,7 @@
 #define __UTIL_H__
 
 #include "core/arc4.h"
+#include "core/deque.h"
 
 
 // These are higher-order utility functions

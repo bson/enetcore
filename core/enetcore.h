@@ -14,9 +14,10 @@ enum { NOT_FOUND = (uint32_t)-1 };
 
 #define USE_LITERALS
 
+#include "params.h"
+#include "config.h"
 #include "init.h"
 #include "core/gpio.h"
-#include "config.h"
 #include "core/mem.h"
 
 #include "core/assert.h"
