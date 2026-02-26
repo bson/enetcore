@@ -4,7 +4,7 @@
 #include "params.h"
 #include "core/enetkit.h"
 
-#include "eeprom.h"
+#include "soc/stm32h7x/eeprom.h"
 #include "core/bits.h"
 
 

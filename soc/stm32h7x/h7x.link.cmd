@@ -25,3 +25,5 @@ ADDR_FMCB3    = 0x80000000; /* FMC bank 3: NAND flash */
 ADDR_FMCB4    = 0x90000000; /* FMC bank 4: NAND flash */
 ADDR_FMCB5    = 0xc0000000; /* FMC bank 5: SDRAM */
 ADDR_FMCB6    = 0xd0000000; /* FMC bank 6: SDRAM */
+
+INCLUDE enetcore/arch/armv7m/cortex-m7.link.cmd
