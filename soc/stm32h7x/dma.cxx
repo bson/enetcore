@@ -5,6 +5,7 @@
 #include "core/thread.h"
 #include "soc/stm32h7x/dma.h"
 #include "arch/armv7m/nvic.h"
+#include "core/bitfield.h"
 
 // XXX currently maps DMA1 to DMAMUX1
 // Add transparent support for DMA (ch 8-15) by increating size of Assignment _stream
@@ -64,7 +65,7 @@ void Stm32Dma::AssignTx(Stm32Dma::Peripheral* p) {
 void Stm32Dma::ReleaseTx(Stm32Dma::Peripheral* p) {
     assert(p == _assignment[p->_tx._stream]);
 
-    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * p->_rx._stream);
+    volatile uint32_t& mux_rgxcr = stream_muxreg(Register::DMAMUX_RG1CR, p->_rx._stream);
 
     ScopedNoInt G;
 
@@ -112,14 +113,17 @@ void Stm32Dma::Transmit(Stm32Dma::Peripheral* p, const void* buf, uint16_t nword
     p->_tx._active = true;
 
     // Configure DMAMUX
-    volatile uint32_t& mux_cxcr = *(volatile uint32_t*)(DMAMUX1_BASE + 0x04 * stream);
-    volatile uint32_t& mux_cfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_CFR);
-    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * stream);
-    volatile uint32_t& mux_rgcfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RGCFR);
+    volatile uint32_t& mux_cxcr = stream_muxreg(Register::DMAMUX_C1CR, stream);
+    volatile uint32_t& mux_cfr = muxreg(Register::DMAMUX_CFR);
+    volatile uint32_t& mux_rgxcr = stream_muxreg(Register::DMAMUX_RG1CR, stream);
+    volatile uint32_t& mux_rgcfr = muxreg(Register::DMAMUX_RGCFR);
 
     mux_cxcr    = 0;
     mux_cfr     = BIT(stream);
-    mux_rgxcr   = (uint32_t(p->_tx._n_ops) << GNBREQ) | (0b01 << GPOL) | BIT(GE);
+    mux_rgxcr   = Bitfield(mux_rgxcr)
+        .f(5, GNBREQ, p->_tx._n_ops)
+        .f(2, GPOL, 0b01)
+        .bit(GE);
     mux_rgcfr   = BIT(stream);
     
     cr |= BIT(EN);
@@ -140,8 +144,7 @@ void Stm32Dma::AssignRx(Stm32Dma::Peripheral* p) {
 
 void Stm32Dma::ReleaseRx(Stm32Dma::Peripheral* p) {
     assert(p == _assignment[p->_rx._stream]);
-
-    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * p->_rx._stream);
+    volatile uint32_t& mux_rgxcr = stream_muxreg(Register::DMAMUX_RG1CR, p->_rx._stream);
 
     ScopedNoInt G;
 
@@ -189,14 +192,17 @@ void Stm32Dma::Receive(Stm32Dma::Peripheral* p, void* buf, uint16_t nwords) {
     p->_rx._active = true;
 
     // Configure DMAMUX
-    volatile uint32_t& mux_cxcr = *(volatile uint32_t*)(DMAMUX1_BASE + 0x04 * stream);
-    volatile uint32_t& mux_cfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_CFR);
-    volatile uint32_t& mux_rgxcr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RG1CR + 0x04 * stream);
-    volatile uint32_t& mux_rgcfr = *(volatile uint32_t*)(DMAMUX1_BASE + DMAMUX_RGCFR);
+    volatile uint32_t& mux_cxcr = stream_muxreg(Register::DMAMUX_C1CR, stream);
+    volatile uint32_t& mux_cfr = muxreg(Register::DMAMUX_CFR);
+    volatile uint32_t& mux_rgxcr = stream_muxreg(Register::DMAMUX_RG1CR, stream);
+    volatile uint32_t& mux_rgcfr = muxreg(Register::DMAMUX_RGCFR);
 
     mux_cxcr    = 0;
     mux_cfr     = BIT(stream);
-    mux_rgxcr   = (uint32_t(p->_tx._n_ops) << GNBREQ) | (0b01 << GPOL) | BIT(GE);
+    mux_rgxcr   = Bitfield(mux_rgxcr)
+        .f(5, GNBREQ, p->_rx._n_ops)
+        .f(2, GPOL, 0b01)
+        .bit(GE);
     mux_rgcfr   = BIT(stream);
     
     cr |= BIT(EN);

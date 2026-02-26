@@ -2,7 +2,7 @@
 // See LICENSE for details.
 
 #ifndef _STM32_EEPROM_H_
-#define _STm32_EEPROM_H_
+#define _STM32_EEPROM_H_
 
 #include <stdint.h>
 #include "soc/stm32h7x.h"

@@ -10,6 +10,7 @@
 
 // Basic flash support.  No erase or write support.
 class Stm32Flash {
+protected:
     // All registers that end with '1' replicate for bank 2 at offset 0x100
     enum Register {
         ACR = 0x00,
@@ -51,6 +52,9 @@ public:
         // SR1/2
         QW1 = 2,
 
+        // CR1
+        PG1 = 1,
+
         // OPTSR_CUR
         SWAP_BANK_OPT = 31,
     };
@@ -60,7 +64,7 @@ public:
         BANK2 = 0x100
    };
 
-private:
+protected:
     // Bank-specific register
     static volatile uint32_t& reg(const Bank bank, const Register r) {
         return *((volatile uint32_t*)(BASE_FLASH + uint32_t(bank) + uint32_t(r)));

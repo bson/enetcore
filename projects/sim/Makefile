@@ -5,8 +5,6 @@ VPATH=.
 ENETCORE = enetcore
 TOOLSET ?= gnuc
 
-#TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10-2020-q4-major
-#TOOLCHAIN ?= /opt/gcc-arm-none-eabi-10.3-2021.10
 TOOLCHAIN=/opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi
 TOOLVER ?= 13.3.1
 
@@ -36,9 +34,6 @@ LFLAGS=-Map $(ODIR)/image.map -N -z noexecstack
 # Project components
 SRCS += main.cxx init.cxx startup.s
 GENSRCS = buildinfo.cxx
-
-# UI
-#GENSRCS += uidefs.cxx
 
 include makefile.$(TOOLSET)
 include $(ENETCORE)/core/makefile.$(TOOLSET)

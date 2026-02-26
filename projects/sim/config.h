@@ -76,6 +76,8 @@ enum {
 #else
 // Non-nested interrupt priorities.  Except HW faults.
 enum {
+    IPL_QUANTUM  = 1,
+
     IPL_SOFT     = 17,
 
     IPL_MIN      = 31,

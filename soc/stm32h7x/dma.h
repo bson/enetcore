@@ -180,6 +180,16 @@ public:
         return *(volatile uint32_t*)(_base + (uint32_t)r + stream*0x18);
     }
 
+    [[__finline, __optimize]]
+    volatile uint32_t& muxreg(Register r) {
+        return *(volatile uint32_t*)(BASE_DMAMUX1 + (uint32_t)r);
+    }
+
+    [[__finline, __optimize]]
+    volatile uint32_t& stream_muxreg(Register r, uint32_t stream) {
+        return *(volatile uint32_t*)(BASE_DMAMUX1 + (uint32_t)r + stream * 0x4);
+    }
+
     // Stream registers
     [[__finline, __optimize]]
     volatile uint32_t& s_cr(uint32_t stream) { return stream_reg(Register::S0CR, stream); }
