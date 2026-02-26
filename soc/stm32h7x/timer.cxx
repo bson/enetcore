@@ -80,14 +80,15 @@ void Stm32Timer<Counter>::RunPwm(uint32_t freq) {
 
 
 template <typename Counter>
-void Stm32Timer<Counter>::ConfigurePwm(Stm32Timer::CCR ccr, Stm32Timer::PwmPolarity pol) {
+void Stm32Timer<Counter>::ConfigurePwm(Stm32Timer::Register ccr, Stm32Timer::PwmPolarity pol) {
     const uint32_t ccer_shift = 4 * (uint32_t)ccr;
 
     CCER &= ~BIT(CC1E + ccer_shift);
 
     const uint32_t ccmbits = BIT(OC1PE) | ((uint32_t)PwmMode::MODE2 << OC1M);
     const uint32_t ccmr_shift = 8 * ((uint32_t)ccr & 1);
-    volatile uint32_t& ccmr = reg(ccr >= CCR::CCR3 ? Register::TIM_CCMR2 : Register::TIM_CCMR1);
+    volatile uint32_t& ccmr = reg(ccr >= Register::TIM_CCR3
+                                  ? Register::TIM_CCMR2 : Register::TIM_CCMR1);
     ccmr = (ccmr & ~(0b11111111 << ccmr_shift))
         | (ccmbits << ccmr_shift);
 
