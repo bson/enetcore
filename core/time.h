@@ -4,8 +4,6 @@
 #ifndef __TIME_H__
 #define __TIME_H__
 
-extern Clock _clock;
-
 #ifdef ENETCORE
 #include "params.h"
 

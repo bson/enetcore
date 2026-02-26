@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jan Brittenson
 // See LICENSE for details.
 
+#include "board.h"
 #include "core/enetkit.h"
 #include "core/util.h"
 
@@ -17,8 +18,6 @@ static void logDateTime() {
     static const char* const days[] = {
         "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
     };
-
-    const int temp = _tsense.Temp() * 100.0f;
 
     DMSG("%s %04d-%02d-%02d %02d:%02d:%02d\n",
          days[now.dow-1],

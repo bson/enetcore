@@ -4,6 +4,9 @@
 #ifndef __STM32_HASH_H__
 #define __STM32_HASH_H__
 
+#include "core/bits.h"
+#include "core/bitfield.h"
+
 
 class Stm32Hash: public Stm32Dma::Peripheral {
 
@@ -86,8 +89,8 @@ private:
 public:
     // RX DMA simply copies TX as a placeholder since it's never used
     Stm32Hash(Stm32Dma::Target txtarg, uint32_t streams)
-        : Peripheral(base + (uint32_t)Register::DIN, 
-                     base + (uint32_t)Register::DIN,
+        : Peripheral(BASE_HASH + (uint32_t)Register::DIN, 
+                     BASE_HASH + (uint32_t)Register::DIN,
                      txtarg, txtarg, streams),
           _dma(NULL) {
     }
@@ -116,9 +119,9 @@ public:
         cr = Bitfield(cr)
             .cbit(INIT)
             .bit(MODE, hmac_mode)
-            .bit(LKEY, hmac_mode && (keylen * 4 <= 64)) // Present and 64 bytes or less
-            .bit(ALGO1, (uint32_t)algo & BIT(1))
-            .bit(ALGO0, (uint32_t)algo & BIT(0))
+            .bit(LKEY, hmac_mode && (inner_keylen * 4 <= 64)) // Present and 64 bytes or less
+            .bit(ALGO1, (bool)((uint32_t)algo & BIT(1)))
+            .bit(ALGO0, (bool)((uint32_t)algo & BIT(0)))
             .f(2, DATATYPE, 0);          // Data is 32-bit words
         
         cr |= BIT(INIT);
@@ -140,7 +143,7 @@ public:
 
         StartTx();
 
-        while (!_send.Empty())
+        while (!_sendq.Empty())
             Thread::WaitFor((void*)&_sendq);
 
         // In HMAC mode, provide outer key
@@ -159,9 +162,8 @@ public:
         while ((sr & BIT(DCIS)) == 0)
             Thread::WaitFor((void*)&_sendq);
 
-        const uint32_t* hr = (const uint32_t*)(BASE_HASH + HR0);
-        while (len--)
-            *digest++ = *hdr++;
+        const uint32_t* hr = (const uint32_t*)(BASE_HASH + (uint32_t)Register::HR0);
+        memcpy((void*)digest, (void*)hr, len * sizeof *digest);
 
         // If someone else is waiting, kick em off
         Thread::WakeSingle((void*)&_sendq);
@@ -180,6 +182,7 @@ public:
             if (_sendq.Headroom()) {
                 while (_sendq.Headroom() && (p < data + len))
                     _sendq.PushBack(*p++);
+            }
         }
     }
 
@@ -272,12 +275,12 @@ private:
             
         if (sr & BIT(DINIS)) {
             if (!_sendq.Empty()) {
-                while (!_send.Empty() && (((sr >> NBW) & 0xf) != 0xf))
+                while (!_sendq.Empty() && (((sr >> NBW) & 0xf) != 0xf))
                     din = _sendq.PopFront();
                     
                 imr = Bitfield(imr)
-                    .bit(DINIE, _enable)
-                    .bit(DCIE, _enable);
+                    .bit(DINIE, _ienable)
+                    .bit(DCIE, _ienable);
             }
         }
     }

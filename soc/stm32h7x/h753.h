@@ -24,7 +24,9 @@ enum class H753MemSize {
 
 #include "arch/armv7m/nvic.h"
 #include "arch/armv7m/systick.h"
-#include "arch/armv7m/swo.h"
+
+//Fix.  And also fix include deps.
+//#include "arch/armv7m/swo.h"
 
 #include "soc/stm32h7x/power.h"
 #include "soc/stm32h7x/clock_tree.h"

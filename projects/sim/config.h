@@ -7,10 +7,10 @@
 #define _console _uart7
 
 #ifdef DEBUG
-#define _trace _usart3
+#define _trace _uart7
 //#define _trace _swo
 #else
-#define _trace _usart3
+#define _trace _uart7
 #endif
 
 // Use SRAM1+SRAM2 as 256k IRAM
@@ -70,6 +70,7 @@ enum {
     IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_MIN  - 3, // DMA (generic)
     IPL_ADC      = IPL_MIN  - 3, // ADC
+    IPL_HASH     = IPL_MIN  - 3, // HASH
     IPL_DAC      = IPL_CRIT + 1, // DAC
 };
 #else
@@ -99,6 +100,7 @@ enum {
     IPL_MISR     = IPL_SOFT,  // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_SOFT,  // DMA
     IPL_ADC      = IPL_SOFT,  // ADC
+    IPL_HASH     = IPL_SOFT,  // HASH
     IPL_DAC      = IPL_SOFT,  // DAC
 };
 #endif

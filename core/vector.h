@@ -4,6 +4,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
+#include "core/mem.h"
 #include "core/arithmetic.h"
 
 // Simple vector
@@ -184,7 +185,7 @@ public:
 			if (IsEqual(_mem[i], arg))
 				return i;
 
-		return NOT_FOUND;
+		return uint32_t(-1);
 	}
 };
 

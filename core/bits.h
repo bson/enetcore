@@ -5,6 +5,7 @@
 #define _BITS_H_
 
 #include <stdint.h>
+#include "core/assert.h"
 
 #define BIT(N) (1 << (N))
 

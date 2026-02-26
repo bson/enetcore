@@ -10,7 +10,7 @@
 
 #include "compiler.h"
 
-enum { NOT_FOUND = (uint)-1 };
+enum { NOT_FOUND = (uint32_t)-1 };
 
 #define USE_LITERALS
 

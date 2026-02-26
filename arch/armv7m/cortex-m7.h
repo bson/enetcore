@@ -5,6 +5,10 @@
 #define _CORTEX_M7_H_
 
 #include "arch/armv7m/defs.h"
+
+// For the assert in core/bits.h
+static inline bool InExceptionHandler();
+
 #include "core/bits.h"
 
 // Various constants

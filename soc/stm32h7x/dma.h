@@ -267,21 +267,16 @@ public:
         uint8_t  _ipl;          // DMA interrupt priority
         bool     _trbuff;       // Buffered transfer
 
-        Peripheral(uint32_t tdr, uin32_t rdr, Target txtarg, Target rxtarg = Target::NOT_USED,
+        Peripheral(uintptr_t tdr, uintptr_t rdr, Target txtarg, Target rxtarg, 
                    uint32_t stream_cand, uint16_t rdop = 1, uint16_t wrop = 1)
             : _prio(Priority::MEDIUM),
               _stream_cand(stream_cand),
               _word_size(WordSize::BYTE),
               _ipl(IPL_DMA),
-              _trbuff(false) {
-            _tx._dr     = tdr;
-            _rx._dr     = rdr;
-            _tx._n_ops  = wrop;
-            _rx._n_ops  = rdop;
-            _tx._target = txtarg;
-            _rx._target = rxtarg;
-            _tx._active = false;
-            _rx._active = false;
+              _trbuff(false),
+              _tx{tdr, wrop, txtarg, 0, false},
+              _rx{tdr, wrop, txtarg, 0, false}
+        {
         }
 
         // Transfer is complete, called in interrupt context
@@ -304,39 +299,24 @@ private:
 
     static const uint32_t stream_to_tcif[8];
 
-    // Target to stream-channel table.  Each stream-channel pair is
-    // encoded in a byte with the stream in the high nybble and the
-    // channel in the low.  Each list is ended with a 0xff sentry.
-    static const uint8_t _target_sch[(int)Target::NUM_TARGET][NUM_MAPPING];
-
 public:
-    Stm32Dma(uint32_t base, const uint16_t* irqs)
-        : _base(base), _irq(irqs) {
-        memset(_assignment, 0, sizeof _assignment);
-        memset(_is_tx, 0, sizeof _is_tx);
-    };
+    Stm32Dma(uint32_t base, const uint16_t* irqs);
 
     // Peripheral transfers
     //
-    // XXX this needs updating for H7x since there is now a DMAMUX for
-    // request to channel mapping.
-    //
     // The device needs to first acquire a DMA stream-channel pair,
     // via the AssignTx/Rx() calls.  These will block and return with
-    // a stream acquired when one becomes available; the device is now
-    // in possession of the selected stream+channel. Because these
-    // calls block they can only be called from a thread context. The
-    // stream picked is the first available from the stream-channel
-    // pairs for the target in the Peripheral's _tx._target and
-    // _rx._target.
+    // a stream acquired when one becomes available.  DMAMUXx is used
+    // to map the target device to the DMA stream (channel).  Because
+    // these calls block they can only be called from a thread
+    // context. The stream picked is the first available from the
+    // stream preference list in the Peripheral's _tx._target and
+    // _rx._target.  It's a 32-bit integer consisting of four 8-bit
+    // stream values.  Each value is 0-15, with 0xff meaning the
+    // selection is skipped.  So for example 0xff070300 means pick
+    // the first available stream of 0, 3 or 7 in that order.
     //
-    // TBD: Optionally a device can declare a preferred s-ch selection
-    // order by setting it in the Peripheral.  This can be used to
-    // control which DMA resource(s) each device will contend over.
-    //
-    // TBD: Exclusive access can be obtained by specifying a single
-    // s-ch, then acquiring it up front and never releasing.  This
-    // will prevent any other peripheral from using the same s-ch.
+    // Note: currently only DMA1 and DMAMUX1 are supported.
     //
     // Once acquired, Transmit/Receive functions are used to perform
     // transfers.  When complete, the Peripheral::DmaTxComplete and
@@ -369,9 +349,6 @@ public:
     // asserting the peripheral is holding the stream.  In a fat
     // single-file production build they're optimized out of
     // existence.
-    //
-    // TBD a function NYI can be used to perform memory-to-memory
-    // copies.
     //
     void AssignTx(Peripheral* p);
     bool TryAssignTx(Peripheral* p);

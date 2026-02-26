@@ -10,6 +10,14 @@
 // Add transparent support for DMA (ch 8-15) by increating size of Assignment _stream
 // Add mapping with DMAMUX2 and BDMA, by encoding it as the high bit of Target
 
+Stm32Dma::Stm32Dma(uint32_t base, const uint16_t* irqs)
+    : _base(base),
+      _irq(irqs)
+{
+    memset(_assignment, 0, sizeof _assignment);
+    memset(_is_tx, 0, sizeof _is_tx);
+};
+
 bool Stm32Dma::TryAssign(Stm32Dma::Peripheral* p,
                          Stm32Dma::Peripheral::Assignment& asn,
                          bool istx) {

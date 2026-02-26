@@ -238,7 +238,7 @@ public:
         assert(date_time.min >= 0 && date_time.min <= 59);
         assert(date_time.sec >= 0 && date_time.sec <= 59);
 
-        Access a_();
+        Access a_;
 
         vreg(Register::ISR) |= BIT(INIT);
         while ((vreg(Register::ISR) & BIT(INITF)) == 0)
@@ -299,7 +299,7 @@ public:
 
     // Backup register N accessor
     static uint32_t& BackupReg(uint32_t n) {
-        assert(n < NBKPxR);
+        assert(n < (uint32_t)Register::NBKPxR);
         return *(uint32_t*)(BASE_RTC + (uint32_t)Register::BKP0R + 4*n);
     }
 };

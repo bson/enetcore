@@ -239,7 +239,7 @@ public:
         for (uint i = 0; i < Size(); ++i)
             if (operator[](i) == arg) return i;
 
-        return NOT_FOUND;
+        return ~uint32_t(0);
     }
 
     void DeleteEntries() {

@@ -21,17 +21,13 @@
 // mapped.
 
 class Stm32Eeprom: public Stm32Flash {
-    using Stm32Flash;
-
     enum {
         // 2k set aside at top of bank, in last sector
         EEPROM_SIZE = 2048
     };
 
 public:
-    Stm32Eeprom()
-        : _state(State::IDLE)
-    { }
+    Stm32Eeprom() { }
 
     // Initialize
     void Init() { }
@@ -42,8 +38,9 @@ public:
 
     // Return base address
     void* Base() {
-        return (Stm32Flash::GetBank() == Stm32Flash::BANK1 ? BASE_FLASHB1 : BASE_FLASHB2)
-            + 
+        return (Stm32Flash::GetBank() == Stm32Flash::Bank::BANK1
+                ? (void*)BASE_FLASHB1 : (void*)BASE_FLASHB2);
+    }
 
 private:
     // Yeah, no

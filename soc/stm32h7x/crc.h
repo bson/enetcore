@@ -56,12 +56,13 @@ public:
     }
 
     void SetMode(bool rev_out, uint8_t rev_in, uint8_t polysize) {
-        _base[CR] = (((uint32_t)rev_out << REV_OUT) : 0)
-            | (rev_in << REV_IN)
-            | (polysize << POLYSIZE);
+        _base[CR] = Bitfield(_base[CR])
+            .bit(REV_OUT, rev_out)
+            .f(2, REV_IN, rev_in)
+            .f(2, POLYSIZE, polysize);
     }
     void SetInit(uint32_t init) { _base[INIT] = init; }
-    void SetPoly(uint32_t poly) { _base[POLY] = poly; }
+    void SetPoly(uint32_t poly) { _base[POL] = poly; }
     void Reset() { _base[CR] |= BIT(RESET); }
 
 
@@ -93,7 +94,7 @@ public:
     }
 
     static uint16_t Checksum(const uint16_t* block, uint len) {
-        CrcCCITT crc();
+        CrcCCITT crc;
         crc.Update((const uint16_t*)block, len);
         return crc.GetValue();
     }
@@ -113,7 +114,7 @@ public:
     }
 
     static uint16_t Checksum(const uint16_t* block, uint len) {
-        Crc16 crc();
+        Crc16 crc;
         crc.Update(block, len);
         return crc.GetValue();
     }

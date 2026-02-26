@@ -32,7 +32,7 @@ public:
     enum {
         // USART_CR1
         RXFFIE = 31,
-        FXFEIE = 30,
+        TXFEIE = 30,
         FIFOEN = 29,
         M1 = 28,
         EOBIE = 27,
@@ -83,7 +83,7 @@ public:
         RXFTIE = 28,
         RXFTCFG = 25,
         TCBGTIE = 24,
-        TXFIE = 23,
+        TXFTIE = 23,
         WUFIE = 22,
         WUS = 20,
         SCARCNT = 17,
@@ -106,7 +106,7 @@ public:
 
         // USART_GTPR
         GT  = 8,
-        PSC = 0
+        PSC = 0,
 
         // USART_RTOR
         BLEN = 24,
@@ -140,7 +140,7 @@ public:
         CTS = 10,
         CTSIF = 9,
         LBDF = 8,
-        TXFXF = 7,
+        TXFNF = 7,
         TC = 6,
         RXFNE = 5,
         IDLE = 4,
@@ -237,20 +237,24 @@ public:
         // FIFO enable
         // TX threshold 3/4
         // RX threshold 3/4
-        // Interrupt on TX/RX either empty or at threshold
+        // Interrupt at FIFO threshold
         // CTS in input, RTS is output
 
         cr1 &= ~BIT(UE);
 
         cr1 = Bitfield(cr1)
-            .cbit(RXFFIE).cbit(RXFEIE).cbit(M1).cbit(M0).cbit(EOBIE).cbit(RTOIE)
-            .cbit(OVER8).cbit(MME).cbit(WAKE).cbit(PCE).cbit(PS).cbit(PEIE).cbit(TXFNFIE)
-            .cbit(TcIE).cbit(RXFNEIE).cbit(IDLEIE).cbit(TE).cbit(RE).bit(UESM);
+            .cbit(RXFFIE).cbit(TXFEIE).cbit(M1).cbit(M0).cbit(EOBIE).cbit(RTOIE)
+            .cbit(DEAT).cbit(DEDT).cbit(OVER8).cbit(CMIE).cbit(MME).cbit(WAKE).cbit(PCE)
+            .cbit(PS).cbit(PEIE).cbit(TXFNFIE).cbit(TCIE).cbit(RXFNEIE).cbit(IDLEIE)
+            .cbit(TE).cbit(RE)
+            .bit(FIFOEN).bit(UESM);
 
         cr2 = Bitfield(cr2)
-            .cbit(ABREN).cbit(MSBFIRST).cbit(DATAINV).cbit(RXINV).cbit(SWAP).cbit(LINEN) 
-            .cbit(CLKEN).cbit(CPOL).cbit(CPHA).cbit(LBCL).cbit(LBDIE).cbit(LBDL) 
-            .cbit(ADDM7).cbit(DIS_NSS).cbit(SLVEN).f(2, STOP, stopbit);
+            .f(7, ADD, 0)
+            .cbit(RTOEN).cbit(ABREN).cbit(MSBFIRST).cbit(DATAINV).cbit(TXINV).cbit(RXINV)
+            .cbit(SWAP).cbit(LINEN).cbit(CLKEN).cbit(CPOL).cbit(CPHA).cbit(LBCL)
+            .cbit(LBDIE).cbit(LBDL).cbit(ADDM7).cbit(DIS_NSS).cbit(SLVEN)
+            .f(2, STOP, stopbit);
 
         cr3 = Bitfield(cr3)
             .f(3, TXFTCFG, FT_3_4)
@@ -423,7 +427,7 @@ private:
         // interrupts.  This makes for some rather messy code.
         if (isr & BIT(TXFT)) {
             if (!_sendq.Empty()) {
-                while (!_send.Empty() && (isr & BIT(TXFNF)))
+                while (!_sendq.Empty() && (isr & BIT(TXFNF)))
                     // While something to TX and FIFO not full: keep stuffing
                     tdr = _sendq.PopFront();
                     
@@ -457,13 +461,8 @@ private:
 
             if (_read_wait)
                 Thread::WakeSingle((void*)&_recvq);
-            }
         }
     }
-
-
-    Stm32Usart(const Stm32Usart&) = delete;
-    Stm32Usart& operator=(const Stm32Usart&) = delete;
 };
 
 #endif // __STM32_USART_H__

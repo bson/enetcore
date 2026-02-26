@@ -66,8 +66,8 @@ public:
 	static void ClearPendingIRQ(uint irq);
 
 private:
-    NVic(const NVic&);
-    NVic& operator=(const NVic&);
+    NVic(const NVic&) = delete;
+    NVic& operator=(const NVic&) = delete;
 };
 
 #endif // __NVIC_H__

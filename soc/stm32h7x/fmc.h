@@ -140,12 +140,12 @@ public:
         b_bcr = Bitfield(b_bcr)
             .bit(WREN)
             .f(2, MWID, Width::WORD16)
-            .bit(2, MTYPE, Type::SRAM); // F405 used Type::PSRAM?!
+            .f(2, MTYP, Type::SRAM); // F405 used Type::PSRAM?!
 
         b_btr = Bitfield(b_btr)
             .f(4, BUSTURN, bus_turn)
             .f(4, ADDSET, data_setup)
-            .f(8, DATAST, data_hole);
+            .f(8, DATAST, data_hold);
 
         b_bcr = Bitfield(b_bcr)
             .bit(MBKEN);

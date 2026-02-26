@@ -4,13 +4,12 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-// This file maps SoC and board peripherals to canonical names and
-// provides external decls.
-
+#include "compiler.h"
 #include "params.h"
+#include "config.h"
 #include "soc/stm32h7x/h753.h"
 
-// SoC peripherals used on CON2
+// Core and SoC resources used
 
 typedef Stm32ClockTree ClockTree;
 typedef Stm32Power Power;
@@ -25,11 +24,11 @@ typedef Stm32Random Random;
 typedef Stm32Debug Debug;
 typedef Stm32Eintr Eintr;
 
+extern Clock _clock;
 extern NVic _nvic;
-
 extern Swo _swo;
-extern Uart<USART3_SENDQ_SIZE, USART3_RECVQ_SIZE> _usart3;
-extern Uart<UART4_SENDQ_SIZE, UART4_SENDQ_SIZE> _uart4;
+extern Uart<UART7_SENDQ_SIZE, UART7_RECVQ_SIZE> _uart7;
+extern Uart<UART5_SENDQ_SIZE, UART5_SENDQ_SIZE> _uart5;
 
 extern Gpio _gpio_a;
 extern Gpio _gpio_b;
@@ -38,9 +37,9 @@ extern Gpio _gpio_d;
 extern Gpio _gpio_e;
 
 extern Dma _dma1;
-extern Timer16 _tim6;
+extern Timer16 _tim5;
 
 // Board peripherals
-
+// LAN8720A
 
 #endif // __BOARD_H__

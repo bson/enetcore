@@ -153,7 +153,8 @@ public:
 		Pin(const Pin& arg) : _port(arg._port), _pin(arg._pin) { }
 		Pin& operator=(const Pin& arg) {
 			if (&arg != this) {
-                new (this) Pin(arg);
+                _port = arg._port;
+                _pin  = arg._pin;
             }
 			return *this;
 		}

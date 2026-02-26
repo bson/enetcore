@@ -16,7 +16,7 @@ void xxfree(void* ptr);
 
 [[__finline]] static inline void xfree(void* ptr) { xxfree(ptr); }
 
-// Locate malloc chunk give a pointer into block
+// Locate malloc chunk given a pointer into block
 #ifdef MEMDEBUG
 void* findmblk(void* ptr);
 #else
@@ -37,7 +37,6 @@ inline void* operator new(size_t size) { return xmalloc(size); }
 inline void operator delete(void *ptr) { xfree(ptr); }
 inline void operator delete(void *ptr, uint) { xfree(ptr); }
 
-#ifdef ENETCORE
 //  libc replacements
 
 extern "C" {
@@ -107,9 +106,9 @@ int strncasecmp(const char* s1, const char* s2, size_t n);
 int strcmp(const char* s1, const char* s2);
 int memcmp(const void* s1, const void* s2, size_t n);
 void* memmove(void* s1, const void* s2, size_t n);
-#endif	// ENETCORE
 
 
+// Wrapper functions
 uchar* xstrdup(const uchar* s);
 
 [[__noalias]] uchar* xstrndup(const uchar* s, uint num);

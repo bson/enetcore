@@ -7,6 +7,7 @@
 #include "core/vector.h"
 #include "core/arithmetic.h"
 
+
 typedef class Thread* ThreadId;
 
 // These are implemented by board specific code to manage memory layout

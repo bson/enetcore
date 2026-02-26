@@ -79,18 +79,16 @@ class Stm32Dac: public Stm32Dma::Peripheral {
         TREFRESH1 = 0,
     };
 
-    uint32_t _base;
+    uintptr_t _base;
 
     volatile uint32_t& reg(Register r) {
         return *(volatile uint32_t*)(_base + (uint32_t)r);
     }
 
 public:
-    Stm32Dac(uint32_t base,
-             Stm32Dma::Target tx_targ,
-             Stm32Dma::Target rx_targ,
-             uint32_t streams)
-        : Peripheral(base + (uint32_t)Register::DHR12R1, tx_targ, rx_targ, streams),
+    Stm32Dac(uint32_t base, Stm32Dma::Target tx_targ, uint32_t streams)
+        : Peripheral(base + (uint32_t)Register::DHR12R1, 0,
+                     tx_targ, Stm32Dma::Target::NOT_USED, streams),
           _base(base) {
     }
 
