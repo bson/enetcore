@@ -4,12 +4,10 @@
 #ifndef __STM32H7X_H__
 #define __STM32H7X_H__
 
-#define STM32H7X
-
 #include <stdint.h>
 
+#define STM32H7X
 #define CORTEX_M 7
-
 #define HAVE_HW_CRC
 
 #include "arch/armv7m/cortex-m7.h"

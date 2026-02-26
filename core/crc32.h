@@ -9,6 +9,8 @@
 #ifndef __CRC32_H__
 #define __CRC32_H__
 
+#ifndef HAVE_HW_CRC
+
 // Define to dynamically initialize table.  Mainly useful to generate the table
 // in the first place.  A precomputed table is const, so will be placed in the
 // text segment.
@@ -36,5 +38,7 @@ public:
 	// Convenience function to checksum a block
 	static uint32_t Checksum(const void* block, uint len);
 };
+
+#endif  // HAVE_HW_CRC
 
 #endif // __CRC32_H__

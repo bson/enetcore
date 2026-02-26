@@ -4,9 +4,10 @@
 // Derived from CRC32 algorithm in RFC1952
 // Public domain
 
-#ifndef HAVE_HW_CRC
 
 #include "core/enetkit.h"
+
+#ifndef HAVE_HW_CRC
 #include "core/crc32.h"
 
 
@@ -101,4 +102,4 @@ uint32_t Crc32::Checksum(const void* block, uint len)
 	return c.GetValue();
 }
 
-#endif
+#endif  // HAVE_HW_CRC

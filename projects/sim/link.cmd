@@ -1,6 +1,6 @@
 ENTRY(_startup)
 
-INCLUDE enetcore/soc/stm327hx/h753.link.cmd
+INCLUDE enetcore/soc/stm32h7x/h7x.link.cmd
 
 /* 
  * the above includes
@@ -9,9 +9,9 @@ INCLUDE enetcore/soc/stm327hx/h753.link.cmd
 
 MEMORY 
 {
-	flash (rx!w)	: ORIGIN = 0x08000000, LENGTH = 1024K
-	ram (rw)		: ORIGIN = 0x20000000, LENGTH = 128K
-    ccmram (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
+	flash (rx!w)	: ORIGIN = ADDR_FLASHB1, LENGTH = 1024K
+	ram (rw)		: ORIGIN = ADDR_AXI_SRAM, LENGTH = 512K
+    ccmram (rw)     : ORIGIN = ADDR_DTCM, LENGTH = 128K
 }
 
 _eiram  = ORIGIN(ram) + LENGTH(ram);
