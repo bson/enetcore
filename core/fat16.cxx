@@ -2,25 +2,25 @@
 // See LICENSE for details.
 
 #include "core/enetkit.h"
-#include "core/fat.h"
+#include "core/fat16.h"
 #include "core/util.h"
 
 
-Fat::Fat(BlockDev& dev) :
+Fat16::Fat16(BlockDev& dev) :
 	_dev(dev)
 {
 }
 
 
-bool Fat::Mount(uint partnum, bool rw)
+bool Fat16::Mount(uint partnum, bool rw)
 {
-	_dev.Retain();
+	_dev.retain();
 
 	_rw = rw;
 
-	if (!_dev.Init()) {
+	if (!_dev.init()) {
         console("FAT: failed to mount device");
-        _dev.Release();
+        _dev.release();
         return false;
     }
 
@@ -30,7 +30,7 @@ bool Fat::Mount(uint partnum, bool rw)
 	uint8_t type;
 
 	// Read MBR
-	if (!_dev.ReadSector(0, sector + 2)) goto failed;
+	if (!_dev.read_blocks(0, 1, sector + 2)) goto failed;
 	if (*(uint16_t*)(sector + 512) != LE16(0xaa55)) goto failed;
 
 	_lba0 = LE32(part[partnum].lba_begin);
@@ -46,7 +46,7 @@ bool Fat::Mount(uint partnum, bool rw)
 	else if (type != 6 && type != 4)  goto failed;
 
 	// Read volume ID
-	if (!_dev.ReadSector(_lba0, sector)) goto failed;
+	if (!_dev.read_blocks(_lba0, 1, sector)) goto failed;
 	if (*(uint16_t*)(sector + 510) != LE16(0xaa55)) goto failed;
 
 	uint16_t byte_per_sect;
@@ -103,13 +103,13 @@ bool Fat::Mount(uint partnum, bool rw)
 failed:
 	xfree(sector);
 
-	_dev.Release();
+	_dev.release();
 	return ok;
 }
 
 
 // * static
-void Fat::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
+void Fat16::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 {
 	uint last_nonspace = NOT_FOUND;
 	for (uint i = 0; i < 8; ++i) {
@@ -132,7 +132,7 @@ void Fat::FTWalker::NameFrom83(Vector<uchar>& sfn, const uint8_t* dirbuf)
 
 
 template <typename Cluster>
-bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
+bool Fat16::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 {
 	uint32_t fatsec = NOT_FOUND; // FAT Sector we currently have loaded
 	uint8_t* fat = (uint8_t*)xmalloc(512); // FAT Sector buffer
@@ -151,7 +151,7 @@ bool Fat::GetFileClustersImpl(Vector<uint32_t>& clusters, uint32_t cluster1)
 
 		if (fatsec == NOT_FOUND || fatsec != next_fatsec) {
 			// Need different FAT sector - load it
-			if (!_dev.ReadSector(_fat_sector + next_fatsec, fat)) goto done;
+			if (!_dev.read_blocks(_fat_sector + next_fatsec, 1, fat)) goto done;
 			fatsec = next_fatsec;
 		}
 
@@ -171,14 +171,14 @@ done:
 }
 
 
-bool Fat::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
+bool Fat16::GetFileClusters(Vector<uint32_t>& clusters, uint32_t cluster1)
 {
 	return _fat32 ? GetFileClustersImpl<uint32_t>(clusters, cluster1) :
 		GetFileClustersImpl<uint16_t>(clusters, cluster1);
 }
 
 
-bool Fat::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
+bool Fat16::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
 {
 	assert(cluster >= 2);
 	assert(cluster < 0x0ffffff0);
@@ -192,7 +192,7 @@ bool Fat::LoadDataCluster(Vector<uint8_t>& buffer, uint32_t cluster)
 }
 
 
-bool Fat::LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_list)
+bool Fat16::LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_list)
 {
 	for (uint i = 0; i < cluster_list.Size(); ++i) {
 		if (!LoadDataCluster(buffer, cluster_list[i]))
@@ -202,16 +202,16 @@ bool Fat::LoadDataClusters(Vector<uint8_t>& buffer, Vector<uint32_t>& cluster_li
 }
 
 
-bool Fat::LoadDataSector(uint8_t* buf, uint32_t sector)
+bool Fat16::LoadDataSector(uint8_t* buf, uint32_t sector)
 {
-	return _dev.ReadSector(_cluster0 + sector, buf);
+	return _dev.read_blocks(_cluster0 + sector, 1, buf);
 }
 
 
-bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sectors)
+bool Fat16::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sectors)
 {
 	while (num_sectors--) {
-		if (!_dev.ReadSector(_cluster0 + sector, buf + buf.Grow(512)))
+		if (!_dev.read_blocks(_cluster0 + sector, 1, buf + buf.Grow(512)))
 			return false;
 		++sector;
 	}
@@ -219,14 +219,14 @@ bool Fat::LoadDataSectors(Vector<uint8_t>& buf, uint32_t sector, uint num_sector
 }
 
 
-Fat::FTWalker::FTWalker(Fat& fat) :
+Fat16::FTWalker::FTWalker(Fat16& fat) :
 	_fat(fat)
 {
 	Reset();
 }
 
 
-bool Fat::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
+bool Fat16::FTWalker::Find(const String& path, bool enclosing, String& enclosed)
 {
 	Vector<String*> pathlist;
 	path.Split(pathlist, STR("/"));
@@ -256,7 +256,7 @@ done:
 }
 
 
-bool Fat::FTWalker::Reset()
+bool Fat16::FTWalker::Reset()
 {
 	_dir.Clear();
 
@@ -275,7 +275,7 @@ bool Fat::FTWalker::Reset()
 }
 
 
-bool Fat::FTWalker::Load(uint entry)
+bool Fat16::FTWalker::Load(uint entry)
 {
 	assert(entry != NOT_FOUND);
 
@@ -290,7 +290,7 @@ bool Fat::FTWalker::Load(uint entry)
 }
 
 
-uint Fat::FTWalker::FindNext(const String& name, uint start)
+uint Fat16::FTWalker::FindNext(const String& name, uint start)
 {
 	if (_dir.Empty() || start == Size())  return NOT_FOUND;
 
@@ -298,7 +298,7 @@ uint Fat::FTWalker::FindNext(const String& name, uint start)
 	assert(start == NOT_FOUND || start < Size());
 
 	for (uint entry = start != NOT_FOUND ? start + 1 : 0; entry < Size(); ++entry) {
-		const FatDirEnt* d = GetDirEnt(entry);
+		const Dirent* d = GetDirEnt(entry);
 
 		if (!d->IsUsed()) continue;
 		if (d->IsLFN()) continue;
@@ -315,7 +315,7 @@ uint Fat::FTWalker::FindNext(const String& name, uint start)
 }
 
 
-bool Fat::FTWalker::GetLFN(String& lfn, uint entry) const
+bool Fat16::FTWalker::GetLFN(String& lfn, uint entry) const
 {
 	assert(entry != NOT_FOUND);
 
@@ -325,7 +325,7 @@ bool Fat::FTWalker::GetLFN(String& lfn, uint entry) const
 
 	while ((int)entry >= 0) {
 
-		const FatDirEnt* d = GetDirEnt(entry);
+		const Dirent* d = GetDirEnt(entry);
 
 		if (!d->IsLFN()) break;
 
@@ -359,9 +359,9 @@ bool Fat::FTWalker::GetLFN(String& lfn, uint entry) const
 }
 
 
-bool Fat::FTWalker::GetSFN(String& sfn, uint entry) const
+bool Fat16::FTWalker::GetSFN(String& sfn, uint entry) const
 {
-	const FatDirEnt* d = GetDirEnt(entry);
+	const Dirent* d = GetDirEnt(entry);
 
 	Vector<uchar> v;
 	NameFrom83(v, d->name);
@@ -370,59 +370,59 @@ bool Fat::FTWalker::GetSFN(String& sfn, uint entry) const
 }
 
 
-FatDirEnt* Fat::FTWalker::GetDirEnt(uint entry)
+Fat16::Dirent* Fat16::FTWalker::GetDirEnt(uint entry)
 {
 	assert(entry != NOT_FOUND);
-	if (entry * sizeof (FatDirEnt) >= _dir.Size()) return NULL;
+	if (entry * sizeof (Dirent) >= _dir.Size()) return NULL;
 
-	return (FatDirEnt*)(_dir + 0) + entry;
+	return (Dirent*)(_dir + 0) + entry;
 }
 
 
-const FatDirEnt* Fat::FTWalker::GetDirEnt(uint entry) const
+const Fat16::Dirent* Fat16::FTWalker::GetDirEnt(uint entry) const
 {
 	assert(entry != NOT_FOUND);
-	if (entry * sizeof (FatDirEnt) >= _dir.Size()) return NULL;
+	if (entry * sizeof (Dirent) >= _dir.Size()) return NULL;
 
-	return (FatDirEnt*)(_dir + 0) + entry;
+	return (Dirent*)(_dir + 0) + entry;
 }
 
 
-FatFile* Fat::Open(const String& path)
+Fat16File* Fat16::Open(const String& path)
 {
-	_dev.Retain();
+	_dev.retain();
 
-	FatFile* file = NULL;
+	Fat16File* file = NULL;
 
 	FTWalker ftw(*this);
 	String filename;
 	if (ftw.Find(path, true, filename)) {
 		const uint entry = ftw.FindNext(filename);
 		if (entry != NOT_FOUND) {
-			file = new FatFile(*this);
+			file = new Fat16File(*this);
 
-			const FatDirEnt* dirent = ftw.GetDirEnt(entry);
+			const Dirent* dirent = ftw.GetDirEnt(entry);
 			file->_size = dirent->GetFileSize();
 			file->_clusters.Reserve(SectorToCluster((file->_size + 511) / 512) + 1);
 
 			if (!GetFileClusters(file->_clusters, dirent->GetCluster()))
-				delete exch<FatFile*>(file, NULL);
+				delete exch<Fat16File*>(file, NULL);
 		}
 	}
 
-	if (!file) _dev.Release();
+	if (!file) _dev.release();
 	return file;
 }
 
 
-bool FatFile::Seek(filepos_t new_pos)
+bool Fat16File::Seek(filepos_t new_pos)
 {
 	_pos = new_pos;
 	return true;
 }
 
 
-uint FatFile::Read(void* buf, uint numbytes)
+uint Fat16File::Read(void* buf, uint numbytes)
 {
 	uint result = 0;
 
@@ -448,7 +448,7 @@ uint FatFile::Read(void* buf, uint numbytes)
 }
 
 
-uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
+uint Fat16File::Read(Deque<uint8_t>& buf, uint numbytes)
 {
 	if (_pos + numbytes > _size)  numbytes = _size - _pos;
 
@@ -456,20 +456,20 @@ uint FatFile::Read(Deque<uint8_t>& buf, uint numbytes)
 }
 
 
-uint FatFile::Write(const void* buf, uint numbytes)
+uint Fat16File::Write(const void* buf, uint numbytes)
 {
 	return 0;
 }
 
 
-void FatFile::Close()
+void Fat16File::Close()
 {
-	_fat._dev.Release();
+	_fat._dev.release();
 	delete this;
 }
 
 
-bool FatFile::BufferSector(uint32_t sector)
+bool Fat16File::BufferSector(uint32_t sector)
 {
 	if (_buf_sec == NOT_FOUND || _buf_sec != sector) {
 		if (_fat.LoadDataSector(_sector, sector)) {

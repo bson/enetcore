@@ -1,14 +1,14 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#ifdef ENABLE_SDCARD
+#ifdef ENABLE_SDSPI
 
 #include "core/enetkit.h"
-#include "core/sdcard.h"
+#include "core/sdspi.h"
 #include "board.h"
 
 
-SDCard::SDCard(SpiDev& spi) :
+SDSpi::SDSpi(SpiDev& spi) :
     _spi(spi)
 {
     _drivelock = NULL;
@@ -19,20 +19,20 @@ SDCard::SDCard(SpiDev& spi) :
 }
 
 
-void SDCard::SetLock(Output *lock)
+void SDSpi::SetLock(Output *lock)
 {
     _drivelock = lock;
 }
 
 
-bool SDCard::Init()
+bool SDSpi::init()
 {
     Mutex::Scoped L(_lock);
 
     if (_initialized)
         return true;
 
-    LpcSpiDev::AcquireBus G(_spi);
+    SpiDev::AcquireBus G(_spi);
 
     _spi.Select();
 
@@ -54,7 +54,7 @@ bool SDCard::Init()
         value = SendCMD(0);
 
     if (value != 1) {
-        DMSG("SDCard: CMD0 failed - missing card?");
+        DMSG("SDSpi: CMD0 failed - missing card?");
         _spi.Deselect();
         return false;
     }
@@ -63,12 +63,12 @@ bool SDCard::Init()
 
     value = SendCMD(8, 0, 1, 0xaa);
     if (value == -1) {
-        DMSG("SDCard: initialization failed");
+        DMSG("SDSpi: initialization failed");
         _spi.Deselect();
         return false;
     }
 
-    Retain();
+    retain();
 
     _sdhc = false;
     _version2 = value != 5;     // 5: Invalid command - not a 2.00 card
@@ -117,16 +117,16 @@ bool SDCard::Init()
         _spi.Configure(0, 24000000); // Mode 0, 24MHz
         console("Version %u SD%s Card in slot", _version2 + 1, _sdhc ? "HC/XC" : "");
     } else {
-        console("SDCard: initialization failed - card not ready");
+        console("SDSpi: initialization failed - card not ready");
     }
 
-    Release();
+    release();
 
     return _initialized;
 }
 
 
-int SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c, bool ssel)
+int SDSpi::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c, bool ssel)
 {
     _lock.AssertLocked();
 
@@ -153,7 +153,7 @@ int SDCard::SendCMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c, bool ssel)
 }
 
 
-uint64_t SDCard::SendCMDR(uint8_t num, uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
+uint64_t SDSpi::SendCMDR(uint8_t num, uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 {
     assert(num);
 
@@ -174,7 +174,7 @@ uint64_t SDCard::SendCMDR(uint8_t num, uint8_t cmd, uint16_t a, uint8_t b, uint8
 }
 
 
-int SDCard::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
+int SDSpi::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 {
     LpcSpiDev::AcquireBus G(_spi);
 
@@ -182,7 +182,7 @@ int SDCard::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 
     int result = SendCMD(55,0,0,0,false);
     if (result != 1) {
-        DMSG("SDCard: CMD55 failed");
+        DMSG("SDSpi: CMD55 failed");
         return -1;
     }
     _spi.Deselect();
@@ -197,15 +197,17 @@ int SDCard::SendACMD(uint8_t cmd, uint16_t a, uint8_t b, uint8_t c)
 }
 
 
-bool SDCard::ReadSector(uint secnum, void* buf)
+int SDSpi::read_blocks(uint secnum, uint32_t count, void* buf, bool)
 {
-    Mutex::Scoped L(_lock);
-    LpcSpiDev::AcquireBus G(_spi);
+    assert(count == 1);
 
-    const uint pos = _sdhc ? secnum : 512 * secnum;
+    Mutex::Scoped L(_lock);
+    SpiDev::AcquireBus G(_spi);
+
+    const uint32_t pos = _sdhc ? secnum : 512 * secnum;
 
     bool crcok;
-    uint tries = 4;             // Retry a few times on CRC error
+    int tries = 4;             // Retry a few times on CRC error
     do {
         const Time rdstart = Time::Now();
 
@@ -214,7 +216,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
         if (result == -1) {
             DMSG("SD: no response to read command");
             _spi.Deselect();
-            return false;
+            return -1;
         }
 
         // Wait up to 100 msec for a reply, retrying in 250usec
@@ -224,7 +226,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
         if (result || b1 != 0xfe) {
             DMSG("SD: Read Command failed: %x, %x", result, b1);
             _spi.Deselect();
-            return false;
+            return -1;
         }
         DMSG("SD sector read: %u usec", (uint)(Time::Now() - rdstart).GetUsec());
 
@@ -249,7 +251,7 @@ bool SDCard::ReadSector(uint secnum, void* buf)
 }
 
 
-void SDCard::Retain()
+void SDSpi::retain()
 {
     Mutex::Scoped L(_lock);
     if (!_inuse++ && _drivelock)
@@ -257,7 +259,7 @@ void SDCard::Retain()
 }
 
 
-void SDCard::Release()
+void SDSpi::release()
 {
     Mutex::Scoped L(_lock);
     assert(_inuse);

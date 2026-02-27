@@ -88,7 +88,7 @@ DEV_CTL_REG(SYST_RVR);
 DEV_CTL_REG(SYST_CVR);
 DEV_CTL_REG(SYST_CALIB);
 
-// ARM Core Cortex-M4 system control
+// ARM Core Cortex-M7 system control
 DEV_CTL_REG(CPUID);
 DEV_CTL_REG(ACTLR);
 DEV_CTL_REG(ICSR);
