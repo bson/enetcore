@@ -9,7 +9,7 @@ CORE_SRCS = platform.cxx assert.cxx trace.cxx crc32.cxx crc16.cxx	\
 	time.cxx lookup3.cxx pstring.cxx hashtable.cxx thread.cxx		\
 	fixedpoint.cxx mutex.cxx init.cxx netaddr.cxx usbtmc.cxx		\
     network.cxx dhcp.cxx ip.cxx udp.cxx dns.cxx                     \
-    sdspi.cxx fat16.cxx blkcache.cxx
+    sdspi.cxx fat16.cxx blkcache.cxx gptmap.cxx
 
 SRCS += $(addprefix $(COREDIR)/,$(CORE_SRCS))
 
