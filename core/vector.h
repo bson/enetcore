@@ -6,6 +6,7 @@
 
 #include "core/mem.h"
 #include "core/arithmetic.h"
+#include "core/assert.h"
 
 // Simple vector
 // Safe for use with POD only

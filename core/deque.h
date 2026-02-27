@@ -4,6 +4,9 @@
 #ifndef __DEQUE_H__
 #define __DEQUE_H__
 
+#include "core/vector.h"
+
+
 // Functionally a deque, but doesn't adher to the STL's complexity contract.
 // It's best suited for pushing at the back and popping from the front, while
 // poorly suited for pushing at the front and popping at the back.

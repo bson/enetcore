@@ -4,6 +4,8 @@
 #ifndef __ARC4_H__
 #define __ARC4_H__
 
+#include <stdint.h>
+#include "compiler.h"
 
 class Arc4 {
 	uint8_t _S[256];

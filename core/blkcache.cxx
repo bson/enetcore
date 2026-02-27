@@ -3,10 +3,8 @@
 // See LICENSE for details. 
 //
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include "blkcache.h"
+#include "core/enetcore.h"
+#include "core/blkcache.h"
 
 
 void CacheBlockDev::lru_move_to_front(CacheEntry *e)

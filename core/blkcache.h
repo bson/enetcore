@@ -7,13 +7,12 @@
 #define __BLKCACHE_H__
 
 #include <stdint.h>
-#include <string.h>
-#include "blockdev.h"
+#include "core/blockdev.h"
 
 
-class CacheBlockDev: public BlockDev 
-{
-// Hard-wire the size
+class CacheBlockDev: public BlockDev {
+
+    // Hard-wire the size
     enum : int { CACHE_SECTORS = 16 };
     enum : int { SECTOR_SIZE = 512 };
 
