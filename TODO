@@ -1,15 +1,17 @@
 ----- TODO
 
-Port to STM32H753
+Implement Stm32Sdio for H753
+  - Verify that AHB_FREQ is a multiple of 12.5MHz for Default Speed,
+    25MHz for High Speed
+  - Determine what the card supports: DS, HS, SDR50, DDR50?
+  - Can H753 support SDR/DDR? (1.8V)
 
 Implement StmEthernet for H753
 
 Implement LAN8720A PHY
 
 Replace header file #ifdef's with #pragma once
-
-DMA peripherals should have a fixed DMA stream assigned since DMAMUX can now
-assign any request to any stream.
+  -- Make sure they're not appended to the release build fat source
 
 Add DMA2 and DMAMUX2 if there is a use case.
 
@@ -26,10 +28,6 @@ Test HSI config
 
 Fix SWO/Openocd
 
-Enable the backup regulator in Power
-- Set CSR.BRE, wait for CSR.BRR to get set
-- Otherwise backup SRAM is lost on Vbat
-
 Add ESP12E serial support
 
 Remove SPI to ESP12, use UART only
@@ -40,8 +38,6 @@ Clock rollover: allow fractional HZ (e.g. 0.1)
 Add MDMA memmove() for large blocks (IOBuffer?)?
 
 Implement StmWdt
-
-Implement StmSdio
 
 Implement a "logout" feature in BKPSRAM
 
