@@ -125,7 +125,7 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
     start(State::DATA_IN_PROGRESS);
 
     reg(Register::DTIMER) = 0xffffffff;
-    reg(Register::DLEN)   = bytes;
+    reg(Register::DLENR)   = bytes;
 
     reg(Register::DMABASE0) = (uintptr_t)buf;
     reg(Register::IDMACTRL) = BIT(IDMAEN);
@@ -159,7 +159,7 @@ Stm32Sdio<SDMMC>::data_write(const void *buf, uint32_t bytes)
     flush_dcache(buf, bytes);
 
     reg(Register::DTIMER) = 0xffffffff;
-    reg(Register::DLEN)   = bytes;
+    reg(Register::DLENR)   = bytes;
 
     reg(Register::IDMABASE0) = (uintptr_t)buf;
     reg(Register::IDMACTRL)  = BIT(IDMAEN);
