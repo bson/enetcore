@@ -40,8 +40,13 @@ template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::set_clock(uint32_t hz)
 {
     uint32_t div = (get_kernel_clk() / hz / 2);
+
+    // Round div up (freq down) to avoid overshooting
+    if (get_kernel_clk() % hz)
+        ++div;
+
     if (div > 0)
-        div -= 1;
+        --div;
 
     assert(div <= 0x3ff);
 
