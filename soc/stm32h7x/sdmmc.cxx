@@ -50,6 +50,8 @@ void Stm32Sdio<SDMMC>::set_clock(uint32_t hz)
 
     assert(div <= 0x3ff);
 
+    DMSG("SDMMC: ker_ck = %u, div = %u  =>  SDIO_CK = %u", AHB_FREQ, div, AHB_FREQ/div);
+
     reg(Register::CLKCR) = Bitfield(reg(Register::CLKCR))
         .f(CLKDIV_W, CLKDIV, div);
 }
