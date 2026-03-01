@@ -8,6 +8,8 @@
 
 #include <stdint.h>
 #include "core/sdio.h"
+#include "core/thread.h"
+#include "core/mutex.h"
 
 
 // Assume only one SDIO bus, so specialize it.
@@ -217,8 +219,9 @@ public:
     };
 
 private:
-    State _state;
-    Result _result;
+    mutable Mutex _lock;
+    State         _state;
+    Result        _result;
 
     volatile uint32_t& reg(Register r) { return *(volatile uint32_t*)(SDMMC + (uint32_t)r); }
 
@@ -226,6 +229,9 @@ private:
 	static void Interrupt(void* token) {
         ((Stm32Sdio<SDMMC>*)token)->HandleInterrupt();
     }
+
+    // start new operation, blocking to wait.  Changes to new state.  Clears result.
+    void start(State new_state);
 
 public:
     // NVIC needs to set up for IRQ, with object ref to this

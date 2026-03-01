@@ -310,4 +310,65 @@ struct EX {
 #error "implement this"
 #endif
 
+// Cache alignment expansion
+enum { CACHE_LINE_SIZE = 32 };
+
+static void cache_align(uintptr_t *addr, uint32_t *size)
+{
+    uintptr_t start = *addr;
+    uintptr_t end   = start + *size;
+
+    start &= ~(CACHE_LINE_SIZE - 1);
+    end = (end + CACHE_LINE_SIZE - 1) &
+          ~(CACHE_LINE_SIZE - 1);
+
+    *addr = start;
+    *size = end - start;
+}
+
+
+// Flush (clean) data cache
+static void flush_dcache_line(uintptr_t addr)
+{
+    *(volatile uint32_t*)DCCMVAC = addr;
+}
+
+
+static void flush_dcache(void* block, uint32_t len)
+{
+    uintptr_t addr = (uintptr_t)block;
+
+    cache_align(&addr, &len);
+
+    const uint32_t end = addr + len;
+
+    while (addr < len) {
+        flush_dcache_line(addr);
+        addr += CACHE_LINE_SIZE;
+    }
+}
+
+
+// Invalidate data cache
+static void invalidate_dcache_line(uintptr_t addr)
+{
+    *(volatile uint32_t*)DCCIMVAC = addr;
+}
+
+
+static void invalidate_dcache(void* block, uint32_t len)
+{
+    uintptr_t addr = (uintptr_t)block;
+
+    cache_align(&addr, &len);
+
+    const uint32_t end = addr + len;
+
+    while (addr < len) {
+        invalidate_dcache_line(addr);
+        addr += CACHE_LINE_SIZE;
+    }
+}
+
+
 #endif // _CORTEX_M7_H_

@@ -5,23 +5,12 @@
 #include <stdint.h>
 
 #include "core/enetcore.h"
+#include "core/mutex.h"
+#include "core/thread.h"
 #include "core/bits.h"
 #include "core/bitfield.h"
 
 #include "soc/stm32h7x/sdmmc.h"
-
-
-// Cache flush
-static void cache_clean(const void *addr, uint32_t len)
-{
-    //SCB_CleanDCache_by_Addr((uint32_t*)addr, len);
-}
-
-// Cache invalidation
-static void cache_invalidate(void *addr, uint32_t len)
-{
-    //SCB_InvalidateDCache_by_Addr((uint32_t*)addr, len);
-}
 
 
 // Note: device needs to be enabled before use
@@ -78,18 +67,29 @@ void Stm32Sdio<SDMMC>::set_bus_width_4bit()
 
 
 template <uintptr_t SDMMC>
+void Stm32Sdio<SDMMC>::start(typename Stm32Sdio<SDMMC>::State new_state)
+{
+    while (_state != State::IDLE) {
+        _lock.Unlock();
+        Thread::WaitFor(this);
+        _lock.Lock();
+    }
+
+    _state = new_state;
+    _result = Result::SUCCESS;
+
+    _lock.Unlock();
+}
+
+
+template <uintptr_t SDMMC>
 typename Stm32Sdio<SDMMC>::Result
 Stm32Sdio<SDMMC>::send_cmd(uint8_t cmd,
-                               uint32_t arg,
-                               uint32_t resp_type,
-                               uint32_t *response)
+                           uint32_t arg,
+                           uint32_t resp_type,
+                           uint32_t *response)
 {
-    while (_state != State::IDLE)
-        Thread::WaitFor(this);
-
-    // XXX This should be done atomically in the wait, above
-    _state = State::CMD_IN_PROGRESS;
-    _result = Result::SUCCESS;
+    start(State::CMD_IN_PROGRESS);
 
     reg(Register::ICR) = 0xffffffff;
     reg(Register::ARGR) = arg;
@@ -122,14 +122,7 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
     // Buffer must be aligned on 32-byte boundary
     assert(((uintptr_t)buf & 31) == 0);
 
-    while (_state != State::IDLE)
-        Thread::WaitFor(this);
-
-    cache_invalidate(buf, bytes);
-
-    // XXX This should be done atomically in the wait, above
-    _state = State::DATA_IN_PROGRESS;
-    _result = Result::SUCCESS;
+    start(State::DATA_IN_PROGRESS);
 
     reg(Register::DTIMER) = 0xffffffff;
     reg(Register::DLEN)   = bytes;
@@ -145,7 +138,7 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
     while (_state != State::DONE)
         Thread::WaitFor(this);
 
-    cache_invalidate(buf, bytes);
+    invalidate_dcache(buf, bytes);
 
     _state = State::IDLE;
     Thread::WakeSingle(this);
@@ -161,14 +154,9 @@ Stm32Sdio<SDMMC>::data_write(const void *buf, uint32_t bytes)
     // Buffer must be aligned on 32-byte boundary
     assert(((uintptr_t)buf & 31) == 0);
 
-    while (_state != State::IDLE)
-        Thread::WaitFor(this);
+    start(State::DATA_IN_PROGRESS);
 
-    cache_clean(buf, bytes);
-
-    // XXX This should be done atomically in the wait, above
-    _state = State::DATA_IN_PROGRESS;
-    _result = Result::SUCCESS;
+    flush_dcache(buf, bytes);
 
     reg(Register::DTIMER) = 0xffffffff;
     reg(Register::DLEN)   = bytes;
