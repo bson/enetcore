@@ -312,7 +312,19 @@ struct EX {
 
 [[__finline]] static inline void __dsb()
 {
-    asm volatile ("dsb 0xf":::"memory");
+    asm volatile ("dsb":::"memory");
+}
+
+
+[[__finline]] static inline void __isb()
+{
+    asm volatile ("isb":::"memory");
+}
+
+
+[[__finline]] static inline void __dmb()
+{
+    asm volatile ("dmb":::);
 }
 
 
@@ -366,5 +378,66 @@ static void invalidate_dcache(const void* block, uint32_t len)
     }
 }
 
+
+// Invalidate all I cache
+static void invalidate_icache()
+{
+    *(volatile uint32_t*)ICIALLU = 0;
+    __dsb();
+    __isb();
+}
+
+
+// Flush ad invalidate all D cache
+static void invalidate_dcache()
+{
+    asm volatile("mov  r0, #0x0;"
+                 "ldr  r11, =CSSELR;"
+                 "str  r0, [r11];"
+                 "dsb;"
+                 "ldr  r11, =CCSIDR;"
+                 "ldr  r2, [r11];"
+                 "and  r1, r2, #0x7;"
+                 "add  r9, r1, #0x4;"
+                 "mov  r1, #0x3ff;"
+                 "ands r4, r1, r2, lsr #3;"
+                 "mov  r1, #0x7fff;"
+                 "ands r2, r1, r2, lsr #13;"
+                 "clz  r6, r4;"
+                 "ldr  r11, =DCISW;"
+           "1:"
+                 "mov  r1, r4;"
+           "2:"
+                 "lsl  r3, r1, r6;"
+                 "lsl  r8, r2, r9;"
+                 "orr  r3, r3, r8;"
+                 "str  r3, [r11];"
+                 "subs r1, r1, #0x1;"
+                 "bge  2b;"
+                 "subs r2, r2, #0x1;"
+                 "bge  1b;"
+                 "dsb;"
+                 "isb" ::: "r0", "r1", "r2", "r3", "r4", "r6",  "r8", "r9", "r11");
+}
+
+
+// Enable all I cache
+static void enable_icache()
+{
+    invalidate_icache();
+    *(volatile uint32_t*)CCR |= BIT(17);
+    __dsb();
+    __isb();
+}
+
+
+// Enable all D cache
+static void enable_dcache()
+{
+    invalidate_dcache();
+    *(volatile uint32_t*)CCR |= BIT(16);
+    __dsb();
+    __isb();
+}
 
 #endif // _CORTEX_M7_H_
