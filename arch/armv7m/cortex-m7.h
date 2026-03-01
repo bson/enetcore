@@ -310,6 +310,12 @@ struct EX {
 #error "implement this"
 #endif
 
+[[__finline]] static inline void __dsb()
+{
+    asm volatile ("dsb 0xf":::"memory");
+}
+
+
 // Cache alignment expansion
 enum { CACHE_LINE_SIZE = 32 };
 
@@ -339,6 +345,7 @@ static void flush_dcache(const void* block, uint32_t len)
     while (addr < len) {
         *(volatile uint32_t*)DCCMVAC = addr;
         addr += CACHE_LINE_SIZE;
+        __dsb();
     }
 }
 
@@ -355,6 +362,7 @@ static void invalidate_dcache(const void* block, uint32_t len)
     while (addr < len) {
         *(volatile uint32_t*)DCCIMVAC = addr;
         addr += CACHE_LINE_SIZE;
+        __dsb();
     }
 }
 
