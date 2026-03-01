@@ -6,6 +6,9 @@ Implement Stm32Sdio for H753
   - Determine what the card supports: DS, HS, SDR50, DDR50?
   - Can H753 support SDR/DDR? (1.8V)
 
+Stm32Sdio
+  - Integrate CARD_DET using Gpio Pin and check before ops
+
 Implement StmEthernet for H753
 
 Implement LAN8720A PHY
