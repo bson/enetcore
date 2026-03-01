@@ -11,15 +11,17 @@
 #undef ENABLE_IP
 
 
+#define MHZ(F) ((F)*1000000)
+
 enum { 
-    CPU_FREQ      = 200000000,
-    AHB_FREQ      = 100000000,
-    APB1_FREQ     =  20000000,   // APB1
-    APB2_FREQ     =  20000000,   // APB2
-    APB3_FREQ     =  20000000,   // APB3 
-    APB4_FREQ     =  20000000,   // APB4
-    CLOCK_TICK    = APB2_FREQ,   // System clock (TIM5) tick
-    CLOCK_HZ      = 1,           // Reload frequency for system clock
+    CPU_FREQ      = MHZ(240),
+    AHB_FREQ      = MHZ(120),
+    APB1_FREQ     = MHZ(20),    // APB1
+    APB2_FREQ     = APB1_FREQ,  // APB2
+    APB3_FREQ     = APB1_FREQ,  // APB3 
+    APB4_FREQ     = APB1_FREQ,  // APB4
+    CLOCK_TICK    = APB2_FREQ,  // System clock (TIM5) tick
+    CLOCK_HZ      = 1,          // Reload frequency for system clock
 };
 
 enum {
