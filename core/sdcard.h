@@ -12,14 +12,22 @@
 
 
 class SDCard: public BlockDev {
+    struct Capability {
+        uint32_t  max_default_freq;   /* Hz (from CSD) */
+        uint8_t   high_speed_supported;
+        uint8_t   uhs_supported;
+        uint8_t   sd_spec;            /* 1, 2, 3, etc */
+        uint8_t   bus_4bit_supported;
+    };
 
-    Sdio&     _sdio;            // SDIO 1 & 4 bit compatible interface
-    uint32_t  _rca;             // Relative Card Address
-    uint32_t  _size;            // Sector count
-    bool      _high_capacity;   // SDHC/SDXC
+    Sdio&      _sdio;           // SDIO 1 & 4 bit compatible interface
+    uint32_t   _rca;            // Relative Card Address
+    uint32_t   _size;           // Sector count
+    Capability _caps;           // Speed capabilities
+    bool       _high_capacity;  // SDHC/SDXC
+    uint8_t    _csd[16];        // Card CSD
 
     enum : uint16_t { BLOCK_SIZE = 512 };
-
 
 public:
     SDCard(Sdio& sdio)
@@ -38,7 +46,27 @@ public:
     uint32_t size() const { return _size; };
 
 private:
+    // Fetch card CSD
     int read_csd();
+
+    // Examine CSD determine card size
+    int find_size();
+
+    // Determine default speed
+    uint32_t parse_tran_speed(uint8_t ts);
+
+    // Read SCR
+    int read_scr(uint8_t scr[8]);
+
+    // Parse SCR to obtain SD spec and bus widths
+    void parse_scr(const uint8_t scr[8]);
+
+    // Check for HS support
+    bool check_high_speed();
+
+    // Obtain speed capabilities
+    int get_speed_caps();
+
     int wait_ready();
 };
 

@@ -76,6 +76,7 @@ void Stm32Sdio<SDMMC>::set_bus_width_4bit()
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::start(typename Stm32Sdio<SDMMC>::State new_state)
 {
+    _lock.Lock();
     while (_state != State::IDLE) {
         _lock.Unlock();
         Thread::WaitFor(this);
