@@ -9,6 +9,7 @@
 #include "core/mutex.h"
 #include "core/consumer.h"
 #include "core/bitfield.h"
+#include "arch/armv7m/cortex-m7.h"
 
 
 template <uint32_t SEND_BUF_SIZE = 128, uint32_t RECV_BUF_SIZE = 32>
@@ -407,9 +408,12 @@ private:
 
         if (_dma) {
             if (!_sendq.Empty()) {
-                if (!_tx._active)
-                    _dma->Transmit(this, _sendq.Buffer(), (_tx_size = _sendq.Continuous()),
-                                   true);
+                if (!_tx._active) {
+                    _tx_size = _sendq.Continuous();
+                    const void* buf = _sendq.Buffer();
+                    flush_dcache(buf, _tx_size);
+                    _dma->Transmit(this, buf, _tx_size, true);
+                }
             } else {
                 _sendq.Clear();     // Normalize
                 _dma->ReleaseTx(this);

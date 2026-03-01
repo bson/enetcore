@@ -6,7 +6,7 @@
 
 #include "core/bits.h"
 #include "core/bitfield.h"
-
+#include "arch/armv7m/cortex-m7.h"
 
 class Stm32Hash: public Stm32Dma::Peripheral {
 
@@ -260,7 +260,10 @@ private:
         if (_dma) {
             if (!_sendq.Empty()) {
                 if (!_tx._active)
-                    _dma->Transmit(this, _sendq.Buffer(), (_tx_size = _sendq.Continuous()), true);
+                    _tx_size = _sendq.Continuous();
+                    const void* buf = _sendq.Buffer();
+                    flush_dcache(buf, _tx_size);
+                    _dma->Transmit(this, buf, _tx_size, true);
             } else {
                 _sendq.Clear();     // Normalize
                 _dma->ReleaseTx(this);

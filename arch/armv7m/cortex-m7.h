@@ -328,13 +328,7 @@ static void cache_align(uintptr_t *addr, uint32_t *size)
 
 
 // Flush (clean) data cache
-static void flush_dcache_line(uintptr_t addr)
-{
-    *(volatile uint32_t*)DCCMVAC = addr;
-}
-
-
-static void flush_dcache(void* block, uint32_t len)
+static void flush_dcache(const void* block, uint32_t len)
 {
     uintptr_t addr = (uintptr_t)block;
 
@@ -343,20 +337,14 @@ static void flush_dcache(void* block, uint32_t len)
     const uint32_t end = addr + len;
 
     while (addr < len) {
-        flush_dcache_line(addr);
+        *(volatile uint32_t*)DCCMVAC = addr;
         addr += CACHE_LINE_SIZE;
     }
 }
 
 
 // Invalidate data cache
-static void invalidate_dcache_line(uintptr_t addr)
-{
-    *(volatile uint32_t*)DCCIMVAC = addr;
-}
-
-
-static void invalidate_dcache(void* block, uint32_t len)
+static void invalidate_dcache(const void* block, uint32_t len)
 {
     uintptr_t addr = (uintptr_t)block;
 
@@ -365,7 +353,7 @@ static void invalidate_dcache(void* block, uint32_t len)
     const uint32_t end = addr + len;
 
     while (addr < len) {
-        invalidate_dcache_line(addr);
+        *(volatile uint32_t*)DCCIMVAC = addr;
         addr += CACHE_LINE_SIZE;
     }
 }

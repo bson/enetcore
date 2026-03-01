@@ -129,6 +129,8 @@ public:
         _word_size = Stm32Dma::WordSize::WORD16;
         _ipl = IPL_DAC;
             
+        flush_dcache(data, nsamples * sizeof *data);
+
         dma.AssignTx(this);
         dma.Transmit(this, data, nsamples, true);
         dma.ReleaseTx(this);
