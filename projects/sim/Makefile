@@ -14,19 +14,20 @@ TOOLDIR=$(TOOLCHAIN)/bin
 
 ifeq ($(CONFIG),opt)
 # Runtime bounds checking only adds a trivial amount of code
-CFLAGS = -Os -DTRACE -DCHECK_BOUNDS=1 -funsigned-char
+CFLAGS = -g -Os -DTRACE -DCHECK_BOUNDS=1
 endif
 ifeq ($(CONFIG),debug)
-CFLAGS = -g3 -O1 -DTRACE -DDEBUG -funsigned-char
+CFLAGS = -g3 -Og -DTRACE -DDEBUG
 AFLAGS = --defsym DEBUG=1
 endif
 ifeq ($(CONFIG),release)
-CFLAGS = -Os -DCHECK_BOUNDS=1 -funsigned-char -fwhole-file
+CFLAGS = -g -Os -DCHECK_BOUNDS=1 -fwhole-file
 endif
 
 ODIR ?= build_$(CONFIG)
 
-CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno
+CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno \
+	-funsigned-char
 
 AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map -N -z noexecstack
