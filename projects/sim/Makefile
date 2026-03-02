@@ -5,8 +5,8 @@ VPATH=.
 ENETCORE = enetcore
 TOOLSET ?= gnuc
 
-TOOLCHAIN=/opt/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi
-TOOLVER ?= 13.3.1
+TOOLCHAIN=/opt/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-eabi
+TOOLVER ?= 15.2.1
 
 CONFIG ?= debug
 
