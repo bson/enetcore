@@ -242,7 +242,8 @@ int SDCard::init()
         _sdio.set_bus_width_4bit();
     }
 
-    _sdio.set_clock(25000000); /* 25 MHz normal */
+    // If card supports HS, switch to it, otherwise DS
+    _sdio.set_clock(_caps.high_speed_supported ? 25000000 : 12500000);
 
     return 0;
 }

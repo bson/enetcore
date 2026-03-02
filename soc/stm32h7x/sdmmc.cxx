@@ -132,6 +132,8 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
 
     start(State::DATA_IN_PROGRESS);
 
+    flush_dcache(buf, bytes);
+
     reg(Register::DTIMER) = 0xffffffff;
     reg(Register::DLENR)   = bytes;
 

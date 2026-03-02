@@ -11,7 +11,7 @@
 #undef ENABLE_IP
 
 
-#define MHZ(F) ((F)*1000000)
+#define MHZ(F) ((unsigned long)((long double)(F)*1000000.0))
 
 enum { 
     CPU_FREQ      = MHZ(240),
