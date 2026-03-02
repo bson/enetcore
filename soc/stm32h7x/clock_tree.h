@@ -434,7 +434,7 @@ public:
     };
 
 
-#define VREG(offset) (*((volatile uint32_t*)(BASE_RCC+(offset))))
+#define VREG(offset) (*((volatile uint32_t*)(uint32_t(BASE_RCC)+(offset))))
 
     // Assumes running on HSI at start.
     // Starts HSI, HSI48, CSI or LSI as needed, if used as a clock source.

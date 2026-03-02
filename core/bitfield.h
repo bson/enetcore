@@ -12,11 +12,11 @@ class Bitfield {
     const T _val;
 
 public:
-    Bitfield<T>(const T& val = 0)
+    Bitfield(const T& val = 0)
         : _val(val)
     { }
 
-    Bitfield<T>(const volatile T& val = 0)
+    Bitfield(const volatile T& val = 0)
         : _val(val)
     { }
 
@@ -41,6 +41,6 @@ public:
         return Bitfield<T>((_val & ~(T(mask) << bit0)) | ((T(val) & T(mask)) << bit0));
     }
 
-    Bitfield<T>(const Bitfield<T>&) = delete;
-    Bitfield<T>& operator=(const Bitfield<T>&) = delete;
+    Bitfield(const Bitfield<T>&) = delete;
+    Bitfield& operator=(const Bitfield<T>&) = delete;
 };

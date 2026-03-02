@@ -66,7 +66,7 @@ enum {
     AHB_FREQ_MAX = 240000000,
 };
 
-enum { 
+enum : uint32_t { 
     // APB1
 
     BASE_TIM2         = 0x40000000,

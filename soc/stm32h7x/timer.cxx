@@ -117,7 +117,7 @@ void Clock::Start() {
 
 void Clock::Tick()
 {
-	_time += TIMEBASE / CLOCK_HZ;
+	_time += uint32_t(TIMEBASE) / uint32_t(CLOCK_HZ);
 }
 
 uint64_t Clock::GetTime() {

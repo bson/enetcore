@@ -6,7 +6,7 @@
 #ifdef ENETCORE
 #include "params.h"
 
-enum {
+enum : uint32_t {
     TIME_RESOLUTION = 20,       // In bits, 2^r must be less than PCLK by some factor
     TIMEBASE = (1 << TIME_RESOLUTION),
 };

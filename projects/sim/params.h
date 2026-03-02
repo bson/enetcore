@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #undef ENABLE_SWO
 
 #undef ENABLE_ENET
@@ -12,7 +14,7 @@
 
 #define MHZ(F) ((unsigned long)((long double)(F)*1000000.0))
 
-enum { 
+enum : uint32_t { 
     CPU_FREQ      = MHZ(240),
     AHB_FREQ      = MHZ(120),
     APB1_FREQ     = MHZ(20),    // APB1
@@ -23,7 +25,7 @@ enum {
     CLOCK_HZ      = 1,          // Reload frequency for system clock
 };
 
-enum {
+enum : uint32_t {
     CCLK = CPU_FREQ,                // Core (CPU) clock
     SYSTICK_CLK = CPU_FREQ/8        // Systick clock (alternative, HCLK/8)
 };

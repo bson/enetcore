@@ -26,8 +26,8 @@ endif
 
 ODIR ?= build_$(CONFIG)
 
-CFLAGS += -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros -fno-math-errno \
-	-funsigned-char
+CFLAGS += -std=gnu++26 -ffinite-math-only -fsingle-precision-constant -fno-signed-zeros \
+	-fno-math-errno -funsigned-char
 
 AFLAGS +=-ahls
 LFLAGS=-Map $(ODIR)/image.map -N -z noexecstack

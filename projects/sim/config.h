@@ -24,7 +24,8 @@
 #define TEXT_REGION_SIZE  ((uintptr_t)&_etext - TEXT_REGION_START)
 
 // Main (default) internal RAM region, contains thread stacks.
-#define IRAM_REGION_SIZE (MAIN_THREAD_STACK + INTR_THREAD_STACK + 2*THREAD_DATA_SIZE + 8)
+#define IRAM_REGION_SIZE (uint32_t(MAIN_THREAD_STACK) + uint32_t(INTR_THREAD_STACK) \
+                          + 2*uint32_t(THREAD_DATA_SIZE) + 8)
 #define IRAM_REGION_START ((uintptr_t)&__stack_top - IRAM_REGION_SIZE)
 
 #define MALLOC_REGION_START ((uintptr_t)&_bss_end)
@@ -139,7 +140,7 @@ enum {
     HCLK_PER_CYC1  = AHB_FREQ/FMC1_FREQ,          // HCLKs per bus cycle
     BUS_TURN_CLK1  = HCLK_PER_CYC1/2,             // Bus turn HCLKs
     DATA_CLK1      = (HCLK_PER_CYC1 - BUS_TURN_CLK1), // Data cycle HCLKs
-    DATA_SETUP_CLK1= int(AHB_FREQ*4.5e-12)+1,     // Data setup (actually address setup for data access)
+    DATA_SETUP_CLK1= int((float)AHB_FREQ*4.5e-12)+1, // Data setup (actually address setup for data access)
     DATA_HOLD_CLK1 = DATA_CLK1 - DATA_SETUP_CLK1  // Data hold, HCLKs
 };
 
