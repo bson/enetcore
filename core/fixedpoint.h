@@ -1,8 +1,6 @@
-// Copyright (c) 2021 Jan Brittenson
+// Copyright (c) 2021-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __FIXEDPOINT_H__
-#define __FIXEDPOINT_H__
+#pragma once
 
 template <typename T, uint FBITS, typename T2>
 class FixedPoint {
@@ -102,5 +100,3 @@ typedef FixedPoint<uint16_t, 8, uint32_t> Q8_8;
 typedef FixedPoint<uint32_t, 28, uint64_t> Q4_28;
 typedef FixedPoint<uint32_t, 24, uint64_t> Q8_24;
 typedef FixedPoint<uint32_t, 20, uint64_t> Q12_20;
-
-#endif // __FIXEDPOINT_H__

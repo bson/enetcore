@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __IP_H__
-#define __IP_H__
+#pragma once
 
 #include "core/mutex.h"
 
@@ -455,5 +453,3 @@ private:
 };
 
 extern Ip _ip0;
-
-#endif // __IP_H__

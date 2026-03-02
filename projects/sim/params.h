@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __PARAMS_H__
-#define __PARAMS_H__
+#pragma once
 
 #undef ENABLE_SWO
 
@@ -33,5 +32,3 @@ enum {
 
 // SysTick uses alternative, implementation specific clock
 #define SYSTICK_ALT
-
-#endif // __PARAMS_H__

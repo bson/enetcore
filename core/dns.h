@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __DNS_H__
-#define __DNS_H__
+#pragma once
 
 #include "core/network.h"
 #include "core/udp.h"
@@ -109,6 +108,3 @@ public:
 };
 
 extern Dns _dns0;
-
-
-#endif // __DNS_H__

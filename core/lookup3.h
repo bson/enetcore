@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __LOOKUP3_H__
-#define __LOOKUP3_H__
+#pragma once
 
 namespace Lookup3 {
 	
@@ -26,4 +24,3 @@ namespace Lookup3 {
 	void selftest();
 #endif
 }
-#endif // __LOOKUP3_H__

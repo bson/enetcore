@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#pragma once
 
 #include "core/arc4.h"
 #include "core/deque.h"
@@ -99,5 +98,3 @@ namespace Util {
 	inline void RandomSeed(const uint8_t* key, uint key_len) { Arc4::RandomSeed(key, key_len); }
 	template <typename T> inline T Random() { return Arc4::Random<T>(); }
 }
-
-#endif	// __UTIL_H__

@@ -1,7 +1,5 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __ERROR_H__
 #define __ERROR_H__
 
 enum {
@@ -15,5 +13,3 @@ enum {
 	ERR_NOT_CONNECTED = 7,
 	ERR_DEST_UNREACH = 8
 };
-
-#endif // __ERROR_H__

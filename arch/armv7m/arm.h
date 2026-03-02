@@ -1,8 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ARM_H__
-#define __ARM_H__
+#pragma once
 
 // Generic ARM code and definitions
 
@@ -16,5 +15,3 @@
 #else
 #error "Unsupported compiler"
 #endif
-
-#endif // __ARM_H__

@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __FILE_H__
-#define __FILE_H__
+#pragma once
 
 typedef class File* file_t;
 typedef uint32_t filepos_t;
@@ -21,5 +19,3 @@ protected:
 	// Don't delete File; use Close()
 	virtual ~File() { }
 };
-
-#endif // __FILE_H__

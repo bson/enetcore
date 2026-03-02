@@ -1,5 +1,7 @@
-#ifndef __LIS302DL_H__
-#define __LIS302DL_H__
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 
 // Device interface for LIS302DL accelerometer in I2C mode
@@ -101,6 +103,3 @@ public:
 	// Read status
 	[[__finline]] uint8_t GetStatus() { return Read<uint8_t>(REG_STATUS); }
 };
-
-
-#endif // __LIS302DL_H__

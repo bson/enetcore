@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __TRACE_H__
-#define __TRACE_H__
+#pragma once
 
 #include "core/util.h"
 
@@ -25,5 +24,3 @@ void DMSG(const char* fmt, ...);
 static inline void NDMSG(const char* fmt, ...) { }
 #define DMSG NDMSG
 #endif
-
-#endif // __TRACE_H__

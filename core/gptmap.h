@@ -1,10 +1,7 @@
-//
 // Copyright 2026 Jan Brittenson
 // See LICENSE for details. 
-//
 
-#ifndef __GPTMAP_H__
-#define __GPTMAP_H__
+#pragma once
 
 #include <stdint.h>
 #include "core/blockdev.h"
@@ -166,5 +163,3 @@ namespace GPTMap {
         return a < (T1)b ? a : (T1)b;
     }
 }; // ns GPTMap
-
-#endif  // __GPTMAP_H__

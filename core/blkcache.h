@@ -1,10 +1,7 @@
-//
 // Copyright 2026 Jan Brittenson
 // See LICENSE for details. 
-//
 
-#ifndef __BLKCACHE_H__
-#define __BLKCACHE_H__
+#pragma once
 
 #include <stdint.h>
 #include "core/blockdev.h"
@@ -80,5 +77,3 @@ private:
 
     CacheBlockDev(CacheBlockDev&) = delete;
 };
-
-#endif // __BLKCACHE_H__

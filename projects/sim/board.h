@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __BOARD_H__
-#define __BOARD_H__
+#pragma once
 
 #include "compiler.h"
 #include "params.h"
@@ -42,5 +41,3 @@ extern Timer16 _tim5;
 
 // Board peripherals
 // LAN8720A
-
-#endif // __BOARD_H__

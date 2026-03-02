@@ -1,9 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018,2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ARC4_H__
-#define __ARC4_H__
-
+#pragma once
 #include <stdint.h>
 #include "compiler.h"
 
@@ -33,5 +31,3 @@ public:
 		return r;
 	}
 };
-
-#endif // __ARC4_H__

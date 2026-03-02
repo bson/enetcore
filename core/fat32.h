@@ -1,10 +1,7 @@
-//
 // Copyright 2026 Jan Brittenson
 // See LICENSE for details. 
-//
 
-#ifndef __FAT32_H__
-#define __FAT32_H__
+#pragma once
 
 #include <stdint.h>
 #include "core/thread.h"
@@ -446,5 +443,3 @@ namespace Fat32 {
     }
 
 }; // ns Fat32
-
-#endif // __FAT32_H__

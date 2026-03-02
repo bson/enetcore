@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018,2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ARITHMETIC_H__
-#define __ARITHMETIC_H__
+#pragma once
 
 #undef min
 #undef max
@@ -73,5 +72,3 @@ inline uint16_t Swap16(uint16_t val)
 	return ((val & 0xff00) >> 8) | ((val & 0xff) << 8);
 }
 #endif
-
-#endif // __ARITHMETIC_H__

@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ASSERT_H__
-#define __ASSERT_H__
+#pragma once
 
 extern bool _assert_stop;
 
@@ -60,5 +59,3 @@ inline void AssertNotInterrupt() { assert(!InExceptionHandler()); }
 #else
 #define assert_alloc(EXPR)  0
 #endif
-
-#endif // __ASSERT_H__

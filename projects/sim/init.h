@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __INIT_H__
-#define __INIT_H__
+#pragma once
 
 #include "params.h"
 #include "soc/stm32h7x/h753.h"
@@ -34,4 +33,3 @@ void fault0(uint num);
         fault0(num);
     }
 }
-#endif // __INIT_H__

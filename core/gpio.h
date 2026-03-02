@@ -1,9 +1,7 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __GPIO_H__
-#define __GPIO_H__
-
+#pragma once
 
 class Output {
 public:
@@ -39,5 +37,3 @@ public:
 	void Raise() { T::Reset(); }
 	void Lower() { T::Set(); }
 };
-
-#endif // __GPIO_H__

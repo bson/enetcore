@@ -1,12 +1,10 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
 // public api for steve reid's public domain SHA-1 implementation
 // this file is in the public domain
 
-#ifndef __SHA1_H__
-#define __SHA1_H__
-
+#pragma once
 
 class Sha1 {
 	uint32_t _state[5];
@@ -34,4 +32,3 @@ private:
 			 _state[2], _state[3], _state[4]);
 	}
 };
-#endif // __SHA1_H__

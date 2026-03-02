@@ -1,9 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __MALLOC_H__
-#define __MALLOC_H__
-
+#pragma once
 
 /*
   This is a version (aka dlmalloc) of malloc/free/realloc written by
@@ -1140,5 +1138,3 @@ int mspace_mallopt(int, int);
 #ifdef __cplusplus
 };  /* end of extern "C" */
 #endif /* __cplusplus */
-
-#endif /* __MALLOC_H__ */

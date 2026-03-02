@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __NETADDR_H__
-#define __NETADDR_H__
+#pragma once
 
 #ifdef ENABLE_IP
 
@@ -114,5 +113,3 @@ public:
 };
 
 #endif // ENABLE_IP
-
-#endif // __NETADDR_H__

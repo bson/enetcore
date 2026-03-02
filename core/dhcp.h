@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __DHCP_H__
-#define __DHCP_H__
+#pragma once
 
 #include "core/mutex.h"
 #include "core/network.h"
@@ -175,5 +174,3 @@ private:
 
 
 extern Dhcp _dhcp0;
-
-#endif // __DHCP_H__

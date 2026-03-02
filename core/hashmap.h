@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __HASHMAP_H__
-#define __HASHMAP_H__
+#pragma once
 
 #include "core/hashtable.h"
 
@@ -85,6 +83,3 @@ private:
 	HashMap(const HashMap&);
 	HashMap& operator=(const HashMap&);
 };
-
-
-#endif // __HASHMAP_H__

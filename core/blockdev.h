@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __BLOCKDEV_H__
-#define __BLOCKDEV_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -33,5 +32,3 @@ public:
 	virtual void retain() = 0;
 	virtual void release() = 0;
 };
-
-#endif // __BLOCKDEV_H__

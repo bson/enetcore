@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _USB_H_
-#define _USB_H_
+#pragma once
 
 // Common USB definitions
 
@@ -171,5 +170,3 @@ struct StringDesc0 {
 };
 
 } // namespace usb
-
-#endif // _USB_H_

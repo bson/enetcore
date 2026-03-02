@@ -1,9 +1,9 @@
-//
-// SSD1963 based panel
-//
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
 
-#ifndef _SSD1306_H_
-#define _SSD1306_H_
+#pragma once
+
+// SSD1963 based panel
 
 #include <stdint.h>
 #include "core/enetcore.h"
@@ -200,6 +200,3 @@ private:
     }
 };
 }; // namespace ssd1963
-
-#endif // _SSD1963_H_
-

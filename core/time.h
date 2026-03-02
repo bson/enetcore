@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __TIME_H__
-#define __TIME_H__
+#pragma once
 
 #ifdef ENETCORE
 #include "params.h"
@@ -113,6 +112,3 @@ private:
 	static uint GetMonthSize(uint year, uint month);
 #endif
 };
-
-#endif // __TIME_H__
-

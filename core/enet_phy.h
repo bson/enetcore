@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef _ENET_PHY_H_
-#define _ENET_PHY_H_
+#pragma once
 
 namespace enet_phy {
 
@@ -117,6 +115,3 @@ enum {
 };
 
 };  // ns enet_phy
-
-#endif // _ENET_PHY_H_
-

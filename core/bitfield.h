@@ -1,8 +1,6 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __BITFIELD_H__
-#define __BITFIELD_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -46,5 +44,3 @@ public:
     Bitfield<T>(const Bitfield<T>&) = delete;
     Bitfield<T>& operator=(const Bitfield<T>&) = delete;
 };
-
-#endif // __BITFIELD_H__

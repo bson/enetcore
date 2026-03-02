@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __DEQUE_H__
-#define __DEQUE_H__
+#pragma once
 
 #include "core/vector.h"
 
@@ -131,5 +130,3 @@ public:
 
 	void DeleteEntries() { _v.DeleteEntries(_head); }
 };
-
-#endif // __DEQUE_H__

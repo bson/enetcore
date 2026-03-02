@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __IPCONN_H__
-#define __IPCONN_H__
+#pragma once
 
 #include "core/lookup3.h"
 
@@ -37,5 +35,3 @@ struct Tuple {
 		return *(Tuple*)a == *(Tuple*)b;
 	}
 };
-
-#endif // __IPCONN_H__

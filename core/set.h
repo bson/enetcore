@@ -1,9 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __SET_H__
-#define __SET_H__
-
+#pragma once
 
 // Set: an ordered vector that guarantees uniqueness.
 // Use only with standard layout types.
@@ -115,6 +113,3 @@ struct KeyValue {
 		return KeyOrder(&kv1.key, &kv2.key);
 	}
 };
-
-
-#endif // __SET_H__

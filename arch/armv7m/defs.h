@@ -1,8 +1,4 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _DEFS_H_
-#define _DEFS_H_
-
-
-#endif // _DEFS_H_
+#pragma once

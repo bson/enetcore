@@ -1,9 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __ICMP_H__
-#define __ICMP_H__
-
+#pragma once
 
 struct __novtable Icmph {
 	// ICMP message types
@@ -67,5 +64,3 @@ struct __novtable Icmph {
 
 // Magic cookies
 #define ICMP_COOKIE_NETMASK  0x2a56
-
-#endif // __ICMP_H__

@@ -1,5 +1,7 @@
-#ifndef __FPU_H__
-#define __FPU_H__
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 #include "core/bits.h"
 
@@ -28,5 +30,3 @@ public:
         CPACR |= (0b11 << CP10) | (0b11 << CP11);
     }
 };
-
-#endif // __FPU_H__

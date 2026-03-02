@@ -1,8 +1,7 @@
-// Copyright (c) 2021 Jan Brittenson
+// Copyright (c) 2021-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _SWO_H_
-#define _SWO_H_
+#pragma once
 
 #include <stdint.h>
 #include "core/bits.h"
@@ -84,5 +83,3 @@ public:
     void Apply(uint8_t c) { Write(&c, 1); }
     void Apply(const class String& s) { Write(s.CStr(), s.Size()); }
 };
-
-#endif  // _SWO_H_

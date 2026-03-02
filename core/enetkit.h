@@ -1,9 +1,5 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ENETKIT_H__
-#define __ENETKIT_H__
-
+#pragma once
 #include "core/enetcore.h"
-
-#endif // __ENETKIT_H__

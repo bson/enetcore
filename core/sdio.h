@@ -1,10 +1,7 @@
-//
 // Copyright 2026 Jan Brittenson
 // See LICENSE for details. 
-//
 
-#ifndef __SDIO_H__
-#define __SDIO_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -37,5 +34,3 @@ public:
     virtual int get_data_timeout() = 0;
     virtual void reset_datapath() = 0;
 };
-
-#endif // __SDIO_H__

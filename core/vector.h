@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __VECTOR_H__
-#define __VECTOR_H__
+#pragma once
 
 #include "core/mem.h"
 #include "core/arithmetic.h"
@@ -189,5 +188,3 @@ public:
 		return uint32_t(-1);
 	}
 };
-
-#endif // __VECTOR_H__

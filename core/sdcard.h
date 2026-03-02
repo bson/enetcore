@@ -1,10 +1,7 @@
-//
 // Copyright 2026 Jan Brittenson
 // See LICENSE for details. 
-//
 
-#ifndef __SDCARD_H__
-#define __SDCARD_H__
+#pragma once
 
 #include <stdint.h>
 #include "core/sdio.h"
@@ -69,5 +66,3 @@ private:
 
     int wait_ready();
 };
-
-#endif // __SDCARD_H__

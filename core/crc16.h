@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __CRC16_H__
-#define __CRC16_H__
+#pragma once
 
 #ifndef HAVE_HW_CRC
 
@@ -29,7 +28,4 @@ public:
 	static void GenTable();
 #endif
 };
-
-#endif // __CRC16_H__
-
-#endif
+#endif // HAVE_HW_CRC

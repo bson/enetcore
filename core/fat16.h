@@ -1,8 +1,6 @@
 // Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __FAT16_H__
-#define __FAT16_H__
+#pragma once
 
 #include "core/file.h"
 #include "core/blockdev.h"
@@ -207,6 +205,3 @@ private:
 };
 
 extern Fat16 _fat;
-
-
-#endif // __FAT16_H__

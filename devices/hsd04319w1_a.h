@@ -1,5 +1,7 @@
-#ifndef _HSD04319W1_A_H_
-#define _HSD04319W1_A_H_
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 namespace PanelInfo {
 
@@ -33,4 +35,3 @@ enum {
 };
 
 };
-#endif // _HSD04319W1_A_H_

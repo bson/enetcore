@@ -1,8 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _CORTEX_M4_H_
-#define _CORTEX_M4_H_
+#pragma once
 
 #include "arch/armv7m/defs.h"
 #include "core/bits.h"
@@ -282,5 +281,3 @@ struct EX {
 #else
 #error "implement this"
 #endif
-
-#endif // _CORTEX_M4_H_

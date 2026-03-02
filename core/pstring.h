@@ -1,8 +1,7 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __PSTRING_H__
-#define __PSTRING_H__
+#pragma once
 
 #include "core/lookup3.h"
 #include "core/freelist.h"
@@ -196,5 +195,3 @@ public:
 		return *(String*)a == *(String*)b;
 	}
 };
-
-#endif // __PSTRING_H__

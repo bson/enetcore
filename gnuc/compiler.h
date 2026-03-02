@@ -1,5 +1,7 @@
-#ifndef __COMPILER_H__
-#define __COMPILER_H__
+// Copyright (c) 2018-2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 #ifndef __GNUC__
 #error "Wrong compiler"
@@ -49,6 +51,3 @@ typedef uint32_t time_t;
 
 #define __atomic_dec(PTR)  \
     __sync_sub_and_fetch((PTR), 1)
-
-
-#endif // __COMPILER_H__

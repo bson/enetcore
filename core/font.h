@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef _FONT_H_
-#define _FONT_H_
+#pragma once
 
 #include "core/enetcore.h"
 
@@ -43,6 +41,3 @@ struct Font {
         return _map && (_map[c & 0x7f] & 0x80);
     }
 };
-
-#endif // _FONT_H_
-

@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef  _USBTMC_H_
-#define _USBTMC_H_
+#pragma once
 
 #include "core/enetcore.h"
 #include "board.h"
@@ -150,5 +149,3 @@ private:
     UsbTmc(const UsbTmc&);
     UsbTmc& operator=(const UsbTmc&);
 };
-
-#endif // _USBTMC_H_

@@ -1,8 +1,7 @@
 // Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _BITS_H_
-#define _BITS_H_
+#pragma once
 
 #include <stdint.h>
 #include "core/assert.h"
@@ -58,5 +57,3 @@ enum {
     BIT30 = BIT(30),
     BIT31 = BIT(31)
 };
-
-#endif // _BITS_H

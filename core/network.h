@@ -1,8 +1,7 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __NETWORK_H__
-#define __NETWORK_H__
+#pragma once
 
 #ifdef ENABLE_IP
 
@@ -69,5 +68,3 @@ bool GetIfMacAddr(const String& interface, uint8_t macaddr[6]);
 bool GetMacAddr(uint8_t macaddr[6]);
 
 #endif // ENABLE_IP
-
-#endif // __NETWORK_H__

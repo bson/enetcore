@@ -1,5 +1,7 @@
-#ifndef __MACCS8900A_H__
-#define __MACCS8900A_H__
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 #include "core/mutex.h"
 
@@ -201,5 +203,3 @@ private:
 protected:
 	MacCS8900a(const MacCS8900a&);
 };
-
-#endif // __MACCS8900A_H__

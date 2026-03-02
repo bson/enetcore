@@ -1,13 +1,11 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
 // Derived from CRC32 algorithm in RFC1952
 // Public domain
 
 // Don't include this directly - use board.h to use HW CRC when available
-
-#ifndef __CRC32_H__
-#define __CRC32_H__
+#pragma once
 
 #ifndef HAVE_HW_CRC
 
@@ -40,5 +38,3 @@ public:
 };
 
 #endif  // HAVE_HW_CRC
-
-#endif // __CRC32_H__

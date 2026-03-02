@@ -1,9 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __OVECTOR_H__
-#define __OVECTOR_H__
-
+#pragma once
 
 // Ordered vector
 // This differs from a set in that the same item can recur.
@@ -110,5 +108,3 @@ public:
 	// For ODeque::Insert
 	T& InsertInternal(uint pos) { return _v.Insert(pos); }
 };
-
-#endif // __OVECTOR_H__

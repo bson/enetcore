@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __SOCKET_H__
-#define __SOCKET_H__
+#pragma once
 
 #include "core/mutex.h"
 
@@ -54,5 +53,3 @@ public:
 	void SetError(uint e) { _error = e; }
 	uint GetError() { return _error; }
 };
-
-#endif // __SOCKET_H__

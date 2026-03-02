@@ -1,5 +1,7 @@
-#ifndef  _TLK110_H_
-#define  _TLK110_H_
+// Copyright (c) 2026 Jan Brittenson
+// See LICENSE for details.
+
+#pragma once
 
 #include <stdint.h>
 #include "core/enet_phy.h"
@@ -84,5 +86,3 @@ void Configure(Ethernet& eth);
 void PostConf(Ethernet& eth);
 
 }; // ns EnetPHY
-
-#endif // _TLK110_H_

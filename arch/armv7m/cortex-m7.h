@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _CORTEX_M7_H_
-#define _CORTEX_M7_H_
+#pragma once
 
 #include "arch/armv7m/defs.h"
 
@@ -439,5 +438,3 @@ static void enable_dcache()
     __dsb();
     __isb();
 }
-
-#endif // _CORTEX_M7_H_

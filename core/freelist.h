@@ -1,8 +1,6 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
-
-#ifndef __FREELIST_H__
-#define __FREELIST_H__
+#pragma once
 
 // Free list
 // Use to reduce heap thrashing for short-lived objects.
@@ -59,5 +57,3 @@ public:
 	// Check pointer to see if we're attempting to free something on this list
 	void Check(void* ptr) { FreelistVoidStar::Check(ptr); }
 };
-
-#endif // __FREELIST_H__

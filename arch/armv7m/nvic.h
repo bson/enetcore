@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __NVIC_H__
-#define __NVIC_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -69,5 +68,3 @@ private:
     NVic(const NVic&) = delete;
     NVic& operator=(const NVic&) = delete;
 };
-
-#endif // __NVIC_H__

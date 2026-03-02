@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _SYSTICK_H_
-#define _SYSTICK_H_
+#pragma once
 
 #include "compiler.h"
 #include "core/bits.h"
@@ -27,5 +26,3 @@ public:
 };
 
 typedef SysTick SysTimer;
-
-#endif  // _SYSTICK_H_

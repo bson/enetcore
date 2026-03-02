@@ -1,9 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __RING_H__
-#define __RING_H__
-
+#pragma once
 
 // Ring buffer of static size. Size should be a power of two, but can technically
 // be any integer value.  Designed purely for performance.
@@ -250,5 +248,3 @@ public:
     }
 
 };
-
-#endif // __RING_H__

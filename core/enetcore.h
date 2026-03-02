@@ -1,8 +1,7 @@
 // Copyright (c) 2018 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ENETCORE_H__
-#define __ENETCORE_H__
+#pragma once
 
 #include <new>
 
@@ -42,5 +41,3 @@ typedef bool (*OrderFunc)(const void* a, const void* b);
 #include "core/netaddr.h"
 #include "core/network.h"
 #include "board.h"
-
-#endif // __ENETCORE_H__

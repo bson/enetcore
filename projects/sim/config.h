@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#pragma once
 
 #define _console _uart7
 
@@ -225,5 +224,3 @@ enum { WATCHDOG_PING_INTERVAL = 5 };	// Time between pings, in seconds
 // Various configuration checks
 static_assert((MAIN_THREAD_STACK & 3) == 0);
 static_assert((INTR_THREAD_STACK & 3) == 0);
-
-#endif // _CONFIG_H_

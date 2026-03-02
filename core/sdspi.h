@@ -1,8 +1,7 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __SDSPI_H__
-#define __SDSPI_H__
+#pragma once
 
 #include "core/mutex.h"
 #include "core/blockdev.h"
@@ -67,5 +66,3 @@ private:
 #ifdef ENABLE_SDSPI
 extern SDSpi _sd;
 #endif
-
-#endif // __SDSPI_H__

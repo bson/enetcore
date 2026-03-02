@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __CLOSURE_H__
-#define __CLOSURE_H__
+#pragma once
 
 // Simple closure abstraction.
 // The function must not be virtual, but the instance may have a vptr.
@@ -50,5 +49,3 @@ private:
 #else
 #error "Unsupported compiler"
 #endif
-
-#endif // __CLOSURE_H__

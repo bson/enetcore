@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __PLATFORM_H__
-#define __PLATFORM_H__
+#pragma once
 
 #include "core/trace.h"
 #include "core/dlmalloc.h"
@@ -178,5 +177,3 @@ inline void VALIDATE_FREE(void* ptr)  {
 #endif
 #endif
 }
-
-#endif // __PLATFORM_H__

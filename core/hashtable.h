@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __HASHTABLE_H__
-#define __HASHTABLE_H__
+#pragma once
 
 // This implements a Cuckoo Hash:
 // An key is hash to two slots.
@@ -116,5 +115,3 @@ private:
 
 	void Rehash();
 };
-
-#endif // __HASHTABLE_H__

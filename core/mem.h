@@ -1,8 +1,7 @@
 // Copyright (c) 2018-2021 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __MEM_H__
-#define __MEM_H__
+#pragma once
 
 #if defined(DEBUG) && !defined(NMEMDEBUG)
 #undef MEMDEBUG
@@ -156,5 +155,3 @@ inline int xstrncasecmp(const uchar* a, const uchar* b, uint len) {
 template <typename T> [[__finline]] inline void move(T* dest, T* src, uint items) {
 	memmove(dest, src, items * sizeof(T));
 }
-
-#endif // __MEM_H__

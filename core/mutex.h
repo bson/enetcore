@@ -1,8 +1,7 @@
-// Copyright (c) 2018 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __MUTEX_H__
-#define __MUTEX_H__
+#pragma once
 
 #include "core/thread.h"
 
@@ -116,7 +115,3 @@ public:
 	bool Wait(Time delay);
 	uint8_t GetState() const;
 };
-
-
-#endif	// __MUTEX_H__
-

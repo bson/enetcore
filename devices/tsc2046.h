@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef _TSC2046_H_
-#define _TSC2046_H_
+#pragma once
 
 #include "core/mutex.h"
 
@@ -55,5 +54,3 @@ public:
 };
 
 } // ns tsc2046
-
-#endif

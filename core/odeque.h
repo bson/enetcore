@@ -1,9 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __ODEQUE_H__
-#define __ODEQUE_H__
-
+#pragma once
 
 // Ordered deque - basically a priority queue
 
@@ -96,5 +94,3 @@ public:
 		return pos - _head;
 	}
 };
-
-#endif // __ODEQUE_H__

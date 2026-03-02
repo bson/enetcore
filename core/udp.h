@@ -1,8 +1,7 @@
-// Copyright (c) 2018-2021 Jan Brittenson
+// Copyright (c) 2018-2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __UDP_H__
-#define __UDP_H__
+#pragma once
 
 #include "core/ip.h"
 #include "core/netaddr.h"
@@ -106,6 +105,3 @@ protected:
 
 
 extern Udp _udp0;
-
-
-#endif // __UDP_H__
