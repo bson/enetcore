@@ -262,10 +262,7 @@ int SDCard::read_blocks(uint32_t lba, uint32_t count, void *buffer, bool)
         if (_sdio.send_cmd(17, addr, Sdio::SD_RESP_R1, resp))
             return -1;
 
-        if (_sdio.data_read(buffer, BLOCK_SIZE))
-            return -1;
-
-        return _sdio.wait_data_done();
+        return _sdio.data_read(buffer, BLOCK_SIZE);
     }
 
     /* Multiple block read */
@@ -276,9 +273,10 @@ int SDCard::read_blocks(uint32_t lba, uint32_t count, void *buffer, bool)
     if (_sdio.data_read(buffer, count * BLOCK_SIZE))
         return -1;
 
+#if 0
     if (_sdio.wait_data_done())
         return -1;
-
+#endif
     /* CMD12: STOP_TRANSMISSION */
     if (_sdio.send_cmd(12, 0, Sdio::SD_RESP_R1, resp))
         return -1;
@@ -300,10 +298,7 @@ int SDCard::write_blocks(uint32_t lba, uint32_t count, const void *buffer, bool)
         if (_sdio.send_cmd(24, addr, Sdio::SD_RESP_R1, resp))
             return -1;
 
-        if (_sdio.data_write(buffer, BLOCK_SIZE))
-            return -1;
-
-        return _sdio.wait_data_done();
+        return _sdio.data_write(buffer, BLOCK_SIZE);
     }
 
     /* Multi-block write */
@@ -314,9 +309,10 @@ int SDCard::write_blocks(uint32_t lba, uint32_t count, const void *buffer, bool)
     if (_sdio.data_write(buffer, count * BLOCK_SIZE))
         return -1;
 
+#if 0
     if (_sdio.wait_data_done())
         return -1;
-
+#endif
     /* STOP */
     if (_sdio.send_cmd(12, 0, Sdio::SD_RESP_R1, resp))
         return -1;

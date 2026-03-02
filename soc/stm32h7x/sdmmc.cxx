@@ -12,18 +12,15 @@
 
 #include "soc/stm32h7x/sdmmc.h"
 
+template class Stm32Sdio<BASE_SDMMC1>;
+template class Stm32Sdio<BASE_SDMMC2>;
+
 
 // Note: device needs to be enabled before use
 
-static uint32_t get_kernel_clk()
-{
-    return AHB_FREQ;
-}
-
-
 template <uintptr_t SDMMC>
 Stm32Sdio<SDMMC>::Stm32Sdio()
-    : _state(State::IDLE), _result(0)
+    : _state(State::IDLE), _result(Sdio::Result::SUCCESS)
 {
     reg(Register::MASKR) = Bitfield(0)
         .bit(CMDRENDIE)
@@ -39,10 +36,10 @@ Stm32Sdio<SDMMC>::Stm32Sdio()
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::set_clock(uint32_t hz)
 {
-    uint32_t div = (get_kernel_clk() / hz / 2);
+    uint32_t div = AHB_FREQ / hz / 2;
 
     // Round div up (freq down) to avoid overshooting
-    if (get_kernel_clk() % hz)
+    if (AHB_FREQ % hz)
         ++div;
 
     if (div > 0)
@@ -137,10 +134,10 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
     reg(Register::DTIMER) = 0xffffffff;
     reg(Register::DLENR)   = bytes;
 
-    reg(Register::DMABASE0) = (uintptr_t)buf;
-    reg(Register::IDMACTRL) = BIT(IDMAEN);
+    reg(Register::IDMABASE0R) = (uintptr_t)buf;
+    reg(Register::IDMACTRLR) = BIT(IDMAEN);
 
-    reg(Register::DCTRL) = Bitfield(0)
+    reg(Register::DCTRLR) = Bitfield(0)
         .bit(DTEN)
         .bit(DTDIR)
         .f(DBLOCKSIZE_W, DBLOCKSIZE, 9); // 512-byte block
@@ -171,10 +168,10 @@ Stm32Sdio<SDMMC>::data_write(const void *buf, uint32_t bytes)
     reg(Register::DTIMER) = 0xffffffff;
     reg(Register::DLENR)   = bytes;
 
-    reg(Register::IDMABASE0) = (uintptr_t)buf;
-    reg(Register::IDMACTRL)  = BIT(IDMAEN);
+    reg(Register::IDMABASE0R) = (uintptr_t)buf;
+    reg(Register::IDMACTRLR)  = BIT(IDMAEN);
 
-    reg(Register::DCTRL) = Bitfield(0)
+    reg(Register::DCTRLR) = Bitfield(0)
         .bit(DTEN)
         .f(DBLOCKSIZE_W, DBLOCKSIZE, 9); // 512-byte block
 
@@ -205,8 +202,8 @@ bool Stm32Sdio<SDMMC>::get_data_timeout()
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::reset_datapath()
 {
-    reg(Register::DCTRL) = 0;
-    reg(Register::IDMACTRL) = 0;
+    reg(Register::DCTRLR) = 0;
+    reg(Register::IDMACTRLR) = 0;
     reg(Register::ICR) = 0xffffffff;
 }
 
@@ -247,11 +244,11 @@ void Stm32Sdio<SDMMC>::HandleInterrupt()
     /* Data complete */
     if (sta & BIT(DATAEND)) {
 
-        reg(Register::IDMACTRL) = 0;
+        reg(Register::IDMACTRLR) = 0;
         reg(Register::ICR) = Bitfield(0)
             .bit(DATAENDC)
             .bit(DTIMEOUTC)
-            .it(DCRCFAILC);
+            .bit(DCRCFAILC);
 
         _state = State::DONE;
         Thread::WakeSingle(this);

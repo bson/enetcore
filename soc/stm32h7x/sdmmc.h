@@ -209,15 +209,6 @@ class Stm32Sdio: public Sdio {
         DONE
     };
 
-public:
-    enum Result : int {
-        SUCCESS = 0,
-        CMD_TIMEOUT = -1,
-        CMD_CRC_FAIL = -2,
-        DATA_TIMEOUT = -3,
-        DATA_CRC_FAIL = -4,
-    };
-
 private:
     mutable Mutex _lock;
     State         _state;
@@ -241,9 +232,9 @@ public:
     void set_clock(uint32_t hz);
     void set_bus_width_1bit();
     void set_bus_width_4bit();
-    Result send_cmd(uint8_t cmd, uint32_t arg, uint32_t resp_type, uint32_t *response);
-    Result data_read(void *buf, uint32_t bytes);
-    Result data_write(const void *buf, uint32_t bytes);
+    Sdio::Result send_cmd(uint8_t cmd, uint32_t arg, uint32_t resp_type, uint32_t *response);
+    Sdio::Result data_read(void *buf, uint32_t bytes);
+    Sdio::Result data_write(const void *buf, uint32_t bytes);
     bool get_data_crc_error();
     bool get_data_timeout();
     void reset_datapath();

@@ -29,6 +29,6 @@ public:
     // Return device size in sectors.  Returns 0 if unknown.
     virtual uint32_t size() const = 0;
 
-	virtual void retain() = 0;
-	virtual void release() = 0;
+	virtual void retain() { }
+	virtual void release() { }
 };
