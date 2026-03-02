@@ -344,8 +344,9 @@ static void cache_align(uintptr_t *addr, uint32_t *size)
 }
 
 
-// Flush (clean) data cache
-static void flush_dcache(const void* block, uint32_t len)
+// Perform a data cache op on a memory range
+template <volatile uint32_t& CMREG>
+static void dcache_op(const void* block, uint32_t len)
 {
     uintptr_t addr = (uintptr_t)block;
 
@@ -354,40 +355,44 @@ static void flush_dcache(const void* block, uint32_t len)
     const uint32_t end = addr + len;
 
     while (addr < len) {
-        *(volatile uint32_t*)DCCMVAC = addr;
+        CMREG = addr;
         addr += CACHE_LINE_SIZE;
         __dsb();
     }
 }
 
 
-// Invalidate data cache
+// Flush (clean) data cache to point of coherency
+static void flush_dcache(const void* block, uint32_t len)
+{
+    dcache_op<DCCMVAC>(block, len);
+}
+
+
+// invalidate data cache to PoC
 static void invalidate_dcache(const void* block, uint32_t len)
 {
-    uintptr_t addr = (uintptr_t)block;
+    dcache_op<DCIMVAC>(block, len);
+}
 
-    cache_align(&addr, &len);
 
-    const uint32_t end = addr + len;
-
-    while (addr < len) {
-        *(volatile uint32_t*)DCCIMVAC = addr;
-        addr += CACHE_LINE_SIZE;
-        __dsb();
-    }
+// Flush and invalidate data cache to PoC
+static void flush_invalidate_dcache(const void* block, uint32_t len)
+{
+    dcache_op<DCCIMVAC>(block, len);
 }
 
 
 // Invalidate all I cache
 static void invalidate_icache()
 {
-    *(volatile uint32_t*)ICIALLU = 0;
+    ICIALLU = 0;
     __dsb();
     __isb();
 }
 
 
-// Flush ad invalidate all D cache
+// Flush and invalidate all D cache
 static void invalidate_dcache()
 {
     asm volatile("mov  r0, #0x0;"
@@ -424,7 +429,7 @@ static void invalidate_dcache()
 static void enable_icache()
 {
     invalidate_icache();
-    *(volatile uint32_t*)CCR |= BIT(17);
+    CCR |= BIT(17);
     __dsb();
     __isb();
 }
@@ -434,7 +439,7 @@ static void enable_icache()
 static void enable_dcache()
 {
     invalidate_dcache();
-    *(volatile uint32_t*)CCR |= BIT(16);
+    CCR |= BIT(16);
     __dsb();
     __isb();
 }

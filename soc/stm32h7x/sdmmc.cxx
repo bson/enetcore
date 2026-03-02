@@ -148,7 +148,7 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
     while (_state != State::DONE)
         Thread::WaitFor(this);
 
-    invalidate_dcache(buf, bytes);
+    flush_invalidate_dcache(buf, bytes);
 
     _state = State::IDLE;
     Thread::WakeSingle(this);
