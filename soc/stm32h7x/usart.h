@@ -1,13 +1,13 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __STM32_USART_H__
-#define __STM32_USART_H__
+#pragma once
 
 #include "core/time.h"
 #include "core/ring.h"
 #include "core/mutex.h"
 #include "core/consumer.h"
+#include "core/thread.h"
 #include "core/bitfield.h"
 #include "arch/armv7m/cortex-m7.h"
 
@@ -406,6 +406,8 @@ private:
         volatile uint32_t& isr = reg<volatile uint32_t>(Register::USART_ISR);
         volatile uint32_t& tdr = reg<volatile uint32_t>(Register::USART_TDR);
 
+        Thread::IPL G(IPL_UART);
+
         if (_dma) {
             if (!_sendq.Empty()) {
                 if (!_tx._active) {
@@ -469,5 +471,3 @@ private:
         }
     }
 };
-
-#endif // __STM32_USART_H__

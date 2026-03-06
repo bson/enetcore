@@ -1,12 +1,12 @@
 // Copyright (c) 2026 Jan Brittenson
 // See LICENSE for details.
 
-#ifndef __STM32_HASH_H__
-#define __STM32_HASH_H__
+#pragma once
 
 #include "core/bits.h"
 #include "core/bitfield.h"
 #include "arch/armv7m/cortex-m7.h"
+#include "core/thread.h"
 
 class Stm32Hash: public Stm32Dma::Peripheral {
 
@@ -228,7 +228,7 @@ public:
         ((Stm32Hash*)token)->HandleInterrupt();
     }
 
-    // DMA TX complete
+    // DMA TX complete - called in DMA interrupt context
     void DmaTxComplete() {
         _sendq.Clear();
         StartTx();              // Housekeeping
@@ -240,10 +240,12 @@ public:
 
     // Enable disable DMA (attach, detach trigger)
     void DmaEnableTx() {
+        Thread::IPL G(IPL_HASH);
         reg(Register::CR) |= BIT(DMAE);
     }
 
     void DmaDisableTx() {
+        Thread::IPL G(IPL_HASH);
         reg(Register::CR) &= ~BIT(DMAE);
     }
 
@@ -256,6 +258,8 @@ private:
         volatile uint32_t& imr = reg(Register::IMR);
         volatile uint32_t& sr  = reg(Register::SR);
         volatile uint32_t& din = reg(Register::DIN);
+
+        Thread::IPL G(IPL_HASH);
 
         if (_dma) {
             if (!_sendq.Empty()) {
@@ -301,5 +305,3 @@ private:
         }
     }
 };
-
-#endif // __HASH_H__
