@@ -49,6 +49,8 @@ void Stm32Sdio<SDMMC>::set_clock(uint32_t hz)
 
     DMSG("SDMMC: ker_ck = %u, div = %u  =>  SDIO_CK = %u", AHB_FREQ, div, AHB_FREQ/div);
 
+    Thread::IPL G(IPL_SDMMC);
+
     reg(Register::CLKCR) = Bitfield(reg(Register::CLKCR))
         .f(CLKDIV_W, CLKDIV, div);
 }
@@ -57,6 +59,8 @@ void Stm32Sdio<SDMMC>::set_clock(uint32_t hz)
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::set_bus_width_1bit()
 {
+    Thread::IPL G(IPL_SDMMC);
+
     reg(Register::CLKCR) = Bitfield(reg(Register::CLKCR))
         .f(WIDBUS_W, WIDBUS, Widbus::SingleBit);
 }
@@ -65,6 +69,8 @@ void Stm32Sdio<SDMMC>::set_bus_width_1bit()
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::set_bus_width_4bit()
 {
+    Thread::IPL G(IPL_SDMMC);
+
     reg(Register::CLKCR) = Bitfield(reg(Register::CLKCR))
         .f(WIDBUS_W, WIDBUS, Widbus::FourBit);
 }
@@ -95,6 +101,8 @@ Stm32Sdio<SDMMC>::send_cmd(uint8_t cmd,
                            uint32_t *response)
 {
     start(State::CMD_IN_PROGRESS);
+
+    Thread::IPL G(IPL_SDMMC);
 
     reg(Register::ICR) = 0xffffffff;
     reg(Register::ARGR) = arg;
@@ -129,6 +137,8 @@ Stm32Sdio<SDMMC>::data_read(void *buf, uint32_t bytes)
 
     start(State::DATA_IN_PROGRESS);
 
+    Thread::IPL G(IPL_SDMMC);
+
     flush_dcache(buf, bytes);
 
     reg(Register::DTIMER) = 0xffffffff;
@@ -162,6 +172,8 @@ Stm32Sdio<SDMMC>::data_write(const void *buf, uint32_t bytes)
     assert(((uintptr_t)buf & 31) == 0);
 
     start(State::DATA_IN_PROGRESS);
+
+    Thread::IPL G(IPL_SDMMC);
 
     flush_dcache(buf, bytes);
 
@@ -202,6 +214,8 @@ bool Stm32Sdio<SDMMC>::get_data_timeout()
 template <uintptr_t SDMMC>
 void Stm32Sdio<SDMMC>::reset_datapath()
 {
+    Thread::IPL G(IPL_SDMMC);
+
     reg(Register::DCTRLR) = 0;
     reg(Register::IDMACTRLR) = 0;
     reg(Register::ICR) = 0xffffffff;

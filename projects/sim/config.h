@@ -69,6 +69,7 @@ enum {
     IPL_ENET     = IPL_COMM - 4, // Ethernet controller
     IPL_MISR     = IPL_MIN  - 5, // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_MIN  - 3, // DMA (generic)
+    IPL_SDMMC    = IPL_MIN  - 3, // SDIO
     IPL_ADC      = IPL_MIN  - 3, // ADC
     IPL_HASH     = IPL_MIN  - 3, // HASH
     IPL_DAC      = IPL_CRIT + 1, // DAC
@@ -101,6 +102,7 @@ enum {
     IPL_ENET     = IPL_SOFT,  // Ethernet controller
     IPL_MISR     = IPL_SOFT,  // PHY MISR interrupt (link change, etc)
     IPL_DMA      = IPL_SOFT,  // DMA
+    IPL_SDMMC    = IPL_SOFT,  // SDIO
     IPL_ADC      = IPL_SOFT,  // ADC
     IPL_HASH     = IPL_SOFT,  // HASH
     IPL_DAC      = IPL_SOFT,  // DAC
