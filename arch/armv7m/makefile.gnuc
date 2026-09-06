@@ -1,7 +1,0 @@
-ARCH_SRCS = nvic.cxx nvic_exc.s systick.cxx
-
-SRCS += $(addprefix $(ARCH)/,$(ARCH_SRCS))
-
-ODIR_TREE += $(ODIR)/$(ARCH)
-
-include $(ARCH)/makefile.$(CPUID).$(TOOLSET)
